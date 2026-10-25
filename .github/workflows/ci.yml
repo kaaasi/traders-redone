@@ -10,33 +10,33 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
       - name: Verify original file hashes
         run: |
-          (cd original/dos && sha256sum -c ../SHA256SUMS.dos)
-          (cd original/amiga && sha256sum -c ../SHA256SUMS.amiga)
+          tools/ci-step.sh hash-dos bash -c 'cd original/dos && sha256sum -c ../SHA256SUMS.dos'
+          tools/ci-step.sh hash-amiga bash -c 'cd original/amiga && sha256sum -c ../SHA256SUMS.amiga'
 
       - name: Build
-        run: dotnet build TradersRedone.slnx -c Release
+        run: tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
 
       - name: Test
-        run: dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
+        run: tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
 
       - name: Export assets
-        run: dotnet run --project src/Traders.Tools -c Release --no-build -- export original/dos out/assets
+        run: tools/ci-step.sh export dotnet run --project src/Traders.Tools -c Release --no-build -- export original/dos out/assets
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: test-results
           path: TestResults
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: asset-export
           path: out/assets
