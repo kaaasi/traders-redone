@@ -14,9 +14,11 @@ public class BootTests
     {
         var m = MachineTests.NewMachine();
         m.LoadProgram("T.EXE");
+        // "INSERT COIN!" code request (21FD:0687) appears after about 12.2 s; answer with four digit keys.
+        for (int i = 0; i < 4; i++) m.ScheduleKey(14.0 + 0.4 * i, 0x02);
         string? outDir = RefEmuPaths.OutputDir;
         double seconds = double.TryParse(Environment.GetEnvironmentVariable("REFEMU_SECONDS"),
-            System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : 8.0;
+            System.Globalization.CultureInfo.InvariantCulture, out var s) ? s : 20.0;
 
         var frames = new List<(double Time, string Hash)>();
         string last = "";
