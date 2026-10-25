@@ -19,8 +19,9 @@ public static class MzLoader
     public static MzHeader ParseHeader(ReadOnlySpan<byte> exe)
     {
         if (exe.Length < 0x1C || exe[0] != 'M' || exe[1] != 'Z') throw new InvalidDataException("Not an MZ executable.");
-        ushort W(int o) => (ushort)(exe[o] | (exe[o + 1] << 8));
-        return new MzHeader(W(2), W(4), W(6), W(8), W(10), W(12), W(14), W(16), W(20), W(22), W(24));
+        var w = new ushort[13];
+        for (int i = 0; i < w.Length; i++) w[i] = (ushort)(exe[2 * i] | (exe[2 * i + 1] << 8));
+        return new MzHeader(w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[10], w[11], w[12]);
     }
 
     /// <summary>Copies the load module to <paramref name="loadSegment"/>:0 and relocates it. Returns the header.</summary>
