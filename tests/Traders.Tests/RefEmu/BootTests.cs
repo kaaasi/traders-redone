@@ -1,3 +1,4 @@
+using Traders.RefEmu;
 using Traders.RefEmu.Hardware;
 using Traders.RefEmu.Machine;
 
@@ -62,5 +63,17 @@ public class BootTests
         Assert.False(m.Exited, $"program exited with {m.ExitCode}:\n{string.Join('\n', m.Log.Events.TakeLast(30))}");
         Assert.Contains(m.Log.Events, e => e.Kind == EventKind.Video && e.Text.StartsWith("set mode 13"));
         Assert.NotEmpty(frames);
+        if (seconds >= OriginalProgram.MainMenuTime) Assert.Equal(OriginalProgram.MainMenuFrameHash, frames[^1].Hash);
+    }
+
+    [Fact]
+    public void Boot_to_main_menu_is_deterministic()
+    {
+        var dir = Path.Combine(RefEmuPaths.RepoRoot, "original", "dos");
+        var a = OriginalProgram.BootToMainMenu(dir);
+        Assert.Equal(OriginalProgram.MainMenuFrameHash, a.Frame().Hash());
+        var b = OriginalProgram.BootToMainMenu(dir);
+        Assert.Equal(a.Machine.Cpu.InstructionCount, b.Machine.Cpu.InstructionCount);
+        Assert.Equal(a.DataSegment(), b.DataSegment());
     }
 }
