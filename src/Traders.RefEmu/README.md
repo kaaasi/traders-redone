@@ -1,3 +1,8 @@
 # Traders.RefEmu (Arbeitspaket AP1)
-8086-Interpreter mit den nötigen DOS/BIOS/VGA/Timer-Stubs, um Routinen und ganze Abläufe
-der originalen T.EXE auszuführen und Referenzspuren für Differenztests zu erzeugen.
+
+Deterministischer Referenz-Emulator: 80286-Realmodus-Interpreter, PC-Hardware (PIC, PIT, Tastatur,
+VGA, stilles AdLib) und DOS/BIOS-Dienste auf Host-Seite. Führt die originale `T.EXE` bis ins
+Hauptmenü aus und ruft einzelne Originalroutinen für Differenztests auf.
+
+Einstieg für Differenztests: `OriginalProgram` (`LoadOnly`, `BootToMainMenu`, `Call`, DS-Zugriffe).
+Ausführliche Beschreibung: [docs/analyse/REFEMU.md](../../docs/analyse/REFEMU.md).
