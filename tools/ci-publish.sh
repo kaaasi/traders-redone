@@ -4,7 +4,7 @@
 #   latest/<ref>/        newest report per branch
 #   index.md             list of runs
 set -euo pipefail
-report="$1"; sha="$2"; ref="$3"
+report="$(cd "$1" && pwd)"; sha="$2"; ref="$3"
 safe_ref="${ref//\//_}"
 work="$(mktemp -d)"
 url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"

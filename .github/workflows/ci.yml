@@ -122,9 +122,9 @@ jobs:
           path: results
 
       - name: Build report
-        run: python3 tools/ci-report.py results report "${{ github.sha }}" "${{ github.ref_name }}" "linux=${{ needs.linux.result }}" "windows=${{ needs.windows.result }}"
+        run: tools/ci-step.sh report-build python3 tools/ci-report.py results report "${{ github.sha }}" "${{ github.ref_name }}" "linux=${{ needs.linux.result }}" "windows=${{ needs.windows.result }}"
 
       - name: Publish to branch ci-results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: tools/ci-publish.sh report "${{ github.sha }}" "${{ github.ref_name }}"
+        run: tools/ci-step.sh report-publish tools/ci-publish.sh report "${{ github.sha }}" "${{ github.ref_name }}"
