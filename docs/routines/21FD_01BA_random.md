@@ -22,6 +22,12 @@ return (seed >> 8) % (unsigned long)(n + 1);       // 0000:5058 = unsigned long 
 ## Seiteneffekte
 - Uhr: nur bei `n == 0` (`time()` → DOS `int 21h` AH=2Ah/2Ch). Für Wiederholbarkeit muss
   dieser Wert als Eingabe aufgezeichnet werden.
+- Borland `time()` (`0000:3405`) rechnet die lokale DOS-Zeit mit der Vorgabe-Zeitzone EST5EDT um
+  (`timezone` = 18000 s, Sommerzeit an, kein `TZ` gesetzt): Seed = Sekunden seit 1970 der lokalen
+  Zeit + 18000 − 3600 (im Sommer). Im RefEmu-Lauf 01.06.1991 12:00:00 → `675792000`.
+- `random(-1)`: `n + 1 = 0` → Division durch 0 in LUMOD (`int 0`). Der Port wirft
+  `DivideByZeroException`; beides ist als Fehlerfall geprüft.
+- Erster Aufruf mit `n == 0` im Spiel: Code-Abfrage beim Start ([21FD:0687](21FD_0687_codeabfrage.md)).
 
 ## Plausibilitätsbefund
 Erster Schritt ab Startseed 1 ergibt `3141592622` (π) – die Konstante ist offensichtlich bewusst gewählt.
@@ -31,4 +37,6 @@ Erster Schritt ab Startseed 1 ergibt `3141592622` (π) – die Konstante ist off
 
 ## Prüfung
 - `tests/Traders.Tests/OriginalRandomTests.cs` (Formel-Referenz, Neusaat, fehlende Uhr-Eingabe).
-- **Offen:** Differenztest gegen ausgeführtes Original (RefEmu, M2).
+- **Differenztest gegen das ausgeführte Original:** `tests/Traders.Tests/RefEmu/RandomDifferentialTests.cs`
+  – 3000 Aufrufe mit Grenzwerten und zufälligen `n` (Rückgabe und Seed nach jedem Aufruf), fünf
+  Start-Seeds, `n = 0` mit Borland-`time()`, `n = -1` (Division durch 0). Alle gleich.

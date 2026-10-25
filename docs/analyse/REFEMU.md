@@ -14,6 +14,8 @@ und Referenzspuren (Zustand, Grafik, Ton-Aufrufe) zu erzeugen.
 | Dateien | `Machine/DosFileSystem.cs` | Laufwerk C: = Originalordner, nur lesend; Schreibzugriffe nur im Speicher |
 | Hardware | `Hardware/*.cs` | PIC 8259, PIT 8253, Tastatur-Controller (60h/61h/64h), VGA auf Registerebene, Bildabzug |
 | Protokoll | `Machine/EventLog.cs` | Alle Host-Dienste mit Befehlszähler und emulierter Zeit |
+| Schnittstelle | `OriginalProgram.cs` | Adressen wie in der Analyse (Ladebild-Segment, DS-Offset), `LoadOnly`, `BootToMainMenu`, `Call` |
+| AdLib | `Hardware/AdLibStub.cs` | Stilles OPL2 bei 388h: Registerdatei + Timer-Status für die Kartenerkennung |
 
 ## Prüfung der CPU
 
@@ -59,6 +61,13 @@ Vektoren 60h–67h sind leer, außer 64h bei `RecordSoundDriver` (Vorgabe: an).
 
 ## Befunde über das Original
 
+- **Version:** Das Hauptmenü dieser `T.EXE` zeigt „(C) 1992 by Linel Switzerland“ und
+  „Code/Grafix/FX: André Wüthrich, R. T. Smith (PC)“. Video 1 zeigt dagegen „(C) 1991“ mit
+  anderen Credits (u. a. Intro-/Menümusik Michael Tschögl) und vorher ein Linel-Intro. Das Video
+  stammt also von einer anderen Fassung; Abweichungen zwischen Video und RefEmu sind möglich.
+- Die Code-Abfrage beim Start nimmt jede Eingabe an und setzt den Zufallsgenerator aus der Uhr.
+- AdLib: Das Spiel prüft die Karte selbst an Port 388h (Timer-Test); nur dann ruft es `int 64h` auf.
+
 - `T.EXE` biegt `int 8` (Timer, PIT auf 0x4000 = 72,8 Hz, jeder 4. Takt geht an das BIOS weiter),
   `int 9` (eigene Tastaturbehandlung über Port 60h, Tastentabelle `DS:3D47`) und `int 21h`
   (fängt Get/Set-Vector für `int 8` ab) um (`27C6:0000`, `27C6:037A`, `27C6:0551`).
@@ -66,6 +75,26 @@ Vektoren 60h–67h sind leer, außer 64h bei `RecordSoundDriver` (Vorgabe: an).
 - Borland `time()` (`0000:3405`) rechnet die lokale DOS-Zeit mit `timezone` = 18000 s und
   Sommerzeit (Standard EST5EDT, kein `TZ` gesetzt) in Sekunden seit 1970 um. Dieser Wert ist die
   Uhr-Eingabe von `random(0)`.
+
+## Referenzlauf bis ins Hauptmenü
+
+`OriginalProgram.BootToMainMenu` (Optionen: Vorgaben von `MachineOptions`):
+
+| Zeit (emuliert) | Ereignis |
+|---|---|
+| 0,00 s | Start, Speicher anpassen, `int 24h/9/8/21h` umgebogen, PIT 4× |
+| 0,00 s | AdLib-Erkennung (Ports 388h/389h), `int 64h`-Initialisierung (24 × Funktion 10h) |
+| 0,00 s | Modus 13h → Mode X |
+| 0,04–0,12 s | `FONTS.PP`, `ENGLISCH.TXT`, `MASKS.PP` |
+| 0,87 s | Ladebild „TRADERS – LOADING DATA. PLEASE WAIT.“ |
+| 0,89–10,8 s | `V-ANBAU`, `V-RAKETE`, `V-AHANDE`, `V-BHANDE`, `V-FATMIK`, `V-BERGE`, `V-MENU` (je 4× öffnen: Größe, Endbytes, Daten) |
+| 12,2 s | Code-Abfrage „INSERT COIN!“ ([21FD:0687](../routines/21FD_0687_codeabfrage.md)), `random(0)` = Uhr-Neusaat |
+| 14,0–15,2 s | Eingabe: viermal Taste „1“ |
+| 17,3 s | Hauptmenü (Bild-Hash `DBAB2787F9AA5222`) |
+
+Bilder: `tests/Traders.Tests/RefEmu/Data/refemu-codeabfrage.png`, `refemu-hauptmenue.png`.
+Das CI-Experiment (`ci/experiment.sh`, nur auf `dev/ap1-refemu`) legt jeden geänderten Frame und
+das Ereignisprotokoll unter `ci-results` → `runs/<sha>/linux-results/experiment/boot/` ab.
 
 ## Verwendung
 
