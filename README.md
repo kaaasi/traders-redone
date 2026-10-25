@@ -24,5 +24,12 @@ dotnet run --project src/Traders.Viewer          # Asset-Viewer
 Asset-Viewer: Pfeiltasten links/rechts = Seite, +/- = Zoom, L = Linie bei Zeile 200,
 Esc = Ende. Koordinate und Palettenindex unter der Maus stehen im Fenstertitel.
 
+## CI
+
+Jeder Push auf `main` oder `dev/...` baut und testet unter Linux und Windows. Ergebnisse
+(Zusammenfassung, Logs, Testergebnisse, Screenshots) stehen im Branch `ci-results`
+(`latest/main/SUMMARY.md`). Eine startfertige Windows-Version des Viewers gibt es auf der
+Actions-Seite des jeweiligen Laufs als Artefakt `traders-viewer-win-x64`.
+
 `original/` enthält die Originaldateien (privates Repo). `original/SHA256SUMS.*` sichert
 die analysierte Fassung ab.

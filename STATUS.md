@@ -77,9 +77,11 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 
 | Werkzeug | Zweck | Status |
 |---|---|---|
-| `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex | 🟢 (in CI gebaut, Start auf Windows zu prüfen) |
+| `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex; `--screenshot` für CI | 🟡 erster Lauf unter virtuellem Bildschirm |
 | `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (CI-Artefakt `asset-export`) | 🟢 |
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
+| CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | 🟡 erster Lauf |
+| `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | 🟡 |
 
 ## 5. Einzelne Routinen
 

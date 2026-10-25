@@ -9,6 +9,8 @@ namespace Traders.Viewer;
 /// Asset viewer for the original resources. Keys: Left/Right = previous/next page,
 /// +/- = zoom, L = toggle line at row 200 (end of visible screen), Esc = quit.
 /// Mouse position, palette index and RGB are shown in the window title.
+/// With a screenshot directory, every page is rendered once through the GPU pipeline,
+/// saved as PNG and the program exits (used by CI under a virtual display).
 /// </summary>
 public sealed class ViewerGame : Game
 {
@@ -24,9 +26,14 @@ public sealed class ViewerGame : Game
     private int _zoom = 3;
     private bool _showLine = true;
     private KeyboardState _prevKeys;
+    private readonly string? _screenshotDir;
 
-    public ViewerGame(AssetLibrary assets)
+    /// <summary>Number of screenshots written in screenshot mode (-1 = failed).</summary>
+    public int ScreenshotsWritten { get; private set; }
+
+    public ViewerGame(AssetLibrary assets, string? screenshotDir = null)
     {
+        _screenshotDir = screenshotDir;
         _graphics = new GraphicsDeviceManager(this);
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
@@ -72,7 +79,7 @@ public sealed class ViewerGame : Game
         ShowPage(0);
     }
 
-    private void ShowPage(int index)
+    private void ShowPage(int index, bool resizeWindow = true)
     {
         _page = (index % _pages.Count + _pages.Count) % _pages.Count;
         var p = _pages[_page];
@@ -85,6 +92,7 @@ public sealed class ViewerGame : Game
             colors[i] = new Color(r, g, b);
         }
         _texture.SetData(colors);
+        if (!resizeWindow) return;
         _graphics.PreferredBackBufferWidth = p.Width * _zoom;
         _graphics.PreferredBackBufferHeight = p.Height * _zoom;
         _graphics.ApplyChanges();
@@ -113,13 +121,52 @@ public sealed class ViewerGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        if (_screenshotDir is not null)
+        {
+            SaveScreenshots(_screenshotDir);
+            Exit();
+            return;
+        }
         GraphicsDevice.Clear(Color.Black);
-        var p = _pages[_page];
-        _batch.Begin(samplerState: SamplerState.PointClamp);
-        _batch.Draw(_texture, new Rectangle(0, 0, p.Width * _zoom, p.Height * _zoom), Color.White);
-        if (_showLine && p.IsAtlas)
-            _batch.Draw(_white, new Rectangle(0, VgaImage.VisibleHeight * _zoom, p.Width * _zoom, 1), Color.Magenta);
-        _batch.End();
+        DrawPage(_pages[_page], _zoom);
         base.Draw(gameTime);
+    }
+
+    private void DrawPage(Page p, int zoom)
+    {
+        _batch.Begin(samplerState: SamplerState.PointClamp);
+        _batch.Draw(_texture, new Rectangle(0, 0, p.Width * zoom, p.Height * zoom), Color.White);
+        if (_showLine && p.IsAtlas)
+            _batch.Draw(_white, new Rectangle(0, VgaImage.VisibleHeight * zoom, p.Width * zoom, 1), Color.Magenta);
+        _batch.End();
+    }
+
+    private void SaveScreenshots(string dir)
+    {
+        try
+        {
+            Directory.CreateDirectory(dir);
+            const int zoom = 2;
+            for (int i = 0; i < _pages.Count; i++)
+            {
+                ShowPage(i, resizeWindow: false);
+                var p = _pages[i];
+                using var target = new RenderTarget2D(GraphicsDevice, p.Width * zoom, p.Height * zoom);
+                GraphicsDevice.SetRenderTarget(target);
+                GraphicsDevice.Clear(Color.Black);
+                DrawPage(p, zoom);
+                GraphicsDevice.SetRenderTarget(null);
+                var name = new string(p.Name.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
+                using var fs = File.Create(Path.Combine(dir, $"{i:00}-{name}.png"));
+                target.SaveAsPng(fs, target.Width, target.Height);
+                ScreenshotsWritten++;
+            }
+            Console.WriteLine($"{ScreenshotsWritten} screenshots written to {dir}");
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e);
+            ScreenshotsWritten = -1;
+        }
     }
 }
