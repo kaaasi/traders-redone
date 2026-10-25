@@ -57,6 +57,15 @@ public sealed class Palette
         return new Palette(data.ToArray());
     }
 
+    /// <summary>Preview palette (0 = black, 1 = white, 2 = dark grey, rest black) for 1-bit data such as masks and fonts.</summary>
+    public static Palette Monochrome()
+    {
+        var p = new byte[768];
+        p[3] = p[4] = p[5] = 63;
+        p[6] = p[7] = p[8] = 12; // 2 = dark grey (grid in preview sheets)
+        return new Palette(p);
+    }
+
     /// <summary>Converts a 6-bit component to 8 bits the way the classic VGA DAC is usually shown (v*255/63).</summary>
     public static byte To8Bit(byte v6) => (byte)((v6 * 255 + 31) / 63);
 
