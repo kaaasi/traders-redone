@@ -74,7 +74,7 @@ summary = subprocess.run(['git', 'show', f'origin/ci-results:runs/{head}/SUMMARY
 if summary.returncode != 0:
     problems.append(f'Kein CI-Bericht für Branch-Stand {head[:7]} (noch laufend oder nicht gepusht?)')
 else:
-    jobs = re.findall(r'^\| (\w+) \| (✅|❌) (\w+) \|', summary.stdout, re.M)
+    jobs = re.findall(r'^\| (\w+) \| (✅|❌) (\w+) \|', summary.stdout.split('\n## ')[0], re.M)
     failed = [j for j, mark, _ in jobs if mark != '✅']
     tests = re.findall(r'\*\*Tests:\*\* (\d+) bestanden, (\d+) fehlgeschlagen', summary.stdout)
     infos.append('CI: ' + ', '.join(f'{j} {r}' for j, _, r in jobs) + (f'; Tests {tests}' if tests else ''))

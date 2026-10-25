@@ -40,7 +40,7 @@ for b in git('branch', '-r', '--list', 'origin/dev/ap*').split():
     if s.returncode != 0:
         ci = 'kein Bericht'
     else:
-        jobs = re.findall(r'^\| (\w+) \| (✅|❌)', s.stdout, re.M)
+        jobs = re.findall(r'^\| (\w+) \| (✅|❌)', s.stdout.split('\n## ')[0], re.M)
         ci = ' '.join(f'{j}{m}' for j, m in jobs)
     print(f'| `{name}` | {ahead} | {behind} | {last} | {ready} | {ci} |')
 
