@@ -90,9 +90,28 @@ public class SaveGameDifferentialTests(ITestOutputHelper output)
         foreach (int o in new[] { (int)L.ActivePlayer, SaveGame.LoopWare, SaveGame.LoopWare + 1, SaveGame.LoopFieldX, SaveGame.LoopFieldY })
             Assert.Equal(expected.Bytes[o], after.Bytes[o]);
 
-        // everything else the original changed (field origin, buffer pointer, screen reload) – for the record
+        // 192D:0058 recomputes the playfield origin from the loaded size (16-bit arithmetic)
+        var (x, y) = FieldOrigin(expected.S16(L.FieldColumns), expected.S16(L.FieldRows));
+        Assert.Equal(x, after.S16(FieldOriginX));
+        Assert.Equal(y, after.S16(FieldOriginY));
+        expected.Set(FieldOriginX, x);
+        expected.Set(FieldOriginY, y);
+
+        // Anything else may only be the buffer pointer DS:57F8 and the timer tick counters DS:117E/1180
+        // (int 8 handler 27C6:03C3, advanced by emulated time).
         var other = Enumerable.Range(0, L.Size).Where(i => expected.Bytes[i] != after.Bytes[i]).ToList();
         output.WriteLine($"other changed DS bytes: {string.Join(" ", other.Select(i => i.ToString("X4")))}");
+        Assert.All(other, i => Assert.True(i is >= 0x117E and <= 0x1181 or >= 0x57F8 and <= 0x57FB, $"unexpected change at DS:{i:X4}"));
+    }
+
+    private const int FieldOriginX = 0x451E, FieldOriginY = 0x4528;
+
+    /// <summary>192D:0058: x = (320 - cols*32)/2, y = ((146 - rows*22) - 14)/2 + 58, all in 16 bit, idiv truncates.</summary>
+    private static (short X, short Y) FieldOrigin(short cols, short rows)
+    {
+        short x = (short)((short)(0x140 - (short)(cols << 5)) / 2);
+        short y = (short)((short)((short)((short)(0x92 - (short)(rows * 0x16)) + unchecked((short)0xFFF2)) / 2) + 0x3A);
+        return (x, y);
     }
 
     [Fact]
