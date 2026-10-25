@@ -12,3 +12,19 @@
   einzelne Routinen mit Status (✅ / 🟢 / 🟡 / 🔍 / ⬜).
 - Zwischenstände pro Meilenstein in `CHANGELOG.md` mit Commit festhalten. Tags (`v0.x`)
   kann die Claude-Sitzung nicht pushen; der Nutzer setzt sie bei Bedarf.
+
+## Bauen und Testen (ohne lokales .NET)
+
+Die Claude-Sitzung hat kein .NET-SDK; gebaut und getestet wird über GitHub Actions.
+Logs/Artefakte sind über den Proxy nicht lesbar, deshalb schreibt CI alles in den Branch
+**`ci-results`**:
+
+1. Commit pushen (`main` oder `dev/<thema>`).
+2. `tools/ci-wait.sh` ausführen (Hintergrund): wartet auf alle Checks, holt den Bericht nach
+   `.ci-results/` und gibt `SUMMARY.md` aus (Schritte, Testergebnisse, Fehlermeldungen).
+3. Details: `.ci-results/<job>/logs/*.log`, Bilder unter `.ci-results/<job>/images/`
+   (Asset-Export, Viewer-Screenshots), Experiment-Ausgaben unter `.../experiment/`.
+4. Analysen mit .NET: `ci/experiment.sh` anlegen (siehe `ci/README.md`), bevorzugt auf `dev/...`.
+
+Jobs: `linux` (Build, Tests, Export, Viewer-Screenshots unter xvfb, Experiment),
+`windows` (Build, Tests, startfertiger Viewer als Artefakt für den Nutzer), `report`.
