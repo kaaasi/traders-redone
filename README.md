@@ -4,6 +4,7 @@ Originalgetreue C#-Portierung von *Traders – The Intergalactic Trading Game* (
 DOS-Fassung) mit anschließenden Erweiterungen (IQ je Gegner, Cheats, Übersetzungen,
 moderne Grafik, Netzwerkspiel, Dedicated Server).
 
+- **Aktueller Stand: [STATUS.md](STATUS.md)** · Zwischenstände: [CHANGELOG.md](CHANGELOG.md)
 - Plan und Meilensteine: [docs/PORTIERUNGSPLAN.md](docs/PORTIERUNGSPLAN.md)
 - Erkenntnisse aus dem Vorversuch: [docs/ERKENNTNISSE_VORVERSUCH.md](docs/ERKENNTNISSE_VORVERSUCH.md)
 - Routinenbefunde: [docs/routines/](docs/routines/)
