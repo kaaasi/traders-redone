@@ -1,11 +1,9 @@
 # Arbeitspakete für parallele Chats
 
-Jeder Chat übernimmt **genau ein** Paket, arbeitet auf seinem eigenen Branch und schreibt nur
-in seinen Dateibereich. Gemeinsame Dateien (siehe unten) nur minimal ändern.
-
-**Übernehmen:** Zeile unten auf „in Arbeit“ setzen, Chat-Name und Datum eintragen, sofort
-nach `main` pushen (so sehen andere Chats, dass das Paket vergeben ist). Ist ein Paket schon
-„in Arbeit“, ein anderes nehmen.
+Jeder Paket-Chat bearbeitet **genau ein** Paket auf seinem eigenen Branch und schreibt nur in
+seinen Dateibereich (maschinenlesbar: `ci/arbeitspakete.json`). Diese Datei pflegt **nur die
+Leitstelle**; Paket-Chats ändern sie nicht. Regeln: [CLAUDE.md](../CLAUDE.md), Abschnitt
+„Rollen“.
 
 ## Jetzt parallel möglich
 
@@ -23,23 +21,16 @@ Je Phase ein Paket: Menü/Setup (M4), Anbau (M5), Produktion/Wetter (M6), Fat Mi
 Auktion (M8), Rakete/Piraten (M9), Ereignisse/Katastrophen (M10), Bilanz/Einkauf (M11),
 Kampf (M12), Ende (M13). Diese werden hier eingetragen, sobald die Grundlagen stehen.
 
-## Gemeinsame Dateien – Regeln
+## Ablauf
 
-| Datei | Regel |
-|---|---|
-| `STATUS.md` | Nur die Zeilen des eigenen Pakets/Moduls ändern. |
-| `CHANGELOG.md` | Nur beim Abschluss eines Pakets einen Eintrag oben anfügen. |
-| `docs/ARBEITSPAKETE.md` | Nur die eigene Zeile ändern. |
-| `TradersRedone.slnx`, `Directory.Build.props`, `global.json`, CI | Möglichst nicht ändern; falls nötig, kleine eigene Commits. |
-| `docs/analyse/disasm/` | Nicht von Hand ändern (erzeugt von `tools/segmap.py`). |
+| Schritt | Wer | Was |
+|---|---|---|
+| Vergabe | Nutzer + Leitstelle | Nutzer startet einen Chat mit „übernimm APn“; Leitstelle trägt ihn hier ein. |
+| Arbeit | Paket-Chat | Commits auf `dev/apN-…`, CI über `tools/ci-wait.sh`, `main` per Merge hereinholen. |
+| Übergabe | Paket-Chat | `docs/uebergabe/APn.md` aktualisieren, „Bereit zur Übernahme: ja“, CI grün. |
+| Prüfung | Leitstelle | `tools/pruefe-branch.py dev/apN-…`: Dateibereich, Regeln des Kerns, CI, Konflikte. |
+| Übernahme | Leitstelle | Merge nach `main`, CI grün, `STATUS.md`/`CHANGELOG.md`/diese Datei aktualisieren. |
+| Rückmeldung | Leitstelle → Nutzer | Was übernommen wurde, was der Paket-Chat nachbessern soll. |
 
-## Ablauf je Chat
-
-1. `git fetch origin && git checkout -b dev/apN-… origin/main` (bzw. bestehenden Branch fortsetzen).
-2. Arbeiten, committen, Branch pushen → CI läuft, `tools/ci-wait.sh` holt den Bericht.
-3. Regelmäßig `git fetch origin && git rebase origin/main`, damit Änderungen anderer Chats
-   früh ankommen.
-4. Zwischenstand fertig und CI grün → nach `main` übernehmen:
-   `git fetch origin && git rebase origin/main && git push origin HEAD:main`
-   (scheitert der Push, weil ein anderer Chat schneller war: erneut rebasen und pushen).
-5. `STATUS.md` und die eigene Zeile hier aktualisieren.
+`ci/experiment.sh` ist für Analysen auf dem eigenen Branch gedacht und wird bei der Übernahme
+nicht nach `main` übernommen.
