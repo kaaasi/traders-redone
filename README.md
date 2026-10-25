@@ -5,6 +5,8 @@ DOS-Fassung) mit anschließenden Erweiterungen (IQ je Gegner, Cheats, Übersetzu
 moderne Grafik, Netzwerkspiel, Dedicated Server).
 
 - **Aktueller Stand: [STATUS.md](STATUS.md)** · Zwischenstände: [CHANGELOG.md](CHANGELOG.md)
+- Parallele Arbeitspakete: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md)
+- Referenzbilder aus den Videos: [reference/](reference/)
 - Plan und Meilensteine: [docs/PORTIERUNGSPLAN.md](docs/PORTIERUNGSPLAN.md)
 - Erkenntnisse aus dem Vorversuch: [docs/ERKENNTNISSE_VORVERSUCH.md](docs/ERKENNTNISSE_VORVERSUCH.md)
 - Ressourcenformate: [docs/RESSOURCENFORMATE.md](docs/RESSOURCENFORMATE.md)
