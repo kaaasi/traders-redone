@@ -63,7 +63,9 @@ public class AssetTests
     public void English_text_table_starts_with_known_lines()
     {
         var t = TextTable.Load(OriginalFiles.Dos(ResourceTable.EnglishText));
-        Assert.Equal(303, t.Count);
+        // 303 game lines plus the developers' trailing marker "--- max 303 Lines ---" (no CRLF).
+        Assert.Equal(304, t.Count);
+        Assert.Equal("--- max 303 Lines ---", t[303]);
         Assert.Equal("SILOS", t[0]);
         Assert.Equal("WALLS", t[1]);
         Assert.Equal("MINES", t[2]);
