@@ -32,7 +32,8 @@
       "docs/routines/",
       "docs/uebergabe/AP2.md",
       "ci/experiment.sh",
-      "docs/analyse/GRAFIK.md"
+      "docs/analyse/GRAFIK.md",
+      "tools/exeimg.py"
     ],
     "ap3": [
       "docs/analyse/DATENLAYOUT.md",

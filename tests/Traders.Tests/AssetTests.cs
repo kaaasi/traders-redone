@@ -42,8 +42,19 @@ public class AssetTests
         {
             var img = VgaImage.Load(OriginalFiles.Dos(vga));
             Assert.Equal(VgaImage.Width * VgaImage.Height, img.Pixels.Length);
-            Assert.Equal(4, img.Trailer.Length);
         }
+    }
+
+    [Fact]
+    public void Vga_atlas_starts_after_size_header()
+    {
+        // Palette (768) + header "00 01 40 01" (height 256, width 320) + pixels from byte 772.
+        var raw = PowerPacker.Decrunch(File.ReadAllBytes(OriginalFiles.Dos("V-ANBAU.PP")));
+        Assert.Equal(new byte[] { 0x00, 0x01, 0x40, 0x01 }, raw[768..772]);
+        var img = VgaImage.FromDecrunched(raw);
+        Assert.Equal(raw[772], img[0, 0]);
+        Assert.Equal(raw[773], img[1, 0]);
+        Assert.Equal(raw[^1], img[319, 255]);
     }
 
     [Fact]
