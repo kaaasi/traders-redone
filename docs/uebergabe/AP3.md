@@ -2,8 +2,8 @@
 
 - **Branch:** `dev/ap3-state`
 - **Stand (Commit):** siehe Branch-Spitze (wird mit jedem Push aktualisiert)
-- **CI für diesen Commit:** siehe unten
-- **Bereit zur Übernahme:** nein
+- **CI für diesen Commit:** grün für `7747ea2` (Code); Folge-Commits nur Doku – Bericht `ci-results` → `runs/<sha>/SUMMARY.md`
+- **Bereit zur Übernahme:** ja (Zwischenstand: Datenlayout + Zustandsmodell; Detailbedeutungen einzelner Felder folgen mit M9/M12)
 
 ## Erledigt seit letzter Übernahme
 - **Datenlayout** `docs/analyse/DATENLAYOUT.md`: alle 52 Felder des Spielstands (= persistenter
@@ -20,6 +20,7 @@
   extrahierte Liste (`tools/datenlayout/savegame.py`), Abdeckung aller Spielstand-Bytes,
   Rundreisen DS/Spielstand/JSON, Vorzeichenerweiterung, Startzustand = initialisierte Daten
   aus T.EXE, Level-Tabelle und Stationsnamen aus T.EXE.
+- Routinenbefund `docs/routines/2336_000A_spielstand.md`.
 - Werkzeuge: `tools/datenlayout/dsrefs.py` (alle DS-Zugriffe), `tools/datenlayout/savegame.py`.
 
 ## Offen / nächste Schritte
