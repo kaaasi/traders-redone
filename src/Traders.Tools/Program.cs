@@ -43,6 +43,22 @@ static int Export(string srcDir, string dstDir)
         Console.WriteLine($"{name}: {data.Length} bytes");
     }
 
+    var mono = Palette.Monochrome();
+    var fonts = FontSet.Load(Path.Combine(srcDir, ResourceTable.Fonts));
+    foreach (var (name, font) in new[] { ("FONTS-large", fonts.Large), ("FONTS-small", fonts.Small) })
+    {
+        var sheet = SheetRenderer.Font(font);
+        PngWriter.WriteIndexed(Path.Combine(dstDir, name + ".png"), sheet.Width, sheet.Height, sheet.Pixels, mono);
+    }
+    var masks = SheetRenderer.Mask(MaskImage.Load(Path.Combine(srcDir, ResourceTable.Masks)));
+    PngWriter.WriteIndexed(Path.Combine(dstDir, "MASKS.png"), masks.Width, masks.Height, masks.Pixels, mono);
+
+    foreach (var m in ResourceTable.Music)
+    {
+        var music = MusicModule.Load(Path.Combine(srcDir, m));
+        Console.WriteLine($"{m}: {music.Orders.Count} orders, {music.PatternCount} patterns");
+    }
+
     var text = TextTable.Load(Path.Combine(srcDir, ResourceTable.EnglishText));
     using (var w = new StreamWriter(Path.Combine(dstDir, "ENGLISCH.lines.txt")))
         for (int i = 0; i < text.Count; i++) w.WriteLine($"{i,4}: {text[i]}");

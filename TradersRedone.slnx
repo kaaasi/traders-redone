@@ -3,6 +3,7 @@
     <Project Path="src/Traders.Assets/Traders.Assets.csproj" />
     <Project Path="src/Traders.Core/Traders.Core.csproj" />
     <Project Path="src/Traders.Tools/Traders.Tools.csproj" />
+    <Project Path="src/Traders.Viewer/Traders.Viewer.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Traders.Tests/Traders.Tests.csproj" />

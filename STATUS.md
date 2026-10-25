@@ -10,7 +10,7 @@ Stand: 25.10.2026 · letzter geprüfter Stand: `main` (CI grün)
 | # | Meilenstein | Status | Bemerkung |
 |---|---|---|---|
 | M0 | Fundament (Repo, CI, Originale, Plan) | ✅ | Hash-Prüfung der Originale in CI |
-| M1 | Ressourcen | 🟡 | PP20, VGA-Atlas, Palette, Texte fertig; Fonts, Masken, Musikformat, Asset-Viewer offen |
+| M1 | Ressourcen | 🟢 | PP20, VGA-Atlas, Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer; Bildschirm-Zuordnungen folgen mit den Phasen |
 | M2 | Analyse-Infrastruktur / RefEmu | 🟡 | Segmentkarte + Disassemblierung fertig; 8086-Emulator offen |
 | M3 | Kern-Fundament | 🟡 | RNG und 16-Bit-Arithmetik fertig; Spielzustand/DS-Layout, Phasenmodell offen |
 | M4 | Menü & Setup | ⬜ | |
@@ -33,11 +33,11 @@ Stand: 25.10.2026 · letzter geprüfter Stand: `main` (CI grün)
 |---|---|---|---|---|
 | `V-*.PP` (10) | VGA-Bilder: Palette + 320×256-Atlas | `VgaImage` | ja (4 Endbytes unbekannt) | 🟢 |
 | `E-*.PP` (10) | EGA-Bilder | entpackt | nein (nur Gegenprüfung) | ⬜ |
-| `FONTS.PP` | Schrift | entpackt | nein | ⬜ |
-| `MASKS.PP` | Masken | entpackt | nein | ⬜ |
+| `FONTS.PP` | 2 Schriften (16×12, 16×5) | `FontSet` | ja (Breiten aus Code offen) | 🟢 |
+| `MASKS.PP` | 1-Bit-Masken 320×200 | `MaskImage` | ja (Zuordnung aus Code offen) | 🟢 |
 | `ENGLISCH.TXT` | 303 Spieltexte | `TextTable` | ja | 🟢 |
-| `*.CMF` (3) | Musik, eigenes Format „A.H.“ | – | nein | ⬜ |
-| `FXDRIVER.EXE` | AdLib-Treiber (Linel) | – | nein | ⬜ |
+| `*.CMF` (3) | Musik, eigenes Format „A.H.“ | `MusicModule` (Kopf) | teilweise: Reihenfolge, Patternanzahl | 🟡 Rest in M14 |
+| `FXDRIVER.EXE` | Ton-Treiber (Linel), `int 64h` | – | Schnittstelle teilweise | 🔍 |
 
 ## 3. Originalmodule (Codesegmente in T.EXE)
 
@@ -66,13 +66,22 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `1E7E` | 0xE50 | ? (viel Zufall) | ⬜ |
 | `1F63` | 0x1500 | Fat Mike | ⬜ |
 | `20B3` | 0xD80 | Schlussauswertung, Abend-/Endbild | ⬜ |
-| `218B`–`21AF` | | ? | ⬜ |
+| `218B` | 0x1C0 | Ton: Treiberaufrufe `int 64h` | 🔍 |
+| `21A7`–`21AF` | | ? (21A7: Ton-Effekte) | ⬜ |
 | `21FD` | 0x980 | Hilfsroutinen: Zufall, Warten | 🟡 |
 | `2295` | 0xE0 | Zahl → Text mit Füllzeichen | 🔍 |
 | `22A3` | 0x930 | Wettertexte / -vorführung | ⬜ |
 | `2336`–`2850` | | ? (u. a. Ton/Treiber) | ⬜ |
 
-## 4. Einzelne Routinen
+## 4. Werkzeuge
+
+| Werkzeug | Zweck | Status |
+|---|---|---|
+| `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex | 🟢 (in CI gebaut, Start auf Windows zu prüfen) |
+| `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (CI-Artefakt `asset-export`) | 🟢 |
+| `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
+
+## 5. Einzelne Routinen
 
 | Adresse | Funktion | C# | Befund | Status |
 |---|---|---|---|---|
@@ -80,7 +89,7 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `0000:4F4E` / `5058` / `4FA0` | Long-Multiplikation, unsigned Shift, unsigned Modulo | in `OriginalRandom` | im RNG-Befund | 🟢 |
 | `0000:3405` | `time()` | Eingabe `IClockInput` | im RNG-Befund | 🟢 |
 
-## 5. Bekannte offene Punkte
+## 6. Bekannte offene Punkte
 
 - Differenztests gegen das ausgeführte Original fehlen noch für alles (RefEmu, M2).
 - Kampf und Ton waren schon im Vorversuch unverstanden.
