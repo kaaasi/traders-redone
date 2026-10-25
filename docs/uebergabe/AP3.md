@@ -2,8 +2,8 @@
 
 - **Branch:** `dev/ap3-state`
 - **Stand (Commit):** siehe Branch-Spitze (wird mit jedem Push aktualisiert)
-- **CI für diesen Commit:** grün für `7747ea2` (Code); Folge-Commits nur Doku – Bericht `ci-results` → `runs/<sha>/SUMMARY.md`
-- **Bereit zur Übernahme:** nein
+- **CI für diesen Commit:** grün für `fb64063` (393 Tests, Linux + Windows)
+- **Bereit zur Übernahme:** ja (Stand 2: Differenztest Speichern/Laden)
 
 ## Erledigt seit letzter Übernahme
 - **Differenztest Speichern/Laden gegen das Original** (`tests/Traders.Tests/State/SaveGameDifferentialTests.cs`):
