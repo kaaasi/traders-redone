@@ -3,7 +3,7 @@
 - **Branch:** `dev/ap3-state`
 - **Stand (Commit):** siehe Branch-Spitze (wird mit jedem Push aktualisiert)
 - **CI für diesen Commit:** grün für `7747ea2` (Code); Folge-Commits nur Doku – Bericht `ci-results` → `runs/<sha>/SUMMARY.md`
-- **Bereit zur Übernahme:** ja (Zwischenstand: Datenlayout + Zustandsmodell; Detailbedeutungen einzelner Felder folgen mit M9/M12)
+- **Bereit zur Übernahme:** nein
 
 ## Erledigt seit letzter Übernahme
 - **Datenlayout** `docs/analyse/DATENLAYOUT.md`: alle 52 Felder des Spielstands (= persistenter
