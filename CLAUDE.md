@@ -8,4 +8,7 @@
   keine Zufallsquelle außer dem portierten Original-RNG.
 - Rendern/Animation darf keinen Zufall verbrauchen und nichts buchen.
 - 16-Bit-Semantik über `Int16Math`, nicht über „saubere“ Neurechnung.
-- Zwischenstände pro Meilenstein taggen (`v0.x`).
+- **`STATUS.md` bei jedem Push aktuell halten**: Meilensteine, Ressourcen, Module und
+  einzelne Routinen mit Status (✅ / 🟢 / 🟡 / 🔍 / ⬜).
+- Zwischenstände pro Meilenstein in `CHANGELOG.md` mit Commit festhalten. Tags (`v0.x`)
+  kann die Claude-Sitzung nicht pushen; der Nutzer setzt sie bei Bedarf.
