@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Traders.Tools</RootNamespace>
+    <AssemblyName>traders-tools</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Traders.Assets\Traders.Assets.csproj" />
+  </ItemGroup>
+</Project>
