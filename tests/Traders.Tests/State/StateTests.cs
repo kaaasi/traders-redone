@@ -20,7 +20,7 @@ public class StateTests
     private static string Json(GameState s) => JsonSerializer.Serialize(s);
 
     /// <summary>Fills every modelled field with distinct, width-exhausting values.</summary>
-    private static GameState Scrambled(int seed)
+    internal static GameState Scrambled(int seed)
     {
         var r = new Random(seed);
         sbyte S8() => (sbyte)r.Next(-128, 128);
