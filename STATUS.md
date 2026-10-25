@@ -82,6 +82,8 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
 | CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
 | `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | ✅ |
+| `tools/pruefe-branch.py` | Leitstelle: Prüfung eines Paket-Branches vor der Übernahme | ✅ |
+| `tools/lagebericht.py` | Leitstelle: Übersicht aller Paket-Branches + Wächter-Prüfung von main | ✅ |
 | `reference/` | Referenzbilder aus beiden Videos (alle 4 s bzw. 5 s) für alle Chats | ✅ |
 | `ci/experiment.sh`-Hook | Beliebige .NET-Analysen in CI, Ausgabe im Bericht | ✅ (auf `dev/ci-probe` geprüft) |
 
@@ -95,8 +97,9 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 
 ## 6. Parallele Arbeitspakete
 
-Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md) (AP1 Emulator, AP2 Grafik,
-AP3 Datenlayout, AP4 Ton, AP5 Programmablauf).
+Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). In Arbeit: AP1 Emulator,
+AP2 Grafik, AP3 Datenlayout. Offen: AP4 Ton, AP5 Programmablauf. Übernahme nach `main` nur
+durch die Leitstelle.
 
 ## 7. Bekannte offene Punkte
 

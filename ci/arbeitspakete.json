@@ -1,0 +1,65 @@
+{
+  "_comment": "Allowed file areas per work package (path prefixes) and the Leitstelle session. Used by tools/pruefe-branch.py and tools/lagebericht.py.",
+  "shared": [
+    "STATUS.md",
+    "CHANGELOG.md",
+    "docs/ARBEITSPAKETE.md",
+    "TradersRedone.slnx",
+    "Directory.Build.props",
+    "global.json",
+    ".github/",
+    "tools/ci-",
+    "original/",
+    "docs/analyse/disasm/",
+    "docs/analyse/segments.md",
+    "CLAUDE.md",
+    "ci/arbeitspakete.json"
+  ],
+  "packages": {
+    "ap1": [
+      "src/Traders.RefEmu/",
+      "tests/Traders.Tests/RefEmu/",
+      "docs/routines/",
+      "docs/uebergabe/AP1.md",
+      "ci/experiment.sh",
+      "docs/analyse/REFEMU.md"
+    ],
+    "ap2": [
+      "src/Traders.Vga/",
+      "tests/Traders.Tests/Vga/",
+      "docs/routines/0A96_",
+      "docs/routines/0A69_",
+      "docs/routines/",
+      "docs/uebergabe/AP2.md",
+      "ci/experiment.sh",
+      "docs/analyse/GRAFIK.md"
+    ],
+    "ap3": [
+      "docs/analyse/DATENLAYOUT.md",
+      "src/Traders.Core/State/",
+      "tests/Traders.Tests/State/",
+      "docs/routines/",
+      "docs/uebergabe/AP3.md",
+      "ci/experiment.sh",
+      "tools/datenlayout"
+    ],
+    "ap4": [
+      "src/Traders.Audio/",
+      "tests/Traders.Tests/Audio/",
+      "docs/analyse/FXDRIVER.md",
+      "docs/routines/",
+      "docs/uebergabe/AP4.md",
+      "ci/experiment.sh",
+      "tools/fxdriver"
+    ],
+    "ap5": [
+      "docs/analyse/PHASEN.md",
+      "docs/analyse/callgraph/",
+      "tools/callgraph.py",
+      "docs/routines/",
+      "docs/uebergabe/AP5.md",
+      "ci/experiment.sh"
+    ]
+  },
+  "leitstelle_session": "session_01Rovbp2HqJDAvauvg6neKmJ"
+}

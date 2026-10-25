@@ -8,19 +8,35 @@
   keine Zufallsquelle außer dem portierten Original-RNG.
 - Rendern/Animation darf keinen Zufall verbrauchen und nichts buchen.
 - 16-Bit-Semantik über `Int16Math`, nicht über „saubere“ Neurechnung.
-- **`STATUS.md` bei jedem Push aktuell halten**: Meilensteine, Ressourcen, Module und
-  einzelne Routinen mit Status (✅ / 🟢 / 🟡 / 🔍 / ⬜).
-- Zwischenstände pro Meilenstein in `CHANGELOG.md` mit Commit festhalten. Tags (`v0.x`)
-  kann die Claude-Sitzung nicht pushen; der Nutzer setzt sie bei Bedarf.
+- `STATUS.md` (Status je Meilenstein/Ressource/Modul/Routine: ✅ / 🟢 / 🟡 / 🔍 / ⬜) und
+  `CHANGELOG.md` (Zwischenstände mit Commit) pflegt **nur die Leitstelle** bei jeder
+  Übernahme nach `main`. Tags kann keine Claude-Sitzung pushen; der Nutzer setzt sie bei Bedarf.
 
-## Paralleles Arbeiten in mehreren Chats
+## Rollen: Leitstelle und Paket-Chats
 
-Mehrere Chats arbeiten gleichzeitig an diesem Repo. Vor jeder Arbeit
-[`docs/ARBEITSPAKETE.md`](docs/ARBEITSPAKETE.md) lesen: ein Paket übernehmen (eigene Zeile
-eintragen und sofort pushen), nur auf dem eigenen Branch `dev/apN-…` und im eigenen
-Dateibereich arbeiten, gemeinsame Dateien nur minimal ändern, regelmäßig auf `origin/main`
-rebasen. Nach `main` nur mit grüner CI und per Rebase (kein Merge-Commit, kein Force-Push).
-Referenzbilder aus den Videos: `reference/` (die Videos selbst sind nicht im Repo).
+Mehrere Chats arbeiten gleichzeitig an diesem Repo.
+
+**Leitstelle** (ein zentraler Chat, portiert selbst nicht): vergibt Arbeitspakete, prüft
+Paket-Branches und übernimmt sie als **einziger** nach `main` (Merge-Commit
+„Integration APn: …“). Pflegt `STATUS.md`, `CHANGELOG.md`, `docs/ARBEITSPAKETE.md`,
+CI und gemeinsame Projektdateien. Prüfwerkzeug: `tools/pruefe-branch.py`.
+
+**Paket-Chats** (je Arbeitspaket einer):
+1. Vor Beginn [`docs/ARBEITSPAKETE.md`](docs/ARBEITSPAKETE.md) lesen; nur das zugewiesene Paket bearbeiten.
+2. **Nie nach `main` pushen.** Nur auf den eigenen Branch `dev/apN-…`.
+3. Nur im eigenen Dateibereich schreiben (siehe `ci/arbeitspakete.json`). Gemeinsame Dateien
+   (`STATUS.md`, `CHANGELOG.md`, `docs/ARBEITSPAKETE.md`, `TradersRedone.slnx`,
+   `Directory.Build.props`, `global.json`, `.github/`, `tools/ci-*`, `original/`,
+   `docs/analyse/disasm/`) nicht ändern. Braucht ein Paket eine Änderung dort, im
+   Übergabebericht unter „Anfragen an die Leitstelle“ beschreiben.
+4. Neuen Stand von `main` per `git fetch origin && git merge origin/main` holen
+   (kein Rebase bereits gepushter Commits, kein Force-Push – beides ist gesperrt).
+5. Übergabebericht `docs/uebergabe/APn.md` (Vorlage `docs/uebergabe/_vorlage.md`) aktuell
+   halten: Stand, erledigte/offene Punkte, Status-Vorschläge für `STATUS.md`, Anfragen.
+   Ist ein Zwischenstand übernahmereif, dort „Bereit zur Übernahme: ja“ setzen und CI grün haben.
+
+Referenzbilder aus den Videos: `reference/`. Dichtere Bildfolgen aus den Videos kann nur die
+Leitstelle erzeugen → als Anfrage im Übergabebericht.
 
 ## Bauen und Testen (ohne lokales .NET)
 
@@ -28,7 +44,7 @@ Die Claude-Sitzung hat kein .NET-SDK; gebaut und getestet wird über GitHub Acti
 Logs/Artefakte sind über den Proxy nicht lesbar, deshalb schreibt CI alles in den Branch
 **`ci-results`**:
 
-1. Commit pushen (`main` oder `dev/<thema>`).
+1. Commit pushen (Paket-Chats: eigener `dev/apN-…`-Branch).
 2. `tools/ci-wait.sh` ausführen (Hintergrund): wartet auf alle Checks, holt den Bericht nach
    `.ci-results/` und gibt `SUMMARY.md` aus (Schritte, Testergebnisse, Fehlermeldungen).
 3. Details: `.ci-results/<job>/logs/*.log`, Bilder unter `.ci-results/<job>/images/`
