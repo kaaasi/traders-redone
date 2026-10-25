@@ -82,6 +82,7 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
 | CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
 | `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | ✅ |
+| `reference/` | Referenzbilder aus beiden Videos (alle 4 s bzw. 5 s) für alle Chats | ✅ |
 | `ci/experiment.sh`-Hook | Beliebige .NET-Analysen in CI, Ausgabe im Bericht | ✅ (auf `dev/ci-probe` geprüft) |
 
 ## 5. Einzelne Routinen
@@ -92,7 +93,12 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `0000:4F4E` / `5058` / `4FA0` | Long-Multiplikation, unsigned Shift, unsigned Modulo | in `OriginalRandom` | im RNG-Befund | 🟢 |
 | `0000:3405` | `time()` | Eingabe `IClockInput` | im RNG-Befund | 🟢 |
 
-## 6. Bekannte offene Punkte
+## 6. Parallele Arbeitspakete
+
+Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md) (AP1 Emulator, AP2 Grafik,
+AP3 Datenlayout, AP4 Ton, AP5 Programmablauf).
+
+## 7. Bekannte offene Punkte
 
 - Differenztests gegen das ausgeführte Original fehlen noch für alles (RefEmu, M2).
 - Kampf und Ton waren schon im Vorversuch unverstanden.

@@ -13,6 +13,15 @@
 - Zwischenstände pro Meilenstein in `CHANGELOG.md` mit Commit festhalten. Tags (`v0.x`)
   kann die Claude-Sitzung nicht pushen; der Nutzer setzt sie bei Bedarf.
 
+## Paralleles Arbeiten in mehreren Chats
+
+Mehrere Chats arbeiten gleichzeitig an diesem Repo. Vor jeder Arbeit
+[`docs/ARBEITSPAKETE.md`](docs/ARBEITSPAKETE.md) lesen: ein Paket übernehmen (eigene Zeile
+eintragen und sofort pushen), nur auf dem eigenen Branch `dev/apN-…` und im eigenen
+Dateibereich arbeiten, gemeinsame Dateien nur minimal ändern, regelmäßig auf `origin/main`
+rebasen. Nach `main` nur mit grüner CI und per Rebase (kein Merge-Commit, kein Force-Push).
+Referenzbilder aus den Videos: `reference/` (die Videos selbst sind nicht im Repo).
+
 ## Bauen und Testen (ohne lokales .NET)
 
 Die Claude-Sitzung hat kein .NET-SDK; gebaut und getestet wird über GitHub Actions.
