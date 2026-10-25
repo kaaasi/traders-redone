@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Traders.Core</RootNamespace>
+  </PropertyGroup>
+</Project>
