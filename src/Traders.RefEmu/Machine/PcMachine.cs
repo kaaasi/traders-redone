@@ -63,7 +63,7 @@ public sealed partial class PcMachine : IIoBus
         Cpu = new Cpu286(Mem, this) { HostTrap = OnHostTrap };
         Mem.Map(Vga, 0xA0000, 0xB0000);
         Vga.Now = () => Now;
-        Vga.UnknownPort = (p, v) => LogEvent(EventKind.Port, $"VGA port {p:X3} <- {v:X2} not modelled");
+        Vga.UnknownPort = (p, v) => LogPort($"VGA port {p:X3} not modelled", $" <- {v:X2}");
         Pit.ReloadChanged += (ch, reload) =>
         {
             if (ch == 0) _nextTimerIrq = Now + reload;
@@ -106,7 +106,7 @@ public sealed partial class PcMachine : IIoBus
             case 0x64: return Keyboard.Read(port, Now);
             case 0x201: return 0xFF; // no joystick
             default:
-                LogEvent(EventKind.Port, $"in {port:X3} (unmapped)");
+                LogPort($"in {port:X3} (unmapped, reads FF)");
                 return 0xFF;
         }
     }
@@ -123,9 +123,20 @@ public sealed partial class PcMachine : IIoBus
             case 0x60:
             case 0x64: return;
             default:
-                LogEvent(EventKind.Port, $"out {port:X3} <- {value:X2} (unmapped)");
+                LogPort($"out {port:X3} (unmapped)", $" <- {value:X2}");
                 return;
         }
+    }
+
+    private readonly Dictionary<string, int> _portLogCount = [];
+
+    /// <summary>Logs unusual port accesses, the first few per port and direction only.</summary>
+    private void LogPort(string key, string detail = "")
+    {
+        _portLogCount.TryGetValue(key, out int n);
+        _portLogCount[key] = n + 1;
+        if (n < 3) LogEvent(EventKind.Port, key + detail);
+        else if (n == 3) LogEvent(EventKind.Port, key + " ... (further accesses not logged)");
     }
 
     // ------------------------------------------------------------------ execution
