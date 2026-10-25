@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AP1 experiment: boots T.EXE in the reference emulator and stores frames + event log.
 set -uo pipefail
-out="$1"
+out="$(realpath "$1")"
 mkdir -p "$out/boot"
 REFEMU_OUT="$out/boot" REFEMU_SECONDS="${REFEMU_SECONDS:-40}" \
   dotnet test TradersRedone.slnx -c Release --no-build --filter "FullyQualifiedName~RefEmu.BootTests" \
