@@ -349,7 +349,7 @@ public sealed class Cpu286
             case 5: // SHR
                 SetFlag(CF, ((a >> (count - 1)) & 1) != 0);
                 res = count >= bits ? 0 : a >> count;
-                SetFlag(OF, (a & sign) != 0);
+                SetFlag(OF, ((a >> (count - 1)) & sign) != 0); // msb before the last 1-bit step
                 SetFlag(AF, false);
                 SetSzp(res, word);
                 return res;
@@ -629,6 +629,7 @@ public sealed class Cpu286
             case 0xD3: { DecodeModRm(); WriteRm16((ushort)Shift(_reg, ReadRm16(), (byte)R[CX], true)); return; }
             case 0xD4: Aam(Fetch8()); return;
             case 0xD5: Aad(Fetch8()); return;
+            case 0xD6: SetReg8(0, GetFlag(CF) ? (byte)0xFF : (byte)0); return; // SALC (undocumented)
             case 0xD7: { ushort off = (ushort)(R[BX] + (byte)R[AX]); SetReg8(0, ReadByte(DataSeg, off)); return; }
 
             case 0xE0: { sbyte d = (sbyte)Fetch8(); R[CX]--; if (R[CX] != 0 && !GetFlag(ZF)) IP = (ushort)(IP + d); return; }
@@ -856,56 +857,71 @@ public sealed class Cpu286
     private void StringOp(int kind, bool word)
     {
         int step = (GetFlag(DF) ? -1 : 1) * (word ? 2 : 1);
-        if (_rep == 0)
-        {
-            StringOnce(kind, word, step);
-            return;
-        }
         bool conditional = kind == StrCmps || kind == StrScas;
-        while (R[CX] != 0)
+        try
         {
-            StringOnce(kind, word, step);
-            R[CX]--;
-            Snapshot(); // a fault in a later iteration keeps the progress made so far
-            _snapIp = _startIp;
-            if (conditional && GetFlag(ZF) != (_rep == 0xF3)) break;
+            if (_rep == 0)
+            {
+                StringOnce(kind, word, step);
+                return;
+            }
+            while (R[CX] != 0)
+            {
+                StringOnce(kind, word, step);
+                R[CX]--;
+                CommitPartial(); // a fault in a later iteration keeps the progress made so far
+                if (conditional && GetFlag(ZF) != (_rep == 0xF3)) break;
+            }
+        }
+        catch (CpuFault)
+        {
+            // Observed on the 286: the faulting iteration has already advanced its index registers
+            // (and under REP decremented CX; REP INSW even by two) when the exception is taken.
+            if (_rep != 0) R[CX] -= (ushort)(kind == StrIns ? 2 : 1);
+            CommitPartial();
+            throw;
         }
     }
+
+    /// <summary>Makes the current register state the restart state of the running instruction.</summary>
+    private void CommitPartial()
+    {
+        Snapshot();
+        _snapIp = _startIp;
+    }
+
+    // Each memory access first advances its index register, then accesses memory (286 fault behaviour).
+    private ushort NextSi(int step) { ushort a = R[SI]; R[SI] = (ushort)(a + step); return a; }
+    private ushort NextDi(int step) { ushort a = R[DI]; R[DI] = (ushort)(a + step); return a; }
 
     private void StringOnce(int kind, bool word, int step)
     {
         switch (kind)
         {
             case StrMovs:
-                if (word) WriteWord(ES, R[DI], ReadWord(DataSeg, R[SI]));
-                else WriteByte(ES, R[DI], ReadByte(DataSeg, R[SI]));
-                R[SI] = (ushort)(R[SI] + step); R[DI] = (ushort)(R[DI] + step);
+                if (word) { ushort v = ReadWord(DataSeg, NextSi(step)); WriteWord(ES, NextDi(step), v); }
+                else { byte v = ReadByte(DataSeg, NextSi(step)); WriteByte(ES, NextDi(step), v); }
                 break;
             case StrCmps:
-                if (word) Alu(7, ReadWord(DataSeg, R[SI]), ReadWord(ES, R[DI]), true);
-                else Alu(7, ReadByte(DataSeg, R[SI]), ReadByte(ES, R[DI]), false);
-                R[SI] = (ushort)(R[SI] + step); R[DI] = (ushort)(R[DI] + step);
+                if (word) { ushort d = ReadWord(ES, NextDi(step)); ushort s = ReadWord(DataSeg, NextSi(step)); Alu(7, s, d, true); }
+                else { byte d = ReadByte(ES, NextDi(step)); byte s = ReadByte(DataSeg, NextSi(step)); Alu(7, s, d, false); }
                 break;
             case StrStos:
-                if (word) WriteWord(ES, R[DI], R[AX]); else WriteByte(ES, R[DI], (byte)R[AX]);
-                R[DI] = (ushort)(R[DI] + step);
+                if (word) WriteWord(ES, NextDi(step), R[AX]); else WriteByte(ES, NextDi(step), (byte)R[AX]);
                 break;
             case StrLods:
-                if (word) R[AX] = ReadWord(DataSeg, R[SI]); else SetReg8(0, ReadByte(DataSeg, R[SI]));
-                R[SI] = (ushort)(R[SI] + step);
+                if (word) R[AX] = ReadWord(DataSeg, NextSi(step)); else SetReg8(0, ReadByte(DataSeg, NextSi(step)));
                 break;
             case StrScas:
-                if (word) Alu(7, R[AX], ReadWord(ES, R[DI]), true);
-                else Alu(7, (byte)R[AX], ReadByte(ES, R[DI]), false);
-                R[DI] = (ushort)(R[DI] + step);
+                if (word) Alu(7, R[AX], ReadWord(ES, NextDi(step)), true);
+                else Alu(7, (byte)R[AX], ReadByte(ES, NextDi(step)), false);
                 break;
             case StrIns:
-                if (word) WriteWord(ES, R[DI], In16(R[DX])); else WriteByte(ES, R[DI], Io.In8(R[DX]));
-                R[DI] = (ushort)(R[DI] + step);
+                if (word) { ushort v = In16(R[DX]); WriteWord(ES, NextDi(step), v); }
+                else { byte v = Io.In8(R[DX]); WriteByte(ES, NextDi(step), v); }
                 break;
             default: // OUTS
-                if (word) Out16(R[DX], ReadWord(DataSeg, R[SI])); else Io.Out8(R[DX], ReadByte(DataSeg, R[SI]));
-                R[SI] = (ushort)(R[SI] + step);
+                if (word) Out16(R[DX], ReadWord(DataSeg, NextSi(step))); else Io.Out8(R[DX], ReadByte(DataSeg, NextSi(step)));
                 break;
         }
     }
@@ -973,7 +989,13 @@ public sealed class Cpu286
 
     private void Aam(byte imm)
     {
-        if (imm == 0) throw new CpuFault(0);
+        if (imm == 0)
+        {
+            // Observed on the 286 (single test case): flags pushed by the divide error show SF=0 ZF=0 PF=1.
+            SetFlag(SF, false); SetFlag(ZF, false); SetFlag(PF, true);
+            CommitPartial();
+            throw new CpuFault(0);
+        }
         int al = (byte)R[AX];
         R[AX] = (ushort)(((al / imm) << 8) | (al % imm));
         SetSzp(al % imm, false);
