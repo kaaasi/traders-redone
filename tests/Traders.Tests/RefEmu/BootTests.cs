@@ -51,6 +51,7 @@ public class BootTests
                 using var w = File.CreateText(Path.Combine(outDir, "events.log"));
                 m.Log.WriteTo(w);
                 w.WriteLine($"stopped at {m.Cpu.Cs:X4}:{m.Cpu.IP:X4} after {m.Cpu.InstructionCount} instructions, {m.Seconds:F3} s, exited={m.Exited}");
+                w.WriteLine($"OPL register writes: {m.AdLib.WriteCount}, int 64h calls: {m.Log.OfKind(EventKind.Sound).Count()}");
                 if (failure is not null) w.WriteLine(failure);
                 using var fl = File.CreateText(Path.Combine(outDir, "frames.txt"));
                 foreach (var (time, hash) in frames) fl.WriteLine($"{time:F3} {hash}");

@@ -18,6 +18,9 @@ public sealed class MachineOptions
     /// <summary>Install an int 64h stub that records the calls of the game to the FXDRIVER sound driver.</summary>
     public bool RecordSoundDriver { get; init; } = true;
 
+    /// <summary>Provide a silent AdLib (OPL2) at 388h so the game's card detection succeeds.</summary>
+    public bool AdLib { get; init; } = true;
+
     public ushort PspSegment { get; init; } = 0x0FF0;
     public ushort MemoryTop { get; init; } = 0xA000;
 }
@@ -44,6 +47,7 @@ public sealed partial class PcMachine : IIoBus
     public Pit Pit { get; } = new();
     public Keyboard Keyboard { get; } = new();
     public VgaAdapter Vga { get; } = new();
+    public AdLibStub AdLib { get; } = new();
     public DosFileSystem Files { get; }
     public EventLog Log { get; } = new();
 
@@ -105,6 +109,10 @@ public sealed partial class PcMachine : IIoBus
             case 0x61:
             case 0x64: return Keyboard.Read(port, Now);
             case 0x201: return 0xFF; // no joystick
+            case 0x388:
+            case 0x389:
+                if (Options.AdLib) return AdLib.ReadStatus(Now);
+                goto default;
             default:
                 LogPort($"in {port:X3} (unmapped, reads FF)");
                 return 0xFF;
@@ -122,6 +130,8 @@ public sealed partial class PcMachine : IIoBus
             case 0x61: Keyboard.Write(port, value); return;
             case 0x60:
             case 0x64: return;
+            case 0x388 when Options.AdLib: AdLib.WriteIndex(value); return;
+            case 0x389 when Options.AdLib: AdLib.WriteData(value, Now); return;
             default:
                 LogPort($"out {port:X3} (unmapped)", $" <- {value:X2}");
                 return;
