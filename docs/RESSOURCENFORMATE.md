@@ -8,8 +8,11 @@ mit `Traders.Assets.PowerPacker` (Referenz: `tools/pp20.py`).
 | Offset | Länge | Inhalt |
 |---:|---:|---|
 | 0 | 768 | Palette, 256 × RGB, 6 Bit je Kanal (0–63) |
-| 768 | 81920 | Atlas 320 × 256, 1 Byte Farbindex je Pixel, zeilenweise |
-| 82688 | 4 | unbekannt (z. B. `00000000`, `63636366`, `FFFFFFFA`) |
+| 768 | 4 | Größenkopf: Höhe, Breite als LE-Wörter (`00 01 40 01` = 256, 320) |
+| 772 | 81920 | Atlas 320 × 256, 1 Byte Farbindex je Pixel, zeilenweise |
+
+Korrigiert nach Befund AP2 (Lader `186C:0002`): Die früher als „4 Endbytes“ geführten Bytes
+sind die letzten 4 Pixel von Zeile 255; der Atlas war um 4 Pixel verschoben gelesen.
 
 Zeilen 0–199 entsprechen dem sichtbaren Bildschirm, Zeilen 200–255 enthalten Sprites und
 Bausteine. Zuordnung zur Ressourcenliste bei `DS:09CE` siehe `ResourceTable`.

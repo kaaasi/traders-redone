@@ -49,6 +49,12 @@ jobs:
         if: success() || failure()
         run: tools/ci-step.sh viewer-screenshots xvfb-run -a -s "-screen 0 1280x1024x24" dotnet run --project src/Traders.Viewer -c Release --no-build -- original/dos --screenshot "$CI_OUT/images/viewer"
 
+      - name: Original im Referenz-Emulator bis zum Hauptmenü (Bilder + Ereignisprotokoll)
+        if: success() || failure()
+        run: |
+          mkdir -p "$CI_OUT/images/refemu-boot"
+          REFEMU_OUT="$(realpath "$CI_OUT/images/refemu-boot")" tools/ci-step.sh refemu-boot dotnet test TradersRedone.slnx -c Release --no-build --filter "FullyQualifiedName~RefEmu.BootTests"
+
       - name: Experiment (ci/experiment.sh, if present)
         if: (success() || failure()) && hashFiles('ci/experiment.sh') != ''
         run: |

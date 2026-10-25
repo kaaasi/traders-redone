@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 25.10.2026 · letzter geprüfter Stand: `main` (CI grün)
+Stand: 25.10.2026 · Integration AP1 + AP3
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -10,9 +10,9 @@ Stand: 25.10.2026 · letzter geprüfter Stand: `main` (CI grün)
 | # | Meilenstein | Status | Bemerkung |
 |---|---|---|---|
 | M0 | Fundament (Repo, CI, Originale, Plan) | ✅ | Hash-Prüfung der Originale in CI |
-| M1 | Ressourcen | 🟢 | PP20, VGA-Atlas, Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer; Bildschirm-Zuordnungen folgen mit den Phasen |
-| M2 | Analyse-Infrastruktur / RefEmu | 🟡 | Segmentkarte + Disassemblierung fertig; 8086-Emulator offen |
-| M3 | Kern-Fundament | 🟡 | RNG und 16-Bit-Arithmetik fertig; Spielzustand/DS-Layout, Phasenmodell offen |
+| M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
+| M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, T.EXE bis Hauptmenü, Bildabzug, Differenztests (AP1) |
+| M3 | Kern-Fundament | 🟡 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand (AP3) fertig; Phasenmodell offen (AP5) |
 | M4 | Menü & Setup | ⬜ | |
 | M5 | Anbau | ⬜ | |
 | M6 | Produktion & Wetter | ⬜ | |
@@ -31,7 +31,7 @@ Stand: 25.10.2026 · letzter geprüfter Stand: `main` (CI grün)
 
 | Datei | Inhalt | Laden | Format verstanden | Status |
 |---|---|---|---|---|
-| `V-*.PP` (10) | VGA-Bilder: Palette + 320×256-Atlas | `VgaImage` | ja (4 Endbytes unbekannt) | 🟢 |
+| `V-*.PP` (10) | VGA-Bilder: Palette + Größenkopf + 320×256-Atlas | `VgaImage` | ja (Kopf bei 768, Pixel ab 772 – Befund AP2) | 🟢 |
 | `E-*.PP` (10) | EGA-Bilder | entpackt | nein (nur Gegenprüfung) | ⬜ |
 | `FONTS.PP` | 2 Schriften (16×12, 16×5) | `FontSet` | ja (Breiten aus Code offen) | 🟢 |
 | `MASKS.PP` | 1-Bit-Masken 320×200 | `MaskImage` | ja (Zuordnung aus Code offen) | 🟢 |
@@ -47,31 +47,38 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | Segment | Größe | Aufgabe | Status |
 |---|---:|---|---|
 | `0000` | 0x5350 | Turbo-C-Laufzeit (Startup, Long-Arithmetik, Datei, Zeit) | 🔍 nur benötigte Teile werden nachgebildet |
-| `0535` | 0xD40 | ? | ⬜ |
+| `0535` | 0xD40 | Roboterkampf (wahrscheinlich, AP3) | 🔍 |
 | `0609` | 0x21C0 | Anbau / Spielfeld / HUD | ⬜ |
 | `0825` | 0xAA0 | Runden-/Bilanzdarstellung, Vermögen (`0825:06CB`) | ⬜ |
 | `08CF` | 0x19A0 | Einkaufsphase | ⬜ |
-| `0A69` | 0x2D0 | Grafik-Hilfsfunktionen (Wrapper um 0A96) | 🔍 |
-| `0A96` | 0xD10 | Grafiktreiber, maskierte Blits (`0A96:013B`) | ⬜ |
-| `0B67`–`0EDE` | | ? (u. a. 0E31 nutzt viel Zufall) | ⬜ |
+| `0A69` | 0x2D0 | Grafik: Text-/Rahmenhilfen (AP2) | 🔍 |
+| `0A96` | 0xD10 | Grafik: Befehlsliste, 17 Befehlstypen (AP2) | 🔍 |
+| `0B67` | 0x380 | ? | ⬜ |
+| `0B9F` | 0x8A0 | Handel, setzt Warenpreise `DS:4898` (wahrscheinlich, AP3) | 🔍 |
+| `0C29`–`0E9E` (ohne 0E31) | | ? | ⬜ |
+| `0E31` | 0x6D0 | Neue Partie, Landerzeugung, Stationen (AP3) | 🔍 |
+| `0EDE` | 0x23F0 | Roboterkampf / Beute (wahrscheinlich, AP3) | 🔍 |
 | `111D` | 0x860 | Katastrophen + Sternvorführung | ⬜ |
 | `11A3`–`16D6` | | ? | ⬜ |
-| `1777` | 0x540 | ? (nutzt Uhr-Funktion) | ⬜ |
+| `1777` | 0x540 | Wochenpreise (Öl, Raketen, Lotto, Land), nutzt Uhr (AP3) | 🔍 |
 | `17CB` | 0xA10 | Ereignisfenster, Geld-Events | ⬜ |
-| `186C` | 0xC10 | Ressourcenliste / Laden (`186C:0002`) | ⬜ |
-| `192D` | 0x1D60 | ? (viel Zufall) | ⬜ |
+| `186C` | 0xC10 | Bild laden `186C:0002(i)`, setzt `DS:09C8` | 🔍 |
+| `192D` | 0x1D60 | Menüs: Haupt, Schwierigkeit, Einstellungen, Disk, Steuerung (AP3) | 🔍 |
 | `1B03` | 0x1650 | Stationswahl, Raketenflug, Piraten | ⬜ |
-| `1C68` | 0x1870 | ? | ⬜ |
+| `1C68` | 0x1870 | Robo-Store / Roboterkampf (wahrscheinlich, AP3) | 🔍 |
 | `1DEF` | 0x8F0 | Bonusrennen | ⬜ |
 | `1E7E` | 0xE50 | ? (viel Zufall) | ⬜ |
 | `1F63` | 0x1500 | Fat Mike | ⬜ |
 | `20B3` | 0xD80 | Schlussauswertung, Abend-/Endbild | ⬜ |
-| `218B` | 0x1C0 | Ton: Treiberaufrufe `int 64h` | 🔍 |
+| `218B` | 0x1C0 | Ton: Treiberaufrufe `int 64h` (Startfolge im RefEmu protokolliert) | 🔍 |
 | `21A7`–`21AF` | | ? (21A7: Ton-Effekte) | ⬜ |
-| `21FD` | 0x980 | Hilfsroutinen: Zufall, Warten | 🟡 |
+| `21FD` | 0x980 | Hilfsroutinen: Zufall ✅, Code-Abfrage `0687`, Warten, Palette/Blende `026C…04DA` | 🟡 |
 | `2295` | 0xE0 | Zahl → Text mit Füllzeichen | 🔍 |
 | `22A3` | 0x930 | Wettertexte / -vorführung | ⬜ |
-| `2336`–`2850` | | ? (u. a. Ton/Treiber) | ⬜ |
+| `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`, `051E`, `0947`) (AP3) | 🟢 |
+| `23CD` | 0x3F90 | Grafiktreiber (Assembler, VGA = Mode X, Sprites `06E9/071C`) (AP2) | 🔍 |
+| `27C6` | 0x5B0 | Interrupt-Handler: int 9 Tastatur, int 8 Timer, int 21h (AP1) | 🔍 |
+| `2821`–`2850` | | ? | ⬜ |
 
 ## 4. Werkzeuge
 
@@ -80,6 +87,8 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex; `--screenshot` für CI | 🟢 läuft unter virtuellem Bildschirm (13 Screenshots), Windows-Build als Download |
 | `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (CI-Artefakt `asset-export`) | 🟢 |
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
+| `src/Traders.RefEmu` | Referenz-Emulator: führt T.EXE aus, `OriginalProgram` für Differenztests | 🟢 |
+| `tools/datenlayout/` | DS-Zugriffe, Spielstandfelder aus der Disassemblierung | 🟢 |
 | CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
 | `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | ✅ |
 | `tools/pruefe-branch.py` | Leitstelle: Prüfung eines Paket-Branches vor der Übernahme | ✅ |
@@ -91,17 +100,21 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 
 | Adresse | Funktion | C# | Befund | Status |
 |---|---|---|---|---|
-| `21FD:01BA` | `random(n)` inkl. Uhr-Neusaat | `Core/OriginalRandom.cs` | [Befund](docs/routines/21FD_01BA_random.md) | 🟢 |
+| `21FD:01BA` | `random(n)` inkl. Uhr-Neusaat | `Core/OriginalRandom.cs` | [Befund](docs/routines/21FD_01BA_random.md) | ✅ Differenztest gegen Original (AP1) |
 | `0000:4F4E` / `5058` / `4FA0` | Long-Multiplikation, unsigned Shift, unsigned Modulo | in `OriginalRandom` | im RNG-Befund | 🟢 |
-| `0000:3405` | `time()` | Eingabe `IClockInput` | im RNG-Befund | 🟢 |
+| `0000:3405` | `time()` (Borland: lokale Zeit + 18000 s, −3600 s Sommerzeit) | Eingabe `IClockInput` | im RNG-Befund | ✅ |
+| `21FD:0687` | Code-Abfrage vor dem Hauptmenü (setzt RNG aus der Uhr) | – | [Befund](docs/routines/21FD_0687_codeabfrage.md) | 🔍 |
+| `2336:000A` / `0539` | Spielstand speichern / laden | `Core/State/SaveGame.cs` | [Befund](docs/routines/2336_000A_spielstand.md) | 🟢 |
 
 ## 6. Parallele Arbeitspakete
 
-Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). In Arbeit: AP1 Emulator,
-AP2 Grafik, AP3 Datenlayout. Offen: AP4 Ton, AP5 Programmablauf. Übernahme nach `main` nur
-durch die Leitstelle.
+Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1 und AP3: erster Stand
+übernommen, arbeiten weiter. AP2 in Arbeit. Offen: AP4 Ton, AP5 Programmablauf. Übernahme nach
+`main` nur durch die Leitstelle.
 
 ## 7. Bekannte offene Punkte
 
-- Differenztests gegen das ausgeführte Original fehlen noch für alles (RefEmu, M2).
+- Differenztests gegen das ausgeführte Original: bisher nur `random()`; Spielstand-Vergleich im RefEmu offen.
+- Die Videos zeigen eine andere Fassung (© 1991) als unsere T.EXE (© 1992). Bei Abweichungen gilt der RefEmu.
+- IQ ist im Original ein globaler Wert (`DS:2E8E`); IQ je Gegner (E2) ist eine echte Erweiterung.
 - Kampf und Ton waren schon im Vorversuch unverstanden.
