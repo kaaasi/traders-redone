@@ -39,11 +39,6 @@ jobs:
         with:
           global-json-file: global.json
       - run: dotnet --info
-      - name: Resolve dependency locks
-        run: |
-          dotnet restore TradersRedone.slnx --use-lock-file
-          python3 -c 'import pathlib,json; print("LOCKFILES="+json.dumps({str(p):p.read_text() for p in pathlib.Path(".").rglob("packages.lock.json")}))'
-
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.nuget/packages
@@ -52,7 +47,8 @@ jobs:
         run: |
           bash tools/ci-step.sh hash-dos bash -c 'cd original/dos && sha256sum -c ../SHA256SUMS.dos'
           bash tools/ci-step.sh hash-amiga bash -c 'cd original/amiga && sha256sum -c ../SHA256SUMS.amiga'
-      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
+      - run: bash tools/ci-step.sh restore dotnet restore TradersRedone.slnx --locked-mode
+      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release --no-restore
       - run: bash tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=linux.trx" --results-directory "$CI_OUT/tests"
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         if: always()
@@ -78,7 +74,8 @@ jobs:
         with:
           path: ~/.nuget/packages
           key: nuget-win-${{ hashFiles('**/*.csproj', '**/packages.lock.json', 'Directory.Build.props', 'global.json') }}
-      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
+      - run: bash tools/ci-step.sh restore dotnet restore TradersRedone.slnx --locked-mode
+      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release --no-restore
       - run: bash tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=windows.trx" --results-directory "$CI_OUT/tests"
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         if: always()

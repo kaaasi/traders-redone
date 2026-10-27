@@ -10,9 +10,12 @@ Keine Secrets in Logs ausgeben. Authentifizierung der jeweiligen Umgebung verwen
 global.json legt .NET 10.0.100 fest und erlaubt mit latestFeature neuere .NET-10-Feature-Bands.
 Dies ist bewusst für verfügbare Cloud-SDKs gewählt; CI protokolliert die SDK-Version. Bei exakt
 zu reproduzierenden Befunden zusätzlich dotnet --info und Paketversionen festhalten.
-NuGet-Lockdateien werden mit dotnet restore --use-lock-file erzeugt. Erst vollständig erzeugte
-und geprüfte Lockdateien committen; danach --locked-mode in CI aktivieren. Keine Lockdateien
-von Hand erfinden. Die Umstellung ist in docs/UMSETZUNGSSTAND.md nachzuverfolgen.
+NuGet-Lockdateien sind eingecheckt und wurden durch einen echten .NET-Restore in Actions erzeugt.
+CI verwendet dotnet restore --locked-mode und baut danach mit --no-restore. Bei bewussten
+Paketänderungen lokal dotnet restore --force-evaluate ausführen, Lock-Diff prüfen und zusammen
+mit Projektänderungen committen. Keine Lockdateien von Hand erfinden. Plattform-/RID-spezifisches
+Viewer-Publishing darf eigene Restore-Ausgaben erzeugen; diese nicht ungeprüft übernehmen.
+
 
 ## CI-Fallback
 
