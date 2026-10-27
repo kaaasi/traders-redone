@@ -11,6 +11,7 @@ Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind
 - Read-only Build-Jobs; Publisher verwendet main-Code und authentische GitHub-Jobergebnisse.
 - Kompakte Reports pro Run/Attempt, begrenztes Warten und konfliktfeste Veröffentlichungsversuche.
 - Manuelle Diagnosen/Viewer-Builds, Aufbewahrungsfristen, Concurrency und fixierte Action-SHAs.
+- Durch echten Actions-Restore erzeugte NuGet-Lockdateien und Locked Restore.
 - Editorconfig/LF, Ignore-Ergänzungen, Issue-/PR-Vorlagen, Referenzindex und Testdatenlizenz.
 - Int16Math-IDIV-Fehlerpfad und gemeinsame Repositorypfade der Tests.
 
@@ -35,3 +36,6 @@ Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind
 
 Python-Policy-/Reporttests und Architekturprüfung lokal; C#-Build und Tests über Actions.
 Konkrete Run-Links und Ergebnisse werden im PR dokumentiert. Kein lokales .NET-SDK verfügbar.
+
+Erster vollständiger Lauf: https://github.com/kaaasi/traders-redone/actions/runs/40494382881
+Linux/Windows erfolgreich; Linux 391 Tests bestanden, keine fehlgeschlagen.
