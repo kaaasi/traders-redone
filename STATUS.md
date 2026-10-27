@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 25.10.2026 · Integration AP1 + AP3
+Stand: 27.10.2026 · Repositorymodernisierung und AP3 Stand 2
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -92,9 +92,9 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
 | `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | ✅ |
 | `tools/pruefe-branch.py` | Leitstelle: Prüfung eines Paket-Branches vor der Übernahme | ✅ |
-| `tools/lagebericht.py` | Leitstelle: Übersicht aller Paket-Branches + Wächter-Prüfung von main | ✅ |
+| `tools/lagebericht.py` | Leitstelle: anbieterunabhängige Übersicht aller Paket-Branches und CI-Nachweise | ✅ |
 | `reference/` | Referenzbilder aus beiden Videos (alle 4 s bzw. 5 s) für alle Chats | ✅ |
-| `ci/experiment.sh`-Hook | Beliebige .NET-Analysen in CI, Ausgabe im Bericht | ✅ (auf `dev/ci-probe` geprüft) |
+| `experiments/apN/` | Explizite Analysen über manuellen Diagnoseworkflow | 🟢 manuell auslösbar |
 
 ## 5. Einzelne Routinen
 
@@ -114,7 +114,7 @@ Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1 und AP3: 
 
 ## 7. Bekannte offene Punkte
 
-- Differenztests gegen das ausgeführte Original: bisher auf integriertem main nur `random()`; zusätzlich Speichern/Laden mit RefEmu-Differenztests integriert (AP3 Stand 2).
+- Differenztests gegen das ausgeführte Original: `random()` sowie Speichern/Laden (AP3 Stand 2); weitere Routinen folgen mit den Paketen.
 - Die Videos zeigen eine andere Fassung (© 1991) als unsere T.EXE (© 1992). Bei Abweichungen gilt der RefEmu.
 - IQ ist im Original ein globaler Wert (`DS:2E8E`); IQ je Gegner (E2) ist eine echte Erweiterung.
 - Kampf und Ton waren schon im Vorversuch unverstanden.
