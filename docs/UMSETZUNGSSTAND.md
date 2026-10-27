@@ -1,6 +1,6 @@
 # Umsetzung der Repositoryanalyse
 
-Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind im PR prüfbar.
+Repositorypflege über PR #1 integriert (`76df32b`); AP3 Stand 2 und Report-Randfall über PR #2.
 
 ## Implementiert
 
@@ -17,9 +17,9 @@ Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind
 
 ## Aktivierung und bewusst nicht erfundene Ergebnisse
 
-- publish-report.yml wird erst nach Integration dieses PRs auf main aktiv. Vorher Actions direkt
-  prüfen; ein fehlender neuer JSON-Bericht ist kein grüner Integrationsnachweis.
-- Paketstände AP1/AP2/AP3/AP5 bleiben separat. Insbesondere AP1/AP2 melden nicht übernahmebereit.
+- publish-report.yml ist auf main aktiv. Erster Publisher-Lauf 40499351047 erfolgreich;
+  JSON-Nachweis für 76df32b im Branch ci-results gelesen und geprüft.
+- Paketstände AP1/AP2/AP5 bleiben separat; AP3 Stand 2 ist im separaten Integrations-PR #2 enthalten. Insbesondere AP1/AP2 melden nicht übernahmebereit.
   Ihre alten Übergaben werden nicht stellvertretend als aktuell/fertig ausgegeben. Ein verifizierter
   Snapshot steht in ARBEITSPAKETE.md. Die neuen Regeln sind nach Integration in Paketbranches zu mergen.
 - Upstream-Revision der bereits vorhandenen CPU-Testdaten ist nicht überliefert. Lizenz liegt bei;
@@ -34,7 +34,7 @@ Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind
 
 ## Prüfungen
 
-Python-Policy-/Reporttests und Architekturprüfung lokal; C#-Build und Tests über Actions.
+Neun Python-Policy-/Reporttests und Architekturprüfung lokal; C#-Build und Tests über Actions.
 Konkrete Run-Links und Ergebnisse werden im PR dokumentiert. Kein lokales .NET-SDK verfügbar.
 
 Erster vollständiger Lauf: https://github.com/kaaasi/traders-redone/actions/runs/40494382881
