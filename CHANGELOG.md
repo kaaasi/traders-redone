@@ -1,5 +1,14 @@
 # Zwischenstände
 
+## In Vorbereitung – Repositorymodernisierung
+
+- Anbieterunabhängige AGENTS.md, Übergaben und Worktree-/PR-Ablauf.
+- Integrationsprüfung mit JSON-Nachweisen und Fehlerfalltests.
+- Lesende Build-CI, separater vertrauenswürdiger Publisher, manuelle Diagnosen.
+- IDIV-Grenzfall korrigiert und gegen RefEmu abgesichert; gemeinsame Testpfade.
+- Kein neuer Portierungsmeilenstein; Paketstände bleiben separat zu integrieren.
+
+
 Jeder Meilenstein-Stand wird hier mit Commit festgehalten. Git-Tags (`v0.x`) können
 nachträglich auf den genannten Commit gesetzt werden.
 
