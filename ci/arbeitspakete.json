@@ -1,5 +1,5 @@
 {
-  "_comment": "Allowed file areas per work package (path prefixes) and the Leitstelle session. Used by tools/pruefe-branch.py and tools/lagebericht.py.",
+  "_comment": "Exact files, directory paths ending /, and explicit filename prefixes ending _; no session identity is authorization.",
   "shared": [
     "STATUS.md",
     "CHANGELOG.md",
@@ -13,54 +13,68 @@
     "docs/analyse/disasm/",
     "docs/analyse/segments.md",
     "CLAUDE.md",
-    "ci/arbeitspakete.json"
+    "ci/arbeitspakete.json",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    "docs/ARCHITEKTUR.md",
+    "docs/UMGEBUNGEN.md",
+    "tools/pruefe-branch.py",
+    "tools/repo_policy.py",
+    "tools/lagebericht.py",
+    "tools/check-architecture.py",
+    "tests/tools/"
   ],
   "packages": {
     "ap1": [
       "src/Traders.RefEmu/",
       "tests/Traders.Tests/RefEmu/",
-      "docs/routines/",
       "docs/uebergabe/AP1.md",
-      "ci/experiment.sh",
-      "docs/analyse/REFEMU.md"
+      "docs/analyse/REFEMU.md",
+      "experiments/ap1/",
+      "docs/routines/ap1/",
+      "docs/routines/21FD_01BA_random.md",
+      "docs/routines/21FD_0687_codeabfrage.md"
     ],
     "ap2": [
       "src/Traders.Vga/",
       "tests/Traders.Tests/Vga/",
       "docs/routines/0A96_",
       "docs/routines/0A69_",
-      "docs/routines/",
       "docs/uebergabe/AP2.md",
-      "ci/experiment.sh",
       "docs/analyse/GRAFIK.md",
-      "tools/exeimg.py"
+      "tools/exeimg.py",
+      "experiments/ap2/",
+      "docs/routines/ap2/"
     ],
     "ap3": [
       "docs/analyse/DATENLAYOUT.md",
       "src/Traders.Core/State/",
       "tests/Traders.Tests/State/",
-      "docs/routines/",
       "docs/uebergabe/AP3.md",
-      "ci/experiment.sh",
-      "tools/datenlayout"
+      "tools/datenlayout/",
+      "experiments/ap3/",
+      "docs/routines/ap3/",
+      "docs/routines/2336_000A_spielstand.md"
     ],
     "ap4": [
       "src/Traders.Audio/",
       "tests/Traders.Tests/Audio/",
       "docs/analyse/FXDRIVER.md",
-      "docs/routines/",
       "docs/uebergabe/AP4.md",
-      "ci/experiment.sh",
-      "tools/fxdriver"
+      "tools/fxdriver/",
+      "experiments/ap4/",
+      "docs/routines/ap4/"
     ],
     "ap5": [
       "docs/analyse/PHASEN.md",
       "docs/analyse/callgraph/",
       "tools/callgraph.py",
-      "docs/routines/",
       "docs/uebergabe/AP5.md",
-      "ci/experiment.sh"
+      "experiments/ap5/",
+      "docs/routines/ap5/"
     ]
-  },
-  "leitstelle_session": "session_01Rovbp2HqJDAvauvg6neKmJ"
+  }
 }

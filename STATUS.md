@@ -114,7 +114,12 @@ Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1 und AP3: 
 
 ## 7. Bekannte offene Punkte
 
-- Differenztests gegen das ausgeführte Original: bisher nur `random()`; Spielstand-Vergleich im RefEmu offen.
+- Differenztests gegen das ausgeführte Original: bisher auf integriertem main nur `random()`; Spielstand-Differenztests auf `dev/ap3-state` vorhanden, Integration offen.
 - Die Videos zeigen eine andere Fassung (© 1991) als unsere T.EXE (© 1992). Bei Abweichungen gilt der RefEmu.
 - IQ ist im Original ein globaler Wert (`DS:2E8E`); IQ je Gegner (E2) ist eine echte Erweiterung.
 - Kampf und Ton waren schon im Vorversuch unverstanden.
+
+
+## Repositorymodernisierung
+
+Arbeitsstand und noch notwendige Aktivierung: [docs/UMSETZUNGSSTAND.md](docs/UMSETZUNGSSTAND.md).

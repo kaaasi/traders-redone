@@ -2,9 +2,7 @@ namespace Traders.Tests.RefEmu;
 
 internal static class RefEmuPaths
 {
-    private static readonly Lazy<string> Root = new(FindRoot);
-
-    public static string RepoRoot => Root.Value;
+    public static string RepoRoot => RepositoryPaths.Root;
 
     public static string Dos(string name) => Path.Combine(RepoRoot, "original", "dos", name);
 
@@ -20,14 +18,4 @@ internal static class RefEmuPaths
         }
     }
 
-    private static string FindRoot()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            if (File.Exists(Path.Combine(dir.FullName, "TradersRedone.slnx"))) return dir.FullName;
-            dir = dir.Parent;
-        }
-        throw new InvalidOperationException("Repository root (TradersRedone.slnx) not found.");
-    }
 }

@@ -4,7 +4,7 @@ Usage: python3 tools/ci-report.py <results-dir> <report-dir> <sha> <ref> <job=re
 <results-dir> contains one folder per job artifact (e.g. linux-results/, windows-results/),
 each with steps.tsv, logs/, tests/*.trx and optional images/ and experiment/.
 """
-import sys, os, shutil, glob, datetime
+import sys, os, shutil, glob, datetime, json
 import xml.etree.ElementTree as ET
 
 src, dst, sha, ref = sys.argv[1:5]
@@ -50,13 +50,25 @@ for job_dir in sorted(glob.glob(os.path.join(src, '*'))):
             lines += [f'- {n}' for n in sorted(passed)]
             lines += ['', '</details>']
     # copy logs, images, experiment output
-    for sub in ('logs', 'images', 'experiment'):
+    for sub in ('logs',):
         p = os.path.join(job_dir, sub)
         if os.path.isdir(p):
-            shutil.copytree(p, os.path.join(dst, job, sub), dirs_exist_ok=True)
+            target = os.path.join(dst, job, sub)
+            os.makedirs(target, exist_ok=True)
+            for log in glob.glob(os.path.join(p, '*.log')):
+                with open(log, encoding='utf-8', errors='replace') as stream:
+                    tail = stream.read()[-32000:]
+                open(os.path.join(target, os.path.basename(log)), 'w', encoding='utf-8').write(tail)
     for trx in glob.glob(os.path.join(job_dir, 'tests', '*.trx')):
         os.makedirs(os.path.join(dst, job, 'tests'), exist_ok=True)
         shutil.copy(trx, os.path.join(dst, job, 'tests'))
 
 open(os.path.join(dst, 'SUMMARY.md'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 print('\n'.join(lines))
+
+
+metadata = {'schema_version': 1, 'sha': sha, 'ref': ref, 'jobs': jobs,
+            'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+with open(os.path.join(dst, 'result.json'), 'w', encoding='utf-8') as stream:
+    json.dump(metadata, stream, indent=2)

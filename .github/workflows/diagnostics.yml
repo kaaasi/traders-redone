@@ -1,0 +1,59 @@
+name: Diagnostics
+on:
+  workflow_dispatch:
+    inputs:
+      experiment:
+        description: 'Optional: experiments/apN/name.sh'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: diagnostics-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - run: dotnet build TradersRedone.slnx -c Release
+      - run: dotnet run --project src/Traders.Tools -c Release --no-build -- export original/dos out/assets
+      - run: xvfb-run -a dotnet run --project src/Traders.Viewer -c Release --no-build -- original/dos --screenshot out/viewer
+      - run: REFEMU_OUT="$PWD/out/refemu" dotnet test TradersRedone.slnx -c Release --no-build --filter 'FullyQualifiedName~RefEmu.BootTests'
+      - name: Explicit experiment
+        env:
+          EXPERIMENT: ${{ inputs.experiment }}
+        run: |
+          if [ -n "$EXPERIMENT" ]; then
+            [[ "$EXPERIMENT" =~ ^experiments/ap[0-9]+/[a-zA-Z0-9_-]+\.sh$ ]] || exit 1
+            mkdir -p out/experiment
+            bash "$EXPERIMENT" "$PWD/out/experiment"
+          fi
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        if: always()
+        with:
+          name: diagnostics
+          path: out
+          retention-days: 7
+  viewer:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - run: dotnet publish src/Traders.Viewer/Traders.Viewer.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out/traders-viewer-win-x64
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: traders-viewer-win-x64
+          path: out/traders-viewer-win-x64
+          retention-days: 7

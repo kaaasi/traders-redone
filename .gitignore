@@ -9,3 +9,7 @@ artifacts/
 TestResults/
 __pycache__/
 .ci-results/
+
+
+ci-out/
+.worktrees/
