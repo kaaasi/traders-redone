@@ -28,10 +28,17 @@ Esc = Ende. Koordinate und Palettenindex unter der Maus stehen im Fenstertitel.
 
 ## CI
 
-Jeder Push auf `main` oder `dev/...` baut und testet unter Linux und Windows. Ergebnisse
-(Zusammenfassung, Logs, Testergebnisse, Screenshots) stehen im Branch `ci-results`
-(`latest/main/SUMMARY.md`). Eine startfertige Windows-Version des Viewers gibt es auf der
-Actions-Seite des jeweiligen Laufs als Artefakt `traders-viewer-win-x64`.
+Pushes auf `main` und `dev/...` sowie PRs bauen und testen unter Linux und Windows.
+Kompakte Ergebnisse stehen nach Aktivierung des Publisher-Workflows auf `main` im Branch
+`ci-results` (`commits/<sha>/result.json`, `latest/main/SUMMARY.md`). Vollständige Logs bleiben
+7 Tage als Actions-Artefakte verfügbar. Der manuelle Workflow `Diagnostics` erzeugt Bilder,
+Experimente und das Windows-Paket `traders-viewer-win-x64`.
 
 `original/` enthält die Originaldateien (privates Repo). `original/SHA256SUMS.*` sichert
 die analysierte Fassung ab.
+
+
+## Mitarbeit
+
+Start: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md),
+[Architektur](docs/ARCHITEKTUR.md), [Umgebungen](docs/UMGEBUNGEN.md).
