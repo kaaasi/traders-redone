@@ -43,3 +43,20 @@ class ReportTests(unittest.TestCase):
             data = json.loads((base / f'store/commits/{sha}/result.json').read_text())
             self.assertEqual(('20', '2'), (data['run_id'], data['run_attempt']))
             self.assertEqual(3, len(list((base / 'store/runs').iterdir())))
+
+    def test_cancelled_run_cannot_displace_completed_commit_checks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source = base / 'source'
+            source.mkdir()
+            sha = 'a' * 40
+            for run, status in [(10, 'success'), (11, 'cancelled'), (12, 'failure')]:
+                (source / 'result.json').write_text(json.dumps({'sha': sha, 'ref': 'main',
+                    'run_id': str(run), 'run_attempt': '1',
+                    'jobs': dict.fromkeys(('linux', 'windows', 'policy'), status)}))
+                (source / 'SUMMARY.md').write_text(status)
+                subprocess.run([sys.executable, str(ROOT / 'tools/report-store.py'), str(source), str(base / 'store')], check=True)
+                selected = json.loads((base / f'store/commits/{sha}/result.json').read_text())
+                self.assertEqual('failure' if run == 12 else 'success', selected['jobs']['linux'])
+                latest = json.loads((base / 'store/latest/main/result.json').read_text())
+                self.assertEqual(status, latest['jobs']['linux'])

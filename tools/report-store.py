@@ -25,12 +25,20 @@ for _, _, entry, _ in reports[40:]:
     shutil.rmtree(entry)
 for name in ('commits', 'latest'):
     shutil.rmtree(target / name, ignore_errors=True)
-for _, _, entry, item in reports[:40]:
-    for name, identifier in [('commits', item['sha']), ('latest', item['ref'].replace('/', '_'))]:
+def completed_checks(report):
+    jobs = report[3].get('jobs', {})
+    return all(jobs.get(name) in ('success', 'failure') for name in ('linux', 'windows', 'policy'))
+
+
+# A cancelled run on another branch does not invalidate completed checks for the
+# same immutable commit. A newer completed failure still supersedes an old success.
+for name in ('commits', 'latest'):
+    ordered = sorted(reports[:40], key=lambda row: (completed_checks(row), *row[:2]), reverse=True) if name == 'commits' else reports[:40]
+    for _, _, entry, item in ordered:
+        identifier = item['sha'] if name == 'commits' else item['ref'].replace('/', '_')
         dest = target / name / identifier
         if not dest.exists():
             dest.mkdir(parents=True)
-            # Index copies are deliberately just metadata + summary, not duplicate logs.
             for file in ('result.json', 'SUMMARY.md'):
                 shutil.copy(entry / file, dest / file)
 (target / 'index.md').write_text('# CI-Ergebnisse\n\n' + '\n'.join(
