@@ -2,7 +2,7 @@
 
 Jeder Paket-Chat bearbeitet **genau ein** Paket auf seinem eigenen Branch und schreibt nur in
 seinen Dateibereich (maschinenlesbar: `ci/arbeitspakete.json`). Diese Datei pflegt **nur die
-Leitstelle**; Paket-Chats ändern sie nicht. Regeln: [CLAUDE.md](../CLAUDE.md), Abschnitt
+Leitstelle**; Paket-Chats ändern sie nicht. Regeln: [AGENTS.md](../AGENTS.md), Abschnitt
 „Rollen“.
 
 ## Jetzt parallel möglich
@@ -26,11 +26,26 @@ Kampf (M12), Ende (M13). Diese werden hier eingetragen, sobald die Grundlagen st
 | Schritt | Wer | Was |
 |---|---|---|
 | Vergabe | Nutzer + Leitstelle | Nutzer startet einen Chat mit „übernimm APn“; Leitstelle trägt ihn hier ein. |
-| Arbeit | Paket-Chat | Commits auf `dev/apN-…`, CI über `tools/ci-wait.sh`, `main` per Merge hereinholen. |
+| Arbeit | Paket-Chat | Commits auf `dev/apN-…`, CI über `tools/ci-wait.sh` (nach Publisher-Aktivierung auf main), `main` per Merge hereinholen. |
 | Übergabe | Paket-Chat | `docs/uebergabe/APn.md` aktualisieren, „Bereit zur Übernahme: ja“, CI grün. |
 | Prüfung | Leitstelle | `tools/pruefe-branch.py dev/apN-…`: Dateibereich, Regeln des Kerns, CI, Konflikte. |
 | Übernahme | Leitstelle | Merge nach `main`, CI grün, `STATUS.md`/`CHANGELOG.md`/diese Datei aktualisieren. |
 | Rückmeldung | Leitstelle → Nutzer | Was übernommen wurde, was der Paket-Chat nachbessern soll. |
 
-`ci/experiment.sh` ist für Analysen auf dem eigenen Branch gedacht und wird bei der Übernahme
-nicht nach `main` übernommen.
+Experimente liegen unter `experiments/apN/` und laufen nur manuell. Bestehende `ci/experiment.sh` vor Integration migrieren.
+
+
+## Verifizierter Branch-Stand vom 27.10.2026 (keine Übernahmefreigabe)
+
+| AP | Kopf | vor main | Beobachtung |
+|---|---|---:|---|
+| AP1 | `2f03e46` | 2 | Tracing/Spielstart-Erweiterungen; Übergabe nennt noch älteren Stand. |
+| AP2 | `3fc6033` | 7 | Mode-X-Code und Differenztests vorhanden; Übergabe „noch kein Code“ veraltet. |
+| AP3 | `f45f778` | 3 | Savegame-Differenztests vorhanden; separater Integrationsreview erforderlich. |
+| AP5 | `92edea9` | 1 | Callgraph und Experiment vorhanden; bisheriger Status „offen“ beschreibt nicht den Branch. |
+
+Alle vier Branches basieren bei diesem Abruf auf main `717a226`. Aktive Bearbeiter müssen ihren
+Status bestätigen; aus einem Commit wird keine aktive Chat-Zuständigkeit abgeleitet. Historische
+Tabellen oben beschreiben die ursprüngliche Vergabe. Vor Neuvergabe Branch und Übergabe lesen.
+Leitstelle für die Repositorymodernisierung: ChatGPT im ausdrücklichen Nutzerauftrag;
+Arbeitsbranch `dev/repo-collaboration`. Keine parallele Paketarbeit dadurch neu vergeben.
