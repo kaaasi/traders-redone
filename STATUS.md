@@ -85,12 +85,12 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | Werkzeug | Zweck | Status |
 |---|---|---|
 | `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex; `--screenshot` für CI | 🟢 läuft unter virtuellem Bildschirm (13 Screenshots), Windows-Build als Download |
-| `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (CI-Artefakt `asset-export`) | 🟢 |
+| `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (manueller Diagnoseworkflow) | 🟢 |
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
 | `src/Traders.RefEmu` | Referenz-Emulator: führt T.EXE aus, `OriginalProgram` für Differenztests | 🟢 |
 | `tools/datenlayout/` | DS-Zugriffe, Spielstandfelder aus der Disassemblierung | 🟢 |
 | CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
-| `tools/ci-wait.sh` | Wartet auf CI und holt den Bericht (für Claude-Sitzungen) | ✅ |
+| `tools/ci-wait.sh` | Wartet begrenzt auf den JSON-Nachweis und holt die Zusammenfassung (alle Agenten) | ✅ |
 | `tools/pruefe-branch.py` | Leitstelle: Prüfung eines Paket-Branches vor der Übernahme | ✅ |
 | `tools/lagebericht.py` | Leitstelle: anbieterunabhängige Übersicht aller Paket-Branches und CI-Nachweise | ✅ |
 | `reference/` | Referenzbilder aus beiden Videos (alle 4 s bzw. 5 s) für alle Chats | ✅ |
@@ -108,8 +108,7 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 
 ## 6. Parallele Arbeitspakete
 
-Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1 und AP3: erster Stand
-übernommen, arbeiten weiter. AP2 in Arbeit. Offen: AP4 Ton, AP5 Programmablauf. Übernahme nach
+Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1: erster Stand übernommen; AP3: Stand 2 einschließlich Savegame-Differenztests übernommen (PR #2). AP2 in Arbeit. AP4 Ton offen; AP5 hat einen Analysebranch, Übergabe ausstehend. Übernahme nach
 `main` nur durch die Leitstelle.
 
 ## 7. Bekannte offene Punkte
