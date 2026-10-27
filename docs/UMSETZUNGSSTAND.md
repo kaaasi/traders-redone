@@ -39,3 +39,17 @@ Konkrete Run-Links und Ergebnisse werden im PR dokumentiert. Kein lokales .NET-S
 
 Erster vollständiger Lauf: https://github.com/kaaasi/traders-redone/actions/runs/40494382881
 Linux/Windows erfolgreich; Linux 391 Tests bestanden, keine fehlgeschlagen.
+
+## Abschlussstand
+
+PR #1: https://github.com/kaaasi/traders-redone/pull/1 (integriert `76df32b`).
+PR #2: https://github.com/kaaasi/traders-redone/pull/2 (integriert `d13c5b3`).
+Geprüfter kombinierter Stand: Run 40499607053, Linux/Windows/Policy/Report erfolgreich,
+396 C#-Tests (Linux), neun lokale Python-Tests. Der anschließende main-Lauf ist über Actions
+und `ci-results/commits/<main-sha>/result.json` nachvollziehbar. Die manuelle Diagnosepipeline
+ist konfiguriert, wurde in diesem Auftrag aber nicht manuell gestartet.
+
+Nicht als erledigt ausgeben: AP1/AP2/AP5-Fertigstellung, Herkunftsrevision historischer CPU-Daten,
+kontoweite Budgeteinstellungen, optionales GitHub Project und neue Releasefreigaben. Für diese
+Punkte fehlen entweder abgeschlossene Paketübergaben, historische Informationen oder die passende
+Kontoverwaltungsfunktion. Kein kostenpflichtiges Feature vorausgesetzt oder aktiviert.
