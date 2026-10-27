@@ -134,7 +134,8 @@ Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`
 | `4B98` | W | – | Ölvorrat des Ladens | G – `08CF:05A3` |
 | `2F26` | B | – | Betriebsmittel je Produktionsfeld (Standard 30) | W – `0609:1178` |
 | `48F4` | B[9·26] | – | Produktionsergebnis je Feld (4–60), Zwischenspeicher | W – `22A3:0003` |
-| `451E` / `4528` | W | – | Spielfeldursprung x / y in Pixeln | G – `192D:0058` |
+| `451E` / `4528` | W | – | Spielfeldursprung x = (320 − Spalten·32)/2, y = ((146 − Zeilen·22) − 14)/2 + 58 | G – `192D:0058`, Differenztest |
+| `117E` / `1180` | W | – | Tickzähler des Timer-Interrupts | G – `27C6:03C3` |
 | `5330` / `5332` | W | – | Menü-Kopie von Spalten/Zeilen | G |
 | `3D47` | B[128] | – | Tastenzustand je Scancode (F1 = `3D82`, Enter = `3D63`) | G |
 | `37CC` | Far[304] | – | Textzeiger: Zeile *k* bei `37D0 + 4·k` | G – Ladecode `192D:18B6` |
@@ -156,4 +157,3 @@ Portierung gehört zu M11; Rechenreihenfolge und 32-Bit-Zwischenwerte dabei aus 
 - Zuordnung Feldart 0–2 → Ware (Tabelle `DS:08E4`: Art 0→2, 1→0, 2→1) und Warennamen
   (Wasser/Blumen/Parfüm laut Wettertexten; vierte Ware offen).
 - Bedeutung `StationValue` und `StationVisited` (M9).
-- Differenztest gegen das ausgeführte Original (Speichern/Laden im RefEmu, AP1).

@@ -43,5 +43,12 @@ Zustand ↔ DS-Abbild `GameStateMapper.cs`.
 - `tests/Traders.Tests/State/StateTests.cs`: Reihenfolge gegen die per
   `tools/datenlayout/savegame.py` unabhängig aus der Disassemblierung gelesene Liste,
   522 Dwords, Erweiterung/Abschneiden, Rundreise, Längenprüfung.
-- **Offen:** Differenztest gegen das ausgeführte Original (RefEmu, AP1): DS-Abbild vorbereiten,
-  `2336:000A` ausführen, Puffer bei `DS:45D6` mit `SaveGame.Write` vergleichen.
+- **Differenztest** `tests/Traders.Tests/State/SaveGameDifferentialTests.cs` (RefEmu, nach dem
+  Booten ins Hauptmenü, damit der Puffer `DS:45D6` angelegt ist; DS mit zufälligen Werten in
+  allen Feldbreiten gefüllt):
+  - Speichern: geschriebene `SAVEGAME.DAT` (522 Dwords) bytegleich mit `SaveGame.Write`,
+    Rückgabe 1, Schleifenvariablen, keine Änderung an Zustandsfeldern.
+  - Laden: alle gespeicherten Bytes, Schleifenvariablen und der von `192D:0058` neu berechnete
+    Spielfeldursprung `DS:451E/4528` stimmen; sonst ändern sich nur Pufferzeiger `DS:57F8` und die
+    Timerzähler `DS:117E/1180` (int-8-Handler `27C6:03C3`).
+  - Laden einer 0x8FF-Byte-Datei: Rückgabe 0, kein gespeichertes Feld geändert.
