@@ -1,136 +1,107 @@
 name: CI
-
-# Results of every run (summary, full logs, test results, screenshots, experiment output)
-# are pushed to the branch "ci-results" so they can be read with plain git.
-
 on:
   push:
-    branches: [ main, 'dev/**' ]
+    branches: [main, 'dev/**']
   pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   DOTNET_NOLOGO: 1
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   CI_OUT: ci-out
-
 jobs:
-  linux:
+  # Same-repository branches already receive push CI; PR merge tests are useful
+  # only after main changed. Keep PR CI to validate that synthetic merge as well.
+  policy:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s tests/tools -v
+      - run: python3 tools/check-architecture.py
+      - run: bash -n tools/ci-step.sh tools/ci-wait.sh tools/ci-publish.sh
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-
+      - run: dotnet --info
       - uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: nuget-linux-${{ hashFiles('**/*.csproj', 'Directory.Build.props', 'global.json') }}
-          restore-keys: nuget-linux-
-
-      - name: Verify original file hashes
+          key: nuget-linux-${{ hashFiles('**/*.csproj', '**/packages.lock.json', 'Directory.Build.props', 'global.json') }}
+      - name: Verify originals
         run: |
-          tools/ci-step.sh hash-dos bash -c 'cd original/dos && sha256sum -c ../SHA256SUMS.dos'
-          tools/ci-step.sh hash-amiga bash -c 'cd original/amiga && sha256sum -c ../SHA256SUMS.amiga'
-
-      - name: Build
-        run: tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
-
-      - name: Test
-        run: tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=linux.trx" --results-directory "$CI_OUT/tests"
-
-      - name: Export assets
-        if: success() || failure()
-        run: tools/ci-step.sh export dotnet run --project src/Traders.Tools -c Release --no-build -- export original/dos "$CI_OUT/images/assets"
-
-      - name: Viewer screenshots (virtual display)
-        if: success() || failure()
-        run: tools/ci-step.sh viewer-screenshots xvfb-run -a -s "-screen 0 1280x1024x24" dotnet run --project src/Traders.Viewer -c Release --no-build -- original/dos --screenshot "$CI_OUT/images/viewer"
-
-      - name: Original im Referenz-Emulator bis zum Hauptmenü (Bilder + Ereignisprotokoll)
-        if: success() || failure()
-        run: |
-          mkdir -p "$CI_OUT/images/refemu-boot"
-          REFEMU_OUT="$(realpath "$CI_OUT/images/refemu-boot")" tools/ci-step.sh refemu-boot dotnet test TradersRedone.slnx -c Release --no-build --filter "FullyQualifiedName~RefEmu.BootTests"
-
-      - name: Experiment (ci/experiment.sh, if present)
-        if: (success() || failure()) && hashFiles('ci/experiment.sh') != ''
-        run: |
-          mkdir -p "$CI_OUT/experiment"
-          tools/ci-step.sh experiment bash ci/experiment.sh "$CI_OUT/experiment"
-
+          bash tools/ci-step.sh hash-dos bash -c 'cd original/dos && sha256sum -c ../SHA256SUMS.dos'
+          bash tools/ci-step.sh hash-amiga bash -c 'cd original/amiga && sha256sum -c ../SHA256SUMS.amiga'
+      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
+      - run: bash tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=linux.trx" --results-directory "$CI_OUT/tests"
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: linux-results
           path: ci-out
-          include-hidden-files: true
-
+          retention-days: 7
   windows:
     runs-on: windows-latest
+    timeout-minutes: 15
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v5
-
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-
       - uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: nuget-win-${{ hashFiles('**/*.csproj', 'Directory.Build.props', 'global.json') }}
-          restore-keys: nuget-win-
-
-      - name: Build
-        run: tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
-
-      - name: Test
-        run: tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=windows.trx" --results-directory "$CI_OUT/tests"
-
-      - name: Publish viewer (win-x64, self-contained)
-        if: success() || failure()
-        run: tools/ci-step.sh publish-viewer dotnet publish src/Traders.Viewer/Traders.Viewer.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out/traders-viewer-win-x64
-
+          key: nuget-win-${{ hashFiles('**/*.csproj', '**/packages.lock.json', 'Directory.Build.props', 'global.json') }}
+      - run: bash tools/ci-step.sh build dotnet build TradersRedone.slnx -c Release
+      - run: bash tools/ci-step.sh test dotnet test TradersRedone.slnx -c Release --no-build --logger "trx;LogFileName=windows.trx" --results-directory "$CI_OUT/tests"
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: windows-results
           path: ci-out
-          include-hidden-files: true
-
-      - name: Download for the user (Actions page → artifact "traders-viewer-win-x64")
-        uses: actions/upload-artifact@v5
-        if: success()
-        with:
-          name: traders-viewer-win-x64
-          path: out/traders-viewer-win-x64
-
+          retention-days: 7
   report:
-    needs: [ linux, windows ]
+    needs: [linux, windows, policy]
     if: always()
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    concurrency:
-      group: ci-results
-      cancel-in-progress: false
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v5
         with:
           pattern: '*-results'
           path: results
-
-      - name: Build report
-        run: tools/ci-step.sh report-build python3 tools/ci-report.py results report "${{ github.sha }}" "${{ github.ref_name }}" "linux=${{ needs.linux.result }}" "windows=${{ needs.windows.result }}"
-
-      - name: Publish to branch ci-results
+      - name: Build compact report
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: tools/ci-step.sh report-publish tools/ci-publish.sh report "${{ github.sha }}" "${{ github.ref_name }}"
+          REPORT_SHA: ${{ github.sha }}
+          REPORT_REF: ${{ github.ref_name }}
+          LINUX_RESULT: ${{ needs.linux.result }}
+          WINDOWS_RESULT: ${{ needs.windows.result }}
+          POLICY_RESULT: ${{ needs.policy.result }}
+        run: python3 tools/ci-report.py results report "$REPORT_SHA" "$REPORT_REF" "linux=$LINUX_RESULT" "windows=$WINDOWS_RESULT" "policy=$POLICY_RESULT"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: compact-report
+          path: report
+          retention-days: 7

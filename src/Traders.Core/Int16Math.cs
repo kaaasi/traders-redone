@@ -15,15 +15,23 @@ public static class Int16Math
     /// <summary>Signed 16-bit division as IDIV: truncates toward zero.</summary>
     public static short Div(short a, short b)
     {
-        if (b == 0) throw new DivideByZeroException();
+        ValidateDivision(a, b);
         return S(a / b);
     }
 
     /// <summary>Signed 16-bit remainder as IDIV: sign follows the dividend.</summary>
     public static short Mod(short a, short b)
     {
-        if (b == 0) throw new DivideByZeroException();
+        ValidateDivision(a, b);
         return S(a % b);
+    }
+
+    // IDIV faults before producing either quotient or remainder.
+    private static void ValidateDivision(short a, short b)
+    {
+        if (b == 0) throw new DivideByZeroException();
+        if (a == short.MinValue && b == -1)
+            throw new OverflowException("16-bit IDIV quotient overflow.");
     }
 
     /// <summary>Signed 32-bit wrap (C <c>long</c> in Turbo C).</summary>

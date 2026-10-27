@@ -1,0 +1,24 @@
+"""Check project boundaries and obvious host dependencies in the deterministic core."""
+from pathlib import Path
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+root = Path(__file__).resolve().parents[1]
+errors = []
+for name, allowed in {'Traders.Core': set(), 'Traders.Assets': set(),
+                      'Traders.Vga': {'Traders.Assets'}, 'Traders.Audio': {'Traders.Assets'}}.items():
+    project = root / 'src' / name / (name + '.csproj')
+    for node in ET.parse(project).iter('ProjectReference'):
+        target = node.attrib['Include'].replace('\\', '/').split('/')[-1].removesuffix('.csproj')
+        if target not in allowed:
+            errors.append(f'{name}: unerlaubte Projektabhängigkeit {target}')
+for path in (root / 'src/Traders.Core').rglob('*.cs'):
+    if 'obj' in path.parts or 'bin' in path.parts:
+        continue
+    # Comments are excluded. This check supplements review; it is not a C# semantic analyzer.
+    source = re.sub(r'/\*.*?\*/|//[^\n]*', '', path.read_text(), flags=re.S)
+    if re.search(r'\b(?:DateTime\.(?:Now|UtcNow|Today)|Random\.Shared|new\s+(?:System\.)?Random\s*\(|File\.|Directory\.|Console\.|Thread\.Sleep|Task\.Delay|Environment\.TickCount|Stopwatch|Guid\.NewGuid)', source):
+        errors.append(f'{path.relative_to(root)}: Host-/Zufallszugriff im Core')
+print('\n'.join(errors) if errors else 'Architekturgrenzen geprüft')
+sys.exit(bool(errors))
