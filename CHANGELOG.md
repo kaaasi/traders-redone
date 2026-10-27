@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## In Vorbereitung – Repositorymodernisierung
+## Repositorymodernisierung (27.10.2026) · Integration `76df32b`
 
 - Anbieterunabhängige AGENTS.md, Übergaben und Worktree-/PR-Ablauf.
 - Integrationsprüfung mit JSON-Nachweisen und Fehlerfalltests.
@@ -33,3 +33,9 @@ nachträglich auf den genannten Commit gesetzt werden.
 - Ressourcen: PowerPacker PP20, VGA-Atlas + Palette, Texttabelle, PNG-Export
 - Analyse: Segmentkarte (45 Module, ~890 Funktionen), Disassemblierung je Modul
 - Kern: Original-Zufallsgenerator `21FD:01BA`, 16-Bit-Arithmetik-Helfer
+
+
+## AP3 Stand 2 – Savegame-Differenztests
+
+- Stand `f45f778` mit bewahrter Branch-Historie integriert.
+- Original-Speichern/Laden, Speicher-Nebenwirkungen und Kurzdatei-Fehlerfall gegen RefEmu geprüft.

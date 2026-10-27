@@ -19,7 +19,7 @@ Arbeitsbranch: dev/repo-collaboration; Basis main 717a226. Alle Änderungen sind
 
 - publish-report.yml wird erst nach Integration dieses PRs auf main aktiv. Vorher Actions direkt
   prüfen; ein fehlender neuer JSON-Bericht ist kein grüner Integrationsnachweis.
-- Paketstände AP1/AP2/AP3/AP5 bleiben separat. Insbesondere AP1/AP2 melden nicht übernahmebereit.
+- Paketstände AP1/AP2/AP5 bleiben separat; AP3 Stand 2 wird separat per Integrations-PR übernommen. Insbesondere AP1/AP2 melden nicht übernahmebereit.
   Ihre alten Übergaben werden nicht stellvertretend als aktuell/fertig ausgegeben. Ein verifizierter
   Snapshot steht in ARBEITSPAKETE.md. Die neuen Regeln sind nach Integration in Paketbranches zu mergen.
 - Upstream-Revision der bereits vorhandenen CPU-Testdaten ist nicht überliefert. Lizenz liegt bei;
