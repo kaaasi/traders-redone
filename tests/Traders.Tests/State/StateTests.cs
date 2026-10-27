@@ -6,14 +6,7 @@ namespace Traders.Tests.State;
 
 public class StateTests
 {
-    private static string RepoFile(params string[] parts)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "TradersRedone.slnx")))
-            dir = dir.Parent;
-        Assert.NotNull(dir);
-        return Path.Combine(new[] { dir!.FullName }.Concat(parts).ToArray());
-    }
+    private static string RepoFile(params string[] parts) => RepositoryPaths.File(parts);
 
     private static Dgroup OriginalDgroup() => Dgroup.FromExe(File.ReadAllBytes(OriginalFiles.Dos("T.EXE")));
 

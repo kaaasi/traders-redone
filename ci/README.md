@@ -1,12 +1,13 @@
-# Experimente in CI
+# CI
 
-Liegt hier eine Datei `experiment.sh`, führt der Linux-Job sie nach dem Build aus:
+Build/Test: .github/workflows/ci.yml (nur Leserechte).
+Veröffentlichung: publish-report.yml führt ausschließlich main-Code aus und prüft
+Jobstatus über GitHub, bevor kompakte Artefakte nach ci-results übernommen werden.
+Der Publisher wird erst wirksam, wenn sein Workflow auf main liegt.
+Diagnosen/Experimente: diagnostics.yml, siehe experiments/README.md.
+Ergebnisformat: result.json schema_version=1, sha, ref, run_id, run_attempt, jobs.
+Erforderliche Jobs: linux, windows, policy; jeder muss success sein.
+Historische Markdown-Berichte gelten nicht als maschinenlesbarer Integrationsnachweis.
 
-```
-bash ci/experiment.sh <ausgabe-ordner>
-```
-
-Alles, was das Skript in `<ausgabe-ordner>` schreibt, landet im Branch `ci-results` unter
-`runs/<commit>/linux-results/experiment/`. Gedacht für Analysen, die eine .NET-Umgebung
-brauchen (z. B. Referenzläufe des Originals im Emulator). Experimente laufen idealerweise
-auf einem Branch `dev/...`, damit `main` sauber bleibt.
+40 Berichte im aktuellen Baum; frühere Git-Objekte bleiben in der Historie. Keine
+automatische Historienumschreibung. Speicherwachstum beobachten.
