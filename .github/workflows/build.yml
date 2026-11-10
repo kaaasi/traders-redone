@@ -1,0 +1,91 @@
+name: Build
+
+# Actions-Minuten sparen (GitHub Free, Vorbild Eishockey-Manager): reine Doku-Änderungen bauen nicht, Draft-PRs bauen erst
+# bei „Ready for review“, ein neuer Push bricht den überholten Lauf desselben PRs ab. Windows-Build und Downloads nur per
+# Hand („Run workflow“, Entscheidung Nutzer 10.11.2026). Keine Tags.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md', 'reference/**']
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore: ['docs/**', '**/*.md', 'reference/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  linux:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-linux-${{ hashFiles('**/packages.lock.json', 'global.json') }}
+      # Dieselbe Prüfung wie lokal; die Tabelle landet in der Zusammenfassung des Laufs.
+      - name: tools/pruefen.sh
+        run: |
+          set -o pipefail
+          bash tools/pruefen.sh | tee pruefen.txt
+      - name: Zusammenfassung
+        if: success() || failure()
+        run: sed -n '/^### Markerbericht/,$p' pruefen.txt >> "$GITHUB_STEP_SUMMARY"
+
+  # Nur per Hand: Windows-Build und -Tests.
+  windows:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - run: dotnet restore TradersRedone.slnx --locked-mode
+      - run: dotnet build TradersRedone.slnx -c Release --no-restore -warnaserror
+      - run: dotnet test TradersRedone.slnx -c Release --no-build
+
+  # Nur per Hand: lauffähiger Viewer zum Herunterladen (Actions → Lauf → Artifacts), kurze Aufbewahrung.
+  downloads:
+    if: github.event_name == 'workflow_dispatch'
+    needs: linux
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        rid: [win-x64, linux-x64, osx-arm64]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - run: dotnet publish src/Traders.Viewer/Traders.Viewer.csproj -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out/traders-viewer-${{ matrix.rid }}
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: traders-viewer-${{ matrix.rid }}-${{ github.sha }}
+          path: out/traders-viewer-${{ matrix.rid }}
+          retention-days: 7
