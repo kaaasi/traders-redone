@@ -85,16 +85,14 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | Werkzeug | Zweck | Status |
 |---|---|---|
 | `src/Traders.Viewer` | Asset-Viewer (MonoGame): Atlanten, Masken, Schriften; Maus zeigt Koordinate/Palettenindex; `--screenshot` für CI | 🟢 läuft unter virtuellem Bildschirm (13 Screenshots), Windows-Build als Download |
-| `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN (manueller Diagnoseworkflow) | 🟢 |
+| `src/Traders.Tools` | Export aller Ressourcen als PNG/BIN | 🟢 |
 | `tools/segmap.py` | Segmentkarte + Disassemblierung | 🟢 |
 | `src/Traders.RefEmu` | Referenz-Emulator: führt T.EXE aus, `OriginalProgram` für Differenztests | 🟢 |
 | `tools/datenlayout/` | DS-Zugriffe, Spielstandfelder aus der Disassemblierung | 🟢 |
-| CI (`.github/workflows/ci.yml`) | Linux + Windows bauen/testen, Bericht in Branch `ci-results`, Windows-Viewer als Download | ✅ |
-| `tools/ci-wait.sh` | Wartet begrenzt auf den JSON-Nachweis und holt die Zusammenfassung (alle Agenten) | ✅ |
-| `tools/pruefe-branch.py` | Leitstelle: Prüfung eines Paket-Branches vor der Übernahme | ✅ |
-| `tools/lagebericht.py` | Leitstelle: anbieterunabhängige Übersicht aller Paket-Branches und CI-Nachweise | ✅ |
+| CI (`.github/workflows/build.yml`) | Ubuntu: `tools/pruefen.sh` je PR/Push auf main; Windows und Viewer-Downloads nur per Hand | ✅ |
+| `tools/pruefen.sh`, `tools/claude/` | Einheitliche Prüfung; SDK + NuGet-Spiegel für Claude (Release `claude-werkzeuge`) | ✅ |
 | `reference/` | Referenzbilder aus beiden Videos (alle 4 s bzw. 5 s) für alle Chats | ✅ |
-| `experiments/apN/` | Explizite Analysen über manuellen Diagnoseworkflow | 🟢 manuell auslösbar |
+| `experiments/apN/` | Analysen, lokal ausgeführt | 🟢 |
 
 ## 5. Einzelne Routinen
 
@@ -106,9 +104,10 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 | `21FD:0687` | Code-Abfrage vor dem Hauptmenü (setzt RNG aus der Uhr) | – | [Befund](docs/routines/21FD_0687_codeabfrage.md) | 🔍 |
 | `2336:000A` / `0539` | Spielstand speichern / laden | `Core/State/SaveGame.cs` | [Befund](docs/routines/2336_000A_spielstand.md) | ✅ Differenztests gegen RefEmu |
 
-## 6. Parallele Arbeitspakete
+## 6. Runden und Spuren
 
-Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1: erster Stand übernommen; AP3: Stand 2 einschließlich Savegame-Differenztests übernommen (PR #2). AP2 in Arbeit. AP4 Ton offen; AP5 hat einen Analysebranch, Übergabe ausstehend. Übernahme nach
+Vergabe und Stand: [docs/arbeitspakete.md](docs/arbeitspakete.md) (ab 10.11.2026 Runden nach dem Ablauf des Eishockey-Managers).
+Nicht integriert und für Runde 2 vorgesehen: `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen`. AP4 Ton offen. Übernahme nach
 `main` nur durch die Leitstelle.
 
 ## 7. Bekannte offene Punkte
@@ -117,8 +116,3 @@ Vergabe und Stand: [docs/ARBEITSPAKETE.md](docs/ARBEITSPAKETE.md). AP1: erster S
 - Die Videos zeigen eine andere Fassung (© 1991) als unsere T.EXE (© 1992). Bei Abweichungen gilt der RefEmu.
 - IQ ist im Original ein globaler Wert (`DS:2E8E`); IQ je Gegner (E2) ist eine echte Erweiterung.
 - Kampf und Ton waren schon im Vorversuch unverstanden.
-
-
-## Repositorymodernisierung
-
-Arbeitsstand und noch notwendige Aktivierung: [docs/UMSETZUNGSSTAND.md](docs/UMSETZUNGSSTAND.md).

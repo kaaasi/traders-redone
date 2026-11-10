@@ -5,6 +5,6 @@ Die Videos zeigen teilweise eine andere Spielversion; bei Abweichungen ist die e
 T.EXE im RefEmu maßgeblich. Bilder sind Beobachtungsmaterial, keine alleinige Spezifikation.
 
 Für Dateiliste/Unterordner: `git ls-tree -r --name-only HEAD reference/`.
-Reine Codeaufgaben können reference per Sparse Checkout auslassen (docs/UMGEBUNGEN.md).
+Reine Codeaufgaben können reference per Sparse Checkout auslassen (`git sparse-checkout set --no-cone '/*' '!/reference/'`).
 Neue Bildserien mit Videoquelle, Zeitstempelintervall und Erzeugungsbefehl dokumentieren.
 Keine LFS- oder Historienmigration ohne konkreten Speicherbedarf.
