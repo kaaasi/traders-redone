@@ -19,7 +19,9 @@ reviewt werden, gemergt wird in dieser Folge.
 - **Inhalt:** `werkzeuge.yml` (Release `claude-werkzeuge`), `tools/claude/`, `tools/pruefen.sh`, `tools/markerbericht.py`,
   `build.yml` statt `ci.yml`, ci-results-Mechanik entfernt, `global.json` 10.0.402.
 - **Abnahme:** `tools/pruefen.sh` in einer frischen Claude-Sitzung grün (396 Tests), CI grün auf dem Head.
-- **Status:** fertig, Review offen.
+- **Status:** fertig, Review offen (PR #4).
+
+**Review:** ein geplanter Lauf (Claude Opus, frische Sitzung) prüft #4, #5, #6 je mit eigener Datei in `docs/reviews/`.
 
 ### ② `prozess/regeln` – Prozessdoku
 
@@ -27,7 +29,7 @@ reviewt werden, gemergt wird in dieser Folge.
   Datei; `CONTRIBUTING.md`, `docs/UMGEBUNGEN.md`, `docs/ARBEITSPAKETE.md`, `docs/uebergabe/` aufgelöst (Archiv). Labels angelegt.
 - **Abnahme:** keine Verweise auf entfernte Werkzeuge oder Dateien; Regeln des alten `AGENTS.md`/`CONTRIBUTING.md` sind
   übernommen oder bewusst ersetzt (Gegenliste im PR).
-- **Status:** in Arbeit.
+- **Status:** fertig, Review offen (PR #5).
 
 ### ③ `prozess/abdeckung` – Status-Übersicht per Skript (nach ①)
 
@@ -35,7 +37,7 @@ reviewt werden, gemergt wird in dieser Folge.
   Code, Befunde in `docs/routines/`, Differenztests → erzeugte Tabellen in `STATUS.md` zwischen Markierungskommentaren;
   `--check` in `tools/pruefen.sh`. Vorhandene Routinen (`21FD:01BA`, `2336:000A/0539`, `Int16Math`) mit Markern versehen.
 - **Abnahme:** zweiter Lauf ohne Diff; `--check` wird rot, wenn ein Marker ohne Befund oder ein Befund ohne Test auftaucht.
-- **Status:** offen.
+- **Status:** fertig, Review offen (PR #6, gestapelt auf #4).
 
 ### Zuständigkeit gemeinsamer Dateien in R1
 
