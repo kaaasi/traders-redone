@@ -96,13 +96,77 @@ Vollständige Liste der Einsprünge: [docs/analyse/segments.md](docs/analyse/seg
 
 ## 5. Einzelne Routinen
 
-| Adresse | Funktion | C# | Befund | Status |
+Die Tabellen dieses Abschnitts erzeugt `tools/abdeckung.py --write` aus `T.EXE`, `docs/routines/`, den Markern
+`[ORIGINAL] SSSS:OOOO` im Code und den Differenztests (`tests/**/*Differential*.cs`); `tools/pruefen.sh` prüft, dass sie aktuell
+sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0000:3405` `time()`) stehen im Befund von
+`21FD:01BA`, der 16-Bit-IDIV-Grenzfall in [Int16Math_IDIV.md](docs/routines/Int16Math_IDIV.md).
+
+<!-- abdeckung:anfang -->
+<!-- Erzeugt von tools/abdeckung.py --write; nicht von Hand ändern. -->
+
+### Routinen mit Befund
+
+| Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
-| `21FD:01BA` | `random(n)` inkl. Uhr-Neusaat | `Core/OriginalRandom.cs` | [Befund](docs/routines/21FD_01BA_random.md) | ✅ Differenztest gegen Original (AP1) |
-| `0000:4F4E` / `5058` / `4FA0` | Long-Multiplikation, unsigned Shift, unsigned Modulo | in `OriginalRandom` | im RNG-Befund | 🟢 |
-| `0000:3405` | `time()` (Borland: lokale Zeit + 18000 s, −3600 s Sommerzeit) | Eingabe `IClockInput` | im RNG-Befund | ✅ |
-| `21FD:0687` | Code-Abfrage vor dem Hauptmenü (setzt RNG aus der Uhr) | – | [Befund](docs/routines/21FD_0687_codeabfrage.md) | 🔍 |
-| `2336:000A` / `0539` | Spielstand speichern / laden | `Core/State/SaveGame.cs` | [Befund](docs/routines/2336_000A_spielstand.md) | ✅ Differenztests gegen RefEmu |
+| `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `RandomDifferentialTests.cs` | ✅ |
+| `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | – | – | 🔍 |
+| `2336:000A` | [2336_000A_spielstand.md](docs/routines/2336_000A_spielstand.md) | `src/Traders.Core/State/SaveGame.cs` | `SaveGameDifferentialTests.cs` | ✅ |
+| `2336:0539` | [2336_000A_spielstand.md](docs/routines/2336_000A_spielstand.md) | `src/Traders.Core/State/SaveGame.cs` | `SaveGameDifferentialTests.cs` | ✅ |
+
+Status: ✅ portiert mit Differenztest · 🟢 portiert, Differenztest fehlt · 🔍 nur Befund.
+
+### Abdeckung je Segment
+
+| Segment | Größe | Far-Einsprünge | mit Befund | portiert | mit Differenztest |
+|---|---:|---:|---:|---:|---:|
+| `0000` | 0x5350 | 76 | 0 | 0 | 0 |
+| `0535` | 0xD40 | 24 | 0 | 0 | 0 |
+| `0609` | 0x21C0 | 56 | 0 | 0 | 0 |
+| `0825` | 0xAA0 | 16 | 0 | 0 | 0 |
+| `08CF` | 0x19A0 | 42 | 0 | 0 | 0 |
+| `0A69` | 0x2D0 | 9 | 0 | 0 | 0 |
+| `0A96` | 0xD10 | 24 | 0 | 0 | 0 |
+| `0B67` | 0x380 | 8 | 0 | 0 | 0 |
+| `0B9F` | 0x8A0 | 16 | 0 | 0 | 0 |
+| `0C29` | 0x14A0 | 29 | 0 | 0 | 0 |
+| `0D73` | 0x8A0 | 15 | 0 | 0 | 0 |
+| `0DFD` | 0x340 | 5 | 0 | 0 | 0 |
+| `0E31` | 0x6D0 | 7 | 0 | 0 | 0 |
+| `0E9E` | 0x400 | 5 | 0 | 0 | 0 |
+| `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
+| `111D` | 0x860 | 7 | 0 | 0 | 0 |
+| `11A3` | 0x1250 | 15 | 0 | 0 | 0 |
+| `12C8` | 0x950 | 12 | 0 | 0 | 0 |
+| `135D` | 0xC00 | 14 | 0 | 0 | 0 |
+| `141D` | 0xF20 | 17 | 0 | 0 | 0 |
+| `150F` | 0x1C70 | 41 | 0 | 0 | 0 |
+| `16D6` | 0xA10 | 12 | 0 | 0 | 0 |
+| `1777` | 0x540 | 4 | 0 | 0 | 0 |
+| `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
+| `186C` | 0xC10 | 19 | 0 | 0 | 0 |
+| `192D` | 0x1D60 | 74 | 0 | 0 | 0 |
+| `1B03` | 0x1650 | 44 | 0 | 0 | 0 |
+| `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
+| `1DEF` | 0x8F0 | 14 | 0 | 0 | 0 |
+| `1E7E` | 0xE50 | 19 | 0 | 0 | 0 |
+| `1F63` | 0x1500 | 27 | 0 | 0 | 0 |
+| `20B3` | 0xD80 | 27 | 0 | 0 | 0 |
+| `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
+| `21A7` | 0x80 | 3 | 0 | 0 | 0 |
+| `21AF` | 0x4E0 | 7 | 0 | 0 | 0 |
+| `21FD` | 0x980 | 28 | 2 | 1 | 1 |
+| `2295` | 0xE0 | 4 | 0 | 0 | 0 |
+| `22A3` | 0x930 | 15 | 0 | 0 | 0 |
+| `2336` | 0x970 | 4 | 2 | 2 | 2 |
+| `23CD` | 0x3F90 | 25 | 0 | 0 | 0 |
+| `27C6` | 0x5B0 | 15 | 0 | 0 | 0 |
+| `2821` | 0x2F0 | 1 | 0 | 0 | 0 |
+| `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
+| `28DA` | 0x10 | 0 | 0 | 0 | 0 |
+| `28DB` | 0x10 | 0 | 0 | 0 | 0 |
+| **Summe** | **0x28DC0** | **891** | **4** | **3** | **3** |
+
+<!-- abdeckung:ende -->
 
 ## 6. Runden und Spuren
 

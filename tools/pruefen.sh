@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Einheitliche Prüfung vor jedem Push – für alle Agenten gleich (AGENTS.md, Abschnitt „Tests“).
 #
-#   tools/pruefen.sh            Hashes, Architektur, Restore (Lockdateien), Build ohne Warnungen, alle Tests, Markerbericht
+#   tools/pruefen.sh            Hashes, Architektur, Abdeckung, Restore (Lockdateien), Build ohne Warnungen, alle Tests, Markerbericht
 #   tools/pruefen.sh --schnell  derselbe Lauf (die Originaldaten liegen im Repo, es gibt nur einen Testlauf);
 #                               die Option existiert, damit Kurzaufrufe mit dem Eishockey-Ablauf übereinstimmen
 #
@@ -22,6 +22,9 @@ schritt "Originaldateien (SHA-256)"
 
 schritt "Architekturgrenzen"
 python3 tools/check-architecture.py || fehler "Architekturprüfung"
+
+schritt "Abdeckung (STATUS.md, Marker, Befunde, Differenztests)"
+python3 tools/abdeckung.py --check || fehler "Abdeckung – tools/abdeckung.py --write"
 
 if [ -d tests/tools ] && ls tests/tools/test_*.py >/dev/null 2>&1; then
   schritt "Python-Tests der Werkzeuge"
