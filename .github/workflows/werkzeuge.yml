@@ -9,7 +9,7 @@ name: Werkzeuge für Claude
 on:
   workflow_dispatch:
   push:
-    branches: [main, prozess/werkzeuge]   # TEMP-BOOTSTRAP: vor dem Review entfernen
+    branches: [main]
     paths:
       - '**/*.csproj'
       - '**/packages.lock.json'
