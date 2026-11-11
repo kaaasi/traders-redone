@@ -20,7 +20,7 @@ reviewt werden, gemergt wird in dieser Folge.
 - **Inhalt:** `werkzeuge.yml` (Release `claude-werkzeuge`), `tools/claude/`, `tools/pruefen.sh`, `tools/markerbericht.py`,
   `build.yml` statt `ci.yml`, ci-results-Mechanik entfernt, `global.json` 10.0.402.
 - **Abnahme:** `tools/pruefen.sh` in einer frischen Claude-Sitzung grün (396 Tests), CI grün auf dem Head.
-- **Status:** fertig, Review offen (PR #4).
+- **Status:** gemergt 11.11.2026 (`096dcbe`), Review R1① „Ja“ (#14); P3 #7–#9 mit PR #6 behoben.
 
 **Review:** ein geplanter Lauf (Claude Opus, frische Sitzung) prüft #4, #5, #6 je mit eigener Datei in `docs/reviews/`.
 
@@ -30,7 +30,7 @@ reviewt werden, gemergt wird in dieser Folge.
   Datei; `CONTRIBUTING.md`, `docs/UMGEBUNGEN.md`, `docs/ARBEITSPAKETE.md`, `docs/uebergabe/` aufgelöst (Archiv). Labels angelegt.
 - **Abnahme:** keine Verweise auf entfernte Werkzeuge oder Dateien; Regeln des alten `AGENTS.md`/`CONTRIBUTING.md` sind
   übernommen oder bewusst ersetzt (Gegenliste im PR).
-- **Status:** fertig, Review offen (PR #5).
+- **Status:** gemergt 11.11.2026 (`a138d26`), Review R1② „Ja“ (#15); P3 #10 mit PR #6 behoben.
 
 ### ③ `prozess/abdeckung` – Status-Übersicht per Skript (nach ①)
 
@@ -40,8 +40,8 @@ reviewt werden, gemergt wird in dieser Folge.
   keine `T.EXE`-Routine (IDIV-Semantik) und verweist ohne Adressmarker auf `docs/routines/Int16Math_IDIV.md`.
 - **Abnahme:** zweiter Lauf ohne Diff; `--check` wird rot, wenn ein Marker ohne Befund, ein portierter Befund ohne
   `[DIFFERENTIAL]`-Test oder ein Marker ohne gültige Adresse auftaucht.
-- **Status:** Fixlauf R6-1–R6-3 und P3 der Runde (R4-1–R4-3, R5-1) sowie Kommentare Englisch erledigt; Delta-Prüfung der
-  Leitstelle offen (PR #6).
+- **Status:** gemergt 11.11.2026 (`18e6502`) nach Review R1③ „Nein“ (#16), Fixlauf und Delta-Prüfung der Leitstelle (nur
+  P2/P3); Issues #7–#13 geschlossen.
 
 ### ④ `prozess/referenz` – Originale ins Referenz-Repo (Nutzer 11.11.2026)
 
@@ -54,7 +54,9 @@ reviewt werden, gemergt wird in dieser Folge.
   ohne Daten scheitert; keine Originaldatei mehr im Baum.
 - **Nutzer:** Secret `TRADERS_REFERENZ_TOKEN` anlegen (fein granuliertes Token, nur `kaaasi/traders-referenz`, Contents: Read);
   traders-referenz#1 mergen. In der Git-Historie dieses Repos bleiben die Dateien (privat; Umschreiben nur auf Wunsch).
-- **Status:** fertig, Review offen.
+- **Status:** gemergt 11.11.2026 (`1aead2b`) nach Review R1④ „Nein“ (#24, nur R19-1 P2), Fixlauf und Delta-Prüfung der
+  Leitstelle; Issues #20–#23 geschlossen. traders-referenz#1 gemergt, Secret angelegt (CI mit Originaldaten). Git-Historie am
+  11.11.2026 bereinigt (Nutzerauftrag); alte PR-Refs hält nur noch GitHub (Support-Anfrage optional, Nutzer).
 
 ### Zuständigkeit gemeinsamer Dateien in R1
 
@@ -62,8 +64,8 @@ reviewt werden, gemergt wird in dieser Folge.
 
 ### Danach (Leitstelle nach dem Merge von ①–③)
 
-Alte Branches aufräumen: `ci-results`, `dev/ci-probe`, `dev/integration-*`, `dev/repo-*`, `dev/ap3-state` löschen (gemergt bzw.
-überholt); `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
+Alte Branches aufgeräumt (11.11.2026, Nutzer per Hand bzw. Workflow „Branches aufräumen“, PR #18); `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
+Offen: Gesamtreview Runde 1 (ChatGPT), danach Archiv `docs/archiv/runde-1.md` und Plan Runde 2.
 
 ## Vorschau: Runde 2 – Altbestand übernehmen (Plan folgt, Go nötig)
 

@@ -1,5 +1,17 @@
 # Zwischenstände
 
+## Runde 1 – Umstellung auf den Ablauf des Eishockey-Managers (11.11.2026) · `main` `1aead2b`
+
+- ① Werkzeuge (PR #4): SDK-Release `claude-werkzeuge`, `tools/pruefen.sh`, schlanke `build.yml` statt `ci.yml`.
+- ② Prozessdoku (PR #5): Rollen, Runden, Kurzaufrufe, Review-Kette, Merge-Prüfung; Labels.
+- ③ Abdeckung (PR #6): `tools/abdeckung.py` erzeugt die Routinen-/Segmenttabellen in `STATUS.md`; Marker `[ORIGINAL]`,
+  `[DIFFERENTIAL]`; Kommentare im Quelltext Englisch.
+- ④ Referenz-Repo (PR #19, traders-referenz#1): Originale, Disassemblierung, RefEmu-Bilder und Videobilder nur noch im privaten
+  Repo `kaaasi/traders-referenz` (`tools/claude/fetch-reference.sh`); Tests mit Originaldaten `[GameDataFact]`; drei Prüfläufe;
+  CI mit Originaldaten über Secret `TRADERS_REFERENZ_TOKEN`; Git-Historie bereinigt.
+- Workflow „Branches aufräumen“ (PR #18).
+- Kein neuer Portierungsmeilenstein; 396 Tests grün mit Originaldaten (`tools/pruefen.sh`, CI).
+
 ## Repositorymodernisierung (27.10.2026) · Integration `76df32b`
 
 - Anbieterunabhängige AGENTS.md, Übergaben und Worktree-/PR-Ablauf.
