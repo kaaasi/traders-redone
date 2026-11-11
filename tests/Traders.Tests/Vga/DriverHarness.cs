@@ -88,6 +88,12 @@ internal sealed class DriverHarness
         Port.Color = color;
     }
 
+    public void SetLinePattern(ushort pattern)
+    {
+        CallOriginal(0x05D0, pattern);
+        Port.LinePattern = pattern;
+    }
+
     public void SetFont(ushort font)
     {
         CallOriginal(0x05B6, font);
@@ -138,6 +144,108 @@ internal sealed class DriverHarness
     }
 
     public ushort Next(int minInclusive, int maxInclusive) => (ushort)Rng.Next(minInclusive, maxInclusive + 1);
+
+    // ------------------------------------------------------------------ moving objects (DS:330C, 8 × 1Ah)
+
+    private const ushort ObjectTable = 0x330C, ObjectSize = 0x1A, PointerSeg = 0x7600, SaveSeg = 0x7800;
+    private const int Frames = 4, Pages = 2;
+
+    private static ushort SaveSegment(int obj, int page) => (ushort)(SaveSeg + (obj * Pages + page) * 0x200);
+
+    /// <summary>
+    /// Eight objects on both sides: pointer tables at 7600h (per object 40h bytes: images, masks, save buffers,
+    /// restore records), images in the RAM atlas, masks in the mask atlas, save buffers of 8 KB from 7800h, all with
+    /// random contents; restore records start with random plane and valid flag.
+    /// </summary>
+    public MovingObject[] SetUpObjects()
+    {
+        var mem = Original.Machine.Mem;
+        var objects = new MovingObject[8];
+        for (int i = 0; i < 8; i++)
+        {
+            var o = new MovingObject
+            {
+                Height = Next(1, 24),
+                Images = new FarBuffer[Frames],
+                Masks = new FarBuffer[Frames],
+                SaveBuffers = new FarBuffer[Pages],
+                Restore = new RestoreRecord[Pages],
+            };
+            ushort table = (ushort)(i * 0x40);
+            for (int f = 0; f < Frames; f++)
+            {
+                ushort ax = Next(0, 300), ay = Next(0, 256 - o.Height);
+                ushort para = (ushort)(ay * 20), off = (ushort)((ax >> 2) + PlanarAtlas.HeaderSize);
+                o.Images[f] = new FarBuffer(Port.Atlas.Data, para * 16, off);
+                mem.Write16(PointerSeg, (ushort)(table + f * 4), off);
+                mem.Write16(PointerSeg, (ushort)(table + f * 4 + 2), (ushort)(AtlasSeg + para));
+                ushort moff = (ushort)(Next(0, 200 - o.Height) * 40 + Next(0, 38));
+                o.Masks[f] = new FarBuffer(Port.Masks, 0, moff);
+                mem.Write16(PointerSeg, (ushort)(table + 0x10 + f * 4), moff);
+                mem.Write16(PointerSeg, (ushort)(table + 0x10 + f * 4 + 2), MaskSeg);
+            }
+            for (int p = 0; p < Pages; p++)
+            {
+                var buffer = new byte[0x2000];
+                Rng.NextBytes(buffer);
+                mem.WriteBlock((uint)SaveSegment(i, p) << 4, buffer);
+                o.SaveBuffers[p] = new FarBuffer(buffer, 0, 0);
+                mem.Write16(PointerSeg, (ushort)(table + 0x20 + p * 4), 0);
+                mem.Write16(PointerSeg, (ushort)(table + 0x20 + p * 4 + 2), SaveSegment(i, p));
+                o.Restore[p] = new RestoreRecord { PageOffset = Next(0, 0x7FFF), Plane = (byte)Next(0, 3), Valid = (byte)Next(0, 1) };
+                if (Rng.Next(3) == 0) o.Restore[p].Plane = 0;
+                ushort rec = (ushort)(table + 0x30 + p * 4);
+                mem.Write16(PointerSeg, rec, o.Restore[p].PageOffset);
+                mem.Write8(PointerSeg, (ushort)(rec + 2), o.Restore[p].Plane);
+                mem.Write8(PointerSeg, (ushort)(rec + 3), o.Restore[p].Valid);
+            }
+            ushort at = (ushort)(ObjectTable + i * ObjectSize);
+            Original.WriteWord((ushort)(at + 0x02), o.Height);
+            void Far(int field, ushort off) { Original.WriteWord((ushort)(at + field), off); Original.WriteWord((ushort)(at + field + 2), PointerSeg); }
+            Far(0x04, table);
+            Far(0x08, (ushort)(table + 0x10));
+            Far(0x0C, (ushort)(table + 0x20));
+            Far(0x10, (ushort)(table + 0x30));
+            objects[i] = o;
+        }
+        return objects;
+    }
+
+    /// <summary>New random active flag, position and frame for every object (written to DS:330C and the port).</summary>
+    public void MoveObjects(MovingObject[] objects, int round)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            var o = objects[i];
+            o.Active = (byte)(Rng.Next(4) == 0 ? 0 : Next(1, 255));
+            o.X = Next(0, round % 4 == 0 ? 319 : 304);
+            o.Y = Next(0, 200 - o.Height);
+            o.Frame = Next(0, Frames - 1);
+            ushort at = (ushort)(ObjectTable + i * ObjectSize);
+            Original.WriteByte(at, o.Active);
+            Original.WriteWord((ushort)(at + 0x14), o.X);
+            Original.WriteWord((ushort)(at + 0x16), o.Y);
+            Original.WriteWord((ushort)(at + 0x18), o.Frame);
+        }
+    }
+
+    /// <summary>VRAM, registers, save buffers and restore records equal on both sides.</summary>
+    public void AssertObjectsEqual(MovingObject[] objects, string what)
+    {
+        AssertVramEqual(what);
+        var mem = Original.Machine.Mem;
+        for (int i = 0; i < 8; i++)
+            for (int p = 0; p < Pages; p++)
+            {
+                var a = mem.ReadBlock(SaveSegment(i, p), 0, 0x2000);
+                int k = FirstDifference(a, objects[i].SaveBuffers[p].Data);
+                if (k >= 0) Assert.Fail($"{what}: object {i} page {p} save buffer byte {k:X4} original {a[k]:X2} port {objects[i].SaveBuffers[p].Data[k]:X2}");
+                ushort rec = (ushort)(i * 0x40 + 0x30 + p * 4);
+                var r = objects[i].Restore[p];
+                Assert.True(mem.Read16(PointerSeg, rec) == r.PageOffset && mem.Read8(PointerSeg, (ushort)(rec + 2)) == r.Plane
+                    && mem.Read8(PointerSeg, (ushort)(rec + 3)) == r.Valid, $"{what}: object {i} page {p} restore record");
+            }
+    }
 
     /// <summary>Second page at A400h (offset 4000h) or first page.</summary>
     public void RandomPage() => SetPage(Rng.Next(2) == 0 ? (ushort)0xA000 : (ushort)0xA400);

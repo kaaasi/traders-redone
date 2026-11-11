@@ -11,7 +11,7 @@ namespace Traders.Vga;
 /// their buffers (the original far pointers' offsets do not change any result as long as no
 /// 64 KB wrap occurs inside one row run).
 /// </summary>
-public sealed class ModeXDriver
+public sealed partial class ModeXDriver
 {
     private static readonly byte[] StartSkip = [0x00, 0x01, 0x03, 0x07];   // 23CD:315A
     private static readonly byte[] ExtraByte = [0x00, 0x11, 0x33, 0x77];   // 23CD:315E
