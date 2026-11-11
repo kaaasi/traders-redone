@@ -87,12 +87,23 @@ public sealed partial class PcMachine : IIoBus
 
     // ------------------------------------------------------------------ input script
 
-    /// <summary>Schedules a key press (make + break) at an emulated time in seconds.</summary>
-    public void ScheduleKey(double seconds, byte makeScancode)
+    /// <summary>
+    /// Schedules a key press at an emulated time: make code at <paramref name="seconds"/>, break code
+    /// <paramref name="holdSeconds"/> later (games that poll a key-state table need a realistic hold time).
+    /// </summary>
+    public void ScheduleKey(double seconds, byte makeScancode, double holdSeconds = 0.1)
+    {
+        ScheduleScancode(seconds, makeScancode);
+        ScheduleScancode(seconds + holdSeconds, (byte)(makeScancode | 0x80));
+    }
+
+    /// <summary>Schedules a raw scancode byte (make or break) at an emulated time.</summary>
+    public void ScheduleScancode(double seconds, byte scancode)
     {
         long t = (long)(seconds * Pit.ClockHz);
-        _scheduledKeys.Add((t, makeScancode));
-        _scheduledKeys.Sort((a, b) => a.Time.CompareTo(b.Time));
+        int i = _scheduledKeys.Count;
+        while (i > _nextScheduledKey && _scheduledKeys[i - 1].Time > t) i--; // stable insert
+        _scheduledKeys.Insert(i, (t, scancode));
     }
 
     // ------------------------------------------------------------------ I/O bus
@@ -172,11 +183,45 @@ public sealed partial class PcMachine : IIoBus
             else
             {
                 idle = 0;
+                if (_hookMap is not null)
+                {
+                    uint lin = (((uint)Cpu.Cs << 4) + Cpu.IP) & 0xFFFFF;
+                    if (_hookMap[lin] != 0) FireHooks(lin);
+                }
                 Cpu.Step();
             }
             ServiceDevices();
         }
     }
+
+    // ------------------------------------------------------------------ code hooks
+
+    private byte[]? _hookMap;
+    private readonly Dictionary<uint, List<Action<PcMachine>>> _hooks = [];
+
+    /// <summary>
+    /// Calls <paramref name="action"/> each time execution reaches seg:off, before that instruction runs.
+    /// Hooks only observe; they must not change machine state if the run is to stay comparable.
+    /// </summary>
+    public void AddCodeHook(ushort seg, ushort off, Action<PcMachine> action)
+    {
+        uint lin = Memory.Linear(seg, off) & 0xFFFFF;
+        _hookMap ??= new byte[0x100000];
+        _hookMap[lin] = 1;
+        if (!_hooks.TryGetValue(lin, out var list)) _hooks[lin] = list = [];
+        list.Add(action);
+    }
+
+    public bool HasCodeHook(ushort seg, ushort off) =>
+        _hooks.ContainsKey(Memory.Linear(seg, off) & 0xFFFFF);
+
+    private void FireHooks(uint lin)
+    {
+        foreach (var a in _hooks[lin].ToArray()) a(this);
+    }
+
+    /// <summary>Video frame number (70 Hz) at the current emulated time.</summary>
+    public long FrameNumber => Now / Vga.FramePeriod;
 
     private void FastForwardToNextEvent()
     {
@@ -200,8 +245,8 @@ public sealed partial class PcMachine : IIoBus
         while (_nextScheduledKey < _scheduledKeys.Count && _scheduledKeys[_nextScheduledKey].Time <= now)
         {
             byte sc = _scheduledKeys[_nextScheduledKey++].Scancode;
-            Keyboard.Press(sc);
-            LogEvent(EventKind.Keyboard, $"key {sc:X2} scheduled");
+            Keyboard.Enqueue(sc);
+            LogEvent(EventKind.Keyboard, $"scancode {sc:X2}");
         }
         if (Keyboard.Poll(now)) Pic.Raise(1);
 
@@ -295,6 +340,7 @@ public sealed partial class PcMachine : IIoBus
             case 0x16: Int16(trapIp); return;
             case 0x1A: Int1A(); return;
             case 0x20: Exit(0); return;
+            case 0x27: StayResident((ushort)((Cpu.Dx + 15) >> 4), 0); return;
             case 0x21: Int21(trapIp); return;
             case 0x23: Exit(0); return;
             case 0x24: Cpu.Ax = (ushort)((Cpu.Ax & 0xFF00) | 3); return; // fail

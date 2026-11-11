@@ -97,3 +97,19 @@ public class MachineTests
         for (int p = 0; p < 4; p++) Assert.Equal(10 + p, vga.Planes[p][200]);
     }
 }
+
+public class ScancodeTests
+{
+    [Fact]
+    public void Scancodes_match_set_1()
+    {
+        Assert.Equal(0x1E, Scancodes.Letter('a'));
+        Assert.Equal(0x26, Scancodes.Letter('L'));
+        Assert.Equal(0x2C, Scancodes.Letter('Z'));
+        Assert.Equal(0x10, Scancodes.Letter('Q'));
+        Assert.Equal(0x3B, Scancodes.F(1));
+        Assert.Equal(0x44, Scancodes.F(10));
+        Assert.Equal(0x02, Scancodes.Digit(1));
+        Assert.Equal(0x0B, Scancodes.Digit(0));
+    }
+}
