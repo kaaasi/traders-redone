@@ -305,7 +305,7 @@ braucht. Vorschlag: ② auf den Treiber begrenzen und die Schichten als eigene S
 
 Hinweis für die Abdeckung: Die Treiberroutinen liegen hinter der Vektortabelle und sind keine Far-Einsprünge; die Spalte
 „Far-Einsprünge“ (25 für `23CD`) taugt dort nicht als Nenner. EGA-, Tandy-Teil und `E-*.PP` sollten ausdrücklich als „nicht
-zu portieren“ geführt werden (Entscheidung Nutzer, §3.3).
+zu portieren“ geführt werden (entschieden, §3.3).
 
 **③ `phasen`** – die Analyse des Altbestands ist richtig und bytegleich reproduzierbar; zu übernehmen ist nur das Werkzeug.
 
@@ -354,8 +354,9 @@ Runden ans Ende, eine spielbare Partie ohne Roboter als Zwischenziel.
 
 ### 3.3 Offene Punkte
 
-- **Entscheidung Nutzer:** nur VGA portieren (EGA, Tandy, `E-*.PP`, PC-Lautsprecher `2850` entfallen)? Zwischenziel
-  „Gesamtpartie ohne Roboterkampf“ vor dem Roboterkampf?
+- **Entschieden (Nutzer 11.11.2026):** Es wird nur VGA portiert – EGA, Tandy, `E-*.PP` und PC-Lautsprecher `2850` entfallen.
+  Zwischenziel ist die „Gesamtpartie ohne Roboterkampf“ vor dem Roboterkampf (R10 in §3.2). Der Probencode liegt im Repo
+  (Anhang A). Eintrag in Plan und `PORTIERUNGSPLAN.md`: Leitstelle.
 - Regel der Zusatzphase `1DEF`, Bedeutung von `DS:48A2`/`DS:2F26`, Kennzahl +9 der Ressourcentabelle, Tonroutinen
   `0000:06FE…0750`, Schalter `DS:0912`: nicht geklärt.
 - Nicht untersucht: `FXDRIVER.EXE`, Amiga-Fassung, Videobilder; die Rollen in §1.2 sind bis auf die belegten Stellen nicht
@@ -363,9 +364,11 @@ Runden ans Ende, eine spielbare Partie ohne Roboter als Zwischenziel.
 
 ## Anhang A: RefEmu-Proben
 
-Alle Proben liefen lokal als xUnit-Tests gegen `OriginalProgram`; der Probencode ist nicht im Repo (Dateigrenzen der Spur).
-P1, P4, P5 brauchen `Start`, `Press` und `AddCodeHook` aus `dev/ap1-refemu` (per Cherry-Pick auf `main` `9995b6e`), P2 und P3
-laufen mit `main`. Optionen: Vorgaben von `MachineOptions`, soweit nicht genannt.
+Alle Proben sind xUnit-Tests gegen `OriginalProgram`: `experiments/bestand/BestandProben.cs`, gestartet mit
+`bash experiments/bestand/proben.sh <Ausgabeordner> [Sekunden für P1]` (Nutzer 11.11.2026: Probencode ins Repo). Das Skript
+arbeitet in Wegwerf-Worktrees und wendet dort die Commits der Altbranches an: P1, P4, P5 brauchen `Start`, `Press` und
+`AddCodeHook` aus `dev/ap1-refemu`, P2 und P3 liefen auch mit `main` allein. Ein zweiter vollständiger Lauf des Skripts
+(P1 mit 230 s) ergab dieselben Werte. Optionen: Vorgaben von `MachineOptions`, soweit nicht genannt.
 
 | ID | Aufbau | Eingangszustand | Ergebnis |
 |---|---|---|---|
@@ -376,6 +379,6 @@ laufen mit `main`. Optionen: Vorgaben von `MachineOptions`, soweit nicht genannt
 | P5 | `Start`, 17,5 s, Eingabetaste nach 0,5 / 0,5 / 1,5 / 3,0 s; `DS:10D2` beim Eintritt in `192D:0007` und `0E31:0003` | – | Menü jeweils `2689D01E`; neue Partie `F9D5A4AC`, `F9D5A4AC`, `211A7193`, `17ED9B74` |
 | P6 | `dev/ap2-vga` (`0e95549`, `dab5889`, `5a9f178`) per Cherry-Pick auf `main`, Verknüpfung `original` → Originaldaten, `dotnet test --filter FullyQualifiedName~Vga` | – | 20 bestanden, 0 fehlgeschlagen |
 
-Statische Zählungen (§1.1–1.3, §2.4) stammen aus einem lokalen Auswerteskript über die Ausgabe von `tools/segmap.py`; die
+Statische Zählungen (§1.1–1.3, §1.5) liefert `python3 -I experiments/bestand/statik.py gamedata/dos/T.EXE <disasm> <aus>`; die
 Segmentliste dieses Dokuments wurde maschinell gegen `docs/analyse/segments.md` verglichen (45 Segmente, 891 Far-Einsprünge,
 Größen gleich).
