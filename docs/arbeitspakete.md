@@ -19,7 +19,7 @@ reviewt werden, gemergt wird in dieser Folge.
 - **Inhalt:** `werkzeuge.yml` (Release `claude-werkzeuge`), `tools/claude/`, `tools/pruefen.sh`, `tools/markerbericht.py`,
   `build.yml` statt `ci.yml`, ci-results-Mechanik entfernt, `global.json` 10.0.402.
 - **Abnahme:** `tools/pruefen.sh` in einer frischen Claude-Sitzung grün (396 Tests), CI grün auf dem Head.
-- **Status:** fertig, Review offen (PR #4).
+- **Status:** gemergt 11.11.2026 (`096dcbe`), Review R1① „Ja“ (#14); offene P3 #7–#9.
 
 **Review:** ein geplanter Lauf (Claude Opus, frische Sitzung) prüft #4, #5, #6 je mit eigener Datei in `docs/reviews/`.
 
@@ -29,7 +29,7 @@ reviewt werden, gemergt wird in dieser Folge.
   Datei; `CONTRIBUTING.md`, `docs/UMGEBUNGEN.md`, `docs/ARBEITSPAKETE.md`, `docs/uebergabe/` aufgelöst (Archiv). Labels angelegt.
 - **Abnahme:** keine Verweise auf entfernte Werkzeuge oder Dateien; Regeln des alten `AGENTS.md`/`CONTRIBUTING.md` sind
   übernommen oder bewusst ersetzt (Gegenliste im PR).
-- **Status:** fertig, Review offen (PR #5).
+- **Status:** gemergt 11.11.2026 (`a138d26`), Review R1② „Ja“ (#15); offene P3 #10.
 
 ### ③ `prozess/abdeckung` – Status-Übersicht per Skript (nach ①)
 
