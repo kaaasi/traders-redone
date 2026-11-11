@@ -1,0 +1,658 @@
+Test run for D:\a\traders-redone\traders-redone\tests\Traders.Tests\bin\Release\net10.0\Traders.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:02.24]     Traders.Tests.RefEmu.RandomDifferentialTests.Zero_reseeds_from_borland_time [FAIL]
+[xUnit.net 00:00:02.26]     Traders.Tests.RefEmu.RandomDifferentialTests.Arbitrary_start_seeds_match [FAIL]
+[xUnit.net 00:00:02.26]     Traders.Tests.RefEmu.RandomDifferentialTests.Minus_one_divides_by_zero_in_both [FAIL]
+[xUnit.net 00:00:02.27]     Traders.Tests.RefEmu.RandomDifferentialTests.Initial_seed_in_the_data_segment_is_one [FAIL]
+[xUnit.net 00:00:02.27]     Traders.Tests.RefEmu.RandomDifferentialTests.Sequence_matches_port_for_many_arguments [FAIL]
+[xUnit.net 00:00:02.27]     Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRADINTR.CMF", orders: 30, patterns: 24) [FAIL]
+[xUnit.net 00:00:02.27]     Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRAD_END.CMF", orders: 28, patterns: 12) [FAIL]
+[xUnit.net 00:00:02.28]     Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRADMENU.CMF", orders: 11, patterns: 9) [FAIL]
+[xUnit.net 00:00:02.28]     Traders.Tests.FontMaskMusicTests.Space_is_empty_in_both_fonts [FAIL]
+  Failed Traders.Tests.RefEmu.RandomDifferentialTests.Zero_reseeds_from_borland_time [16 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Prepare(UInt32 seed) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 20
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Zero_reseeds_from_borland_time() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 102
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.RandomDifferentialTests.Arbitrary_start_seeds_match [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Prepare(UInt32 seed) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 20
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Arbitrary_start_seeds_match() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 78
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.RandomDifferentialTests.Minus_one_divides_by_zero_in_both [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Prepare(UInt32 seed) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 20
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Minus_one_divides_by_zero_in_both() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 92
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.RandomDifferentialTests.Initial_seed_in_the_data_segment_is_one [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Initial_seed_in_the_data_segment_is_one() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 44
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.RandomDifferentialTests.Sequence_matches_port_for_many_arguments [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Prepare(UInt32 seed) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 20
+   at Traders.Tests.RefEmu.RandomDifferentialTests.Sequence_matches_port_for_many_arguments() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\RandomDifferentialTests.cs:line 52
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRADINTR.CMF", orders: 30, patterns: 24) [1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\TRADINTR.CMF'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.MusicModule.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\MusicModule.cs:line 46
+   at Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(String file, Int32 orders, Int32 patterns) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 65
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRAD_END.CMF", orders: 28, patterns: 12) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\TRAD_END.CMF'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.MusicModule.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\MusicModule.cs:line 46
+   at Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(String file, Int32 orders, Int32 patterns) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 65
+   at InvokeStub_FontMaskMusicTests.Music_header_orders_and_pattern_count(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(file: "TRADMENU.CMF", orders: 11, patterns: 9) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\TRADMENU.CMF'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.MusicModule.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\MusicModule.cs:line 46
+   at Traders.Tests.FontMaskMusicTests.Music_header_orders_and_pattern_count(String file, Int32 orders, Int32 patterns) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 65
+   at InvokeStub_FontMaskMusicTests.Music_header_orders_and_pattern_count(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Space_is_empty_in_both_fonts [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\FONTS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.FontSet.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\BitmapFont.cs:line 77
+   at Traders.Tests.FontMaskMusicTests.get_Fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 7
+   at Traders.Tests.FontMaskMusicTests.Space_is_empty_in_both_fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 22
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.29]     Traders.Tests.FontMaskMusicTests.Font_layout_covers_file_exactly [FAIL]
+[xUnit.net 00:00:02.29]     Traders.Tests.FontMaskMusicTests.Large_exclamation_mark_matches_original_bits [FAIL]
+[xUnit.net 00:00:02.29]     Traders.Tests.FontMaskMusicTests.Masks_are_a_full_screen_bitplane_with_content [FAIL]
+[xUnit.net 00:00:02.29]     Traders.Tests.FontMaskMusicTests.Asset_library_loads_everything [FAIL]
+[xUnit.net 00:00:02.29]     Traders.Tests.FontMaskMusicTests.Small_hash_sign_matches_original_bits [FAIL]
+[xUnit.net 00:00:02.30]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-AHANDE.PP", length: 82692, sha256: "f50fed22651d614341e87b9e2cd9ff708a2ec3a23b7fd85d48"···) [FAIL]
+[xUnit.net 00:00:02.30]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "E-RAKETE.PP", length: 40964, sha256: "c6b6759c9f0f52963cff7b6341fc7cd5edc398d9020fffbcc9"···) [FAIL]
+[xUnit.net 00:00:02.30]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-BHANDE.PP", length: 82692, sha256: "91f5827c9c9756b5b9693e22e39bc35a502f0948417a4bca7d"···) [FAIL]
+[xUnit.net 00:00:02.30]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "MASKS.PP", length: 8000, sha256: "d1f9d2d657efd842f6286c8a600aca308499315c4f196d11f1"···) [FAIL]
+  Failed Traders.Tests.FontMaskMusicTests.Font_layout_covers_file_exactly [5 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\FONTS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.FontSet.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\BitmapFont.cs:line 77
+   at Traders.Tests.FontMaskMusicTests.get_Fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 7
+   at Traders.Tests.FontMaskMusicTests.Font_layout_covers_file_exactly() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 14
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Large_exclamation_mark_matches_original_bits [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\FONTS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.FontSet.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\BitmapFont.cs:line 77
+   at Traders.Tests.FontMaskMusicTests.get_Fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 7
+   at Traders.Tests.FontMaskMusicTests.Large_exclamation_mark_matches_original_bits() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 33
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Masks_are_a_full_screen_bitplane_with_content [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\MASKS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.MaskImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\MaskImage.cs:line 28
+   at Traders.Tests.FontMaskMusicTests.Masks_are_a_full_screen_bitplane_with_content() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 51
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Asset_library_loads_everything [8 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ANBAU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.VgaImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\VgaImage.cs:line 45
+   at Traders.Assets.AssetLibrary.<>c__DisplayClass19_0.<Load>b__1(ValueTuple`3 p) in D:\a\traders-redone\traders-redone\src\Traders.Assets\AssetLibrary.cs:line 26
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector, IEqualityComparer`1 comparer)
+   at System.Linq.Enumerable.ToDictionary[TSource,TKey,TElement](IEnumerable`1 source, Func`2 keySelector, Func`2 elementSelector)
+   at Traders.Assets.AssetLibrary.Load(String dir) in D:\a\traders-redone\traders-redone\src\Traders.Assets\AssetLibrary.cs:line 26
+   at Traders.Tests.FontMaskMusicTests.Asset_library_loads_everything() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 74
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.FontMaskMusicTests.Small_hash_sign_matches_original_bits [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\FONTS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.FontSet.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\BitmapFont.cs:line 77
+   at Traders.Tests.FontMaskMusicTests.get_Fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 7
+   at Traders.Tests.FontMaskMusicTests.Small_hash_sign_matches_original_bits() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\FontMaskMusicTests.cs:line 43
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-AHANDE.PP", length: 82692, sha256: "f50fed22651d614341e87b9e2cd9ff708a2ec3a23b7fd85d48"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-AHANDE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "E-RAKETE.PP", length: 40964, sha256: "c6b6759c9f0f52963cff7b6341fc7cd5edc398d9020fffbcc9"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\E-RAKETE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-BHANDE.PP", length: 82692, sha256: "91f5827c9c9756b5b9693e22e39bc35a502f0948417a4bca7d"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-BHANDE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "MASKS.PP", length: 8000, sha256: "d1f9d2d657efd842f6286c8a600aca308499315c4f196d11f1"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\MASKS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-RAKETE.PP", length: 82692, sha256: "15b753dde823a8ec8ed949c7cb2dd587b5220870b1bd459b01"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ABEND.PP", length: 82692, sha256: "20dd898d7f71b5d054d266ae8ed494368e1d880b02e8fab23e"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ENDE.PP", length: 82692, sha256: "82b509239c2c62c2b05dbbff2671fc34e55dce7d9b93192fc1"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-BERGE.PP", length: 82692, sha256: "ff317a990992138a641ab4200abf1210ac94524f4bab81bd3e"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "FONTS.PP", length: 2150, sha256: "08b98cf0d0669dd5788171d1edee4e8f48abc24208da9de10e"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-MENU.PP", length: 82692, sha256: "19a072f12d1c1506f8a031f637c05378cd052d034d17ac2aed"···) [FAIL]
+[xUnit.net 00:00:02.34]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-KAMPF.PP", length: 82692, sha256: "2b3eb3aef10c0c976e3e5da169c9406edbcc11fafb3f0ef994"···) [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "E-ANBAU.PP", length: 40964, sha256: "bff151d3b1ef33da573c371975f5570ac3aec36c809eaf8eb1"···) [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-FATMIK.PP", length: 82692, sha256: "e5a4914b940bd4a046a2cd99dc05117349b987d15f1fe218cb"···) [FAIL]
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-RAKETE.PP", length: 82692, sha256: "15b753dde823a8ec8ed949c7cb2dd587b5220870b1bd459b01"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-RAKETE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ABEND.PP", length: 82692, sha256: "20dd898d7f71b5d054d266ae8ed494368e1d880b02e8fab23e"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ABEND.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ENDE.PP", length: 82692, sha256: "82b509239c2c62c2b05dbbff2671fc34e55dce7d9b93192fc1"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ENDE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-BERGE.PP", length: 82692, sha256: "ff317a990992138a641ab4200abf1210ac94524f4bab81bd3e"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-BERGE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "FONTS.PP", length: 2150, sha256: "08b98cf0d0669dd5788171d1edee4e8f48abc24208da9de10e"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\FONTS.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-MENU.PP", length: 82692, sha256: "19a072f12d1c1506f8a031f637c05378cd052d034d17ac2aed"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-MENU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-KAMPF.PP", length: 82692, sha256: "2b3eb3aef10c0c976e3e5da169c9406edbcc11fafb3f0ef994"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-KAMPF.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "E-ANBAU.PP", length: 40964, sha256: "bff151d3b1ef33da573c371975f5570ac3aec36c809eaf8eb1"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\E-ANBAU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-FATMIK.PP", length: 82692, sha256: "e5a4914b940bd4a046a2cd99dc05117349b987d15f1fe218cb"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-FATMIK.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ANBAU.PP", length: 82692, sha256: "3a35e18828cbb6e50e541edad1d84b958cfd7aa8e4ee7dc034"···) [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.Rocket_atlas_has_sprites_below_visible_area [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.Png_writer_produces_valid_signature [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.Executable_is_the_analysed_version [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.All_vga_pictures_load_with_full_atlas [FAIL]
+[xUnit.net 00:00:02.35]     Traders.Tests.AssetTests.Vga_atlas_starts_after_size_header [FAIL]
+[xUnit.net 00:00:02.36]     Traders.Tests.AssetTests.English_text_table_starts_with_known_lines [FAIL]
+  Failed Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(file: "V-ANBAU.PP", length: 82692, sha256: "3a35e18828cbb6e50e541edad1d84b958cfd7aa8e4ee7dc034"···) [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ANBAU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.PowerPacker_decrunches_like_reference(String file, Int32 length, String sha256) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 33
+   at InvokeStub_AssetTests.PowerPacker_decrunches_like_reference(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.Rocket_atlas_has_sprites_below_visible_area [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-RAKETE.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.VgaImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\VgaImage.cs:line 45
+   at Traders.Tests.AssetTests.Rocket_atlas_has_sprites_below_visible_area() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 65
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.Png_writer_produces_valid_signature [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-MENU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.VgaImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\VgaImage.cs:line 45
+   at Traders.Tests.AssetTests.Png_writer_produces_valid_signature() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 89
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.Executable_is_the_analysed_version [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\T.EXE'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.Executable_is_the_analysed_version() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 11
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.All_vga_pictures_load_with_full_atlas [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ANBAU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.VgaImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\VgaImage.cs:line 45
+   at Traders.Tests.AssetTests.All_vga_pictures_load_with_full_atlas() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 43
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.Vga_atlas_starts_after_size_header [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-ANBAU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.AssetTests.Vga_atlas_starts_after_size_header() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 52
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.AssetTests.English_text_table_starts_with_known_lines [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\ENGLISCH.TXT'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.TextTable.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\TextTable.cs:line 40
+   at Traders.Tests.AssetTests.English_text_table_starts_with_known_lines() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\AssetTests.cs:line 76
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.36]     Traders.Tests.RefEmu.BootTests.T_exe_boots_into_vga_graphics [FAIL]
+[xUnit.net 00:00:02.36]     Traders.Tests.RefEmu.BootTests.Boot_to_main_menu_is_deterministic [FAIL]
+[xUnit.net 00:00:02.45]     Traders.Tests.State.StateTests.Initial_state_matches_initialised_data_in_TEXE [FAIL]
+  Failed Traders.Tests.RefEmu.BootTests.T_exe_boots_into_vga_graphics [55 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.BootTests.T_exe_boots_into_vga_graphics() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\BootTests.cs:line 17
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.BootTests.Boot_to_main_menu_is_deterministic [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.BootToMainMenu(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 50
+   at Traders.Tests.RefEmu.BootTests.Boot_to_main_menu_is_deterministic() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\BootTests.cs:line 73
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.State.StateTests.Initial_state_matches_initialised_data_in_TEXE [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\T.EXE'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.State.StateTests.OriginalDgroup() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 18
+   at Traders.Tests.State.StateTests.Initial_state_matches_initialised_data_in_TEXE() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 156
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.50]     Traders.Tests.State.StateTests.Text_pointer_table_and_station_names_are_where_documented [FAIL]
+[xUnit.net 00:00:02.53]     Traders.Tests.State.StateTests.Level_presets_in_TEXE_are_as_documented [FAIL]
+[xUnit.net 00:00:02.57]     Traders.Tests.RefEmu.MachineTests.Loading_applies_relocations_and_builds_psp [FAIL]
+  Failed Traders.Tests.State.StateTests.Text_pointer_table_and_station_names_are_where_documented [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\T.EXE'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.State.StateTests.OriginalDgroup() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 18
+   at Traders.Tests.State.StateTests.Text_pointer_table_and_station_names_are_where_documented() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 181
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.State.StateTests.Level_presets_in_TEXE_are_as_documented [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\T.EXE'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.State.StateTests.OriginalDgroup() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 18
+   at Traders.Tests.State.StateTests.Level_presets_in_TEXE_are_as_documented() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\State\StateTests.cs:line 164
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.RefEmu.MachineTests.Loading_applies_relocations_and_builds_psp [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.Tests.RefEmu.MachineTests.Loading_applies_relocations_and_builds_psp() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\MachineTests.cs:line 32
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.57]     Traders.Tests.RefEmu.MachineTests.Mz_header_of_t_exe_is_parsed [FAIL]
+[xUnit.net 00:00:02.58]     Traders.Tests.Vga.DriverDifferentialTests.DrawText_05DD_matches_original_for_both_fonts [FAIL]
+[xUnit.net 00:00:02.58]     Traders.Tests.Vga.DriverDifferentialTests.MaskedBlit_35DF_matches_original [FAIL]
+[xUnit.net 00:00:02.58]     Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPageFixed_3A9A_matches_original [FAIL]
+[xUnit.net 00:00:02.59]     Traders.Tests.Vga.DriverDifferentialTests.MaskFill_3CE8_matches_original [FAIL]
+[xUnit.net 00:00:02.59]     Traders.Tests.Vga.DriverDifferentialTests.Full_screen_blit_of_a_converted_picture_shows_the_picture [FAIL]
+[xUnit.net 00:00:02.59]     Traders.Tests.Vga.DriverDifferentialTests.FillRect_31A6_matches_original [FAIL]
+  Failed Traders.Tests.RefEmu.MachineTests.Mz_header_of_t_exe_is_parsed [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\T.EXE'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Tests.RefEmu.MachineTests.Mz_header_of_t_exe_is_parsed() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\RefEmu\MachineTests.cs:line 18
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.DrawText_05DD_matches_original_for_both_fonts [3 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.DrawText_05DD_matches_original_for_both_fonts() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 184
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.MaskedBlit_35DF_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.MaskedBlit_35DF_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 113
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPageFixed_3A9A_matches_original [1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPageFixed_3A9A_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 51
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.MaskFill_3CE8_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.MaskFill_3CE8_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 130
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.Full_screen_blit_of_a_converted_picture_shows_the_picture [< 1 ms]
+  Error Message:
+   System.IO.DirectoryNotFoundException : Could not find a part of the path 'D:\a\traders-redone\traders-redone\original\dos\V-MENU.PP'.
+  Stack Trace:
+     at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.OpenHandle(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.File.ReadAllBytes(String path)
+   at Traders.Assets.VgaImage.Load(String path) in D:\a\traders-redone\traders-redone\src\Traders.Assets\VgaImage.cs:line 45
+   at Traders.Tests.Vga.DriverDifferentialTests.Full_screen_blit_of_a_converted_picture_shows_the_picture() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 235
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.FillRect_31A6_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.FillRect_31A6_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 20
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:02.60]     Traders.Tests.Vga.DriverDifferentialTests.SetPixel_373B_and_GetPixel_3764_match_original [FAIL]
+[xUnit.net 00:00:02.60]     Traders.Tests.Vga.DriverDifferentialTests.OrAtlasToPage_3386_matches_original [FAIL]
+[xUnit.net 00:00:02.60]     Traders.Tests.Vga.DriverDifferentialTests.LatchCopy_328E_matches_original [FAIL]
+[xUnit.net 00:00:02.60]     Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPage_32D8_matches_original [FAIL]
+[xUnit.net 00:00:02.61]     Traders.Tests.Vga.DriverDifferentialTests.CopyPageToPage_351E_matches_original [FAIL]
+[xUnit.net 00:00:02.61]     Traders.Tests.Vga.DriverDifferentialTests.Planar_row_conversion_3079_matches_original [FAIL]
+[xUnit.net 00:00:02.61]     Traders.Tests.Vga.DriverDifferentialTests.CopyAtlasToAtlas_3449_matches_original [FAIL]
+[xUnit.net 00:00:02.61]     Traders.Tests.Vga.DriverDifferentialTests.SetDisplayStart_30E9_matches_original [FAIL]
+  Failed Traders.Tests.Vga.DriverDifferentialTests.SetPixel_373B_and_GetPixel_3764_match_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.SetPixel_373B_and_GetPixel_3764_match_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 146
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.OrAtlasToPage_3386_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.OrAtlasToPage_3386_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 66
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.LatchCopy_328E_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.LatchCopy_328E_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 169
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPage_32D8_matches_original [4 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.BlitAtlasToPage_32D8_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 35
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.CopyPageToPage_351E_matches_original [7 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.CopyPageToPage_351E_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 98
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.Planar_row_conversion_3079_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.Planar_row_conversion_3079_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 218
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.CopyAtlasToAtlas_3449_matches_original [1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.CopyAtlasToAtlas_3449_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 82
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Traders.Tests.Vga.DriverDifferentialTests.SetDisplayStart_30E9_matches_original [< 1 ms]
+  Error Message:
+   System.IO.FileNotFoundException : T.EXE
+  Stack Trace:
+     at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Machine\PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.LoadOnly(String dosDirectory, MachineOptions options) in D:\a\traders-redone\traders-redone\src\Traders.RefEmu\OriginalProgram.cs:line 36
+   at Traders.Tests.Vga.DriverHarness..ctor(Int32 seed, Boolean realFonts) in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverHarness.cs:line 26
+   at Traders.Tests.Vga.DriverDifferentialTests.SetDisplayStart_30E9_matches_original() in D:\a\traders-redone\traders-redone\tests\Traders.Tests\Vga\DriverDifferentialTests.cs:line 206
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+Results File: D:\a\traders-redone\traders-redone\ci-out\tests\windows.trx
+
+Failed!  - Failed:    55, Passed:   347, Skipped:     0, Total:   402, Duration: 1 s - Traders.Tests.dll (net10.0)
