@@ -69,7 +69,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 
 ### ③ `phasen` – Aufrufgraph und Phasenfolge (Quelle `dev/ap5-phasen`, `8ed0d34`, 1 Commit)
 
-- **Teile:** (1) `tools/callgraph.py` übernehmen; Ausgabe wird **erzeugt, nicht committet** (F1). (2) `docs/analyse/PHASEN.md`:
+- **Teile:** (1) `tools/callgraph.py` übernehmen; Ausgabe wird **erzeugt, nicht committet** (F1, entschieden). (2) `docs/analyse/PHASEN.md`:
   `main()`, Hauptschleife, Phasenfolge und Bedingungen mit Adressen, in eigenen Worten; Video-Zeitstempel je Phase (Videos über
   `fetch-reference.sh videos`). (3) Phasen-Spur im RefEmu als `experiments/phasen/` – braucht die Code-Haken aus ①; ist ① beim
   Start von Teil 3 nicht gemergt: Teil blockiert (`spur-wartet`, „wartet auf ①“).
@@ -92,9 +92,9 @@ dann über `integration/runde-2`.
 
 ### Offene Fragen an den Nutzer
 
-- **F1 Aufrufgraph-Ausgabe:** `dev/ap5-phasen` enthält `docs/analyse/callgraph/` (≈7 200 Zeilen, erzeugt aus `T.EXE`, mit Original-
-  texten aus `ENGLISCH.TXT`). Vorschlag: nicht ins Code-Repo (AGENTS §2.1); Spuren erzeugen sie lokal, die Leitstelle legt bei
-  Bedarf einen Stand im Referenz-Repo unter `analyse/callgraph/` ab (PR `daten/callgraph`). Alternative: Ausgabe ohne Texte committen.
+- **F1 Aufrufgraph-Ausgabe – entschieden (Nutzer 11.11.2026):** `docs/analyse/callgraph/` aus `dev/ap5-phasen` (erzeugt aus
+  `T.EXE`, mit Originaltexten) kommt nicht ins Code-Repo; Spuren erzeugen sie lokal, die Leitstelle legt bei Bedarf einen Stand im
+  Referenz-Repo unter `analyse/callgraph/` ab (PR `daten/callgraph`).
 - **F2 Go** für Runde 2 mit ⓪ (Fable) und ①–③ (Opus) wie oben.
 
 ## Fahrplan
