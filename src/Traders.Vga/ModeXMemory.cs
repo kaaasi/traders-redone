@@ -46,6 +46,9 @@ public sealed class ModeXMemory
             if ((MapMask & (1 << p)) != 0) Planes[p][offset] = _latch[p];
     }
 
+    /// <summary>Memory behind the A000h window at an offset relative to A0000h (not modelled yet: always 0).</summary>
+    public byte ReadOutside(int offset) => 0;
+
     /// <summary>Pixel at (x, y) of a page whose plane offset is <paramref name="pageOffset"/>.</summary>
     public byte Pixel(int pageOffset, int x, int y) =>
         Planes[x & 3][(pageOffset + y * BytesPerRow + (x >> 2)) & 0xFFFF];
