@@ -48,8 +48,10 @@ reviewt werden, gemergt wird in dieser Folge.
 
 ### Danach (Leitstelle nach dem Merge von ①–③)
 
-Alte Branches aufgeräumt (11.11.2026): `ci-results`, `dev/ci-probe`, `dev/integration-*`, `dev/repo-*`, `dev/ap3-state` und die
-gemergten `prozess/*`/`review/*` gelöscht; `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
+Alte Branches aufräumen – **ausstehend, Löschen braucht die Freigabe des Nutzers** (in der Sitzung abgelehnt): `ci-results`,
+`dev/ci-probe` (nur überholte Probe `ci/experiment.sh`), `dev/integration-*`, `dev/repo-*`, `dev/ap3-state` und die gemergten
+`prozess/*`/`review/*` haben keine unintegrierten Commits (`git rev-list --count main..<b>` = 0, außer `dev/ci-probe`).
+`dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
 Offen: Gesamtreview Runde 1 (ChatGPT), danach Archiv `docs/archiv/runde-1.md` und Plan Runde 2.
 
 ## Vorschau: Runde 2 – Altbestand übernehmen (Plan folgt, Go nötig)
