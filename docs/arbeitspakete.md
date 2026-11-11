@@ -52,6 +52,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Rundungsweg → rot); `--schnell` wird um höchstens 3 Minuten länger, sonst eigenes Filtermerkmal außerhalb von `--schnell` und im
   PR nennen; `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 (sonst `spur-wartet`, „wartet auf 1“).
+- **Status:** Teil 1 in Arbeit (Claude, Draft-PR `paket/takt`, Base `7a645ff`).
 
 ## 1 `regeln` – Wochenregeln ohne Bildschirm
 
