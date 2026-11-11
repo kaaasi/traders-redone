@@ -143,6 +143,28 @@ Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`
 | `0DE7` | char[] | – | 12 Stationsnamen (VULCAN … LAVE) | G (Test) |
 | `09CE` | 10×19 B | – | Ressourcenliste `V-*.PP`/`E-*.PP` | G (Vorversuch) |
 
+### Grafikschichten (Spur `schichten`, R3)
+
+Belege: Differenztests `tests/Traders.Tests/Vga/PageLayerTests.cs`, `PaletteLayerTests.cs` (ganzes DS gegen RefEmu).
+
+| DS | Breite | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `090E` | W | `CardMode` | Anzeigemodus (0 EGA, 1 VGA, 2/63h Tandy); VGA = 1 | G – `0B67:0002`, `2295:006D` |
+| `0238` | W | `ShownPage` | angezeigte Seite (0 = Seite 0, sonst Seite 1) | G – `0B67:0196/01B5` |
+| `023A` | W | `DrawHidden` | 0 = auf der angezeigten Seite zeichnen, sonst auf der verdeckten | G – `0B67:01D4/0206` |
+| `2BA0` / `2BA4` | Far | `Page0` / `Page1` | Adresse der Seiten (VGA `A000:0000` / `A400:0000`) | G – `0B67:007F` |
+| `2BA8` | Far | – | Tandy-Puffer (nur Modus 63h) | G – `0B67:0018` |
+| `2BAC` | Far | `PageBuffer` | Puffer 500h Byte (VGA), angelegt in `0B67:0002` | G |
+| `082E` / `0830` | W | `DrawPageIndex` / `ShownPageIndex` | Seitenindex des Spiels: gezeichnet / angezeigt (`0830` = 1 genau dann, wenn `082E` = 0) | G – `21FD:051F` |
+| `40DE` | D[2] | `PageNumbers` | Seitennummern (1/2) für `0B67:0238`, Index `082E`/`0830` | G – `21FD:051F` |
+| `4516` | D | `CurrentDrawPage` | Seitennummer, auf die nach dem letzten Wechsel gezeichnet wird | G – `21FD:051F` |
+| `3D95` / `3D91` | B | `NoFlipWait` / `SlowFlip` | ≠ 0: `051F` wartet nicht auf den Strahlrücklauf / wartet vier weitere | G – `21FD:051F` |
+| `3DCB` | B[768] | `BasePalette` | Basispalette | G – `21FD:026C/02C9` |
+| `5017` | B[768] | `LoadedPalette` | Palette des zuletzt geladenen Bildes | G – `21FD:026C` |
+| `54E8` | B[768] | `WorkPalette` | Arbeitspalette (Ergebnis der Blende, an den DAC) | G – `21FD:03EB` |
+| `10D8` | W | `BlendColor` | Blendfarbe (12 Bit RGB) der Einblendungen | G – `21FD:04DA/0329` |
+| `33E4` | Far[2]·8 | `ObjectPointerPairs` | acht Paare von Far-Zeigern (8 Byte je Satz), beim Ausblenden genullt; Bedeutung in Teil 3 | G – `21AF:04A2/04CD` |
+
 ## 5. Abgeleitete Werte
 
 Preise (`43F4`, `48A0`, `40CC`, `3746`, `4B98`) werden in `1777:02DC` aus Bargeld der Spieler, Feldzahlen, Woche und

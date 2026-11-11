@@ -119,3 +119,16 @@ berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die e
 - Grenzfälle (Ränder ohne Abschneiden, kleine Breiten, `h` = 0, extreme Linien, Seitenwechsel) in `DriverEdgeCaseTests`.
 - Nicht in ②: EGA (`0797`), Tandy (`1645`, `3F0A`), Umwandlung `166A` (nur VGA); `0A96`, `0A69`, `0B67`, `21AF`,
   Paletten/Blenden und Farbregister → R3.
+
+## 8. Grafikschichten (Spur `schichten`, R3)
+
+- **Teil 1** (portiert mit Differenztest, `src/Traders.Vga/Layers/`): Seitenverwaltung `0B67` (`0002` nur VGA, `016B`, `0196`,
+  `01B5`, `01D4`, `0206`, `0238`, `028F`, `0299`), Paletten und Blenden `21FD:026C…04DA` mit Warten `0185`, Seitenwechsel
+  `21FD:051F`, Farbregister `2295:006D/00C5`, Zeigerpaare `21AF:04A2/04CD`. Befunde: `docs/routines/0B67_0002_seiten.md`,
+  `21FD_026C_paletten.md`, `21FD_051F_seitenwechsel.md`, `2295_006D_farbregister.md`, `21AF_04A2_zeigerpaare.md`; DS-Adressen in
+  `DATENLAYOUT.md` (Unterabschnitt „Grafikschichten“).
+- Die Schichten arbeiten auf dem DS-Abbild an den Originaloffsets; DAC als `VgaDac` (6 Bit je Kanal). Jedes Warten auf den
+  Strahlrücklauf (`0D73:00D3`) ist genau ein Aufruf von `IRetraceWait` – keine eigene Uhr; die Tests zählen die Warten gegen den RefEmu.
+- Korrektur zu §5: In `03EB` sind auch Ergebnisse jenseits des Ziels möglich (Schritt als Byte, Vergleich vorzeichenbehaftet:
+  Stufe 16 ergibt Schritt 80h). Ausblenden ruft zusätzlich `21AF:04CD` (Zeigerpaare `DS:33E4` nullen), nicht Objekte zeichnen.
+
