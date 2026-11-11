@@ -9,7 +9,7 @@
 - Traders.Tests: verbindet Portierung und Original für Differenztests.
 
 OriginalProgram.LoadOnly/BootToMainMenu, Call, DataSegment und Frame bilden den Vertrag für
-Differenztests. Neue Hooks additiv und mit AP1 koordinieren; Aufrufkonvention, Segmentbasis,
+Differenztests. Neue Hooks additiv und mit der Spur `refemu` (Leitstelle) koordinieren; Aufrufkonvention, Segmentbasis,
 Zeit-/Eingabemodell sowie zulässige Seiteneffekte dokumentieren. Tests vergleichen Rückgaben,
 relevante Speicherbereiche und Seiteneffekte. Erwartungswerte nicht aus der Portierung selbst
 gewinnen. Der Emulator ist ebenfalls Software: unabhängige CPU-Testdaten und Originalbefunde behalten.
@@ -20,5 +20,5 @@ Netzwerksnapshot braucht zusätzlich RNG, Zeit-/Eingabefolge und Phasenzustand, 
 Wiederanlaufstest. Dies ist ein Zukunftsvertrag, keine bereits implementierte Netzwerkfunktion.
 
 CPU-Interpreter bei fachlichen Änderungen nach Instruktionsgruppen aufteilen, wenn dies Reviews
-verbessert; kein rein kosmetischer Großumbau parallel zu AP1. Gemeinsame Schnittstellenänderungen
+verbessert; kein rein kosmetischer Großumbau parallel zu laufender RefEmu-Arbeit. Gemeinsame Schnittstellenänderungen
 als eigene Vorarbeit integrieren, danach abhängige Pakete darauf aktualisieren.
