@@ -20,7 +20,9 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - Branch `paket/<spur>` von aktuellem `main`, ein Draft-PR, Teile als Aufgabenliste (`spur-start.md` „Teile und Fortsetzung“).
 - Je portierter Originalroutine Befund in `docs/routines/` (Sammelbefund mit mehreren Adressen erlaubt), `[ORIGINAL]`-Marker und
   `[DIFFERENTIAL]`-Test gegen den RefEmu mit Grenzfällen und Zufallszustand danach; Erwartungswerte nie aus dem Port.
-- Neue Daten in eigene Dateien (`partial`); `DgroupLayout.cs` und `GameState.cs` nur additiv und im PR begründet. Neue
+- Regeln und Phasen arbeiten auf `Dgroup` (Byteabbild) mit Offsets aus `DgroupLayout.cs` (nur additiv, im PR begründet);
+  `GameState`/`GameStateMapper.cs` nur, wenn ein Feld modelliert werden muss – dann `partial` ergänzen (wer zuerst braucht) und
+  den Mapper nur additiv erweitern (R3P-4). Neue
   DGROUP-Adressen mit Beleg in `docs/analyse/DATENLAYOUT.md` (je Spur eigener Unterabschnitt, kein Umschreiben fremder Zeilen).
 - Kein eigener Zufall, keine Host-Uhr im Kern (`AGENTS.md` §4); Wartezeiten und Bildtakt sind explizite Eingaben.
 - `STATUS.md`: nur der erzeugte Block per `tools/abdeckung.py --write` (bei Konflikt nach Rebase erneut ausführen, R2P-1).
@@ -32,17 +34,18 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   = durchgehender Lauf, bitgleich in Datensegment, Zufallszustand `DS:10D2`, Zeit und Bild an der nächsten Marke. Abzüge entstehen
   zur Testlaufzeit in einem Zwischenordner und nie im Repo (abgeleitet aus `T.EXE`, `AGENTS.md` §2.1).
   (2) **Phasenmaschine und Takt im Kern** (`src/Traders.Core/Phases/`): Schrittfolge der Woche nach
-  `docs/routines/1777_01F8_wochenschleife.md` (24 Schritte, sieben Marken, beide Abbruchwege) als Daten, Takt als explizite
+  `docs/routines/1777_01F8_wochenschleife.md` (30 Zeilen einschließlich der sieben Marken; Schrittnummern in diesem Plan nach
+  `BESTAND.md` §1.4, 24 Schritte ohne Marken; beide Abbruchwege) als Daten, Takt als explizite
   Tick-Eingabe, Spielerhandlungen als Befehle, Zufallsverbrauch je Bild als Kern-Ereignis, das die Szene genau einmal je Bild auslöst
   (F3 = A); noch nicht portierte Schritte als ausdrücklich „ausstehend“ markierte Schritte, kein stilles Überspringen. Dazu die
   Präzisierung von `AGENTS.md` §4 (Zeile „Szenen und Rendering lesen nur“) und, wo prüfbar, eine Regel in `tools/check-architecture.py`.
-  (3) **Anbindung und Mehrrundenprobe** (nach Merge von 1 `regeln`): die bildschirmlosen Schritte 1, 2, 5, 10, 11, 12, 16, 21 rufen
-  die Routinen aus Spur 1; Test über vier Wochen mit vier Computerspielern: an jedem dieser Schritte Datensegment aus dem RefEmu
+  (3) **Anbindung und Mehrrundenprobe** (nach Merge von 1 `regeln`): die bildschirmlosen Schritte nach `BESTAND.md` §1.4 – 1 `1777:02DC`, 2 `0825:07C4`,
+  5 und 16 `0609:1178`, 10 `21FD:021F`, 11 `22A3:0003`, 12 `22A3:026B`, 21 `08CF:11D7` – rufen die Routinen aus Spur 1; Test über vier Wochen mit vier Computerspielern: an jedem dieser Schritte Datensegment aus dem RefEmu
   übernehmen, Schritt im Port ausführen, Ergebnis gegen den RefEmu beim Rücksprung vergleichen (Datensegment, `DS:10D2`), dazu
   Markenfolge und Wochenzähler; Abbruchweg B (Rückgabe aus `20B3:0005`) per gesetztem Zustand prüfen. P3 #52 mitnehmen.
 - **Dateigrenzen:** `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.RefEmu/**` (nur Maschinenabzug,
-  additiv), `tests/Traders.Tests/RefEmu/**` (nur neue Dateien), `docs/routines/1777_*`, `docs/analyse/REFEMU.md`,
-  `AGENTS.md` §4 (eine Zeile), `tools/check-architecture.py`. Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R3
+  additiv), `tests/Traders.Tests/RefEmu/**` (nur neue Dateien), `docs/routines/1777_*` außer `1777_02DC*`, `docs/analyse/REFEMU.md`,
+  `AGENTS.md` §4 (eine Zeile), `tools/check-architecture.py` (ohne die Regel für `Traders.App`, s. 3). Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R3
   dieser Spur.
 - **Abnahme:** alle drei Läufe von `tools/pruefen.sh` grün; Wiederaufsetzen bitgleich (Test, Gegenprobe: ein ausgelassenes
   Zustandsteil macht ihn rot); Mehrrundenprobe ≥ 4 Wochen nach `AGENTS.md` §5, Gegenprobe im Review (vertauschter Schritt, falscher
@@ -70,13 +73,13 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 ## 2 `schichten` – Grafikschichten über dem Treiber
 
 - **Teile:** (1) Seiten und Warten `0B67`, Paletten und Blenden `21FD:026C…04DA` (Basis-, geladene, Arbeitspalette, Blendfarbe
-  `DS:10D8`, sichtbare/verdeckte Seite `DS:082E/0830`), Farbregister `2295:006D/00C5`; Wartezeiten als Schrittzahl bzw. Tick-Eingabe,
+  `DS:10D8`), Seitenwechsel `21FD:051F` (sichtbare/verdeckte Seite `DS:082E/0830`), Farbregister `2295:006D/00C5`; Wartezeiten als Schrittzahl bzw. Tick-Eingabe,
   keine eigene Uhr. (2) Befehlsliste `0A96` (17 Befehlstypen, Ausführung `06A8`, Liste `DS:15BA…`) und Hilfen `0A69`.
   (3) Bewegte Objekte `21AF` (8 Sätze ab `DS:330C`) über `23CD:06E9/071C`; P3 #60 klären (erreicht das Spiel den Fall?).
 - **Grenze zum Kern:** Die Schichten ändern keinen Spielzustand. Zieht eine Routine Zufall (z. B. Warteschleife `21FD:0004` im
   Fat-Mike-Modus, BESTAND §1.4), wird nur die Darstellung portiert und die Ziehung im Befund als Kern-Ereignis für 0 notiert.
 - **Dateigrenzen:** `src/Traders.Vga/**`, `tests/Traders.Tests/Vga/**`, `docs/routines/{0B67,0A96,0A69,21AF,2295}_*`,
-  `docs/routines/21FD_*` nur für Adressen aus `026C…04DA` (Paletten), `docs/analyse/GRAFIK.md`. Kein Eingriff in `src/Traders.RefEmu/`.
+  `docs/routines/21FD_*` nur für Adressen aus `026C…04DA` (Paletten) und `051F`, `docs/analyse/GRAFIK.md`. Kein Eingriff in `src/Traders.RefEmu/`.
 - **Abnahme:** alle drei Läufe grün; VRAM- und Palettenvergleich gegen den `VgaAdapter` des RefEmu nach `Call` der Originalroutine
   (`Frame()`), Gegenprobe je Test im Review; Befehlsliste mit allen 17 Typen mindestens einmal.
 - **Abhängigkeiten:** keine.
@@ -91,16 +94,19 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Taste → Scancode und Tick-Zählung bei unterschiedlicher Bildrate. (3) Ton-Analyse: `FXDRIVER.EXE` (Schnittstelle `int 64h`),
   `218B`, `21A7:0054` (drei Wege nach `DS:0910`, nur der Treiberweg wird portiert) → `docs/analyse/TON.md`; P3 #39 R2 (`2850`).
 - **Dateigrenzen:** `src/Traders.App/**`, `tests/Traders.Tests/App/**`, `docs/routines/{27C6,0E9E}_*`, `docs/analyse/TON.md`;
-  gemeinsame Datei `TradersRedone.slnx` (eine Zeile, neues Projekt) gehört in R3 dieser Spur. Lockdatei des neuen Projekts
+  gemeinsame Datei `TradersRedone.slnx` (eine Zeile, neues Projekt) gehört in R3 dieser Spur, ebenso
+  `tests/Traders.Tests/Traders.Tests.csproj` (eine `ProjectReference`), `tests/Traders.Tests/packages.lock.json` und in
+  `tools/check-architecture.py` die Regel für `Traders.App` (keine Abhängigkeit auf `Traders.RefEmu`, R3P-3). Lockdatei des neuen Projekts
   mitcommitten; fehlt ein Paket im Offline-Spiegel, im PR melden (Leitstelle stößt `werkzeuge.yml` an).
-- **Abnahme:** alle drei Läufe grün; `check-architecture.py` grün (App hängt nicht vom RefEmu ab, Kern nicht von App); Befunde mit
+- **Abnahme:** alle drei Läufe grün; `check-architecture.py` grün mit der neuen Regel (App hängt nicht vom RefEmu ab, Kern nicht von App; Gegenprobe im Review); Befunde mit
   RefEmu-Probe (z. B. Tickzähler nach *n* emulierten Sekunden, Tastenzustand nach `Press`); Windows-Start nur per Hand (Nutzer).
 - **Abhängigkeiten:** keine. Die Anbindung an die Phasenmaschine folgt in R4.
 
 ## Zuständigkeit gemeinsamer Dateien in R3
 
-`OriginalProgram.cs`: 0. `TradersRedone.slnx`: 3. `AGENTS.md` §4 (eine Zeile): 0. `DgroupLayout.cs`, `GameState.cs`: nur additiv
-(0, 1), bei Konflikt rebased die später gemergte Spur. `docs/analyse/DATENLAYOUT.md`: je Spur eigener Unterabschnitt. `STATUS.md`:
+`OriginalProgram.cs`: 0. `TradersRedone.slnx`, `tests/Traders.Tests/Traders.Tests.csproj`, `tests/Traders.Tests/packages.lock.json`: 3.
+`tools/check-architecture.py`: 0, die Regel für `Traders.App`: 3. `AGENTS.md` §4 (eine Zeile): 0. `DgroupLayout.cs`, `GameState.cs`
+(`partial`), `GameStateMapper.cs`: nur additiv (0, 1), bei Konflikt rebased die später gemergte Spur. `docs/analyse/DATENLAYOUT.md`: je Spur eigener Unterabschnitt. `STATUS.md`:
 nur der erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/prozess/**`: Leitstelle.
 `Directory.Build.props`, `global.json`: niemand.
 
