@@ -101,7 +101,9 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; `check-architecture.py` grün mit der neuen Regel (App hängt nicht vom RefEmu ab, Kern nicht von App; Gegenprobe im Review); Befunde mit
   RefEmu-Probe (z. B. Tickzähler nach *n* emulierten Sekunden, Tastenzustand nach `Press`); Windows-Start nur per Hand (Nutzer).
 - **Abhängigkeiten:** keine. Die Anbindung an die Phasenmaschine folgt in R4.
-- **Status:** in Arbeit (Claude, Teil 1 von 3).
+- **Status:** alle drei Teile fertig, Review offen (PR #69). Teil 1 Befunde `27C6`/`0E9E` mit RefEmu-Proben; Teil 2
+  `src/Traders.App` mit Differenztests `27C6:0043/00AC/037A/03E4`; Teil 3 `docs/analyse/TON.md`, P3 #39 R2 geklärt (Nachtrag in
+  BESTAND §1.2 durch die Leitstelle). Port von `0E9E` in den Kern offen für R4.
 
 ## Zuständigkeit gemeinsamer Dateien in R3
 
