@@ -12,8 +12,8 @@ Befunde in `docs/routines/`, `[DIFFERENTIAL]`-Tests, Tests mit Originaldaten nur
 Kommentare Englisch, nichts aus den Originalen Abgeleitetes im Repo, `tools/abdeckung.py --check` grün. Ergebnis: M2 (RefEmu)
 vollständig für das Spiel nach dem Hauptmenü, Grafiktreiber `23CD` portiert (Vorarbeit M3/M4), Phasenfolge belegt (Grundlage R3).
 
-**Leitstelle R2:** Claude (Sitzung vom 11.11.2026). **Modell aller Spuren und Erstreviews:** Claude Opus (RefEmu, Disassembly,
-Differenztests). **Quellen** (Stand nach der Historienbereinigung vom 11.11.2026; die SHAs der Vorschau sind damit überholt):
+**Leitstelle R2:** Claude (Sitzung vom 11.11.2026). **Modell:** ⓪ Claude Fable (Nutzer 11.11.2026), ①–③ und alle Erstreviews
+Claude Opus (RefEmu, Disassembly, Differenztests). **Quellen** (Stand nach der Historienbereinigung vom 11.11.2026; die SHAs der Vorschau sind damit überholt):
 alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 
 **Gemeinsame Vorgaben für alle drei Spuren:**
@@ -26,6 +26,21 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Spur dadurch eine Ablage im Referenz-Repo, im PR melden – ablegen nur Leitstelle/Nutzer.
 - Altbestand ist **nicht** geprüft: jede übernommene Originalroutine braucht Befund + Differenztest, sonst `[APPROX]` oder raus.
 
+### ⓪ `bestand` – Bestandsaufnahme `T.EXE` gegen den bisherigen Stand (Nutzer 11.11.2026, vor ② und ③)
+
+- **Ziel:** unabhängiger Abgleich, bevor ungeprüfter Altbestand auf `main` kommt; reine Analyse, kein Port.
+- **Teile:** (1) `T.EXE` kartieren: Segmente, Einsprünge, Rolle jedes Moduls, Datenbereiche der DGROUP, genutzte
+  Ressourcenformate (Grundlage `tools/segmap.py`, `docs/analyse/segments.md`, `DATENLAYOUT.md`, `fetch-reference.sh disasm`).
+  (2) Spiegeln gegen `main`, `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen`, `docs/analyse/*`, `docs/routines/*`: je Bereich
+  „portiert und belegt / vorhanden, unbelegt / fehlt“, Widersprüche zum Altbestand mit ausführbarem Beleg (`zusammenarbeit.md` §5
+  Punkt 7). (3) Empfehlung zum Zuschnitt der Teile von ①–③ und der Runden R3 ff.
+- **Ergebnis:** `docs/analyse/BESTAND.md` (Tabellen, Adressen, Befunde in eigenen Worten; keine Disassemblierungsauszüge, keine
+  Originaltexte). Lange Listen nur lokal; braucht es eine Ablage, im PR melden (Leitstelle legt im Referenz-Repo ab).
+- **Dateigrenzen:** `docs/analyse/BESTAND.md`; Korrekturen an `docs/analyse/segments.md`/`DATENLAYOUT.md` nur als Befund im PR.
+- **Abnahme:** jeder Bereich von `T.EXE` erfasst (Segmentliste vollständig gegen `segmap.py`); jede Behauptung „fehlt“ mit
+  erfolgloser Codesuche, jeder Widerspruch mit Probe; `pruefen.sh --schnell` grün. Erstreview (Opus) prüft Stichproben gegen `T.EXE`.
+- **Umfang:** ein Lauf, höchstens 3 Teile (Fable ist teuer). **Abhängigkeiten:** keine. **Status:** offen.
+
 ### ① `refemu` – Referenz-Emulator nach dem Hauptmenü (Quelle `dev/ap1-refemu`, `a12822d`, 2 Commits)
 
 - **Teile:** (1) Übernahme: Tastendruck mit Haltezeit, Scancode-Tabelle, FXDRIVER als TSR (`MzLoader`, `PcMachine.Dos`),
@@ -36,7 +51,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R2 dieser Spur.
 - **Abnahme:** `tools/pruefen.sh` alle drei Läufe grün; zwei Läufe bitgleich (Determinismus-Test bleibt grün); Hash des Hauptmenüs
   mit FXDRIVER als Test; Spiellauf erreicht nachweislich einen Zustand nach dem Hauptmenü (Test mit Prüfkriterium, nicht nur „läuft“).
-- **Abhängigkeiten:** keine. **Status:** offen.
+- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** offen.
 
 ### ② `grafik` – Mode X und Grafiktreiber `23CD` (Quelle `dev/ap2-vga`, `5a9f178`, 7 Commits)
 
@@ -49,7 +64,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   `docs/routines/0A96_*`, `docs/routines/0A69_*`, ggf. `tools/exeimg.py`. Kein Eingriff in `src/Traders.RefEmu/`.
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün mit jedem neuen `[ORIGINAL]`; je Differenztest Gegenprobe im
   Erstreview (Mutation → rot); VRAM-Vergleich gegen `VgaAdapter` des RefEmu, Erwartungswerte nie aus dem Port.
-- **Abhängigkeiten:** keine (nutzt den RefEmu-Stand von `main`). `0A96`/`0A69` (Befehlsliste, Texthilfen) nur Analyse, Port in R3/R4.
+- **Abhängigkeiten:** Start nach Merge von ⓪; die Leitstelle passt die Teile an dessen Empfehlung an (nutzt den RefEmu-Stand von `main`). `0A96`/`0A69` (Befehlsliste, Texthilfen) nur Analyse, Port in R3/R4.
   **Status:** offen.
 
 ### ③ `phasen` – Aufrufgraph und Phasenfolge (Quelle `dev/ap5-phasen`, `8ed0d34`, 1 Commit)
@@ -62,24 +77,25 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Callgraph-Ausgabe).
 - **Abnahme:** `pruefen.sh --schnell` grün; `callgraph.py` läuft reproduzierbar auf `T.EXE` (zweiter Lauf ohne Diff); jede Phase in
   `PHASEN.md` mit Adresse und mindestens einer Probe (RefEmu-Spur oder Videobild); kein Originaltext im Repo.
-- **Abhängigkeiten:** Teil 3 nach Merge von ①. **Status:** offen.
+- **Abhängigkeiten:** Start nach Merge von ⓪ (Teile ggf. angepasst); Teil 3 nach Merge von ①. **Status:** offen.
 
 ### Zuständigkeit gemeinsamer Dateien in R2
 
-`OriginalProgram.cs`: ①. `.gitignore`: ③ (eine Zeile). `STATUS.md`, `CHANGELOG.md`, dieser Plan: Leitstelle. `GameState.cs`,
+`docs/analyse/BESTAND.md`: ⓪. `OriginalProgram.cs`: ①. `.gitignore`: ③ (eine Zeile). `STATUS.md`, `CHANGELOG.md`, dieser Plan: Leitstelle. `GameState.cs`,
 `TradersRedone.slnx`, `Directory.Build.props`, `global.json`: niemand (bei Bedarf im PR begründen, Leitstelle entscheidet).
 
 ### Integrationsfolge
 
-① und ② parallel starten, ③ Teile 1–2 ebenfalls; Merge ① → ② → ③. ② und ③ rebasen nach dem Merge von ① ohne Konflikt
-(dateigetrennt); Konflikte nur dann über `integration/runde-2`.
+⓪ und ① parallel starten; nach Merge von ⓪ passt die Leitstelle ② und ③ an (Plan-PR, Hinweis an den Nutzer nur bei geänderter
+Abnahme) und startet beide. Merge ⓪ → ① → ② → ③ (① darf vor ⓪, wenn früher fertig). Spuren sind dateigetrennt; Konflikte nur
+dann über `integration/runde-2`.
 
 ### Offene Fragen an den Nutzer
 
 - **F1 Aufrufgraph-Ausgabe:** `dev/ap5-phasen` enthält `docs/analyse/callgraph/` (≈7 200 Zeilen, erzeugt aus `T.EXE`, mit Original-
   texten aus `ENGLISCH.TXT`). Vorschlag: nicht ins Code-Repo (AGENTS §2.1); Spuren erzeugen sie lokal, die Leitstelle legt bei
   Bedarf einen Stand im Referenz-Repo unter `analyse/callgraph/` ab (PR `daten/callgraph`). Alternative: Ausgabe ohne Texte committen.
-- **F2 Go** für Runde 2 mit drei Spuren (Opus) wie oben.
+- **F2 Go** für Runde 2 mit ⓪ (Fable) und ①–③ (Opus) wie oben.
 
 ## Fahrplan
 
