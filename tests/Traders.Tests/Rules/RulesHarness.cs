@@ -22,8 +22,21 @@ internal sealed class RulesHarness
     /// <summary>Fresh copy of the data segment as loaded from T.EXE (initialised data, BSS zero).</summary>
     public Dgroup Initial() => new(_initial[..DgroupLayout.Size]);
 
+    /// <summary>
+    /// Initial data segment with arbitrary loop variables and random state: the routines must overwrite the former and
+    /// must not consume random().
+    /// </summary>
+    public Dgroup Base(Inputs r)
+    {
+        var d = Initial();
+        d.Set(DgroupLayout.ActivePlayer, (sbyte)r.Range(-128, 127));
+        d.Set(DgroupLayout.LoopWare, r.Word());
+        d.Set(DgroupLayout.RandomSeed, r.Next());
+        return d;
+    }
+
     /// <summary>Result of the original routine for the given input state.</summary>
-    public sealed record Outcome(byte[] DataSegment, uint RandomState, int Events, Exception? Fault);
+    public sealed record Outcome(byte[] DataSegment, uint RandomState, int Events, Exception? Fault, int Result);
 
     /// <summary>Writes <paramref name="input"/> into the emulator, calls the routine and returns the data segment.</summary>
     public Outcome RunOriginal(Dgroup input, ushort segment, ushort offset)
@@ -36,15 +49,17 @@ internal sealed class RulesHarness
         m.Cpu.Sp = 0xFFF0;
         int before = m.Log.Events.Count;
         Exception? fault = null;
+        int result = 0;
         try
         {
-            _program.Call(segment, offset);
+            var (ax, dx) = _program.Call(segment, offset);
+            result = ax | (dx << 16);
         }
         catch (EmulationException e)
         {
             fault = e;
         }
-        return new Outcome(_program.DataSegment(), _program.RandomState, m.Log.Events.Count - before, fault);
+        return new Outcome(_program.DataSegment(), _program.RandomState, m.Log.Events.Count - before, fault, result);
     }
 
     /// <summary>
@@ -52,12 +67,20 @@ internal sealed class RulesHarness
     /// byte-identical afterwards, that the original logged no host service (no clock, file, video or sound access) and
     /// that the bytes behind the DGROUP image stay untouched. Returns the port's result.
     /// </summary>
-    public Dgroup AssertSame(Dgroup input, ushort segment, ushort offset, Action<Dgroup> port, string label)
+    public Dgroup AssertSame(Dgroup input, ushort segment, ushort offset, Action<Dgroup> port, string label) =>
+        AssertSame(input, segment, offset, d => { port(d); return null; }, label);
+
+    /// <summary>As above for a routine with a result in DX:AX, compared with the port's return value.</summary>
+    public Dgroup AssertSame(Dgroup input, ushort segment, ushort offset, Func<Dgroup, int> port, string label) =>
+        AssertSame(input, segment, offset, d => (int?)port(d), label);
+
+    private Dgroup AssertSame(Dgroup input, ushort segment, ushort offset, Func<Dgroup, int?> port, string label)
     {
         var original = RunOriginal(input, segment, offset);
         Assert.True(original.Fault is null, $"{label}: original faulted: {original.Fault?.Message}");
         var ported = new Dgroup((byte[])input.Bytes.Clone());
-        port(ported);
+        int? result = port(ported);
+        if (result is int r) Assert.True(r == original.Result, $"{label}: result original {original.Result}, port {r}");
 
         Assert.Equal(0, original.Events);
         Assert.Equal(_initial[DgroupLayout.Size..], original.DataSegment[DgroupLayout.Size..]);
@@ -73,4 +96,14 @@ internal sealed class RulesHarness
 
     /// <summary>Original values of a few DS words after the call (for documented probe values).</summary>
     public static short Word(byte[] ds, int offset) => (short)(ds[offset] | (ds[offset + 1] << 8));
+}
+
+/// <summary>Test-local generator for input states (not the game's random()).</summary>
+internal sealed class Inputs(uint seed)
+{
+    private uint _s = seed;
+    public uint Next() => _s = _s * 1664525 + 1013904223;
+    public int Range(int lo, int hi) => lo + (int)(Next() % (uint)(hi - lo + 1));
+    public short Word() => (short)(Next() >> 16);
+    public bool Chance(int percent) => Next() % 100 < (uint)percent;
 }

@@ -12,25 +12,7 @@ public class WeeklyRulesDifferentialTests
 {
     private static readonly RulesHarness Harness = new();
 
-    /// <summary>Test-local generator for input states (not the game's random()).</summary>
-    private sealed class Inputs(uint seed)
-    {
-        private uint _s = seed;
-        public uint Next() => _s = _s * 1664525 + 1013904223;
-        public int Range(int lo, int hi) => lo + (int)(Next() % (uint)(hi - lo + 1));
-        public short Word() => (short)(Next() >> 16);
-        public bool Chance(int percent) => Next() % 100 < (uint)percent;
-    }
-
-    private static Dgroup Base(Inputs r)
-    {
-        var d = Harness.Initial();
-        // Loop variables and random state hold arbitrary values before the call; the routines must not consume random().
-        d.Set(L.ActivePlayer, (sbyte)r.Range(-128, 127));
-        d.Set(L.LoopWare, r.Word());
-        d.Set(L.RandomSeed, r.Next());
-        return d;
-    }
+    private static Dgroup Base(Inputs r) => Harness.Base(r);
 
     // ------------------------------------------------------------------ 1777:02DC weekly prices
 

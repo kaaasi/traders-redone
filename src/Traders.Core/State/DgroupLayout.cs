@@ -97,6 +97,18 @@ public static class DgroupLayout
     public const int LandPrice = 0x3746;       // word        set by 1777:02DC, 100..550
     public const int LimitLow = 0x2F26;        // sbyte       min(30, F/2 + 3) from 0609:1178 (meaning open)
     public const int LimitHigh = 0x48A2;       // sbyte       min(30, F/2 + 6) from 0609:1178 (meaning open)
+    public const int CurrentWealth = 0x2F06;   // dword[4]    total wealth per player, set by 0825:06CB
+    public const int Rank = 0x3D42;            // byte[4]     3 - number of others with wealth <= own (ties count)
+    public const int RankUnique = 0x302A;      // byte[4]     rank with ties broken toward the lower player number
+    public const int ProductionShares = 0x342C; // byte[4][3] stride 3: percent of the production fields per kind
+    public const int ProductionResult = 0x48F4; // byte[9][26] stride 26: production per field (4..60), see 22A3:0003
+    public const int ProductionIdle = 0x57F0;  // word        owned fields that produced nothing this week (tentative)
+    public const int ProductionActive = 0x57F2; // word       fields that consumed stock and produced (tentative)
+    public const int LoopX = 0x2EB0;           // sbyte       global loop variable field column
+    public const int LoopY = 0x2F00;           // sbyte       global loop variable field row
+    public const int KindWare = 0x08E4;        // sbyte[3]    ware consumed by field kind 0..2 (initialised data)
+    public const int QualityTable = 0x0902;    // sbyte[3][4] stride 4: yield bonus per kind and land quality
+    public const int WeatherTable = 0x112C;    // sbyte[3][6] stride 6: percent change per kind and weather
 
     /// <summary>Index into the field grid arrays (x = column, y = row).</summary>
     public static int FieldIndex(int x, int y) => x * FieldRowsMax + y;
