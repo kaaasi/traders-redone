@@ -13,6 +13,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Traders.App\Traders.App.csproj" />
     <ProjectReference Include="..\..\src\Traders.Assets\Traders.Assets.csproj" />
     <ProjectReference Include="..\..\src\Traders.Core\Traders.Core.csproj" />
     <ProjectReference Include="..\..\src\Traders.RefEmu\Traders.RefEmu.csproj" />

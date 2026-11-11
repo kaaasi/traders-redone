@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Traders.App/Traders.App.csproj" />
     <Project Path="src/Traders.Assets/Traders.Assets.csproj" />
     <Project Path="src/Traders.Audio/Traders.Audio.csproj" />
     <Project Path="src/Traders.Core/Traders.Core.csproj" />

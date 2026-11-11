@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Traders.App</RootNamespace>
+    <AssemblyName>traders</AssemblyName>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Traders.Assets\Traders.Assets.csproj" />
+    <ProjectReference Include="..\Traders.Core\Traders.Core.csproj" />
+    <ProjectReference Include="..\Traders.Vga\Traders.Vga.csproj" />
+  </ItemGroup>
+</Project>
