@@ -18,8 +18,10 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 
 **Gemeinsame Vorgaben für alle drei Spuren:**
 
-- Branch `paket/<spur>` von aktuellem `main`; den Altbestand per `git cherry-pick`/`git checkout origin/dev/<ap> -- <pfad>` übernehmen,
-  nicht den Altbranch rebasen. `dev/*` bleibt unverändert, bis die Leitstelle ihn nach dem Merge löscht.
+- Branch `paket/<spur>` von aktuellem `main`; den Altbestand per `git cherry-pick` übernehmen, nicht den Altbranch rebasen;
+  Pfad-Checkout (`git checkout origin/dev/<ap> -- <pfad>`) nur für Dateien, die `main` seit `b6d9057` nicht geändert hat
+  (`git diff --stat b6d9057 origin/main -- <pfad>` leer; R2P-2). `dev/*` bleibt unverändert, bis die Leitstelle ihn nach dem
+  Merge löscht.
 - `docs/uebergabe/APn.md` nicht übernehmen (Verzeichnis aufgelöst); Brauchbares in die PR-Beschreibung bzw. `docs/analyse/`.
   `ci/experiment.sh` wird `experiments/<spur>/<name>.sh` (`experiments/README.md`).
 - Nicht übernommen wird, was gegen `AGENTS.md` §2.1 verstößt (Originaltexte, Disassemblierungsauszüge, Bildabzüge); fehlt der
@@ -46,7 +48,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 - **Teile:** (1) Übernahme: Tastendruck mit Haltezeit, Scancode-Tabelle, FXDRIVER als TSR (`MzLoader`, `PcMachine.Dos`),
   Code-Haken in `PcMachine.RunFor`, `CallTracer` (Grafiktreiber), `OplTrace`; Tests nach `[GameDataFact]`, Kommentare Englisch.
   (2) Spiellauf nach dem Hauptmenü (`GameRunTests`, Hauptmenü-Hash mit FXDRIVER) und Experiment `experiments/refemu/`;
-  `docs/analyse/REFEMU.md` ergänzen.
+  `docs/analyse/REFEMU.md` ergänzen; P3 #31 (Überschrift `RefEmu/Data/README.md`) mitnehmen.
 - **Dateigrenzen:** `src/Traders.RefEmu/**`, `tests/Traders.Tests/RefEmu/**`, `docs/analyse/REFEMU.md`, `experiments/refemu/`.
   Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R2 dieser Spur.
 - **Abnahme:** `tools/pruefen.sh` alle drei Läufe grün; zwei Läufe bitgleich (Determinismus-Test bleibt grün); Hash des Hauptmenüs
@@ -81,7 +83,9 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 
 ### Zuständigkeit gemeinsamer Dateien in R2
 
-`docs/analyse/BESTAND.md`: ⓪. `OriginalProgram.cs`: ①. `.gitignore`: ③ (eine Zeile). `STATUS.md`, `CHANGELOG.md`, dieser Plan: Leitstelle. `GameState.cs`,
+`docs/analyse/BESTAND.md`: ⓪. `OriginalProgram.cs`: ①. `STATUS.md`: nur der erzeugte Block zwischen `abdeckung:anfang/ende`
+per `tools/abdeckung.py --write` durch die Spur, die Marker hinzufügt (② und ggf. ①); bei Konflikt im Block nach Rebase `--write`
+erneut ausführen (R2P-1). `.gitignore`: ③ (eine Zeile). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan: Leitstelle. `GameState.cs`,
 `TradersRedone.slnx`, `Directory.Build.props`, `global.json`: niemand (bei Bedarf im PR begründen, Leitstelle entscheidet).
 
 ### Integrationsfolge
