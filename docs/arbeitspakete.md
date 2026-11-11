@@ -41,7 +41,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 - **Dateigrenzen:** `docs/analyse/BESTAND.md`; Korrekturen an `docs/analyse/segments.md`/`DATENLAYOUT.md` nur als Befund im PR.
 - **Abnahme:** jeder Bereich von `T.EXE` erfasst (Segmentliste vollständig gegen `segmap.py`); jede Behauptung „fehlt“ mit
   erfolgloser Codesuche, jeder Widerspruch mit Probe; `pruefen.sh --schnell` grün. Erstreview (Opus) prüft Stichproben gegen `T.EXE`.
-- **Umfang:** ein Lauf, höchstens 3 Teile (Fable ist teuer). **Abhängigkeiten:** keine. **Status:** offen.
+- **Umfang:** ein Lauf, höchstens 3 Teile (Fable ist teuer). **Abhängigkeiten:** keine. **Status:** Teile 1–3 fertig, PR #33, Review offen.
 
 ### ① `refemu` – Referenz-Emulator nach dem Hauptmenü (Quelle `dev/ap1-refemu`, `a12822d`, 2 Commits)
 
