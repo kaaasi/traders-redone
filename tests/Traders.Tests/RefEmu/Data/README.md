@@ -11,4 +11,5 @@ Upstream-Revision als vermeintliche historische Herkunft eintragen.
 
 Bei der nächsten Regeneration zusammen committen: Upstream-Commit, SHA-256 der Metadaten,
 Revocation-List und Ausgabe, Generator-Commit, Python-Version und vollständiger Aufruf.
-Die PNGs sind Referenzbilder des Originals im RefEmu; Änderungen brauchen Originalvergleich.
+Die früheren RefEmu-Bildabzüge (PNG) liegen seit Runde 1 im privaten Repo `kaaasi/traders-referenz` unter `refemu/`
+(`tools/claude/fetch-reference.sh refemu`); Änderungen daran brauchen einen Originalvergleich.
