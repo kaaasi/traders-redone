@@ -150,10 +150,15 @@ internal sealed class DriverHarness
     }
 
     /// <summary>
-    /// Gives the port the whole 64 KB mask segment of the emulator (MASKS.PP followed by the font table, glyphs and
-    /// the other buffers placed there), so that mask runs past the 8000 bytes of MASKS.PP read the same bytes.
+    /// Clears the emulator's mask segment behind the 8000 bytes of MASKS.PP (font table, glyphs and the other buffers
+    /// placed there), so that mask runs past MASKS.PP read empty memory on both sides. Text and objects do not work
+    /// afterwards.
     /// </summary>
-    public void SyncMaskSegment() => Port.Masks = Original.Machine.Mem.ReadBlock(MaskSeg, 0, 0x10000);
+    public void ClearMaskSegmentBehindMasks()
+    {
+        var mem = Original.Machine.Mem;
+        for (int k = Port.Masks.Length; k < 0x10000; k++) mem.Write8((uint)((MaskSeg << 4) + k), 0);
+    }
 
     private static int FirstDifference(byte[] a, byte[] b)
     {

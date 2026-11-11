@@ -48,7 +48,7 @@ public class DriverWrapTests
     public void Narrow_masked_blits_and_fills_match_original()
     {
         var h = new DriverHarness(74);
-        h.SyncMaskSegment();   // the 64 KB mask run reads past MASKS.PP into the rest of the mask segment
+        h.ClearMaskSegmentBehindMasks();   // the 64 KB mask run reads past MASKS.PP into the rest of the mask segment
         for (ushort w = 1; w <= 3; w++)
             for (ushort da = 0; da < 4; da += 3)
             {
@@ -101,7 +101,11 @@ public class DriverWrapTests
             h.AssertOutsideWindowEqual($"FillRect({x},7,{w},0) on A400");
         }
 
-        // latch copy from behind the window (B000:0000 = A400 page offset C000h) into the first page, and back out
+        // load the latches inside the window, then latch copy from behind the window (B000:0000 = A400 page offset
+        // C000h; the reads there leave the latches alone, so the stale ones are written) into the first page, and back
+        // out
+        h.CallOriginal(0x06DE, 123, 45);
+        h.Port.GetPixel(123, 45);
         h.CallOriginal(0x06B9, 0x0010, 0xB000, 0x0100, 0xA000, 40, 30);
         h.Port.LatchCopy(0x0010, 0xB000, 0x0100, 0xA000, 40, 30);
         h.AssertVramEqual("LatchCopy B000 -> A000");

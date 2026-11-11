@@ -26,4 +26,4 @@ Map Mask und Video-RAM; Ende Map Mask 0Fh. Kein Zufall, keine Uhr, kein DS-Zugri
 
 ## Prüfung
 `DriverDifferentialTests.MaskedBlit_35DF_matches_original`, `MaskFill_3CE8_matches_original`: je 40 zufällige Aufrufe
-(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Rand: `Rectangles_across_the_border_wrap_like_the_original` (`tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`). w = 1–3 (65536 Byte je Zeile, gerader Maskenoffset, ganzes Maskensegment des RefEmu im Port, Seiten A000h/A400h): `Narrow_masked_blits_and_fills_match_original` in `tests/Traders.Tests/Vga/DriverWrapTests.cs`. Nicht geprüft: ungerader Maskenoffset mit w < 4 (Original hängt, s. o.).
+(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Rand: `Rectangles_across_the_border_wrap_like_the_original` (`tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`). w = 1–3 (65536 Byte je Zeile, gerader Maskenoffset, Maskensegment des RefEmu hinter MASKS.PP geleert, Seiten A000h/A400h): `Narrow_masked_blits_and_fills_match_original` in `tests/Traders.Tests/Vga/DriverWrapTests.cs`. Nicht geprüft: ungerader Maskenoffset mit w < 4 (Original hängt, s. o.).
