@@ -2,7 +2,8 @@
 """Coverage of T.EXE: generates the porting tables in STATUS.md from the original, findings, code markers and tests.
 
 Sources (none of them is entered into the tables by hand):
-  - original/dos/T.EXE           segments and far entry points (same method as tools/segmap.py)
+  - gamedata/dos/T.EXE           segments and far entry points (same method as tools/segmap.py); gamedata/ is the link
+                                 created by tools/claude/fetch-reference.sh, or set TRADERS_GAMEDATA
   - docs/routines/SSSS_OOOO_*.md findings; covered are the addresses SSSS:OOOO in the title line
   - src/**/*.cs                  markers "[ORIGINAL] SSSS:OOOO" at the ported code
   - tests/**/*.cs                explicit tags "[DIFFERENTIAL] SSSS:OOOO" in differential tests against the RefEmu;
@@ -17,6 +18,7 @@ Usage:
                                        differential test or a marker/tag has no valid address (part of tools/pruefen.sh)
 """
 import collections
+import os
 import pathlib
 import re
 import struct
@@ -81,8 +83,13 @@ def scan(tag: str, pattern: re.Pattern, files, errors):
     return hits
 
 
+def exe_path() -> pathlib.Path:
+    base = os.environ.get("TRADERS_GAMEDATA")
+    return (pathlib.Path(base) if base else ROOT / "gamedata") / "dos" / "T.EXE"
+
+
 def build():
-    size, far = segments(ROOT / "original/dos/T.EXE")
+    size, far = segments(exe_path())
     found = findings()
     errors = []
     markers = scan("[ORIGINAL]", MARKER, sorted((ROOT / "src").rglob("*.cs")), errors)
@@ -122,6 +129,10 @@ def build():
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "--check"
+    if not exe_path().exists():
+        # Without the original files the segment table cannot be computed; report it instead of passing silently.
+        print(f"Abdeckung nicht geprüft: {exe_path()} fehlt (tools/claude/fetch-reference.sh original)")
+        return 4
     block, errors = build()
     text = STATUS.read_text(encoding="utf-8")
     if BEGIN not in text or END not in text:

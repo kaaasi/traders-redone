@@ -10,7 +10,7 @@ namespace Traders.Tests.RefEmu;
 /// </summary>
 public class BootTests
 {
-    [Fact]
+    [GameDataFact]
     public void T_exe_boots_into_vga_graphics()
     {
         var m = MachineTests.NewMachine();
@@ -66,10 +66,10 @@ public class BootTests
         if (seconds >= OriginalProgram.MainMenuTime) Assert.Equal(OriginalProgram.MainMenuFrameHash, frames[^1].Hash);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Boot_to_main_menu_is_deterministic()
     {
-        var dir = Path.Combine(RefEmuPaths.RepoRoot, "original", "dos");
+        var dir = TestGameData.DosDir;
         var a = OriginalProgram.BootToMainMenu(dir);
         Assert.Equal(OriginalProgram.MainMenuFrameHash, a.Frame().Hash());
         var b = OriginalProgram.BootToMainMenu(dir);

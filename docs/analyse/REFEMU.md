@@ -92,13 +92,13 @@ Vektoren 60h–67h sind leer, außer 64h bei `RecordSoundDriver` (Vorgabe: an).
 | 14,0–15,2 s | Eingabe: viermal Taste „1“ |
 | 17,3 s | Hauptmenü (Bild-Hash `DBAB2787F9AA5222`) |
 
-Bilder: `tests/Traders.Tests/RefEmu/Data/refemu-codeabfrage.png`, `refemu-hauptmenue.png`.
+Bilder: Referenz-Repo `refemu/refemu-codeabfrage.png`, `refemu-hauptmenue.png` (`tools/claude/fetch-reference.sh refemu`).
 Frames und Ereignisprotokoll eines Startlaufs schreibt `REFEMU_OUT=<ordner> dotnet test … --filter FullyQualifiedName~RefEmu.BootTests` lokal.
 
 ## Verwendung
 
 ```csharp
-var m = new PcMachine(new MachineOptions { HostDirectory = "original/dos" });
+var m = new PcMachine(new MachineOptions { HostDirectory = "gamedata/dos" });
 m.LoadProgram("T.EXE");
 m.RunFor(10.0);                          // 10 s emulierte Zeit
 FrameDump.Capture(m.Vga).WritePng("frame.png");

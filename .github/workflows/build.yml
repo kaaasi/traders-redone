@@ -14,7 +14,6 @@ on:
       - '**'
       - '!docs/**'
       - '!**/*.md'
-      - '!reference/**'
       - 'docs/routines/**'
       - 'STATUS.md'
   pull_request:
@@ -23,7 +22,6 @@ on:
       - '**'
       - '!docs/**'
       - '!**/*.md'
-      - '!reference/**'
       - 'docs/routines/**'
       - 'STATUS.md'
   workflow_dispatch:
@@ -44,10 +42,26 @@ jobs:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      # Read-only fine-grained token for the private repo kaaasi/traders-referenz (original files). Without the secret the
+      # run is limited to the tests without original data and says so in the summary.
+      HAS_REFERENZ_TOKEN: ${{ secrets.TRADERS_REFERENZ_TOKEN != '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+      - name: Original files from kaaasi/traders-referenz
+        if: env.HAS_REFERENZ_TOKEN == 'true'
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: kaaasi/traders-referenz
+          token: ${{ secrets.TRADERS_REFERENZ_TOKEN }}
+          path: .referenz
+          sparse-checkout: original
+          persist-credentials: false
+      - name: Link gamedata/
+        if: env.HAS_REFERENZ_TOKEN == 'true'
+        run: ln -sfn "$PWD/.referenz/original" gamedata
       # Exactly the SDK from global.json, as in the Claude session (release claude-werkzeuge). global-json-file would
       # install the latest patch, and the runner image ships newer patches that rollForward latestPatch would pick, so
       # the SDK goes into its own folder that contains nothing else.
@@ -66,10 +80,12 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-linux-${{ hashFiles('**/packages.lock.json', 'global.json') }}
       # The same check as locally; the table goes into the run summary.
+      # Full check (three test runs) with original data; without them only the run without data.
       - name: tools/pruefen.sh
         run: |
           set -o pipefail
-          bash tools/pruefen.sh | tee pruefen.txt
+          if [ -f gamedata/dos/T.EXE ]; then bash tools/pruefen.sh | tee pruefen.txt
+          else bash tools/pruefen.sh --schnell | tee pruefen.txt; fi
       - name: Zusammenfassung
         if: success() || failure()
         run: if [ -f pruefen.txt ]; then sed -n '/^### Markerbericht/,$p' pruefen.txt >> "$GITHUB_STEP_SUMMARY"; fi

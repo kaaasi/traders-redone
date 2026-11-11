@@ -61,9 +61,9 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 - Ändert sich der Head nach dem Review, ist eine **Nachprüfung** des Deltas nötig (`…-nachpruefung.md`) – außer in den Fällen von
   Punkt 4 unten.
 - **Sparsame Kette:**
-  1. **Erstreview** (Spur- oder Integrations-PR): vollständig (Claude Opus) – `tools/pruefen.sh`, Mutationen der neuen Tests,
+  1. **Erstreview** (Spur- oder Integrations-PR): vollständig (Claude Opus) – alle drei Läufe von `tools/pruefen.sh`, Mutationen der neuen Tests,
      Differenztests gegen RefEmu nachvollzogen, Fehlerfälle, Fundstellen in `T.EXE`.
-  2. **Fixlauf:** behebt die Befunde, `tools/pruefen.sh`.
+  2. **Fixlauf:** behebt die Befunde, `tools/pruefen.sh --schnell`.
   3. **Nachprüfung** nur, wenn der Fixlauf **P0/P1** behebt: nur Delta, Gegenbeispiele und Rückmutationen dieser Befunde.
   4. **Delta-Prüfung der Leitstelle** statt Nachprüfung, wenn das Delta **nur P2/P3** behebt oder nur Rebase ohne Konflikt ist
      (`git range-diff`): Delta (`compare`/`--stat`), CI auf dem Head, Testtabelle des Fixlaufs; Vermerk im Merge-Kommentar
@@ -101,13 +101,14 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 GitHub Free erzwingt nichts davon ([anhang.md](anhang.md) B); die Liste ist verbindlich und wird im Merge-Kommentar abgehakt:
 
 1. [ ] **Head-SHA** = vom Review freigegebener SHA (sonst Nachprüfung; Ausnahmen mit Delta-Prüfung nach §5 Punkt 4).
-2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review neu: `tools/pruefen.sh` auf dem
+2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review neu: `tools/pruefen.sh --schnell` mit Originaldaten auf dem
    Merge-Ergebnis (`main` + PR) lokal wiederholen, Tabelle im Merge-Kommentar.
 3. [ ] **CI grün auf genau diesem Head** (Check-Runs des Head-SHA). Nur `docs/**`/`*.md` geändert: CI startet nicht
    (Pfadfilter in `build.yml`) → „entfällt, nur Doku“ nach Bestätigung per `compare`/`--stat`. Gilt nicht für
    `docs/routines/**` und `STATUS.md`: sie sind Eingaben von `tools/abdeckung.py --check`, dafür läuft die CI immer.
-4. [ ] **Testnachweis:** Tabelle von `tools/pruefen.sh` zum Head (PR, Fixlauf oder Review). Ein Review „nur Codelesen“ oder an
-   unverifiziertem Stand zählt nicht.
+4. [ ] **Originaldaten-Nachweis:** Tabelle von `tools/pruefen.sh` mit Originaldaten zum Head (PR, Fixlauf, Review oder CI mit
+   `TRADERS_REFERENZ_TOKEN`); bei Integrations-PRs alle drei Läufe einmal. Ein Review „nur Codelesen“, an unverifiziertem Stand
+   oder „Originaldaten nicht geprüft“ zählt nicht.
 5. [ ] **Review-Freigabe** als Datei in `docs/reviews/`; offene P0/P1/P2 behoben oder vom Nutzer ausdrücklich zurückgestellt.
 6. [ ] Kein Draft; Pflichtangaben vollständig; Restlücken in `docs/arbeitspakete.md` übertragen.
 7. [ ] Merge **mit SHA-Bindung** (`PUT /repos/kaaasi/traders-redone/pulls/<nr>/merge` mit `sha=<freigegebener Head>`,

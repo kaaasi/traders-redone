@@ -10,8 +10,11 @@
 > Repo kaaasi/traders-redone. Arbeite nach `docs/vorlagen/spur-start.md`. Spur: `<name>`. Agent: Claude.
 > Unbeaufsichtigt, keine Rückfragen. Teile und Selbstfortsetzung nach Abschnitt „Teile und Fortsetzung“; das Anlegen
 > einer Fortsetzung per `create_trigger` ist autorisiert (höchstens 3 je Spur). Modell der Spur: `<modell>`.
-> Zugriff zuerst prüfen: `git ls-remote https://github.com/kaaasi/traders-redone HEAD`. Scheitert das, sofort blockiert
-> melden (genaue Fehlermeldung), keine Code-Arbeit; gibt es einen PR der Spur, dort Kommentar und Label `spur-wartet`.
+> Zugriff zuerst prüfen: `git ls-remote https://github.com/kaaasi/traders-redone HEAD` und
+> `git ls-remote https://github.com/kaaasi/traders-referenz HEAD`. Scheitert das Referenz-Repo, `add_repo` (ggf. erst per
+> `ToolSearch` mit `select:mcp__claude-code-remote__add_repo` laden; meist nicht vorhanden) für `kaaasi/traders-referenz`
+> (access read) und erneut prüfen; bleibt eines unerreichbar, sofort blockiert melden (genaue Fehlermeldungen), keine
+> Code-Arbeit; gibt es einen PR der Spur, dort Kommentar und Label `spur-wartet`.
 
 **Einzelner Folgeteil ohne Fortsetzung:** wie oben, aber statt „Teile und Selbstfortsetzung … (höchstens 3 je Spur).“ der Satz
 „Teile nach Abschnitt ‚Teile und Fortsetzung‘; nur Teil <n>, keine Fortsetzung anlegen.“
@@ -27,13 +30,15 @@ Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Be
 
 1. Lies `AGENTS.md`, `docs/prozess/zusammenarbeit.md` §2–4 und in `docs/arbeitspakete.md` **nur** die aktuelle Runde und deine
    Spur. Archiv, alte Reviews und `docs/prozess/anhang.md` nur bei konkretem Bedarf.
-2. Einrichten nach `AGENTS.md` §3 (Claude: zusätzlich `CLAUDE.md`); reine Codeaufgabe ohne Bildvergleich: Klon ohne `reference/`.
+2. Einrichten nach `AGENTS.md` §3 (Claude: zusätzlich `CLAUDE.md`), Originaldaten nach `gamedata/`
+   (`tools/claude/fetch-reference.sh original`). Geplante Läufe erben Schreibrecht auf das Referenz-Repo, Spuren schreiben dort
+   trotzdem nie; fehlen Daten oder Bilder, im PR melden – ablegen nur Leitstelle oder Nutzer.
 3. Offener PR der Spur mit Bearbeiter? Nur nach Übergabekommentar weiterarbeiten (Übernahme: `zusammenarbeit.md` §2), sonst den
    Nutzer fragen (geplante Läufe: „Teile und Fortsetzung“ Schritt 1). Neu: Branch `paket/<spur>` von aktuellem `main`, sofort
    Draft-PR mit `Bearbeiter: <Agent>` und Base-SHA.
 4. Harte Regeln: Befund in `docs/routines/` → Differenztest gegen RefEmu (rot bzw. fehlend) → Port → grün; Dateigrenzen;
    `[ORIGINAL]`/`[APPROX]`; Mehrrundenprobe, wenn Phasenfolge, Geld, Vorräte oder KI berührt sind.
-5. Vor jedem Push: `git fetch origin && git rebase origin/main`, `tools/pruefen.sh` (`AGENTS.md` §5).
+5. Vor jedem Push: `git fetch origin && git rebase origin/main`, `tools/pruefen.sh --schnell` (`AGENTS.md` §5).
 6. Fertig: Beschreibung nach `.github/pull_request_template.md`, Draft aufheben, Status im eigenen Abschnitt von
    `docs/arbeitspakete.md`.
 7. **Immer zum Schluss** (fertig wie unterbrochen): Übergabekommentar nach `docs/handoffs/VORLAGE.md` (`Bearbeiter: frei`).
@@ -51,9 +56,9 @@ oder einen einzelnen Folgeteil nennt (dann ohne Schritt 5).
 2. **Ein Branch, ein PR:** Teil 1 legt `paket/<spur>` von aktuellem `main` an und öffnet den Draft-PR mit der Teilliste als
    Aufgabenliste. Jeder Teil sind Commits auf diesem Branch; eine Fortsetzung übernimmt ihn nach der Übergabe – nacheinander, nie
    gleichzeitig. Vor dem Push auf `origin/main` rebasen, dann `git push --force-with-lease`.
-3. **Teil abschließen:** grünes `tools/pruefen.sh`, gepusht, Teil im PR abgehakt, Übergabe mit „Fortsetzungen verbraucht: n von 3“.
+3. **Teil abschließen:** grünes `tools/pruefen.sh --schnell`, gepusht, Teil im PR abgehakt, Übergabe mit „Fortsetzungen verbraucht: n von 3“.
    Der PR bleibt Draft, bis alle Teile fertig sind; dann den nächsten Teil im selben Lauf beginnen, solange Zeit bleibt.
-4. **Teil blockiert** (kein grünes `pruefen.sh`, Beleg fehlt, fremde Datei nötig, Frage an den Nutzer): Draft mit Übergabe, Label
+4. **Teil blockiert** (kein grünes `pruefen.sh --schnell`, Beleg fehlt, fremde Datei nötig, Frage an den Nutzer): Draft mit Übergabe, Label
    `spur-wartet`, in der Übergabe „blockiert – Entscheidung Nutzer“ und Grund. Keine Fortsetzung.
 5. **Fortsetzung anlegen** (nur wenn Teile offen sind, nichts blockiert und n < 3): vorher `list_triggers` – steht für die Spur
    schon eine Aufgabe aus, keine weitere; `create_trigger` mit `run_once_at` etwa 10 Minuten später, Name

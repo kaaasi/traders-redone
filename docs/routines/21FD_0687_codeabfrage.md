@@ -50,5 +50,5 @@ aufzeichnen, `random` genau zweimal (0 und 0x3FF) aufrufen.
 
 ## Prüfung
 Referenzlauf `tests/Traders.Tests/RefEmu/BootTests.cs`: vier Tastendrücke „1“ ab 14 s → Hauptmenü bei
-17,3 s (Bilder `tests/Traders.Tests/RefEmu/Data/refemu-codeabfrage.png`, `refemu-hauptmenue.png`).
+17,3 s (Bilder im Referenz-Repo: `refemu/refemu-codeabfrage.png`, `refemu-hauptmenue.png`).
 Im Video 1 erscheint die Abfrage mit „CODE: A-21“ (anderer Uhrwert).

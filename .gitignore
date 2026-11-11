@@ -13,3 +13,15 @@ __pycache__/
 
 ci-out/
 .worktrees/
+
+# Original files and reference material live only in the private repo kaaasi/traders-referenz (AGENTS.md 2.1)
+/gamedata
+/original/
+/reference/
+docs/analyse/disasm/
+*.PP
+*.CMF
+T.EXE
+FXDRIVER.EXE
+*.adf
+/.referenz/

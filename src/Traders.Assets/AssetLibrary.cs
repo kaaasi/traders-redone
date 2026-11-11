@@ -32,13 +32,16 @@ public sealed class AssetLibrary
             music);
     }
 
-    /// <summary>Finds original/dos by walking up from the given start directory (default: app base).</summary>
+    /// <summary>
+    /// Finds gamedata/dos (original files, loaded from the private repo kaaasi/traders-referenz) by walking up from the
+    /// given start directory (default: app base).
+    /// </summary>
     public static string? FindOriginalDos(string? start = null)
     {
         var dir = new DirectoryInfo(start ?? AppContext.BaseDirectory);
         while (dir is not null)
         {
-            var candidate = Path.Combine(dir.FullName, "original", "dos");
+            var candidate = Path.Combine(dir.FullName, "gamedata", "dos");
             if (File.Exists(Path.Combine(candidate, ResourceTable.Executable))) return candidate;
             dir = dir.Parent;
         }

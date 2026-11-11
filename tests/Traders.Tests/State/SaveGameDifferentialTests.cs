@@ -19,7 +19,7 @@ public class SaveGameDifferentialTests(ITestOutputHelper output)
     private const ushort Seg = 0x2336, SaveOff = 0x000A, LoadOff = 0x0539;
 
     private static OriginalProgram Boot() =>
-        OriginalProgram.BootToMainMenu(Path.Combine(RefEmuPaths.RepoRoot, "original", "dos"));
+        OriginalProgram.BootToMainMenu(TestGameData.DosDir);
 
     private static Dgroup ReadDs(OriginalProgram p) =>
         new(p.Machine.Mem.ReadBlock(p.Dgroup, 0, L.Size));
@@ -36,7 +36,7 @@ public class SaveGameDifferentialTests(ITestOutputHelper output)
         return ds;
     }
 
-    [Theory]
+    [GameDataTheory]
     [InlineData(11)]
     [InlineData(12)]
     public void Save_writes_the_same_file_as_the_original(int seed)
@@ -66,7 +66,7 @@ public class SaveGameDifferentialTests(ITestOutputHelper output)
         Assert.Equal(Json(expectedState), Json(GameStateMapper.Load(after)));
     }
 
-    [Theory]
+    [GameDataTheory]
     [InlineData(21, 22)]
     [InlineData(23, 24)]
     public void Load_sets_the_same_data_segment_as_the_original(int fileSeed, int previousSeed)
@@ -116,7 +116,7 @@ public class SaveGameDifferentialTests(ITestOutputHelper output)
         return (x, y);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Load_of_a_short_file_fails_and_changes_no_saved_field()
     {
         var p = Boot();

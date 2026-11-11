@@ -8,14 +8,14 @@ public class MachineTests
 {
     internal static PcMachine NewMachine(bool sound = true) => new(new MachineOptions
     {
-        HostDirectory = Path.Combine(RefEmuPaths.RepoRoot, "original", "dos"),
+        HostDirectory = TestGameData.DosDir,
         RecordSoundDriver = sound,
     });
 
-    [Fact]
+    [GameDataFact]
     public void Mz_header_of_t_exe_is_parsed()
     {
-        var h = MzLoader.ParseHeader(File.ReadAllBytes(RefEmuPaths.Dos("T.EXE")));
+        var h = MzLoader.ParseHeader(File.ReadAllBytes(TestGameData.Dos("T.EXE")));
         Assert.Equal(3394, h.RelocationCount);
         Assert.Equal(0x360, h.HeaderParagraphs);
         Assert.Equal((ushort)0x0000, h.InitialCs);
@@ -25,7 +25,7 @@ public class MachineTests
         Assert.Equal(0x2E6E0, h.ImageSize);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Loading_applies_relocations_and_builds_psp()
     {
         var m = NewMachine();
@@ -42,7 +42,7 @@ public class MachineTests
         Assert.Equal((ushort)0x20CD, m.Mem.Read16(m.PspSegment, 0));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Default_vectors_point_to_host_stubs_and_int64_is_optional()
     {
         var with = NewMachine(sound: true);
