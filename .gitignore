@@ -34,3 +34,6 @@ docs/analyse/disasm/
 *.zip
 *.jpg
 refemu-*.png
+
+# Call graph output of tools/callgraph.py (contains original texts; local only, F1)
+docs/analyse/callgraph/
