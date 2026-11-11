@@ -9,7 +9,7 @@ abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](arc
 
 Grundlage: Umstellungsplan im claude.ai-Projekt „Traders Redone“ (`claude/UMSTELLUNGSPLAN.md`), Entscheidungen D1–D6 vom
 10.11.2026: Originale bleiben im Repo (D1, D2 entfällt), Rollen wie Eishockey (D3), Windows-Build nur per Hand (D4), Kommentare
-Deutsch (D5), R1 setzt die Leitstelle selbst um und eine frische Sitzung reviewt (D6).
+Deutsch (D5, ersetzt 11.11.2026: Kommentare Englisch, `AGENTS.md` §1), R1 setzt die Leitstelle selbst um und eine frische Sitzung reviewt (D6).
 
 **Leitstelle R1:** Claude (Sitzung vom 10.11.2026). Folge: ① → ② → ③; ① und ② sind dateigetrennt und dürfen parallel
 reviewt werden, gemergt wird in dieser Folge.
@@ -35,9 +35,12 @@ reviewt werden, gemergt wird in dieser Folge.
 
 - **Inhalt:** `tools/abdeckung.py` (auf `tools/segmap.py`): Segmente und Einsprünge aus `T.EXE`, `[ORIGINAL] <seg:off>`-Marker im
   Code, Befunde in `docs/routines/`, Differenztests → erzeugte Tabellen in `STATUS.md` zwischen Markierungskommentaren;
-  `--check` in `tools/pruefen.sh`. Vorhandene Routinen (`21FD:01BA`, `2336:000A/0539`, `Int16Math`) mit Markern versehen.
-- **Abnahme:** zweiter Lauf ohne Diff; `--check` wird rot, wenn ein Marker ohne Befund oder ein Befund ohne Test auftaucht.
-- **Status:** fertig, Review offen (PR #6, gestapelt auf #4).
+  `--check` in `tools/pruefen.sh`. Vorhandene Routinen (`21FD:01BA`, `2336:000A/0539`) mit Markern versehen; `Int16Math` ist
+  keine `T.EXE`-Routine (IDIV-Semantik) und verweist ohne Adressmarker auf `docs/routines/Int16Math_IDIV.md`.
+- **Abnahme:** zweiter Lauf ohne Diff; `--check` wird rot, wenn ein Marker ohne Befund, ein portierter Befund ohne
+  `[DIFFERENTIAL]`-Test oder ein Marker ohne gültige Adresse auftaucht.
+- **Status:** Fixlauf R6-1–R6-3 und P3 der Runde (R4-1–R4-3, R5-1) sowie Kommentare Englisch erledigt; Delta-Prüfung der
+  Leitstelle offen (PR #6).
 
 ### Zuständigkeit gemeinsamer Dateien in R1
 

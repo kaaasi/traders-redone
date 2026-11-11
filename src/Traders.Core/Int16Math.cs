@@ -4,6 +4,8 @@ namespace Traders.Core;
 /// Helpers that reproduce 16-bit 8086/Turbo C semantics. Original intermediate results
 /// are often 16 bit wide and wrap; porting them with 32/64-bit maths changes behaviour.
 /// </summary>
+// No T.EXE routine, hence no marker with an address: 286 instruction semantics (IDIV), finding
+// docs/routines/Int16Math_IDIV.md, checked against the RefEmu by Int16MathTests.
 public static class Int16Math
 {
     /// <summary>Wraps to a signed 16-bit value (C <c>int</c> in Turbo C).</summary>

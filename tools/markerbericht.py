@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Zählt die Marker [ORIGINAL] und [APPROX] je Projekt unter src/ und gibt eine Markdown-Tabelle aus.
+"""Counts the markers [ORIGINAL] and [APPROX] per project under src/ and prints a Markdown table.
 
-[ORIGINAL] = aus T.EXE belegt (mit Fundstelle Segment:Offset), [APPROX] = nicht belegt (mit Begründung), siehe AGENTS.md.
-Aufruf: markerbericht.py [wurzelordner]
+[ORIGINAL] = backed by T.EXE (with location segment:offset), [APPROX] = not backed (with reason), see AGENTS.md.
+Usage: markerbericht.py [root folder]
 """
 import pathlib
 import sys

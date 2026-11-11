@@ -91,6 +91,7 @@ public static class SaveGame
     private static SaveSlot Index(SaveSlot site, int delta) => site with { Offset = site.Offset + delta };
 
     /// <summary>Builds the file content from a DGROUP image (2336:000A). Unused tail bytes are zero.</summary>
+    // [ORIGINAL] 2336:000A – save game, finding docs/routines/2336_000A_spielstand.md
     public static byte[] Write(Dgroup ds)
     {
         var file = new byte[FileSize];
@@ -115,6 +116,7 @@ public static class SaveGame
     /// file is not exactly 0x900 bytes; the image is then unchanged. Fields not in the save
     /// (e.g. land type, sound, random seed) keep their value.
     /// </summary>
+    // [ORIGINAL] 2336:0539 – load game, finding docs/routines/2336_000A_spielstand.md
     public static bool Read(ReadOnlySpan<byte> file, Dgroup ds)
     {
         if (file.Length != FileSize) return false;
