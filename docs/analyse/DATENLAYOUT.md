@@ -12,7 +12,7 @@ danach BSS (beim Start null). C#-Gegenstück: `src/Traders.Core/State/` (`Dgroup
 
 | Quelle | Inhalt |
 |---|---|
-| `tools/datenlayout/dsrefs.py` | Sammelt alle DS-Zugriffe aus `docs/analyse/disasm/*.asm` (9296 Zugriffe): Offset, Breite, Lesen/Schreiben, Indexregister, Funktion. `python3 -I tools/datenlayout/dsrefs.py docs/analyse/disasm refs.json refs.md` |
+| `tools/datenlayout/dsrefs.py` | Sammelt alle DS-Zugriffe aus der Disassemblierung (`*.asm`, `tools/claude/fetch-reference.sh disasm` bzw. `tools/segmap.py`) (9296 Zugriffe): Offset, Breite, Lesen/Schreiben, Indexregister, Funktion. `python3 -I tools/datenlayout/dsrefs.py ~/traders-referenz/analyse/disasm refs.json refs.md` |
 | `tools/datenlayout/savegame.py` | Liest die Feldreihenfolge aus der Speicherroutine `2336:000A` → `tests/Traders.Tests/State/SaveGameSites.txt` (Test vergleicht mit der C#-Beschreibung) |
 | `2336:000A` / `2336:0539` | Spielstand speichern / laden – **vollständige Liste des persistenten Zustands** |
 | `0E31:0003` (+ `0149`, `01CD`, `023D`) | Neue Partie: Startwerte aller Spieler- und Weltfelder |

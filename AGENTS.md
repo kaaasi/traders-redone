@@ -15,10 +15,13 @@ Portierung von **Traders – The Intergalactic Trading Game** (Linel, DOS 1991/9
 
 ## 2. Harte Regeln
 
-1. **Originaldaten nur an ihrem Platz:** Originaldateien liegen in `original/` (Prüfsummen `original/SHA256SUMS.*`),
-   Videobilder in `reference/`, Disassemblierung in `docs/analyse/disasm/`, RefEmu-Bildabzüge in `tests/**/Data/`. Diese
-   Dateien nie verändern und nirgends sonst hin kopieren (auch nicht in PR-Texte); neue Ablagen dort nur durch Leitstelle
-   oder Nutzer per PR. Wahrheit ist `original/dos/T.EXE` – bei Abweichungen zum Video gilt der RefEmu.
+1. **Originaldateien, Videobilder und daraus Abgeleitetes niemals in dieses Repo committen** – auch nicht in Tests, Doku
+   oder PR-Texten (Nutzer 11.11.2026). Sie liegen nur im privaten Repo
+   [`kaaasi/traders-referenz`](https://github.com/kaaasi/traders-referenz): `original/dos/`, `original/amiga/`,
+   Disassemblierung `analyse/disasm/`, RefEmu-Bildabzüge `refemu/`, Videobilder `videos/`; `.gitignore` schützt `gamedata/`,
+   `*.PP`, `T.EXE` usw. Dort ablegen nur Leitstelle und Nutzer per PR (`daten/<thema>`). Wahrheit ist `T.EXE` mit den
+   Prüfsummen aus `tools/originale/SHA256SUMS.*` – bei Abweichungen zum Video gilt der RefEmu. In diesem Repo bleiben nur
+   Prüfsummen, Adressen und kurze Befunde in eigenen Worten.
 2. **Nie direkt auf `main` schreiben.** Jede Änderung über Branch und Pull Request.
 3. **Ein Branch – ein Agent.** Wer an einem Branch arbeitet, öffnet sofort einen Draft-PR und trägt sich als Bearbeiter ein.
    Fremde Branches nur nach dokumentierter Übergabe weiterführen.
@@ -42,7 +45,8 @@ Portierung von **Traders – The Intergalactic Trading Game** (Linel, DOS 1991/9
 |---|---|
 | .NET-SDK | Version aus `global.json` (10.0.402, `latestPatch`); ohne Microsoft-Server: Release `claude-werkzeuge` (`tools/claude/setup-workspace.sh`, braucht `gh`). |
 | NuGet-Pakete | `dotnet restore TradersRedone.slnx --locked-mode` (Lockdateien eingecheckt); ohne nuget.org: Offline-Spiegel im selben Release. Bewusste Paketänderung: `dotnet restore --force-evaluate`, Lock-Diff prüfen, mitcommitten. |
-| Originaldateien, Videobilder | im Repo (`original/`, `reference/`); für reine Codeaufgaben `reference/` per Sparse-Checkout auslassen ([reference/README.md](reference/README.md)). |
+| Originaldateien | Referenz-Repo (Leserecht nötig): `tools/claude/fetch-reference.sh original` → `~/traders-referenz/`, Verknüpfung `gamedata/` (prüft die Hashes). Ohne Zugriff: eigene Kopie der DOS-Fassung nach `gamedata/dos/` bzw. `TRADERS_GAMEDATA`, sonst den Nutzer fragen. |
+| Disassemblierung, Videobilder | `fetch-reference.sh disasm` bzw. `videos` (nur bei Bedarf); Disassemblierung auch lokal: `python3 -I tools/segmap.py gamedata/dos/T.EXE /tmp/segmap`. |
 | Analyse | `ndisasm` (NASM) für `tools/segmap.py`; Python 3.10+. |
 
 Prüfen: `tools/pruefen.sh`. Scheitern Build, Tests oder GitHub-Schreibaktionen an der Umgebung (kein `dotnet`, kein Netz,
@@ -72,17 +76,25 @@ Testergebnisse und werden als blockiert dokumentiert; Proxy, Sandbox und Freigab
 - **Regelrelevante Pixel** (Kollision gegen `V-RAKETE`, Sichtbarkeit gegen `V-BERGE`) nutzen den kanonischen Original-Atlas im Kern.
 
 **Originaltreue:** (1) **Vorlage:** `T.EXE` (Disassemblierung `tools/segmap.py`, Segmentkarte `docs/analyse/segments.md`,
-Datenlayout `docs/analyse/DATENLAYOUT.md`), RefEmu-Lauf, Videobilder `reference/`. (2) **Belegen:** Differenztest gegen RefEmu.
+Datenlayout `docs/analyse/DATENLAYOUT.md`), RefEmu-Lauf, Videobilder (`fetch-reference.sh videos`). (2) **Belegen:** Differenztest gegen RefEmu.
 (3) **Bild:** Szene rendern und pixelgenau mit dem RefEmu-Framebuffer vergleichen; Video nur, wo der RefEmu nicht hinkommt.
 (4) **Markieren** nach Regel 2.8.
 
 ## 5. Tests
 
-- **Einheitliche Prüfung `tools/pruefen.sh`** (Hashes, Architektur, Restore `--locked-mode`, Build mit Warnungen als Fehler, alle
-  Tests, Markerbericht; gibt die Tabelle für PR und Übergabe aus). Die Originaldaten liegen im Repo, daher gibt es **einen**
-  Lauf; `--schnell` ist gleichbedeutend. Während der Arbeit nur betroffene Tests (`dotnet test … --filter …`), die volle Prüfung
-  vor dem Push.
-- Die CI (`build.yml`) führt dieselbe Prüfung auf Ubuntu aus; Windows nur per Hand. Grüne CI auf genau dem Head ist Pflicht für
+- **Einheitliche Prüfung `tools/pruefen.sh`** (Hashes, Architektur, Abdeckung, Restore `--locked-mode`, Build mit Warnungen als
+  Fehler, Tests, Markerbericht; gibt die Tabelle für PR und Übergabe aus):
+  - **Normaler PR, Fixlauf, Nachprüfung:** `--schnell` – ein Lauf mit Originaldaten (`TR_REQUIRE_GAMEDATA=1`); ohne Daten läuft er
+    ohne sie → im PR „Originaldaten nicht geprüft“.
+  - **Alle drei Läufe** (ohne Option: mit Daten, ohne Daten `TR_SKIP_GAMEDATA=1`, Pflichtlauf ohne Daten, der scheitern **muss**)
+    bei Integrations-PRs, Erstreviews und Änderungen an der Test-Infrastruktur (`tests/**/Support/`, Testprojekte,
+    `tools/pruefen.sh`, `.github/`).
+  - Während der Arbeit nur betroffene Tests (`dotnet test … --filter …`), die volle Prüfung vor dem Push.
+- Tests mit Originaldaten **nur** mit `[GameDataFact]`/`[GameDataTheory]` und `TestGameData.Dos(…)`
+  (`tests/Traders.Tests/Support/TestGameData.cs`); ohne Daten werden sie sichtbar übersprungen. Nie „ohne Daten einfach `return`“.
+- Die CI (`build.yml`) führt dieselbe Prüfung auf Ubuntu aus und holt die Originaldaten über das Secret
+  `TRADERS_REFERENZ_TOKEN` (nur Leserecht auf `kaaasi/traders-referenz`); fehlt es, läuft sie ohne Daten und meldet das. Windows
+  nur per Hand. Grüne CI auf genau dem Head ist Pflicht für
   den Merge; Testanzahl ist keine Abnahme.
 - **Differenztests** über `OriginalProgram` (`LoadOnly`, `BootToMainMenu`, `Call`, `DataSegment`, `Frame`); Grenzfälle und
   RNG-Zustand nach der Routine immer mitprüfen.
@@ -114,7 +126,7 @@ Jede Nachricht und jede gelesene Datei kostet Tokens – bei allen Agenten:
   Arbeitswegs, keine Wiederholung dessen, was in PR, Review oder Repo steht; ausführlich nur auf Wunsch.
 - **Vorlagen nicht ausschreiben:** Spurstart, Review-Anfrage und Leitstelle laufen über die **Kurzaufrufe** in `docs/vorlagen/`.
 - **Gezielt lesen:** in `docs/arbeitspakete.md` nur die aktuelle Runde und die eigene Spur; `docs/archiv/`, ältere Reviews,
-  `docs/analyse/disasm/` und `reference/` nur bei Bedarf. Diffs zuerst mit `--stat`, Logs gefiltert (`tail`, `grep`).
+  Disassemblierung und Videobilder nur bei Bedarf laden. Diffs zuerst mit `--stat`, Logs gefiltert (`tail`, `grep`).
 - **Lange Inhalte ins Repo** (Bericht, Plan, Review), im Chat nur der Verweis.
 
 ## 8. Wo was steht
@@ -131,3 +143,4 @@ Jede Nachricht und jede gelesene Datei kostet Tokens – bei allen Agenten:
 | Reviews / abgeschlossene Runden | `docs/reviews/` / `docs/archiv/` |
 | Routinenbefunde, Analyse, Formate | `docs/routines/`, `docs/analyse/`, `docs/RESSOURCENFORMATE.md` |
 | Erkenntnisse des Vorversuchs | `docs/ERKENNTNISSE_VORVERSUCH.md` |
+| Originaldateien, Disassemblierung, Videobilder | privates Repo `kaaasi/traders-referenz` (`tools/claude/fetch-reference.sh`) |

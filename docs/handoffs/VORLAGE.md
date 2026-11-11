@@ -21,7 +21,9 @@ Als **Kommentar im PR** am Ende jeder Arbeitssitzung, fertig wie bei Abbruch (`d
 ### Tests zum Head-SHA (`tools/pruefen.sh`)
 | Lauf | bestanden | fehlgeschlagen | übersprungen |
 |---|---:|---:|---:|
-| `tools/pruefen.sh` | | | |
+| Mit Originaldaten | | | |
+| Ohne Originaldaten | | | |
+| Pflichtlauf ohne Daten (muss scheitern) | | | |
 
 ### Risiken, Annahmen, neue [APPROX]
 - …

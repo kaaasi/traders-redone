@@ -5,15 +5,15 @@ namespace Traders.Tests;
 
 public class AssetTests
 {
-    [Fact]
+    [GameDataFact]
     public void Executable_is_the_analysed_version()
     {
-        var hash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(OriginalFiles.Dos(ResourceTable.Executable))));
+        var hash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Executable))));
         Assert.Equal(ResourceTable.ExecutableSha256, hash);
     }
 
     // Reference hashes produced by tools/pp20.py (independent Python implementation).
-    [Theory]
+    [GameDataTheory]
     [InlineData("V-ABEND.PP", 82692, "20dd898d7f71b5d054d266ae8ed494368e1d880b02e8fab23ec1c1e54006f560")]
     [InlineData("V-AHANDE.PP", 82692, "f50fed22651d614341e87b9e2cd9ff708a2ec3a23b7fd85d48537093b4dc9fce")]
     [InlineData("V-ANBAU.PP", 82692, "3a35e18828cbb6e50e541edad1d84b958cfd7aa8e4ee7dc0345c5b949274b4e0")]
@@ -30,26 +30,26 @@ public class AssetTests
     [InlineData("MASKS.PP", 8000, "d1f9d2d657efd842f6286c8a600aca308499315c4f196d11f1287cbe47eef79f")]
     public void PowerPacker_decrunches_like_reference(string file, int length, string sha256)
     {
-        var data = PowerPacker.Decrunch(File.ReadAllBytes(OriginalFiles.Dos(file)));
+        var data = PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(file)));
         Assert.Equal(length, data.Length);
         Assert.Equal(sha256, Convert.ToHexStringLower(SHA256.HashData(data)));
     }
 
-    [Fact]
+    [GameDataFact]
     public void All_vga_pictures_load_with_full_atlas()
     {
         foreach (var (_, vga, _) in ResourceTable.Pictures)
         {
-            var img = VgaImage.Load(OriginalFiles.Dos(vga));
+            var img = VgaImage.Load(TestGameData.Dos(vga));
             Assert.Equal(VgaImage.Width * VgaImage.Height, img.Pixels.Length);
         }
     }
 
-    [Fact]
+    [GameDataFact]
     public void Vga_atlas_starts_after_size_header()
     {
         // Palette (768) + header "00 01 40 01" (height 256, width 320) + pixels from byte 772.
-        var raw = PowerPacker.Decrunch(File.ReadAllBytes(OriginalFiles.Dos("V-ANBAU.PP")));
+        var raw = PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos("V-ANBAU.PP")));
         Assert.Equal(new byte[] { 0x00, 0x01, 0x40, 0x01 }, raw[768..772]);
         var img = VgaImage.FromDecrunched(raw);
         Assert.Equal(raw[772], img[0, 0]);
@@ -57,12 +57,12 @@ public class AssetTests
         Assert.Equal(raw[^1], img[319, 255]);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Rocket_atlas_has_sprites_below_visible_area()
     {
         // Lesson from the previous attempt: V-RAKETE (not V-BERGE) carries the flight sprites
         // in rows 200..255. Make sure that region is not empty.
-        var img = VgaImage.Load(OriginalFiles.Dos("V-RAKETE.PP"));
+        var img = VgaImage.Load(TestGameData.Dos("V-RAKETE.PP"));
         var distinct = new HashSet<byte>();
         for (int y = VgaImage.VisibleHeight; y < VgaImage.Height; y++)
             for (int x = 0; x < VgaImage.Width; x++)
@@ -70,10 +70,10 @@ public class AssetTests
         Assert.True(distinct.Count > 8, $"only {distinct.Count} colours below row 200");
     }
 
-    [Fact]
+    [GameDataFact]
     public void English_text_table_starts_with_known_lines()
     {
-        var t = TextTable.Load(OriginalFiles.Dos(ResourceTable.EnglishText));
+        var t = TextTable.Load(TestGameData.Dos(ResourceTable.EnglishText));
         // 303 game lines plus the developers' trailing marker "--- max 303 Lines ---" (no CRLF).
         Assert.Equal(304, t.Count);
         Assert.Equal("--- max 303 Lines ---", t[303]);
@@ -83,10 +83,10 @@ public class AssetTests
         Assert.Equal("WEEKLY BALANCE", t[9]);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Png_writer_produces_valid_signature()
     {
-        var img = VgaImage.Load(OriginalFiles.Dos("V-MENU.PP"));
+        var img = VgaImage.Load(TestGameData.Dos("V-MENU.PP"));
         using var ms = new MemoryStream();
         PngWriter.WriteIndexed(ms, VgaImage.Width, VgaImage.Height, img.Pixels, img.Palette);
         var bytes = ms.ToArray();

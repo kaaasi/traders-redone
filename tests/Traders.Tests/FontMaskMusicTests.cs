@@ -4,9 +4,9 @@ namespace Traders.Tests;
 
 public class FontMaskMusicTests
 {
-    private static FontSet Fonts => FontSet.Load(OriginalFiles.Dos(ResourceTable.Fonts));
+    private static FontSet Fonts => FontSet.Load(TestGameData.Dos(ResourceTable.Fonts));
 
-    [Fact]
+    [GameDataFact]
     public void Font_layout_covers_file_exactly()
     {
         Assert.Equal(FontSet.ExpectedLength,
@@ -16,7 +16,7 @@ public class FontMaskMusicTests
         Assert.Equal(102, f.Small.LastChar);
     }
 
-    [Fact]
+    [GameDataFact]
     public void Space_is_empty_in_both_fonts()
     {
         var f = Fonts;
@@ -25,7 +25,7 @@ public class FontMaskMusicTests
                 Assert.Equal(0, font.Row(' ', y));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Large_exclamation_mark_matches_original_bits()
     {
         // Rows of '!' as found in FONTS.PP: 18 3C 3C 3C 3C 3C 18 00 18 3C 3C 18 (left byte).
@@ -35,7 +35,7 @@ public class FontMaskMusicTests
             Assert.Equal(expected[y] << 8, f.Large.Row('!', y));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Small_hash_sign_matches_original_bits()
     {
         // '#' in the small font: .#.#. / ##### / .#.#. / ##### / .#.#.
@@ -45,10 +45,10 @@ public class FontMaskMusicTests
             Assert.Equal(expected[y] << 8, f.Small.Row('#', y));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Masks_are_a_full_screen_bitplane_with_content()
     {
-        var m = MaskImage.Load(OriginalFiles.Dos(ResourceTable.Masks));
+        var m = MaskImage.Load(TestGameData.Dos(ResourceTable.Masks));
         int set = 0;
         for (int y = 0; y < MaskImage.Height; y++)
             for (int x = 0; x < MaskImage.Width; x++)
@@ -56,22 +56,22 @@ public class FontMaskMusicTests
         Assert.InRange(set, 1000, 40000);
     }
 
-    [Theory]
+    [GameDataTheory]
     [InlineData("TRADINTR.CMF", 30, 24)]
     [InlineData("TRADMENU.CMF", 11, 9)]
     [InlineData("TRAD_END.CMF", 28, 12)]
     public void Music_header_orders_and_pattern_count(string file, int orders, int patterns)
     {
-        var m = MusicModule.Load(OriginalFiles.Dos(file));
+        var m = MusicModule.Load(TestGameData.Dos(file));
         Assert.Equal(orders, m.Orders.Count);
         Assert.Equal(patterns, m.PatternCount);
         Assert.Equal(patterns - 1, m.Orders.Max());
     }
 
-    [Fact]
+    [GameDataFact]
     public void Asset_library_loads_everything()
     {
-        var lib = AssetLibrary.Load(OriginalFiles.DosDir);
+        var lib = AssetLibrary.Load(TestGameData.DosDir);
         Assert.Equal(10, lib.Pictures.Count);
         Assert.Equal(3, lib.Music.Count);
     }

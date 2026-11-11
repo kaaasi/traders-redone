@@ -1,6 +1,6 @@
 """Extract the field order of the original save routine (2336:000A) from the disassembly.
 
-Usage: python3 -I tools/datenlayout/savegame.py docs/analyse/disasm/2336.asm > tests/Traders.Tests/State/SaveGameSites.txt
+Usage: python3 -I tools/datenlayout/savegame.py ~/traders-referenz/analyse/disasm/2336.asm > tests/Traders.Tests/State/SaveGameSites.txt
 
 The save routine writes every value as a 32-bit dword via `call 2336:051E`. For each call
 site this prints, in program order (loops not unrolled):

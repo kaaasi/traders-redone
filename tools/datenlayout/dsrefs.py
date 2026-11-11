@@ -1,6 +1,6 @@
 """Collect every DGROUP (DS) memory access in T.EXE from the ndisasm listings.
 
-Usage: python3 -I tools/datenlayout/dsrefs.py docs/analyse/disasm out.json [out.md]
+Usage: python3 -I tools/datenlayout/dsrefs.py <disasm-dir> out.json [out.md]   (disasm: ~/traders-referenz/analyse/disasm)
 
 Per access: segment:offset, function (nearest preceding '; ---- SSSS:OOOO' label),
 mnemonic, width (1/2/4 bytes, 0 = unknown), mode (r / w / rw / addr), index registers,

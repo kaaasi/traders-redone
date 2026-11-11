@@ -38,7 +38,7 @@ public class RandomDifferentialTests
     private static short CallRandom(PcMachine m, short n) =>
         (short)m.CallFar((ushort)(m.LoadSegment + RandomSeg), RandomOff, [(ushort)n]).Ax;
 
-    [Fact]
+    [GameDataFact]
     public void Initial_seed_in_the_data_segment_is_one()
     {
         var m = MachineTests.NewMachine();
@@ -47,7 +47,7 @@ public class RandomDifferentialTests
         Assert.Equal(OriginalRandom.InitialSeed, ReadSeed(m));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Sequence_matches_port_for_many_arguments()
     {
         var m = Prepare(OriginalRandom.InitialSeed);
@@ -71,7 +71,7 @@ public class RandomDifferentialTests
         }
     }
 
-    [Fact]
+    [GameDataFact]
     public void Arbitrary_start_seeds_match()
     {
         foreach (uint seed in new uint[] { 0, 0xFFFFFFFF, 0x80000000, 0x12345678, 3141592622 })
@@ -87,7 +87,7 @@ public class RandomDifferentialTests
         }
     }
 
-    [Fact]
+    [GameDataFact]
     public void Minus_one_divides_by_zero_in_both()
     {
         var m = Prepare(1);
@@ -97,7 +97,7 @@ public class RandomDifferentialTests
         Assert.Throws<DivideByZeroException>(() => port.Next(-1));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Zero_reseeds_from_borland_time()
     {
         var m = Prepare(1);

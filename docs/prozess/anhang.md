@@ -26,7 +26,7 @@ Es gibt **keine automatische Integration**, nur weil ein Kontingent erschöpft i
 ## C. Gesamtreview am Rundenende (risikoorientiert)
 
 Ziel: Entspricht der Port dem Original hinreichend, und enthalten die Änderungen der Runde konkrete Fehler? Prüflauf:
-`tools/pruefen.sh` auf dem Head. Die Leitstelle setzt im Kurzaufruf hinter „Besonders prüfen:“ diesen Absatz ein und ergänzt die
+`tools/pruefen.sh --schnell` auf dem Head; ohne Originaldaten im Bericht „Originaldaten nicht geprüft“. Die Leitstelle setzt im Kurzaufruf hinter „Besonders prüfen:“ diesen Absatz ein und ergänzt die
 riskantesten Änderungen der Runde:
 
 > Risikoorientiert, keine Vollinventur: Prüfe bevorzugt riskante Änderungen und Übergänge – Zufallsverbrauch und -reihenfolge,
@@ -46,8 +46,10 @@ setzt Codex Labels, sonst wartet die Leitstelle auf den Review-PR `review/*` und
 1. **Head nur auf dem gewählten Branch:** Der Head-SHA ist der Stand des Branches, den der Nutzer in Codex wählt; liegt er auf
    einem anderen Branch, nennt die Leitstelle diesen Branch.
 2. **Ablage immer neu:** neuer Branch `review/<thema>`, neue Datei, neuer PR – auch bei einer Fortsetzung (`…-teil<n>.md`).
-3. **Keine Netzbefehle im Aufruf** (kein `git fetch`, `ls-remote`, `add_repo`). Das SDK besorgt die Codex-Umgebung selbst; fehlt
-   es, gehört das als offener Prüfbereich in den Bericht.
+3. **Keine Netzbefehle im Aufruf** (kein `git fetch`, `ls-remote`, `add_repo`). SDK und Originaldaten besorgt die Codex-Umgebung
+   (Setup-Skript bzw. GitHub-Connector für `kaaasi/traders-referenz`, nach `gamedata/`); fehlen sie, gehört das als offener
+   Prüfbereich in den Bericht („Originaldaten nicht geprüft“).
+4. Der Zugriffsabsatz aus `spur-start.md` gilt nur für Claude-Läufe.
 
 ## E. Review ohne vollständigen Klon
 
@@ -57,9 +59,10 @@ Ist das nicht erbracht, gilt der Stand als „unverifiziert“: Läufe daran sin
 
 ## F. Geplante Läufe – Leitstelle
 
-- **Zugriff:** Läufe erhalten nur die Repos, die die **anlegende Sitzung** eingebunden hat; vor dem ersten `create_trigger`
-  `add_repo` für `kaaasi/traders-redone` (access `push`) und `git ls-remote https://github.com/kaaasi/traders-redone HEAD`
-  erfolgreich – sonst keinen Lauf anlegen und dem Nutzer melden.
+- **Zugriff:** Läufe erhalten nur die Repos, die die **anlegende Sitzung** eingebunden hat (`add_repo` steht im Lauf nicht
+  verlässlich bereit); vor dem ersten `create_trigger` `leitstelle-start.md` Schritt 0 erledigt (beide Repos `push`) und
+  `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` erfolgreich – sonst keinen Lauf anlegen und dem Nutzer melden.
+  Jeder Startaufruf enthält den Zugriffsabsatz aus `spur-start.md`.
 - **Modell:** nach dem Anlegen mit `update_trigger` setzen, wenn es von Opus abweicht (nur für Mechanisches nach
   `zusammenarbeit.md` §5 „Modellwahl“ oder auf Wunsch des Nutzers).
 - **`spur-wartet` durchsehen:** „Fortsetzung anlegen – Leitstelle“ heißt, die Aufgabe mit dem Prompt aus der Übergabe anlegen –

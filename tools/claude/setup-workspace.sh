@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Sets up Claude's work environment: downloads the .NET SDK and NuGet packages from the release "claude-werkzeuge",
-# registers the offline package source and writes the environment variables. The original files are in the repo (original/).
+# registers the offline package source and writes the environment variables. The original files come from
+# kaaasi/traders-referenz via tools/claude/fetch-reference.sh (not part of this script).
 # Usage: tools/claude/setup-workspace.sh      then: source ~/claude-tools-traders/env.sh
 set -euo pipefail
 

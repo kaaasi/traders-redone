@@ -8,7 +8,10 @@ sind, GitHub aber erreichbar ist. Damit Claude trotzdem selbst bauen und testen 
    automatisch, sobald sich Projekt- oder Lockdateien auf `main` ändern, und lässt sich per Hand starten:
    `gh api -X POST repos/kaaasi/traders-redone/actions/workflows/werkzeuge.yml/dispatches -f ref=main`.
 2. `tools/claude/setup-workspace.sh` lädt beides nach `~/claude-tools-traders/` und richtet die Offline-Paketquelle ein.
-3. Danach: `source ~/claude-tools-traders/env.sh` und `tools/pruefen.sh`.
+3. Danach: `source ~/claude-tools-traders/env.sh` und `tools/pruefen.sh --schnell`.
 
-Die Originaldateien liegen in diesem Repo unter `original/` und werden nicht nachgeladen. Das Release enthält keine
+Die Originaldateien liegen im privaten Repo `kaaasi/traders-referenz`; `tools/claude/fetch-reference.sh original` lädt sie
+nach `~/traders-referenz/` und verknüpft sie als `gamedata/`. Ein vorhandener (flacher) Klon wird um die genannten Teile
+ergänzt und auf den aktuellen Stand gesetzt; lokale Änderungen oder Commits dort brechen mit Rückgabe 3 ab (Selbsttest:
+`tools/claude/fetch-reference-selbsttest.sh`, läuft in `tools/pruefen.sh`). Das Release enthält keine
 Originaldateien und kann jederzeit gelöscht werden – es entsteht beim nächsten Workflow-Lauf neu.

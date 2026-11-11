@@ -4,9 +4,9 @@ internal static class RefEmuPaths
 {
     public static string RepoRoot => RepositoryPaths.Root;
 
-    public static string Dos(string name) => Path.Combine(RepoRoot, "original", "dos", name);
+    public static string Dos(string name) => TestGameData.Dos(name);
 
-    /// <summary>Output folder for diagnostic files (CI experiment sets REFEMU_OUT); null when not set.</summary>
+    /// <summary>Output folder for diagnostic files (set REFEMU_OUT for a local diagnostic run); null when not set.</summary>
     public static string? OutputDir
     {
         get

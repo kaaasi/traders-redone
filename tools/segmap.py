@@ -1,6 +1,6 @@
 """Segment map, far-call targets and per-segment disassembly for T.EXE (Turbo C++ 1990).
 
-Usage: python3 -I tools/segmap.py original/dos/T.EXE out_dir
+Usage: python3 -I tools/segmap.py gamedata/dos/T.EXE out_dir
 Writes out_dir/segments.md and out_dir/disasm/SSSS.asm (ndisasm required).
 """
 import struct, sys, os, collections, subprocess

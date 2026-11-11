@@ -9,6 +9,9 @@ Umgebung scheitern – nicht vorsorglich. Übernommen aus den Erfahrungen im Eis
 - **Kein lokales SDK möglich:** Branch pushen, PR auf „Ready for review“ stellen und die Check-Runs des Head-SHA abwarten
   (`gh api repos/kaaasi/traders-redone/commits/<sha>/check-runs`); die Zusammenfassung des Laufs enthält die Tabelle von
   `tools/pruefen.sh`. Im PR „lokal blockiert, Nachweis CI-Lauf <link>“ vermerken.
+- **Originaldaten fehlen:** `tools/claude/fetch-reference.sh original` braucht Leserecht auf `kaaasi/traders-referenz` (Claude:
+  `add_repo`). Scheitert es, ohne Daten weiterarbeiten nur, wo der Auftrag es zulässt, und im PR „Originaldaten nicht geprüft“
+  vermerken; Tests mit Originaldaten sind dann übersprungen, nicht bestanden.
 - **Netzwerkversuche begrenzen:** z. B. `timeout 45s git fetch origin`; bei `curl` `--connect-timeout 5 --max-time 30`. Nach
   einem Proxy-/Berechtigungsfehler Ursache klären oder auf einen GitHub-Connector wechseln; denselben blockierten Versuch nicht
   wiederholt starten. Proxy und Sandbox nicht umgehen.

@@ -8,7 +8,7 @@ public class StateTests
 {
     private static string RepoFile(params string[] parts) => RepositoryPaths.File(parts);
 
-    private static Dgroup OriginalDgroup() => Dgroup.FromExe(File.ReadAllBytes(OriginalFiles.Dos("T.EXE")));
+    private static Dgroup OriginalDgroup() => Dgroup.FromExe(File.ReadAllBytes(TestGameData.Dos("T.EXE")));
 
     private static string Json(GameState s) => JsonSerializer.Serialize(s);
 
@@ -143,14 +143,14 @@ public class StateTests
         Assert.All(ds.Bytes, b => Assert.Equal(0, b));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Initial_state_matches_initialised_data_in_TEXE()
     {
         var fromExe = GameStateMapper.Load(OriginalDgroup());
         Assert.Equal(Json(GameState.OriginalInitial()), Json(fromExe));
     }
 
-    [Fact]
+    [GameDataFact]
     public void Level_presets_in_TEXE_are_as_documented()
     {
         // 192D:0592 copies these tables (DS:0B90..0BAF) when a level 0..3 is chosen.
@@ -168,7 +168,7 @@ public class StateTests
         }
     }
 
-    [Fact]
+    [GameDataFact]
     public void Text_pointer_table_and_station_names_are_where_documented()
     {
         var ds = OriginalDgroup();
