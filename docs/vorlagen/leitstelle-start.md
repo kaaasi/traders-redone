@@ -32,4 +32,5 @@
    PR als `docs/handoffs/<datum>-<thema>.md`.
 9. **Sitzung je Runde:** höchstens eine Runde je Sitzung; die nächste beginnt in einem neuen Chat mit dem Kurzaufruf oben. Dem
    Nutzer meldet sie sich nur bei Entscheidungsbedarf, am Ende einer Spur (Merge) und am Rundenende.
-10. **Warten über Labels** (`zusammenarbeit.md` §5 Punkt 8, `anhang.md` F). Erledigte Labels entfernt die Leitstelle.
+10. **Warten über Labels** (`zusammenarbeit.md` §5 Punkt 8, `anhang.md` F). Erledigte Labels entfernt die Leitstelle; Labels setzen
+    und entfernen darf sie immer selbst (Nutzer 11.11.2026).
