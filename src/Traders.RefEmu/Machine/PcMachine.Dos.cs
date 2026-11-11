@@ -31,11 +31,14 @@ public sealed partial class PcMachine
     /// <summary>Segment where the load module starts (PSP + 10h); image segment 0000 of the analysis maps here.</summary>
     public ushort LoadSegment => (ushort)(_psp + 0x10);
 
-    private const ushort EnvSegment = 0x0FD0;
+    private ushort _envSegment;
+    private ushort _freeStart;                         // first paragraph not used by resident programs
+    private readonly List<MemBlock> _residentBlocks = [];
 
     private void InitDos()
     {
         _psp = Options.PspSegment;
+        _freeStart = (ushort)(Options.PspSegment - 0x20);
         _dtaSeg = _psp;
         _dtaOff = 0x80;
     }
@@ -44,21 +47,27 @@ public sealed partial class PcMachine
     public MzHeader LoadProgram(string exeName, string commandTail = "")
     {
         byte[] exe = Files.Load(exeName) ?? throw new FileNotFoundException(exeName);
-        ushort psp = _psp;
+        _envSegment = _freeStart;
+        ushort psp = (ushort)(_envSegment + 0x20);
+        _psp = psp;
+        _dtaSeg = psp;
+        _dtaOff = 0x80;
+        Exited = false;
 
         // environment block
         string env = "COMSPEC=C:\\COMMAND.COM\0PATH=C:\\\0PROMPT=$P$G\0\0";
         var envBytes = new List<byte>(Encoding.ASCII.GetBytes(env)) { 1, 0 };
         envBytes.AddRange(Encoding.ASCII.GetBytes("C:\\" + DosFileSystem.Normalize(exeName) + "\0"));
-        Mem.WriteBlock(Memory.Linear(EnvSegment, 0), envBytes.ToArray());
+        Mem.WriteBlock(Memory.Linear(_envSegment, 0), envBytes.ToArray());
         _blocks.Clear();
-        _blocks.Add(new MemBlock(EnvSegment, (ushort)(psp - EnvSegment)));
+        _blocks.AddRange(_residentBlocks);
+        _blocks.Add(new MemBlock(_envSegment, (ushort)(psp - _envSegment)));
         _blocks.Add(new MemBlock(psp, (ushort)(Options.MemoryTop - psp)));
 
         // PSP
         Mem.Write16(psp, 0x00, 0x20CD);
         Mem.Write16(psp, 0x02, Options.MemoryTop);
-        Mem.Write16(psp, 0x2C, EnvSegment);
+        Mem.Write16(psp, 0x2C, _envSegment);
         for (int i = 0; i < 20; i++) Mem.Write8(psp, (ushort)(0x18 + i), (byte)(i < 5 ? i : 0xFF));
         Mem.Write16(psp, 0x32, 20);
         Mem.Write16(psp, 0x34, 0x18);
@@ -193,6 +202,7 @@ public sealed partial class PcMachine
             case 0x49: Free(c.Es); return;
             case 0x4A: Resize(c.Es, c.Bx); return;
             case 0x4C: Exit(al); return;
+            case 0x31: StayResident(c.Dx, al); return;
             case 0x4E: FindFirst(); return;
             case 0x4F: FindNext(); return;
             case 0x50: _psp = c.Bx; return;
@@ -217,6 +227,32 @@ public sealed partial class PcMachine
             _consoleLine.Clear();
         }
         else if (ch != '\r') _consoleLine.Append((char)ch);
+    }
+
+    /// <summary>Loads and runs a program that terminates and stays resident (e.g. FXDRIVER.EXE).</summary>
+    public void RunResidentProgram(string exeName, string commandTail = "", long maxInstructions = 100_000_000)
+    {
+        int residentBefore = _residentBlocks.Count;
+        LoadProgram(exeName, commandTail);
+        var reason = Run(maxInstructions);
+        if (reason != StopReason.ProgramExit || _residentBlocks.Count == residentBefore)
+            throw new EmulationException($"{exeName} did not stay resident ({reason}, exit code {ExitCode})");
+        Exited = false;
+    }
+
+    /// <summary>Terminate and stay resident: keeps the program's environment and first <paramref name="paragraphs"/> of its block.</summary>
+    internal void StayResident(ushort paragraphs, byte code)
+    {
+        foreach (var b in _blocks)
+        {
+            if (_residentBlocks.Contains(b)) continue;
+            if (b.Segment == _psp) _residentBlocks.Add(new MemBlock(_psp, paragraphs));
+            else _residentBlocks.Add(b);
+        }
+        _freeStart = (ushort)(_psp + paragraphs);
+        foreach (var b in _residentBlocks) _freeStart = (ushort)Math.Max(_freeStart, b.Segment + b.Paragraphs);
+        LogEvent(EventKind.Dos, $"stay resident: PSP {_psp:X4} keeps {paragraphs:X4} paragraphs, free from {_freeStart:X4}");
+        Exit(code);
     }
 
     // ------------------------------------------------------------------ files

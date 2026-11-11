@@ -1,4 +1,4 @@
-# CPU-Testdaten und Referenzbilder
+# CPU-Testdaten
 
 cputests-286.bin.gz stammt aus SingleStepTests/80286, v1_real_mode (Daniel Balsom, MIT).
 Lizenz: LICENSE.SingleStepTests. Quelle: https://github.com/SingleStepTests/80286

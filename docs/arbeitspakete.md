@@ -54,9 +54,9 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R2 dieser Spur.
 - **Abnahme:** `tools/pruefen.sh` alle drei Läufe grün; zwei Läufe bitgleich (Determinismus-Test bleibt grün); Hash des Hauptmenüs
   mit FXDRIVER als Test; Spiellauf erreicht nachweislich einen Zustand nach dem Hauptmenü (Test mit Prüfkriterium, nicht nur „läuft“).
-- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** Teile 1–2 fertig, PR #37, Erstreview läuft. Wochenlauf als Orakel
-  (`StartGame`, `RunToWeekStart`, `RunToMarker`) nach BESTAND §3.1. Offen für R3: Maschinenabzug zum Wiederaufsetzen an Marken
-  (BESTAND §3.1 Punkt 3).
+- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** Teile 1–2 fertig, PR #37, Erstreview „Ja“ (#42), Fixlauf Rebase + B2/B3.
+  Wochenlauf als Orakel (`StartGame`, `RunToWeekStart`, `RunToMarker`) nach BESTAND §3.1. Offen für R3: Maschinenabzug zum
+  Wiederaufsetzen an Marken (BESTAND §3.1 Punkt 3).
 
 ### ② `grafik` – VGA-Treiber `23CD` (Quelle `dev/ap2-vga`, `5a9f178`; zugeschnitten nach BESTAND §3.1)
 
@@ -75,7 +75,8 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview (Mutation → rot);
   VRAM-Vergleich gegen `VgaAdapter` des RefEmu, Erwartungswerte nie aus dem Port. Die Treiberroutinen liegen hinter der
   Vektortabelle und sind keine Far-Einsprünge: Lehnt `abdeckung.py` solche Adressen ab, im PR melden (Werkzeug gehört nicht zu ②).
-- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** offen, Start durch den Nutzer.
+- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** Teile 1–3 fertig, PR #43 bereit zum Erstreview (11.11.2026); `tools/exeimg.py`
+  nicht übernommen (`segmap.py` deckt die Disassemblierung ab).
 
 ### ③ `phasen` – Wochenschleife und Aufrufgraph-Werkzeug (Quelle `dev/ap5-phasen`, `8ed0d34`; zugeschnitten nach BESTAND §3.1)
 
