@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md)).
 
-## Aktuelle Runde: Runde 2 – Altbestand übernehmen (Plan 11.11.2026, Go Nutzer 11.11.2026)
+## Aktuelle Runde: Runde 2 – Altbestand übernehmen (Plan 11.11.2026, Go Nutzer 11.11.2026) – alle Spuren gemergt, Gesamtreview offen
 
 **Ziel:** Die drei Altbranches der Paketphase (Runde 0) nach den Regeln von Runde 1 auf `main` bringen: Originalcode-Marker,
 Befunde in `docs/routines/`, `[DIFFERENTIAL]`-Tests, Tests mit Originaldaten nur über `[GameDataFact]`/`TestGameData.Dos`,
@@ -54,7 +54,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R2 dieser Spur.
 - **Abnahme:** `tools/pruefen.sh` alle drei Läufe grün; zwei Läufe bitgleich (Determinismus-Test bleibt grün); Hash des Hauptmenüs
   mit FXDRIVER als Test; Spiellauf erreicht nachweislich einen Zustand nach dem Hauptmenü (Test mit Prüfkriterium, nicht nur „läuft“).
-- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** Teile 1–2 fertig, PR #37, Erstreview „Ja“ (#42), Fixlauf Rebase + B2/B3.
+- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** gemergt 11.11.2026 als PR #46 (`c44d3d9`; #37 abgelöst, Force-Push abgelehnt), Erstreview „Ja“ (#42), Fixlauf B2/B3; B1 mit #45.
   Wochenlauf als Orakel (`StartGame`, `RunToWeekStart`, `RunToMarker`) nach BESTAND §3.1. Offen für R3: Maschinenabzug zum
   Wiederaufsetzen an Marken (BESTAND §3.1 Punkt 3).
 
@@ -75,7 +75,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview (Mutation → rot);
   VRAM-Vergleich gegen `VgaAdapter` des RefEmu, Erwartungswerte nie aus dem Port. Die Treiberroutinen liegen hinter der
   Vektortabelle und sind keine Far-Einsprünge: Lehnt `abdeckung.py` solche Adressen ab, im PR melden (Werkzeug gehört nicht zu ②).
-- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** Teile 1–3 fertig, PR #43 bereit zum Erstreview (11.11.2026); `tools/exeimg.py`
+- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** gemergt 11.11.2026 (`7a9554c`), Review „Ja“ (#47), P3 #50; `tools/exeimg.py`
   nicht übernommen (`segmap.py` deckt die Disassemblierung ab).
 
 ### ③ `phasen` – Wochenschleife und Aufrufgraph-Werkzeug (Quelle `dev/ap5-phasen`, `8ed0d34`; zugeschnitten nach BESTAND §3.1)
@@ -92,7 +92,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Probe; Test aus Teil 3 wird rot, wenn eine Marke vertauscht oder ausgelassen wird (Gegenprobe im Review); Laufzeit: der Test
   verlängert `pruefen.sh --schnell` um höchstens 3 Minuten, sonst als eigenes Filtermerkmal außerhalb von `--schnell` führen und
   im PR nennen (N3); kein Originaltext im Repo.
-- **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von ①. **Status:** Teile 1–3 fertig, PR #44 bereit zum Review; Test Teil 3 ≈ 45 s, bleibt in `--schnell` (N3).
+- **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von ①. **Status:** gemergt 11.11.2026 (`b55ce3a`), Review „Ja“ (#51), P3 #52; Test Teil 3 ≈ 45 s, bleibt in `--schnell` (N3).
 
 ### Zuständigkeit gemeinsamer Dateien in R2
 

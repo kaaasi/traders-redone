@@ -1,5 +1,16 @@
 # Zwischenstände
 
+## Runde 2 – Altbestand übernehmen (11.11.2026) · `main` `b55ce3a`
+
+- ⓪ Bestandsaufnahme (PR #33, Fable): Karte aller 45 Segmente von `T.EXE`, Spiegel gegen Port und Altbranches, RefEmu-Proben P1–P6
+  (`docs/analyse/BESTAND.md`); Nachzug in `DATENLAYOUT.md`, `STATUS.md`, Plan (PR #40); Entscheidungen: nur VGA, Zwischenziel
+  Gesamtpartie ohne Roboterkampf, F3 = A (Zufall je Bild als Kern-Ereignis).
+- ① RefEmu (PR #46): Tastendruck mit Haltezeit, FXDRIVER als TSR, Code-Haken, Aufrufspur, OPL-Spur; Wochenlauf als Orakel
+  (`StartGame`, `RunToWeekStart`, `RunToMarker`) mit festen Zufallszuständen aus P1/P5.
+- ② VGA-Treiber `23CD` (PR #43): Mode-X-Speicher, RAM-Atlas, 29 Treiberadressen mit Sammelbefunden und Differenztests.
+- ③ Phasen (PR #44): `tools/callgraph.py` (Ausgabe nur lokal), Befunde `1777:000C`/`01F8`, Test der Markenfolge über zwei Wochen.
+- Prozess: Zugriff der Läufe auf das Code-Repo (PR #32), `proben.sh` nach Übernahme (PR #45). 445 Tests grün mit Originaldaten.
+
 ## Runde 1 – Umstellung auf den Ablauf des Eishockey-Managers (11.11.2026) · `main` `1aead2b`
 
 - ① Werkzeuge (PR #4): SDK-Release `claude-werkzeuge`, `tools/pruefen.sh`, schlanke `build.yml` statt `ci.yml`.
