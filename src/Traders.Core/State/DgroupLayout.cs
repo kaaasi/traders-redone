@@ -87,6 +87,17 @@ public static class DgroupLayout
     public const int Robot33DC = 0x33DC;       // uword[4]    init 30 (robot battle, tentative)
     public const int Robot3016 = 0x3016;       // uword[4]    init 0 (robot battle, tentative)
 
+    // ---- derived weekly values and loop variables (round 3, track "regeln"; docs/analyse/DATENLAYOUT.md §7) ----
+    public const int LoopWare = 0x45D0;        // word        global loop variable (ware / kind), left behind by loops
+    public const int ShopOil = 0x4B98;         // word        oil stock of the shop, set by 1777:02DC
+    public const int OilPrice = 0x43F4;        // word        set by 1777:02DC, at least 1
+    public const int RocketPrice = 0x48A0;     // word        set by 1777:02DC
+    public const int LottoPrize = 0x34A2;      // word        set by 1777:02DC, at least 20 (tentative: prize/pool)
+    public const int LottoPrice = 0x40CC;      // word        LottoPrize / 32 (tentative: ticket price)
+    public const int LandPrice = 0x3746;       // word        set by 1777:02DC, 100..550
+    public const int LimitLow = 0x2F26;        // sbyte       min(30, F/2 + 3) from 0609:1178 (meaning open)
+    public const int LimitHigh = 0x48A2;       // sbyte       min(30, F/2 + 6) from 0609:1178 (meaning open)
+
     /// <summary>Index into the field grid arrays (x = column, y = row).</summary>
     public static int FieldIndex(int x, int y) => x * FieldRowsMax + y;
 }
