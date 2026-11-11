@@ -10,8 +10,8 @@ Ausdrückliche Anweisungen des Nutzers haben Vorrang.
 
 Portierung von **Traders – The Intergalactic Trading Game** (Linel, DOS 1991/92) nach C#/.NET 10: zuerst originalgetreu
 (Regeln, Zufall, Abläufe, Pixel), danach abschaltbare Erweiterungen ([docs/PORTIERUNGSPLAN.md](docs/PORTIERUNGSPLAN.md)).
-**Sprache:** Deutsch in Doku, Code-Kommentaren und Commit-Nachrichten; Code-Bezeichner englisch. Bestehende englische
-Kommentare werden umgestellt, wenn eine Spur die Datei ohnehin ändert (Nutzer 10.11.2026).
+**Sprache:** Deutsch in Doku und Commit-Nachrichten; im Quelltext sind Programmcode und Kommentare stets Englisch (Nutzer
+11.11.2026). Ausgabetexte der Werkzeuge dürfen Deutsch sein.
 
 ## 2. Harte Regeln
 
@@ -29,10 +29,12 @@ Kommentare werden umgestellt, wenn eine Spur die Datei ohnehin ändert (Nutzer 1
    `src/Traders.RefEmu/OriginalProgram.cs`) höchstens minimal und mit Begründung im PR.
 6. **Erst reproduzieren, dann reparieren:** Befund nachstellen → roter Regressionstest → beheben.
 7. **Jede portierte Originalroutine** hat einen Befund in `docs/routines/` (Vorlage `_vorlage.md`) und einen
-   **Differenztest gegen den RefEmu** (gleicher Eingangszustand → DS-Speicher, RNG-Zustand und Seiteneffekte gleich).
+   **Differenztest gegen den RefEmu** (gleicher Eingangszustand → DS-Speicher, RNG-Zustand und Seiteneffekte gleich), im Test
+   gekennzeichnet mit `[DIFFERENTIAL] <Segment:Offset>` (nur diese Kennzeichnung zählt für `tools/abdeckung.py`).
    Erwartungswerte nie aus der Portierung selbst gewinnen.
-8. **Marker:** Aus dem Original Belegtes bekommt im Code `[ORIGINAL] <Segment:Offset>`, nicht Belegtes `[APPROX]` mit kurzer
-   Begründung. Keine ungeprüfte Originaltreue behaupten.
+8. **Marker:** Aus dem Original Belegtes bekommt im Code `[ORIGINAL] <Segment:Offset>` (Großbuchstaben, z. B. `21FD:01BA`;
+   ohne gültige Adresse meldet `tools/abdeckung.py` einen Fehler), nicht Belegtes `[APPROX]` mit kurzer Begründung. Keine
+   ungeprüfte Originaltreue behaupten.
 
 ## 3. Einrichtung
 
@@ -100,7 +102,8 @@ Datenlayout `docs/analyse/DATENLAYOUT.md`), RefEmu-Lauf, Videobilder `reference/
 - **Status** einer Spur nur im eigenen Abschnitt von `docs/arbeitspakete.md`; `STATUS.md` und `CHANGELOG.md` pflegt die Leitstelle.
 - **Übergabe immer:** Jede Sitzung endet – fertig wie bei Abbruch – mit einem Übergabekommentar im PR (`docs/handoffs/VORLAGE.md`).
 - **Gemergt wird nur von Leitstelle oder Nutzer** nach der Merge-Prüfung (`zusammenarbeit.md` §6), mit Merge-Commit.
-- **Keine Tags** (Nutzer); Meilensteine stehen in `STATUS.md`.
+- **Keine Tags** (Nutzer); Meilensteine stehen in `STATUS.md`. Einzige Ausnahme: der technische Release-Tag `claude-werkzeuge`
+  (`werkzeuge.yml`).
 - **Keine Zugangsdaten, Tokens oder privaten Chat-Inhalte** in Commits, PRs, Übergaben oder Reviews.
 
 ## 7. Sparsam arbeiten

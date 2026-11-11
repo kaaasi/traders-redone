@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Einheitliche Prüfung vor jedem Push – für alle Agenten gleich (AGENTS.md, Abschnitt „Tests“).
+# Uniform check before every push - the same for all agents (AGENTS.md, section "Tests").
 #
-#   tools/pruefen.sh            Hashes, Architektur, Restore (Lockdateien), Build ohne Warnungen, alle Tests, Markerbericht
-#   tools/pruefen.sh --schnell  derselbe Lauf (die Originaldaten liegen im Repo, es gibt nur einen Testlauf);
-#                               die Option existiert, damit Kurzaufrufe mit dem Eishockey-Ablauf übereinstimmen
+#   tools/pruefen.sh            hashes, architecture, coverage, restore (lock files), build without warnings, all tests, marker report
+#   tools/pruefen.sh --schnell  the same run (the original data is in the repo, so there is only one test run);
+#                               the option exists so that short prompts match the Eishockey-Manager workflow
 #
-# Gibt am Ende die Tabelle für PR und Übergabe aus. Exit-Code 0 nur, wenn jeder Schritt grün ist.
+# Prints the table for PR and handoff at the end. Exit code 0 only if every step is green.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -23,6 +23,9 @@ schritt "Originaldateien (SHA-256)"
 schritt "Architekturgrenzen"
 python3 tools/check-architecture.py || fehler "Architekturprüfung"
 
+schritt "Abdeckung (STATUS.md, Marker, Befunde, Differenztests)"
+python3 tools/abdeckung.py --check || fehler "Abdeckung – tools/abdeckung.py --write"
+
 if [ -d tests/tools ] && ls tests/tools/test_*.py >/dev/null 2>&1; then
   schritt "Python-Tests der Werkzeuge"
   python3 -m unittest discover -s tests/tools -q 2>"$LOG/py.txt" || { tail -20 "$LOG/py.txt"; fehler "Python-Tests"; }
@@ -39,7 +42,7 @@ dotnet build "$SLN" -c Release --no-restore -warnaserror >"$LOG/build.txt" 2>&1 
 
 schritt "Tests"
 dotnet test "$SLN" -c Release --no-build >"$LOG/test.txt" 2>&1 || fehler "Tests"
-# Jedes Testprojekt muss eine Ergebniszeile liefern; fehlt eine, ist ein Projekt abgestürzt oder nicht geladen.
+# Every test project must report a result line; a missing one means a project crashed or was not loaded.
 PROJEKTE=$(ls tests/*/*.csproj 2>/dev/null | wc -l)
 ZEILEN=$(grep -E "^(Passed|Failed)! " "$LOG/test.txt" || true)
 [ "$(printf '%s\n' "$ZEILEN" | grep -c .)" -eq "$PROJEKTE" ] || { tail -20 "$LOG/test.txt"; fehler "Ergebnisse für weniger als $PROJEKTE Testprojekte"; }
