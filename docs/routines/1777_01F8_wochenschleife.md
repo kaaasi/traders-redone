@@ -83,5 +83,11 @@ Vergleichspunkte für Mehrrundenproben.
   Computerspieler, nur Eingabetaste): Woche 0 und Woche 1 jeweils `1777:02DC` → Marken 0, 1, 2, 3, 4, 5, 6 in dieser Folge,
   danach `1777:02DC` mit `DS:4B9A` um 1 erhöht; Woche 2 bis Marke 4 im Zeitfenster. Emulierte Zeiten der Marken in Woche 0:
   25,3 / 56,2 / 69,0 / 77,4 / 77,4 / 147,3 / 161,6 s (Lauf bitgleich wiederholbar, `BESTAND.md` P1).
-- **Nicht ausgeführt:** Abbruchweg A und B im RefEmu; der Differenztest über zwei Wochen (Teil 3 der Spur `phasen`) prüft
-  Markenfolge und Wochenzähler gegen diese Tabelle.
+- **RefEmu-Test (T):** `tests/Traders.Tests/Phases/WeekLoopTests.cs` (Spur `phasen` Teil 3) prüft gegen die Tabelle oben
+  (`WeekLoopSequence.cs`, statisch gelesen, nicht aus dem Lauf): Vorgabepartie bis zum Beginn von Woche 2 – je Woche die 30
+  Aufrufstellen mit ihren Zielen, Marken 0–6 an ihren Stellen, `DS:4B9A` 0 → 1 → 2 genau bei `02D3`. Abbruchweg A:
+  Rücktaste (0Eh) während der Bilanz von Woche 0 gehalten → nur Aufrufe 1–3, Rückkehr nach `main` (`1777:0184`) mit
+  `AL` = 0 und `DS:4B9A` = 0, danach erneut Hauptmenü `192D:0007`. Gegenproben: Marke in der Tabelle verändert bzw. Taste
+  weggelassen → beide Tests rot; vertauschte, fehlende und zusätzliche Marken, vertauschte Aufrufe und falscher Zähler ohne
+  Originaldaten in `WeekLoopSequenceTests.cs`.
+- **Nicht ausgeführt:** Abbruchweg B (Partieende) im RefEmu.
