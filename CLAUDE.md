@@ -34,7 +34,8 @@ automatisch, wenn sich Projekt- oder Lockdateien auf `main` ändern). Details: [
   `gh api -X PUT repos/kaaasi/traders-redone/pulls/<nr>/merge -f sha=<head> -f merge_method=merge`.
 - Commit-Trailer: die Zeilen aus der Sitzungsvorgabe, sonst `Co-Authored-By: Claude <noreply@anthropic.com>`.
 - **Leitstelle:** immer Lese- und Schreibzugriff auf beide Repos (`add_repo` für `traders-redone` und `traders-referenz`, jeweils
-  access `push`), z. B. für neue Ablagen im Referenz-Repo (dort per PR, Branch `daten/…`).
+  access `push`), z. B. für neue Ablagen im Referenz-Repo (dort per PR, Branch `daten/…`). Der Nutzer hat das Einbinden von
+  `kaaasi/traders-referenz` für jede Leitstelle, auch künftige, ausdrücklich erlaubt (11.11.2026, `leitstelle-start.md` Schritt 0).
 - **Geplante Läufe** (Anlegen nur nach Einbinden beider Repos in der anlegenden Sitzung; Modell, Warten, Laufende) und **Git im flachen Klon**: `docs/prozess/anhang.md` F, G.
 
 ## Rolle in diesem Projekt
