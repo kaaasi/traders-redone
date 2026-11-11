@@ -9,8 +9,7 @@
 - Kein neuer Portierungsmeilenstein; Paketstände bleiben separat zu integrieren.
 
 
-Jeder Meilenstein-Stand wird hier mit Commit festgehalten. Git-Tags (`v0.x`) können
-nachträglich auf den genannten Commit gesetzt werden.
+Jeder Meilenstein-Stand wird hier mit Commit festgehalten (keine Tags).
 
 ## v0.3 – Integration AP1 + AP3 (25.10.2026) · Commit `2c02a38`
 

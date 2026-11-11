@@ -93,8 +93,7 @@ Vektoren 60h–67h sind leer, außer 64h bei `RecordSoundDriver` (Vorgabe: an).
 | 17,3 s | Hauptmenü (Bild-Hash `DBAB2787F9AA5222`) |
 
 Bilder: `tests/Traders.Tests/RefEmu/Data/refemu-codeabfrage.png`, `refemu-hauptmenue.png`.
-Das CI-Experiment (`ci/experiment.sh`, nur auf `dev/ap1-refemu`) legt jeden geänderten Frame und
-das Ereignisprotokoll unter `ci-results` → `runs/<sha>/linux-results/experiment/boot/` ab.
+Frames und Ereignisprotokoll eines Startlaufs schreibt `REFEMU_OUT=<ordner> dotnet test … --filter FullyQualifiedName~RefEmu.BootTests` lokal.
 
 ## Verwendung
 

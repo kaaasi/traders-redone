@@ -1,4 +1,9 @@
-# Arbeitspakete für parallele Chats
+# Runde 0 – Paketphase AP1–AP5 (25.–27.10.2026)
+
+Archiv der früheren Vergabe vor der Umstellung auf Runden (R1, 10.11.2026). Übergaben: [uebergaben/](uebergaben/).
+Repositorymodernisierung vom 27.10.2026: [repositorymodernisierung-2026-10-27.md](repositorymodernisierung-2026-10-27.md).
+Verweise auf `ci-results`, `tools/pruefe-branch.py`, `ci/arbeitspakete.json` gelten nicht mehr.
+
 
 Jeder Paket-Chat bearbeitet **genau ein** Paket auf seinem eigenen Branch und schreibt nur in
 seinen Dateibereich (maschinenlesbar: `ci/arbeitspakete.json`). Diese Datei pflegt **nur die

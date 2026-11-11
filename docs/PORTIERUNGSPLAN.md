@@ -78,7 +78,7 @@ Für jede portierte Originalroutine (Vorlage in `docs/routines/_vorlage.md`):
 
 ## 5. Meilensteine
 
-Jeder Meilenstein endet mit Tag (`v0.x`) und lauffähigem Zwischenstand auf GitHub.
+Jeder Meilenstein endet mit einem lauffähigen Zwischenstand auf `main`, festgehalten in `STATUS.md` und `CHANGELOG.md` (keine Tags, Nutzer 10.11.2026). Ablauf in Runden: `docs/arbeitspakete.md`.
 
 | # | Meilenstein | Inhalt | Prüfung |
 |---|---|---|---|
