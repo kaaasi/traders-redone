@@ -1,9 +1,10 @@
-# Stellt die Werkzeuge bereit, mit denen Claude den Code in seiner eigenen Arbeitsumgebung bauen und testen kann
-# (dort sind die Microsoft- und NuGet-Server gesperrt, GitHub nicht):
-#   - das offizielle .NET-SDK (Linux x64) in der Version aus global.json, gegen die SHA-512-Prüfsumme von Microsoft geprüft
-#   - alle NuGet-Pakete der Solution (nach den eingecheckten Lockdateien) als Offline-Paketquelle
-# Ablage: Release "claude-werkzeuge" (Vorabversion). Läuft manuell und automatisch, wenn sich Projektdateien auf main ändern.
-# Vorbild: kaaasi/eishockey-manager-redone, .github/workflows/werkzeuge.yml.
+# Provides the tools Claude needs to build and test the code in its own work environment
+# (Microsoft and NuGet servers are blocked there, GitHub is not):
+#   - the official .NET SDK (Linux x64) in the version from global.json, verified against Microsoft's SHA-512 checksum
+#   - all NuGet packages of the solution (according to the checked-in lock files) as an offline package source
+# Storage: release "claude-werkzeuge" (pre-release). Its tag is the only tag in the repository (exception to "no tags",
+# AGENTS.md section 6). Runs by hand and automatically when project files change on main.
+# Modelled on kaaasi/eishockey-manager-redone, .github/workflows/werkzeuge.yml.
 name: Werkzeuge für Claude
 
 on:
@@ -52,7 +53,7 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/dotnet:$PATH" DOTNET_ROOT="$HOME/dotnet"
           dotnet restore TradersRedone.slnx --locked-mode --packages nuget-packages
-          # Ordnerstruktur id/version/*.nupkg ist direkt als Paketquelle nutzbar
+          # The folder layout id/version/*.nupkg can be used directly as a package source
           { echo "sdk ${{ steps.sdk.outputs.version }}"; find nuget-packages -mindepth 2 -maxdepth 2 -type d | sed 's|nuget-packages/||; s|/| |' | sort; } > versionen.txt
           tar -czf nuget-packages.tar.gz nuget-packages
           du -sh nuget-packages.tar.gz

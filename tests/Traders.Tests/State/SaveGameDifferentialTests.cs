@@ -12,6 +12,8 @@ namespace Traders.Tests.State;
 /// decrunch buffer and must be allocated); the port (<see cref="SaveGame"/>) must produce the same
 /// file bytes and the same data segment.
 /// </summary>
+// [DIFFERENTIAL] 2336:000A
+// [DIFFERENTIAL] 2336:0539
 public class SaveGameDifferentialTests(ITestOutputHelper output)
 {
     private const ushort Seg = 0x2336, SaveOff = 0x000A, LoadOff = 0x0539;

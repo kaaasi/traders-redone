@@ -35,7 +35,8 @@ der Kommentar nennt **Head-SHA**, erledigt/offen/nächsten Schritt, Testtabelle,
 (oder den Nachfolger). **Höchstens 15 Zeilen plus Testtabelle**; was in PR oder Review steht, wird verlinkt.
 
 Ohne PR (z. B. reine Analyse): `docs/handoffs/<datum>-<thema>.md` auf eigenem Branch. Abbruch ohne Kommentar: Es gilt der letzte
-gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („übernommen ab SHA …, Tests …“).
+gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („übernommen ab SHA …, Tests …“). Sitzungslinks
+(z. B. im Commit-Trailer) sind nur Hinweise, keine Berechtigung und keine Übergabe.
 
 ## 4. Parallele Arbeit ohne Überschreiben
 
@@ -44,6 +45,9 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 - Kein `git push --force` auf fremde Branches; auf eigenen nur `--force-with-lease` nach Rebase.
 - Dateigrenzen einhalten; Berührungen gemeinsamer Dateien im PR begründen. Überschneidende Spuren laufen nacheinander.
 - `docs/arbeitspakete.md` nur im eigenen Statusabschnitt; Planabschnitte ändert die Leitstelle.
+- Abgeschlossene Branches erst löschen, wenn geprüft ist, dass keine unintegrierte Arbeit darauf liegt (`git log main..<branch>`).
+- Status nur in GitHub (`docs/arbeitspakete.md`, PRs, Labels, `STATUS.md`); ein GitHub-Project ist optional und darf keine
+  zweite, von Hand gepflegte Statusquelle werden.
 - Geplante Läufe und Hintergrundagenten nur durch die Leitstelle oder als im Startaufruf autorisierte Fortsetzung, Nachprüfung bzw.
   Review – sonst nicht ohne Auftrag des Nutzers.
 
@@ -100,7 +104,8 @@ GitHub Free erzwingt nichts davon ([anhang.md](anhang.md) B); die Liste ist verb
 2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review neu: `tools/pruefen.sh` auf dem
    Merge-Ergebnis (`main` + PR) lokal wiederholen, Tabelle im Merge-Kommentar.
 3. [ ] **CI grün auf genau diesem Head** (Check-Runs des Head-SHA). Nur `docs/**`/`*.md` geändert: CI startet nicht
-   (`paths-ignore`) → „entfällt, nur Doku“ nach Bestätigung per `compare`/`--stat`.
+   (Pfadfilter in `build.yml`) → „entfällt, nur Doku“ nach Bestätigung per `compare`/`--stat`. Gilt nicht für
+   `docs/routines/**` und `STATUS.md`: sie sind Eingaben von `tools/abdeckung.py --check`, dafür läuft die CI immer.
 4. [ ] **Testnachweis:** Tabelle von `tools/pruefen.sh` zum Head (PR, Fixlauf oder Review). Ein Review „nur Codelesen“ oder an
    unverifiziertem Stand zählt nicht.
 5. [ ] **Review-Freigabe** als Datei in `docs/reviews/`; offene P0/P1/P2 behoben oder vom Nutzer ausdrücklich zurückgestellt.

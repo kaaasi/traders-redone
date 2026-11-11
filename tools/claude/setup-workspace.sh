@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Richtet Claudes Arbeitsumgebung ein: .NET-SDK und NuGet-Pakete aus dem Release "claude-werkzeuge" laden,
-# Offline-Paketquelle eintragen, Umgebungsvariablen schreiben. Die Originaldateien liegen im Repo (original/).
-# Aufruf: tools/claude/setup-workspace.sh      danach: source ~/claude-tools-traders/env.sh
+# Sets up Claude's work environment: downloads the .NET SDK and NuGet packages from the release "claude-werkzeuge",
+# registers the offline package source and writes the environment variables. The original files are in the repo (original/).
+# Usage: tools/claude/setup-workspace.sh      then: source ~/claude-tools-traders/env.sh
 set -euo pipefail
 
 REPO="${REPO:-kaaasi/traders-redone}"
 TAG="claude-werkzeuge"
-BASE="${CLAUDE_TOOLS:-$HOME/claude-tools-traders}"   # eigener Ordner: kollidiert nicht mit anderen Projekten
+BASE="${CLAUDE_TOOLS:-$HOME/claude-tools-traders}"   # own folder, separate from other projects' tool folders
 mkdir -p "$BASE"
 
 download() {
@@ -31,9 +31,8 @@ echo "Lade NuGet-Pakete …"
 download nuget-packages.tar.gz
 rm -rf "$BASE/nuget-packages" && tar -xzf "$BASE/nuget-packages.tar.gz" -C "$BASE" && rm -f "$BASE/nuget-packages.tar.gz"
 
-# Nur die Offline-Quelle verwenden (nuget.org ist aus der Arbeitsumgebung nicht erreichbar).
-# Eigene Konfigurationsdatei, über NUGET_CONFIG_FILE in pruefen.sh bzw. --configfile nutzbar; zusätzlich als
-# Benutzerkonfiguration, damit ein schlichtes "dotnet restore" funktioniert.
+# Use only offline sources (nuget.org cannot be reached from the work environment).
+# Own config file, used by pruefen.sh via TRADERS_NUGET_CONFIG (--configfile); it contains only this project's source.
 cat > "$BASE/NuGet.Config" <<XML
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
@@ -43,8 +42,28 @@ cat > "$BASE/NuGet.Config" <<XML
   </packageSources>
 </configuration>
 XML
+# Additionally merge the source into the user config so that a plain "dotnet restore" works. Sources other projects
+# registered there (e.g. the Eishockey-Manager's offline mirror) are kept; only nuget.org is dropped.
 mkdir -p "$HOME/.nuget/NuGet"
-cp "$BASE/NuGet.Config" "$HOME/.nuget/NuGet/NuGet.Config"
+python3 - "$HOME/.nuget/NuGet/NuGet.Config" "$BASE/nuget-packages" <<'PY'
+import os, sys
+import xml.etree.ElementTree as ET
+path, source = sys.argv[1], sys.argv[2]
+root = ET.parse(path).getroot() if os.path.exists(path) else ET.Element("configuration")
+sources = root.find("packageSources")
+if sources is None:
+    sources = ET.SubElement(root, "packageSources")
+kept = [e for e in sources.findall("add")
+        if e.get("key") not in ("traders-offline", "nuget.org") and "nuget.org" not in (e.get("value") or "")]
+for child in list(sources):
+    sources.remove(child)
+ET.SubElement(sources, "clear")
+for e in kept:
+    sources.append(e)
+ET.SubElement(sources, "add", key="traders-offline", value=source)
+ET.indent(root)
+ET.ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)
+PY
 
 cat > "$BASE/env.sh" <<ENV
 export DOTNET_ROOT="$BASE/dotnet"
