@@ -83,6 +83,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; VRAM- und Palettenvergleich gegen den `VgaAdapter` des RefEmu nach `Call` der Originalroutine
   (`Frame()`), Gegenprobe je Test im Review; Befehlsliste mit allen 17 Typen mindestens einmal.
 - **Abhängigkeiten:** keine.
+- **Status:** in Arbeit (Claude, Teil 1 von 3, PR folgt).
 
 ## 3 `host` – App-Host mit Eingabe, Ton-Analyse
 
