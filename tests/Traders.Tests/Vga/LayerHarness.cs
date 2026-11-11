@@ -27,7 +27,7 @@ internal sealed class LayerHarness
         Original.WriteWord(GraphicsLayers.CardMode, cardMode);
         var dac = new VgaDac();
         Original.Machine.Vga.Dac.CopyTo(dac.Registers, 0);
-        Port = new GraphicsLayers(Driver.Port, Original.DataSegment(), dac, PortRetraces);
+        Port = new GraphicsLayers(Driver.Port, Original.DataSegment(), dac, PortRetraces) { DataSegment = Original.Dgroup };
     }
 
     public ushort Next(int minInclusive, int maxInclusive) => (ushort)Rng.Next(minInclusive, maxInclusive + 1);

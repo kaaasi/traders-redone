@@ -131,4 +131,10 @@ berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die e
   Strahlrücklauf (`0D73:00D3`) ist genau ein Aufruf von `IRetraceWait` – keine eigene Uhr; die Tests zählen die Warten gegen den RefEmu.
 - Korrektur zu §5: In `03EB` sind auch Ergebnisse jenseits des Ziels möglich (Schritt als Byte, Vergleich vorzeichenbehaftet:
   Stufe 16 ergibt Schritt 80h). Ausblenden ruft zusätzlich `21AF:04CD` (Zeigerpaare `DS:33E4` nullen), nicht Objekte zeichnen.
+- **Teil 2** (portiert mit Differenztest): Befehlsliste `0A96` (alle 17 Typen, Einreihen, `06A8`, Text `0C68`, `0C3F`), Zahl
+  `2295:0001/0062`, Hilfen `0A69` einschließlich Schreibmaschinentext `01AD/0243/0288` (Tastenklick und Zeitgeber-Warten als
+  Ereignisse `ITypewriterEffects`). Befunde `docs/routines/0A96_06A8_befehlsliste.md`, `0A69_000B_hilfen.md`, `2295_0001_zahl.md`.
+- Korrektur zu §2: `06A8` leert die Liste **nicht**; Zähler und Zeiger stehen danach wieder hinter dem letzten Eintrag, ein zweiter
+  Aufruf zeichnet dieselben Einträge erneut (`21FD:060D`). Leeren nur `001B`. Zahlen mit mehr als 7 (`$`: 6) Stellen überschreiben
+  das Typwort ihres Eintrags.
 
