@@ -41,4 +41,26 @@ public static class MzLoader
         }
         return h;
     }
+
+    /// <summary>
+    /// Far-call targets in the load image (segment relative to the image): every <c>CALL FAR seg:off</c>
+    /// (9Ah) whose segment word is a relocation site.
+    /// </summary>
+    public static SortedSet<(ushort Seg, ushort Off)> FarCallTargets(ReadOnlySpan<byte> exe)
+    {
+        var h = ParseHeader(exe);
+        int start = h.HeaderParagraphs * 16;
+        var img = exe.Slice(start, Math.Min(h.ImageSize, exe.Length - start));
+        var result = new SortedSet<(ushort, ushort)>();
+        for (int i = 0; i < h.RelocationCount; i++)
+        {
+            int e = h.RelocationTableOffset + i * 4;
+            int lin = (exe[e + 2] | (exe[e + 3] << 8)) * 16 + (exe[e] | (exe[e + 1] << 8));
+            if (lin < 3 || lin + 1 >= img.Length || img[lin - 3] != 0x9A) continue;
+            ushort off = (ushort)(img[lin - 2] | (img[lin - 1] << 8));
+            ushort seg = (ushort)(img[lin] | (img[lin + 1] << 8));
+            result.Add((seg, off));
+        }
+        return result;
+    }
 }
