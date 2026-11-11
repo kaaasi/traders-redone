@@ -62,7 +62,8 @@ Ist das nicht erbracht, gilt der Stand als „unverifiziert“: Läufe daran sin
 - **Zugriff:** Läufe erhalten nur die Repos, die die **anlegende Sitzung** eingebunden hat (`add_repo` steht im Lauf nicht
   verlässlich bereit); vor dem ersten `create_trigger` `leitstelle-start.md` Schritt 0 erledigt (beide Repos `push`) und
   `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` erfolgreich – sonst keinen Lauf anlegen und dem Nutzer melden.
-  Jeder Startaufruf enthält den Zugriffsabsatz aus `spur-start.md`.
+  Jeder Startaufruf enthält den Zugriffsabsatz aus `spur-start.md`. Legt der Nutzer den Lauf selbst an, gibt er beide Repos
+  mit (Code-Repo mit Schreibzugriff); fehlt das Code-Repo, scheitert der Lauf sonst schon an `git ls-remote` (Spur ⓪, 11.11.2026).
 - **Modell:** nach dem Anlegen mit `update_trigger` setzen, wenn es von Opus abweicht (nur für Mechanisches nach
   `zusammenarbeit.md` §5 „Modellwahl“ oder auf Wunsch des Nutzers).
 - **`spur-wartet` durchsehen:** „Fortsetzung anlegen – Leitstelle“ heißt, die Aufgabe mit dem Prompt aus der Übergabe anlegen –

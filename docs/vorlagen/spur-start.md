@@ -11,10 +11,14 @@
 > Unbeaufsichtigt, keine Rückfragen. Teile und Selbstfortsetzung nach Abschnitt „Teile und Fortsetzung“; das Anlegen
 > einer Fortsetzung per `create_trigger` ist autorisiert (höchstens 3 je Spur). Modell der Spur: `<modell>`.
 > Zugriff zuerst prüfen: `git ls-remote https://github.com/kaaasi/traders-redone HEAD` und
-> `git ls-remote https://github.com/kaaasi/traders-referenz HEAD`. Scheitert das Referenz-Repo, `add_repo` (ggf. erst per
-> `ToolSearch` mit `select:mcp__claude-code-remote__add_repo` laden; meist nicht vorhanden) für `kaaasi/traders-referenz`
-> (access read) und erneut prüfen; bleibt eines unerreichbar, sofort blockiert melden (genaue Fehlermeldungen), keine
-> Code-Arbeit; gibt es einen PR der Spur, dort Kommentar und Label `spur-wartet`.
+> `git ls-remote https://github.com/kaaasi/traders-referenz HEAD`. Scheitert eines, `add_repo` (ggf. erst per `ToolSearch` mit
+> `select:mcp__claude-code-remote__add_repo` laden; meist nicht vorhanden) für `kaaasi/traders-redone` (access push) bzw.
+> `kaaasi/traders-referenz` (access read) – beides ausdrücklich autorisiert – und erneut prüfen; bleibt eines unerreichbar,
+> sofort blockiert melden (genaue Fehlermeldungen), keine Code-Arbeit; gibt es einen PR der Spur, dort Kommentar und Label
+> `spur-wartet`.
+
+**Anlegen** (Leitstelle oder Nutzer): dem Lauf beide Repos mitgeben, `kaaasi/traders-redone` mit Schreibzugriff und
+`kaaasi/traders-referenz`; der `add_repo`-Weg im Startaufruf ist nur der Rückfall.
 
 **Einzelner Folgeteil ohne Fortsetzung:** wie oben, aber statt „Teile und Selbstfortsetzung … (höchstens 3 je Spur).“ der Satz
 „Teile nach Abschnitt ‚Teile und Fortsetzung‘; nur Teil <n>, keine Fortsetzung anlegen.“
