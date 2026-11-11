@@ -143,6 +143,24 @@ Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`
 | `0DE7` | char[] | – | 12 Stationsnamen (VULCAN … LAVE) | G (Test) |
 | `09CE` | 10×19 B | – | Ressourcenliste `V-*.PP`/`E-*.PP` | G (Vorversuch) |
 
+### 4.1 Eingabe und Zeitgeber (Spur `host`, R3)
+
+Belege: Befunde `docs/routines/27C6_0043_eingabe_zeitgeber.md`, `0E9E_000E_steuerung.md`; RefEmu-Proben in
+`tests/Traders.Tests/App/`. Präzisiert die Zeilen `117E`/`1180` und `3D47` oben (geschrieben von `27C6:037A`/`03E4` bzw. `0043`).
+
+| DS | Breite | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `1158` | B | – | letzter Make-Code | G – `27C6:0043`, Probe |
+| `115D` | B | – | Make-Zähler mod 256 | G – `27C6:0043`, Probe |
+| `117E` / `1180` | W | – | Tickzähler 72,82 Hz (PIT-Teiler `4000h`); `1180 & 3` = 0 → alter `int 8` | G – `27C6:03E4`, Probe |
+| `083C` | B[4] | – | Steuerungsart je Spieler (0/1 Joystick, 2 Maus, 3 Tasten QAZX, 4 Cursor, 5 Parallelport) | G – `0E9E:0035`, Probe |
+| `0840` | B[4] | – | 1 = Computer | G – `0E9E:0035`, Probe |
+| `37C3` | B[4] | – | Steuerbits (1 rechts, 2 links, 4 hoch, 8 runter, 10h Feuer) | G – `0E9E:0035`, Probe |
+| `3786` / `302E` | DW[4] | – | Bewegungs- / Feuerverzögerung | G – `0E9E:0264`/`0312`, Probe |
+| `44BE`, `43F0`, `439D`, `44BA`, `4894` | B[4] | – | Merker rechts, links, hoch, runter, Feuer | G – `0E9E:0264`/`0312`, Probe |
+| `3308` | B[4] | – | Aktion −1/0 rechts/1 links/2 hoch/3 runter/10 Feuer | G – `0E9E:037A`, Probe |
+| `2C10` | W | – | Spielerzähler in `0E9E:000E` | G – Probe |
+
 ## 5. Abgeleitete Werte
 
 Preise (`43F4`, `48A0`, `40CC`, `3746`, `4B98`) werden in `1777:02DC` aus Bargeld der Spieler, Feldzahlen, Woche und
