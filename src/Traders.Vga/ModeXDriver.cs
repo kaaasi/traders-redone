@@ -4,7 +4,7 @@ namespace Traders.Vga;
 /// Port of the VGA part of the assembler graphics driver in segment 23CD of T.EXE
 /// (installed by 23CD:3042 for display mode 1). Each method mirrors one driver routine
 /// instruction by instruction, including 16-bit wrap-around and the counting quirks of the
-/// original loops (see docs/analyse/GRAFIK.md and docs/routines/23CD_*.md).
+/// original loops (see docs/analyse/GRAFIK.md and the findings docs/routines/23CD_*.md).
 ///
 /// Addressing: the draw page is a VRAM segment (CS:0002); a pixel (x, y) lives in plane x&amp;3 at
 /// page offset y·80 + x/4. The RAM atlas and the mask atlas are addressed from offset 0 of
@@ -27,11 +27,11 @@ public sealed class ModeXDriver
     public ushort PageSegment { get; set; } = 0xA000;
     /// <summary>Draw page offset (CS:0000); stored by 23CD:311A but never used for addressing.</summary>
     public ushort PageOffset { get; set; }
-    /// <summary>Current colour (CS:0588, 23CD:05C3); drawing uses the low byte.</summary>
+    /// <summary>Current colour (CS:0588, set by [ORIGINAL] 23CD:05C3); drawing uses the low byte.</summary>
     public ushort Color { get; set; }
-    /// <summary>Current font number (CS:0586, 23CD:05B6).</summary>
+    /// <summary>Current font number (CS:0586, set by [ORIGINAL] 23CD:05B6).</summary>
     public ushort Font { get; set; }
-    /// <summary>Line pattern (CS:04F4, 23CD:05D0); FFFFh = solid.</summary>
+    /// <summary>Line pattern (CS:04F4, set by [ORIGINAL] 23CD:05D0); FFFFh = solid.</summary>
     public ushort LinePattern { get; set; } = 0xFFFF;
     /// <summary>CRTC start address (registers 0C/0D) as last set by 23CD:30E9.</summary>
     public ushort DisplayStart { get; private set; }
@@ -72,25 +72,25 @@ public sealed class ModeXDriver
         return (byte)((v >> 1) | (v << 7));
     }
 
-    /// <summary>23CD:30D1: reset graphics controller (read map 0, write mode 0 defaults).</summary>
+    /// <summary>[ORIGINAL] 23CD:30D1: reset graphics controller (read map 0, write mode 0 defaults).</summary>
     public void ResetGraphicsController() => Vram.ReadMap = 0;
 
     // ------------------------------------------------------------------ page / state
 
-    /// <summary>23CD:311A: select the page drawn to.</summary>
+    /// <summary>[ORIGINAL] 23CD:311A: select the page drawn to.</summary>
     public void SetDrawPage(ushort offset, ushort segment)
     {
         PageSegment = segment;
         PageOffset = offset;
     }
 
-    /// <summary>23CD:30E9: CRTC start address = (segment − A000h)·16 + offset.</summary>
+    /// <summary>[ORIGINAL] 23CD:30E9: CRTC start address = (segment − A000h)·16 + offset.</summary>
     public void SetDisplayStart(ushort offset, ushort segment) =>
         DisplayStart = (ushort)(((segment - 0xA000) << 4) + offset);
 
     // ------------------------------------------------------------------ primitives
 
-    /// <summary>23CD:31A6 (vector 10): filled rectangle in the current colour.</summary>
+    /// <summary>[ORIGINAL] 23CD:31A6 (vector 10): filled rectangle in the current colour.</summary>
     public void FillRect(ushort x, ushort y, ushort w, ushort h)
     {
         ushort di = PageAddr(x, y);
@@ -114,7 +114,7 @@ public sealed class ModeXDriver
         Vram.MapMask = 0x0F;
     }
 
-    /// <summary>23CD:32D8 (vector 14): copy an atlas rectangle to the draw page.</summary>
+    /// <summary>[ORIGINAL] 23CD:32D8 (vector 14): copy an atlas rectangle to the draw page.</summary>
     public void BlitAtlasToPage(ushort sx, ushort sy, ushort w, ushort h, ushort dx, ushort dy)
     {
         var (para, si) = AtlasAddr(sx, sy);
@@ -145,11 +145,11 @@ public sealed class ModeXDriver
         Vram.MapMask = 0x0F;
     }
 
-    /// <summary>23CD:3A9A (vector 20): <see cref="BlitAtlasToPage"/> with width = units·8.</summary>
+    /// <summary>[ORIGINAL] 23CD:3A9A (vector 20): <see cref="BlitAtlasToPage"/> with width = units·8.</summary>
     public void BlitAtlasToPageFixed(ushort sx, ushort sy, ushort units, ushort h, ushort dx, ushort dy) =>
         BlitAtlasToPage(sx, sy, (ushort)(units << 3), h, dx, dy);
 
-    /// <summary>23CD:3386 (vector 38): OR an atlas rectangle onto the draw page.</summary>
+    /// <summary>[ORIGINAL] 23CD:3386 (vector 38): OR an atlas rectangle onto the draw page.</summary>
     /// <remarks>The inner loop uses LOOP: a plane with zero bytes runs 65536 times (as the original).</remarks>
     public void OrAtlasToPage(ushort sx, ushort sy, ushort w, ushort h, ushort dx, ushort dy)
     {
@@ -189,7 +189,7 @@ public sealed class ModeXDriver
         Vram.MapMask = 0x0F;
     }
 
-    /// <summary>23CD:3449 (vector 3C): copy a rectangle inside the RAM atlas.</summary>
+    /// <summary>[ORIGINAL] 23CD:3449 (vector 3C): copy a rectangle inside the RAM atlas.</summary>
     public void CopyAtlasToAtlas(ushort sx, ushort sy, ushort w, ushort h, ushort dx, ushort dy)
     {
         var (dPara, dOff) = AtlasAddr(dx, dy);
@@ -217,7 +217,7 @@ public sealed class ModeXDriver
         }
     }
 
-    /// <summary>23CD:351E (vector 40): copy a rectangle inside the draw page, plane by plane.</summary>
+    /// <summary>[ORIGINAL] 23CD:351E (vector 40): copy a rectangle inside the draw page, plane by plane.</summary>
     public void CopyPageToPage(ushort sx, ushort sy, ushort w, ushort h, ushort dx, ushort dy)
     {
         ushort dOff = PageAddr(dx, dy);
@@ -249,7 +249,7 @@ public sealed class ModeXDriver
     }
 
     /// <summary>
-    /// 23CD:35DF (vector 2C): atlas rectangle to the draw page where the mask atlas has a set bit
+    /// [ORIGINAL] 23CD:35DF (vector 2C): atlas rectangle to the draw page where the mask atlas has a set bit
     /// (mask origin (mx, my), x rounded down to a multiple of 8).
     /// </summary>
     /// <remarks>A plane with zero bytes (width &lt; 4) runs 65536 bytes per row, as in the original.</remarks>
@@ -304,7 +304,7 @@ public sealed class ModeXDriver
 
     private static readonly ushort[] MaskBits = [0x8000, 0x0800, 0x0080, 0x0008];
 
-    /// <summary>23CD:3CE8 (vector 48): fill the mask shape at (mx, my) with a colour on the draw page.</summary>
+    /// <summary>[ORIGINAL] 23CD:3CE8 (vector 48): fill the mask shape at (mx, my) with a colour on the draw page.</summary>
     /// <remarks>A plane with zero bytes (width &lt; 4) runs 65536 bytes per row, as in the original.</remarks>
     public void MaskFill(ushort mx, ushort my, ushort w, ushort h, ushort dx, ushort dy, ushort color)
     {
@@ -348,7 +348,7 @@ public sealed class ModeXDriver
         Vram.MapMask = 0x0F;
     }
 
-    /// <summary>23CD:373B (vector 30): set one pixel. Leaves the map mask at FFh.</summary>
+    /// <summary>[ORIGINAL] 23CD:373B (vector 30): set one pixel. Leaves the map mask at FFh.</summary>
     public void SetPixel(ushort x, ushort y, ushort color)
     {
         ushort di = PageAddr(x, y);
@@ -357,7 +357,7 @@ public sealed class ModeXDriver
         Vram.MapMask = 0xFF;
     }
 
-    /// <summary>23CD:3764 (vector 34): read one pixel of the draw page.</summary>
+    /// <summary>[ORIGINAL] 23CD:3764 (vector 34): read one pixel of the draw page.</summary>
     public byte GetPixel(ushort x, ushort y)
     {
         ushort di = PageAddr(x, y);
@@ -368,7 +368,7 @@ public sealed class ModeXDriver
     }
 
     /// <summary>
-    /// 23CD:328E (vector 18): latch copy of w bytes × h rows between two VRAM addresses
+    /// [ORIGINAL] 23CD:328E (vector 18): latch copy of w bytes × h rows between two VRAM addresses
     /// (all planes enabled in the map mask at once, i.e. 4 pixels per byte).
     /// </summary>
     public void LatchCopy(ushort srcOff, ushort srcSeg, ushort dstOff, ushort dstSeg, ushort w, ushort h)
@@ -390,7 +390,7 @@ public sealed class ModeXDriver
     }
 
     /// <summary>
-    /// 23CD:31FD (vector 0C): draw one 16-pixel-wide glyph with its top row at (x, yTop) in the
+    /// [ORIGINAL] 23CD:31FD (vector 0C): draw one 16-pixel-wide glyph with its top row at (x, yTop) in the
     /// current colour. <paramref name="height"/> is used as a byte (0 = 256 rows).
     /// </summary>
     public void DrawGlyph(ushort x, ushort yTop, byte[] glyphs, int glyphOffset, byte height)
@@ -427,7 +427,7 @@ public sealed class ModeXDriver
     }
 
     /// <summary>
-    /// 23CD:05DD: draw a zero-terminated string with the current font; y is the bottom row of the
+    /// [ORIGINAL] 23CD:05DD: draw a zero-terminated string with the current font; y is the bottom row of the
     /// glyphs. Characters are masked to 7 bits; x advances by the font's advance per character.
     /// </summary>
     public void DrawText(ushort x, ushort y, ReadOnlySpan<byte> text)

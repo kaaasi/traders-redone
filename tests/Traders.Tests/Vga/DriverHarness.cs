@@ -23,7 +23,7 @@ internal sealed class DriverHarness
     public DriverHarness(int seed, bool realFonts = false)
     {
         Rng = new Random(seed);
-        Original = OriginalProgram.LoadOnly(Path.Combine(RefEmuPaths.RepoRoot, "original", "dos"));
+        Original = OriginalProgram.LoadOnly(TestGameData.DosDir);
         Original.Call(Driver, 0x04F6, 1); // select VGA driver: mode 13h -> Mode X, vectors to CS:0004
 
         // atlas, masks: random contents
@@ -94,8 +94,22 @@ internal sealed class DriverHarness
         Port.Font = font;
     }
 
+    /// <summary>Word of the driver's code-segment state (CS:offset of 23CD in the emulator).</summary>
+    public ushort DriverWord(ushort offset) => Original.Machine.Mem.Read16(Original.Segment(Driver), offset);
+
+    /// <summary>Map mask (sequencer 2, low four bits) and read map (graphics controller 4) as left by the last call.</summary>
+    public void AssertRegistersEqual(string what)
+    {
+        var vga = Original.Machine.Vga;
+        Assert.True((vga.Seq[2] & 0x0F) == (Port.Vram.MapMask & 0x0F),
+            $"{what}: map mask original {vga.Seq[2]:X2} port {Port.Vram.MapMask:X2}");
+        Assert.True((vga.Gc[4] & 0x03) == (Port.Vram.ReadMap & 0x03),
+            $"{what}: read map original {vga.Gc[4]:X2} port {Port.Vram.ReadMap:X2}");
+    }
+
     public void AssertVramEqual(string what)
     {
+        AssertRegistersEqual(what);
         for (int p = 0; p < 4; p++)
         {
             var a = Original.Machine.Vga.Planes[p];

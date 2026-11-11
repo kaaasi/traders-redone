@@ -14,7 +14,8 @@ public class DriverDifferentialTests
 {
     private const int Calls = 40;
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:31A6
+    [GameDataFact]
     public void FillRect_31A6_matches_original()
     {
         var h = new DriverHarness(1);
@@ -29,7 +30,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:32D8
+    [GameDataFact]
     public void BlitAtlasToPage_32D8_matches_original()
     {
         var h = new DriverHarness(2);
@@ -45,7 +47,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:3A9A
+    [GameDataFact]
     public void BlitAtlasToPageFixed_3A9A_matches_original()
     {
         var h = new DriverHarness(3);
@@ -60,7 +63,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:3386
+    [GameDataFact]
     public void OrAtlasToPage_3386_matches_original()
     {
         var h = new DriverHarness(4);
@@ -76,7 +80,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:3449
+    [GameDataFact]
     public void CopyAtlasToAtlas_3449_matches_original()
     {
         var h = new DriverHarness(5);
@@ -92,7 +97,8 @@ public class DriverDifferentialTests
         h.AssertVramEqual("AtlasCopy leaves VRAM untouched");
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:351E
+    [GameDataFact]
     public void CopyPageToPage_351E_matches_original()
     {
         var h = new DriverHarness(6);
@@ -107,7 +113,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:35DF
+    [GameDataFact]
     public void MaskedBlit_35DF_matches_original()
     {
         var h = new DriverHarness(7);
@@ -124,7 +131,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:3CE8
+    [GameDataFact]
     public void MaskFill_3CE8_matches_original()
     {
         var h = new DriverHarness(8);
@@ -140,7 +148,9 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:373B
+    // [DIFFERENTIAL] 23CD:3764
+    [GameDataFact]
     public void SetPixel_373B_and_GetPixel_3764_match_original()
     {
         var h = new DriverHarness(9);
@@ -163,7 +173,8 @@ public class DriverDifferentialTests
         h.AssertVramEqual("SetPixel/GetPixel");
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:328E
+    [GameDataFact]
     public void LatchCopy_328E_matches_original()
     {
         var h = new DriverHarness(10);
@@ -178,7 +189,9 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:05DD
+    // [DIFFERENTIAL] 23CD:31FD
+    [GameDataFact]
     public void DrawText_05DD_matches_original_for_both_fonts()
     {
         var h = new DriverHarness(11);
@@ -200,7 +213,61 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:311A
+    // [DIFFERENTIAL] 23CD:05B6
+    // [DIFFERENTIAL] 23CD:05C3
+    // [DIFFERENTIAL] 23CD:05D0
+    // [DIFFERENTIAL] 23CD:30D1
+    [GameDataFact]
+    public void Driver_state_setters_and_controller_reset_match_original()
+    {
+        var h = new DriverHarness(14);
+        for (int i = 0; i < Calls; i++)
+        {
+            ushort off = h.Next(0, 0xFFFF), seg = h.Next(0, 0xFFFF);
+            h.CallOriginal(0x0570, off, seg);   // jmp far [cs:44] -> 311A
+            h.Port.SetDrawPage(off, seg);
+            Assert.Equal(h.DriverWord(0x0000), h.Port.PageOffset);
+            Assert.Equal(h.DriverWord(0x0002), h.Port.PageSegment);
+
+            ushort font = h.Next(0, 0xFFFF), color = h.Next(0, 0xFFFF), pattern = h.Next(0, 0xFFFF);
+            h.CallOriginal(0x05B6, font);
+            h.Port.Font = font;
+            h.CallOriginal(0x05C3, color);
+            h.Port.Color = color;
+            h.CallOriginal(0x05D0, pattern);
+            h.Port.LinePattern = pattern;
+            Assert.Equal(h.DriverWord(0x0586), h.Port.Font);
+            Assert.Equal(h.DriverWord(0x0588), h.Port.Color);
+            Assert.Equal(h.DriverWord(0x04F4), h.Port.LinePattern);
+
+            byte readMap = (byte)h.Next(0, 3);
+            h.Original.Machine.Vga.Gc[4] = readMap;
+            h.Port.Vram.ReadMap = readMap;
+            h.CallOriginal(0x056B);             // jmp far [cs:04] -> 30D1
+            h.Port.ResetGraphicsController();
+            h.AssertRegistersEqual($"30D1 #{i}");
+        }
+    }
+
+    // [DIFFERENTIAL] 23CD:311A
+    [GameDataFact]
+    public void Drawing_goes_to_the_selected_page()
+    {
+        var h = new DriverHarness(15);
+        foreach (ushort seg in new ushort[] { 0xA000, 0xA400, 0xA800, 0xAC00, 0xA123 })
+        {
+            h.SetPage(seg);
+            h.SetColor(h.Next(0, 255));
+            ushort x = h.Next(0, 300), y = h.Next(0, 180);
+            h.CallOriginal(0x069B, x, y, 17, 9);
+            h.Port.FillRect(x, y, 17, 9);
+            h.AssertVramEqual($"FillRect on page {seg:X4}");
+        }
+    }
+
+    // [DIFFERENTIAL] 23CD:30E9
+    [GameDataFact]
     public void SetDisplayStart_30E9_matches_original()
     {
         var h = new DriverHarness(12);
@@ -212,7 +279,8 @@ public class DriverDifferentialTests
         }
     }
 
-    [Fact]
+    // [DIFFERENTIAL] 23CD:3079
+    [GameDataFact]
     public void Planar_row_conversion_3079_matches_original()
     {
         var h = new DriverHarness(13);
@@ -229,7 +297,7 @@ public class DriverDifferentialTests
         h.AssertAtlasEqual("3079 conversion");
     }
 
-    [Fact]
+    [GameDataFact]
     public void Full_screen_blit_of_a_converted_picture_shows_the_picture()
     {
         var img = VgaImage.Load(RefEmuPaths.Dos("V-MENU.PP"));

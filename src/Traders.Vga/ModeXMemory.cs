@@ -83,7 +83,7 @@ public sealed class PlanarAtlas
     public PlanarAtlas() : this(new byte[Length]) { }
 
     /// <summary>
-    /// Port of 23CD:3079(buf, rowBytes, rows): every row is copied to a scratch buffer and written
+    /// [ORIGINAL] 23CD:3079 – port of 3079(buf, rowBytes, rows): every row is copied to a scratch buffer and written
     /// back plane by plane (scratch[0], scratch[4], …, then scratch[1], scratch[5], …).
     /// </summary>
     public static void ConvertToPlanarRows(byte[] buffer, int start, int rowBytes, int rows)

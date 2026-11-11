@@ -1,6 +1,7 @@
-# Grafiksystem von T.EXE (AP2)
+# Grafiksystem von T.EXE
 
-Stand: 25.10.2026 · Quelle: Disassemblierung `0A96`, `0A69`, `23CD` (VGA-Teil), `21FD`, `186C`.
+Stand: 11.11.2026 (Analyse aus `dev/ap2-vga` vom 25.10.2026, übernommen von Spur ② `grafik`) · Quelle: Disassemblierung
+`0A96`, `0A69`, `23CD` (VGA-Teil), `21FD`, `186C`. Befunde zu den portierten Treiberroutinen: `docs/routines/23CD_*.md`.
 Adressen = Ladebild-Segment:Offset, DS = DGROUP `0x28DC`.
 
 ## 1. Schichten
@@ -106,8 +107,16 @@ emuliertes Mode-X-VRAM (4 × 64 KB, Map-Mask, Read-Map, Latches).
   Ausblenden `037D`/`03B4`(Farbe): n = 0…7, Wartezeit 4 bzw. 2, dann Blendfarbe setzen und
   `21AF:04CD`.
 
-## 6. Ressourcen-Korrektur
+## 6. Ressourcenformat
 
-`V-*.PP` = Palette (768) + Kopf (LE-Wörter Höhe 256, Breite 320) + Atlas ab Byte 772.
-`Traders.Assets.VgaImage` liest den Atlas derzeit ab 768 (um 4 Pixel verschoben) →
-Anfrage an die Leitstelle (siehe `docs/uebergabe/AP2.md`).
+`V-*.PP` = Palette (768) + Kopf (LE-Wörter Höhe 256, Breite 320) + Atlas ab Byte 772. `Traders.Assets.VgaImage`
+berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die ersten 4 Byte des Treiberpuffers.
+
+## 7. Portierungsstand (Spur ②)
+
+- Portiert mit Differenztest: Vektoren 04, 08, 0C, 10, 14, 18, 20, 2C, 30, 34, 38, 3C, 40, 44, 48; Text `05DD`, Setzer
+  `05B6`/`05C3`/`05D0`, Atlas-Umwandlung `3079`.
+- Offen in ②: Linie (Vektoren 1C/4C), Objekt zeichnen/zurückschreiben (Vektoren 24/28 mit `06E9`/`071C`), Kartenwahl `04F6`
+  und VGA-Init `3042`.
+- Nicht in ②: EGA (`0797`), Tandy (`1645`, `3F0A`), Umwandlung `166A` (nur VGA); `0A96`, `0A69`, `0B67`, `21AF`,
+  Paletten/Blenden und Farbregister → R3.
