@@ -16,6 +16,10 @@ und Referenzspuren (Zustand, Grafik, Ton-Aufrufe) zu erzeugen.
 | Protokoll | `Machine/EventLog.cs` | Alle Host-Dienste mit Befehlszähler und emulierter Zeit |
 | Schnittstelle | `OriginalProgram.cs` | Adressen wie in der Analyse (Ladebild-Segment, DS-Offset), `LoadOnly`, `BootToMainMenu`, `Call` |
 | AdLib | `Hardware/AdLibStub.cs` | Stilles OPL2 bei 388h: Registerdatei + Timer-Status für die Kartenerkennung |
+| Tastatur | `Hardware/Scancodes.cs`, `PcMachine.ScheduleKey` | Set-1-Scancodes; Tastendruck = Make-Code, Break-Code nach Haltezeit (Vorgabe 0,1 s) |
+| TSR | `PcMachine.Dos.cs` (`RunResidentProgram`, `int 21h/31h`, `int 27h`) | residente Programme vor `T.EXE` (FXDRIVER wie in `TRADERS.BAT`); `T.EXE` lädt dann darüber |
+| Code-Haken | `PcMachine.AddCodeHook` | Rückruf vor dem Befehl an `seg:off`; nur beobachten, nichts ändern |
+| Spuren | `Machine/CallTracer.cs`, `Machine/OplTrace.cs` | far-Aufrufe in Ladebild-Segmente (z. B. Grafiktreiber `0A96`/`0A69`) mit Argumenten und Rückgabe; jeder OPL2-Registerzugriff mit Zeit |
 
 ## Prüfung der CPU
 
@@ -47,7 +51,8 @@ Bewusst nachgebildete 286-Eigenheiten (alle durch die Tests belegt):
   Retrace-Signal (Port 3DAh) mit 70 Hz aus derselben Zeit.
 - DOS-Datum/Uhrzeit = `StartTime` (Vorgabe 01.06.1991 12:00:00) + emulierte Zeit.
   Jede Abfrage steht im Protokoll (`Clock`).
-- Tastatur: geplante Scancodes (`ScheduleKey`), ein Byte je IRQ1, mindestens 10 ms Abstand.
+- Tastatur: geplante Scancodes (`ScheduleKey`, `ScheduleScancode`), ein Byte je IRQ1, mindestens 10 ms Abstand. Das Spiel
+  fragt eine Tastenzustandstabelle ab; deshalb folgt der Break-Code erst nach einer Haltezeit.
 
 Gleiche Optionen + gleiche Eingaben ⇒ gleicher Lauf.
 
@@ -95,6 +100,39 @@ Vektoren 60h–67h sind leer, außer 64h bei `RecordSoundDriver` (Vorgabe: an).
 Bilder: Referenz-Repo `refemu/refemu-codeabfrage.png`, `refemu-hauptmenue.png` (`tools/claude/fetch-reference.sh refemu`).
 Frames und Ereignisprotokoll eines Startlaufs schreibt `REFEMU_OUT=<ordner> dotnet test … --filter FullyQualifiedName~RefEmu.BootTests` lokal.
 
+## Referenzlauf mit FXDRIVER
+
+`OriginalProgram.Start(…, runFxDriver: true)` startet erst `FXDRIVER.EXE` (bleibt resident, setzt `int 64h`), dann `T.EXE`
+über dem Treiber (Ladesegment `1776` statt `1000`); jeder `int 64h`-Aufruf wird als Ereignis `Sound` protokolliert. Gemessen
+(Test `GameRunTests`, eigene Probe): Das Hauptmenü wird später betreten (15,40 s statt 15,33 s), `random()` hat dort einen anderen
+Zustand, und weil das Menü beim Aufbau `random()` aufruft (BESTAND.md, P4), ist das Bild ein anderes:
+Hash `A1237183394811CE` (`MainMenuFrameHashWithFxDriver`). Ohne FXDRIVER zeichnet der RefEmu `int 64h` nur auf
+(`RecordSoundDriver`). Der Treiber selbst ist nicht kartiert (BESTAND.md §3.3).
+
+## Spiellauf nach dem Hauptmenü (Wochenlauf als Orakel)
+
+`OriginalProgram.StartGame` = Start, Hauptmenü, Eingabetaste nach 0,5 s (Vorgabe: vier Computerspieler). Danach läuft die
+Partie ohne weitere Eingaben. Adressen und Folge nach BESTAND.md §1.4/P1: Wochenpreise `1777:02DC` zu Beginn jeder Woche
+(Wochenzähler `DS:4B9A` schon erhöht), Phasenmarken `21FD:0977(n)` mit n = 0…6, Zufallszustand `DS:10D2`.
+
+| Zeit (emuliert, ohne FXDRIVER) | Ereignis |
+|---|---|
+| 18,10 s | neue Partie `0E31:0003`, Zufallszustand `F9D5A4AC` |
+| 18,12 s | Woche 0: Wochenpreise |
+| 25,66 / 55,86 / 75,70 / 83,77 / 83,78 / 180,38 / 194,72 s | Marken 0–6 der Woche 0 |
+| 220,85 s | Woche 1: Wochenpreise (mit FXDRIVER 214,05 s) |
+
+Belegt durch `GameRunTests`: Markenfolge und Wochenwechsel, zwei Läufe bitgleich (Marken mit Zufallszustand,
+Befehlszähler, Datensegment zu Beginn von Woche 1), Zeiten wie die unabhängige Probe P1. Laufzeit: eine Spielwoche rund
+17 s Rechenzeit (2 Kerne, Release); der Test mit zwei Läufen braucht so etwa 35 s.
+
+- `RunToWeekStart(w, max)` hält vor dem ersten Befehl der Wochenpreise von Woche *w*, `RunToMarker(w, n, max)` vor der
+  Markenroutine mit Argument *n* – dort liegt der Zustand zwischen zwei Phasen im Datensegment (`DataSegment()`). Ein erneuter
+  Aufruf läuft von der Haltestelle weiter.
+- Ein Maschinenabzug zum Wiederaufsetzen an einer Marke fehlt noch (BESTAND.md §3.1 Punkt 3); jeder Lauf beginnt beim Start.
+- Experiment: `bash experiments/refemu/spiellauf.sh <ordner> [sekunden]` schreibt Bilder, Ereignisprotokoll, Grafiktreiber-
+  und OPL-Spur eines Laufs mit FXDRIVER (nur lokal, nicht committen).
+
 ## Verwendung
 
 ```csharp
@@ -105,6 +143,12 @@ FrameDump.Capture(m.Vga).WritePng("frame.png");
 // einzelne Routine: DS = DGROUP, freier Stapel, far-Aufruf
 m.Cpu.Ds = (ushort)(m.LoadSegment + 0x28DC);
 var (ax, dx) = m.CallFar((ushort)(m.LoadSegment + 0x21FD), 0x01BA, [6]);
+```
+
+```csharp
+// Zustand nach Marke 3 der Woche 0 (Standardpartie, vier Computerspieler)
+var p = OriginalProgram.StartGame("gamedata/dos");
+if (p.RunToMarker(week: 0, marker: 3, maxSeconds: 120)) { var ds = p.DataSegment(); uint rnd = p.RandomState; }
 ```
 
 Segmentangaben der Analyse (Ladebild-Segmente) + `LoadSegment` (Vorgabe `0x1000`) = Segment im Emulator.

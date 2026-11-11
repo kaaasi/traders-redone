@@ -53,7 +53,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R2 dieser Spur.
 - **Abnahme:** `tools/pruefen.sh` alle drei Läufe grün; zwei Läufe bitgleich (Determinismus-Test bleibt grün); Hash des Hauptmenüs
   mit FXDRIVER als Test; Spiellauf erreicht nachweislich einen Zustand nach dem Hauptmenü (Test mit Prüfkriterium, nicht nur „läuft“).
-- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** offen.
+- **Abhängigkeiten:** keine; läuft parallel zu ⓪. **Status:** Teile 1–2 fertig, Review offen ([PR #37](https://github.com/kaaasi/traders-redone/pull/37)).
 
 ### ② `grafik` – Mode X und Grafiktreiber `23CD` (Quelle `dev/ap2-vga`, `5a9f178`, 7 Commits)
 
