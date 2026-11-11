@@ -60,13 +60,14 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 
 ### ② `grafik` – VGA-Treiber `23CD` (Quelle `dev/ap2-vga`, `5a9f178`; zugeschnitten nach BESTAND §3.1)
 
-- **Teile:** (1) Übernahme per Cherry-pick von `0e95549`, `dab5889`, `5a9f178`; `f4eb83e` und `ff31159` (Commit/Revert-Paar,
-  auf `main` anders gelöst) auslassen. `ModeXMemory`, RAM-Atlas, `GRAFIK.md` (eigene Worte), Tests auf `[GameDataFact]`/
+- **Teile:** (1) Übernahme per Cherry-pick von `0e95549`, `5a9f178`; `f4eb83e` und `ff31159` (Commit/Revert-Paar, auf `main`
+  anders gelöst) sowie `dab5889` (nur `AP2.md` und `tools/exeimg.py`) auslassen (N2). `ModeXMemory`, RAM-Atlas, `GRAFIK.md` (eigene Worte), Tests auf `[GameDataFact]`/
   `TestGameData.Dos` (`DriverHarness`), `[ORIGINAL] 23CD:<off>`-Marker, Befunde als **Sammelbefunde** in `docs/routines/23CD_*.md`
   (ein Befund darf mehrere Adressen tragen): Rechteck/Pixel, Blits, Masken, Text, Seiten, Atlas-Umwandlung `166A/3079`;
   `[DIFFERENTIAL] 23CD:<off>` je portierter Routine. (2) Fehlende Treiberteile: Linie (2 Vektoren), Objekt zeichnen/zurückschreiben
   `06E9`/`071C` (2 Vektoren), je mit Differenztest. (3) Grenzfälle (Clipping, Seitenwechsel), Kartenwahl `23CD:04F6` nur VGA;
-  `tools/exeimg.py` nur, wenn `tools/segmap.py` es nicht abdeckt.
+  `tools/exeimg.py` (aus `dab5889` per Pfad-Checkout) nur, wenn
+  `tools/segmap.py` es nicht abdeckt.
 - **Nicht in ②:** EGA-, Tandy-Teil (entfällt, nur VGA), `0A96`, `0A69`, `0B67`, `21AF`, Paletten/Blenden, Farbregister → R3
   (Grafikschichten).
 - **Dateigrenzen:** `src/Traders.Vga/**`, `tests/Traders.Tests/Vga/**`, `docs/analyse/GRAFIK.md`, `docs/routines/23CD_*`, ggf.
@@ -85,15 +86,17 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   ①); ist ① beim Start von Teil 3 nicht gemergt: Teil blockiert (`spur-wartet`, „wartet auf ①“).
 - **Entfällt gegenüber dem Plan:** `docs/analyse/PHASEN.md` (Inhalt steht in BESTAND §1.4 und den Befunden), Video-Zeitstempel.
 - **Dateigrenzen:** `tools/callgraph.py`, `experiments/phasen/`, `docs/routines/1777_*`, `tests/Traders.Tests/Phases/**`,
-  `.gitignore` (eine Zeile).
+  `.gitignore` (eine Zeile); Block in `STATUS.md` per `abdeckung.py --write` (N1).
 - **Abnahme:** alle drei Läufe grün (neue Tests); `callgraph.py` reproduzierbar (zweiter Lauf ohne Diff); Befunde mit Adressen und
-  Probe; Test aus Teil 3 wird rot, wenn eine Marke vertauscht oder ausgelassen wird (Gegenprobe im Review); kein Originaltext im Repo.
+  Probe; Test aus Teil 3 wird rot, wenn eine Marke vertauscht oder ausgelassen wird (Gegenprobe im Review); Laufzeit: der Test
+  verlängert `pruefen.sh --schnell` um höchstens 3 Minuten, sonst als eigenes Filtermerkmal außerhalb von `--schnell` führen und
+  im PR nennen (N3); kein Originaltext im Repo.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von ①. **Status:** offen, Start durch den Nutzer.
 
 ### Zuständigkeit gemeinsamer Dateien in R2
 
 `docs/analyse/BESTAND.md`: ⓪ (P3 #39 bei Bedarf Leitstelle). `OriginalProgram.cs`: ①. `STATUS.md`: nur der erzeugte Block zwischen `abdeckung:anfang/ende`
-per `tools/abdeckung.py --write` durch die Spur, die Marker hinzufügt (② und ggf. ①); bei Konflikt im Block nach Rebase `--write`
+per `tools/abdeckung.py --write` durch die Spur, die Marker oder Befunde hinzufügt (②, ③, ggf. ①); bei Konflikt im Block nach Rebase `--write`
 erneut ausführen (R2P-1). `.gitignore`: ③ (eine Zeile). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan: Leitstelle. `GameState.cs`,
 `TradersRedone.slnx`, `Directory.Build.props`, `global.json`: niemand (bei Bedarf im PR begründen, Leitstelle entscheidet).
 
@@ -112,9 +115,9 @@ dann über `integration/runde-2`.
 - **Entschieden (Nutzer 11.11.2026, BESTAND §3.3):** nur VGA; Zwischenziel „Gesamtpartie ohne Roboterkampf“ vor dem Roboterkampf
   (`PORTIERUNGSPLAN.md` §5, Fahrplan unten).
 - **F3 Zufall beim Bildaufbau (BESTAND B8) – entschieden: A (Nutzer 11.11.2026).** Präzisierung von `AGENTS.md` §4 mit der
-  Phasenmaschinen-Spur in R3. Vorlage: Das Original zieht in Bildschleifen Zufall (Proben P4, P5); der
+  Phasenmaschinen-Spur in R3. Hintergrund: Das Original zieht in Bildschleifen Zufall (Proben P4, P5); der
   Zufallszustand bei Partiebeginn hängt von der Verweildauer im Menü ab. `AGENTS.md` §4 verlangt „Szenen … verbrauchen keinen
-  Zufall“ und „was das Original beim Bildaufbau ändert, ist ein Ereignis im Kern“. **A (Vorschlag):** Regel präzisieren – jeder
+  Zufall“ und „was das Original beim Bildaufbau ändert, ist ein Ereignis im Kern“. **A (gewählt):** Regel präzisieren – jeder
   Zufallsverbrauch je Bild ist ein Kern-Ereignis im Takt der Phasenmaschine, die Szene löst es genau einmal je Bild aus; Entwurf in
   der Phasenmaschinen-Spur von R3. **B:** Zufall der Darstellung abweichend vom Original aus einer eigenen Quelle (`[APPROX]`) –
   bricht die Zufallsfolge der Regeln und damit Differenz- und Mehrrundenproben.
