@@ -73,8 +73,22 @@ Tastaturhandler), kein Ton. Alle Wirkungen liegen in den 30 Aufrufen. Die Marke 
   Programm (siehe Befund `main`).
 
 ## C#-Umsetzung
-Kein Port in Runde 2. Ziel ist die Phasenmaschine des Kerns in R3 (`AGENTS.md` §4); die Marken 0–6 sind dort die
-Vergleichspunkte für Mehrrundenproben.
+R3 Spur `takt` Teil 2: `src/Traders.Core/Phases/WeekLoop.cs` (die 30 Aufrufe als Daten mit Schrittnummer nach `BESTAND.md`
+§1.4, Argument, Bildschirm/Zufall laut §1.4 und Ausstiegsprüfung) und `PhaseMachine.cs` (Ablauf auf `Dgroup`).
+
+- **Takt:** einzige Zeiteingabe ist `Advance(PhaseTick)` mit der Bildnummer des Hosts; jedes Bild wird genau einmal und der Reihe
+  nach verarbeitet (Nachholen im Kern, alte Nummern ohne Wirkung). Ein laufender Bildschirmschritt bekommt je Bild einen `Tick`;
+  seine Zufallsziehungen in diesem Bild stehen im Ereignis `Frame` (F3 = A). `[APPROX]`: ein Takt = ein 70-Hz-Bild; das genaue
+  Verhältnis der Warteschleifen zum Bildwechsel wird mit den Szenen belegt.
+- **Befehle:** `Submit(IPlayerCommand)`, übergeben an den laufenden Schritt mit dem nächsten Bild.
+- **Ausstehende Schritte:** Aufrufe ohne Handler blockieren die Maschine (`Blocked`, Ereignis `StepPending`); nichts wird
+  übersprungen. Marken sind leer und werden vom Kern selbst durchlaufen (`MarkerPassed`).
+- **Ausstiege:** A nach Aufruf 3, wenn `DS:3D55` ≠ 0 (Rückgabe 0); B nach Aufruf 19 genau bei `AL` = 1 (`cmp al,1`/`jnz`,
+  Rückgabe 1). Wochenzähler nach Aufruf 30 mit 16-Bit-Überlauf (`inc word`).
+- **Tastentabelle:** `PhaseTick.HeldScancodes` setzt `DS:3D47`+Scancode auf 1/0 (`[APPROX]`, Tastaturhandler `27C6:037A` ist
+  Spur `host`).
+- **Zufallszustand:** der Kern lädt `OriginalRandom` vor jedem Handleraufruf aus `DS:10D2` und schreibt ihn nur zurück, wenn
+  gezogen wurde.
 
 ## Prüfung
 - **Statisch (S):** Disassemblierung `1777:01F8`–`02DB` (`tools/segmap.py` bzw. `tools/callgraph.py`), alle Ziele sind
@@ -90,4 +104,11 @@ Vergleichspunkte für Mehrrundenproben.
   `AL` = 0 und `DS:4B9A` = 0, danach erneut Hauptmenü `192D:0007`. Gegenproben: Marke in der Tabelle verändert bzw. Taste
   weggelassen → beide Tests rot; vertauschte, fehlende und zusätzliche Marken, vertauschte Aufrufe und falscher Zähler ohne
   Originaldaten in `WeekLoopSequenceTests.cs`.
-- **Nicht ausgeführt:** Abbruchweg B (Partieende) im RefEmu.
+- **Differenztest (D):** `tests/Traders.Tests/Phases/PhaseMachineDifferentialTests.cs` (`[DIFFERENTIAL] 1777:01F8`): Kern und
+  RefEmu im Gleichschritt (`RefEmuWeekOracle`) – jeder Aufruf läuft im RefEmu, Datensegment und `AL` gehen an den Kern; Folge,
+  Marken, Ausstiegsprüfung und Wochenzähler rechnet der Kern. An jeder Aufrufstelle ist das Datensegment beider gleich (außer
+  Tickzählern `DS:117E`/`1180` und Tastentabelle `DS:3D47`, die Interrupt-Handler schreiben). Woche 0 von Aufruf 2 bis
+  Aufruf 1 der Woche 1 sowie Abbruchweg A (Rücktaste während der Bilanz). Gegenproben (lokal): Zähler +2 statt +1 bzw.
+  Ausstieg A abgeschaltet → beide rot. Ohne Originaldaten: `PhaseMachineTests.cs` (Tabelle gegen `WeekLoopSequence`,
+  ausstehende Schritte, Bild genau einmal, Zufall je Bild, Befehle, Ausstiege A/B mit `AL` = 0/1/2, 16-Bit-Überlauf).
+- **Nicht ausgeführt:** Abbruchweg B (Partieende) im RefEmu (Teil 3 per gesetztem Zustand).

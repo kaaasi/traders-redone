@@ -71,8 +71,9 @@ Testergebnisse und werden als blockiert dokumentiert; Proxy, Sandbox und Freigab
   Uhrwerte und Eingaben sind explizite Eingaben; Zufall nur über `OriginalRandom`; 16-Bit-Arithmetik über `Int16Math`.
 - **Zeit und Phasenwechsel nur über die Phasenmaschine des Kerns** (ab Runde 3); keine eigenen Nachhol-Zähler in Szenen.
 - **Spielerhandlungen sind Befehle an den Kern,** keine direkten Zustandsänderungen (Vorbereitung Netzwerk E6/E7).
-- **Szenen und Rendering lesen nur:** sie buchen nichts, verbrauchen keinen Zufall und ändern keinen Zustand durch Öffnen,
-  Pause oder Laden. Was das Original beim Bildaufbau ändert, ist ein Ereignis im Kern, das die Szene genau einmal auslöst.
+- **Szenen und Rendering lesen nur:** sie buchen nichts, ziehen keinen Zufall (`OriginalRandom` nur im Kern) und ändern keinen
+  Zustand durch Öffnen, Pause oder Laden. Was das Original je Bild ändert – auch Zufallsverbrauch (F3 = A) –, ist ein Kern-Ereignis
+  im Takt der Phasenmaschine: der Host meldet das erreichte Bild mit `PhaseMachine.Advance`, der Kern verarbeitet jedes Bild genau einmal.
 - **Regelrelevante Pixel** (Kollision gegen `V-RAKETE`, Sichtbarkeit gegen `V-BERGE`) nutzen den kanonischen Original-Atlas im Kern.
 
 **Originaltreue:** (1) **Vorlage:** `T.EXE` (Disassemblierung `tools/segmap.py`, Segmentkarte `docs/analyse/segments.md`,
