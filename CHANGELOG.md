@@ -1,11 +1,12 @@
 # Zwischenstände
 
-## Runde 1 – Umstellung (11.11.2026, in Arbeit) · `main` `a138d26`
+## Runde 1 – Umstellung auf den Ablauf des Eishockey-Managers (11.11.2026) · `main` `18e6502`
 
 - ① Werkzeuge (PR #4): SDK-Release `claude-werkzeuge`, `tools/pruefen.sh`, schlanke `build.yml` statt `ci.yml`.
-- ② Prozessdoku (PR #5): Ablauf nach dem Eishockey-Manager, `docs/prozess/`, `docs/vorlagen/`, Labels.
-- ③ Abdeckung (PR #6): Review „Nein“ (R6-1, R6-2), Fixlauf ausstehend.
-- 396 Tests grün (`tools/pruefen.sh` auf `main`+#4+#5).
+- ② Prozessdoku (PR #5): Rollen, Runden, Kurzaufrufe, Review-Kette, Merge-Prüfung; Labels.
+- ③ Abdeckung (PR #6): `tools/abdeckung.py` erzeugt die Routinen-/Segmenttabellen in `STATUS.md`; Marker `[ORIGINAL]`,
+  `[DIFFERENTIAL]`; Kommentare im Quelltext Englisch.
+- Kein neuer Portierungsmeilenstein; 396 Tests grün (`tools/pruefen.sh`, CI).
 
 ## Repositorymodernisierung (27.10.2026) · Integration `76df32b`
 

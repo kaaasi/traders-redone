@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 27.10.2026 · Repositorymodernisierung und AP3 Stand 2
+Stand: 11.11.2026 · Runde 1 (Umstellung) abgeschlossen, Gesamtreview offen
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
