@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md)).
 
-## Aktuelle Runde: Runde 2 – Altbestand übernehmen (Plan 11.11.2026, **Go Nutzer offen**)
+## Aktuelle Runde: Runde 2 – Altbestand übernehmen (Plan 11.11.2026, Go Nutzer 11.11.2026)
 
 **Ziel:** Die drei Altbranches der Paketphase (Runde 0) nach den Regeln von Runde 1 auf `main` bringen: Originalcode-Marker,
 Befunde in `docs/routines/`, `[DIFFERENTIAL]`-Tests, Tests mit Originaldaten nur über `[GameDataFact]`/`TestGameData.Dos`,
@@ -99,7 +99,7 @@ dann über `integration/runde-2`.
 - **F1 Aufrufgraph-Ausgabe – entschieden (Nutzer 11.11.2026):** `docs/analyse/callgraph/` aus `dev/ap5-phasen` (erzeugt aus
   `T.EXE`, mit Originaltexten) kommt nicht ins Code-Repo; Spuren erzeugen sie lokal, die Leitstelle legt bei Bedarf einen Stand im
   Referenz-Repo unter `analyse/callgraph/` ab (PR `daten/callgraph`).
-- **F2 Go** für Runde 2 mit ⓪ (Fable) und ①–③ (Opus) wie oben.
+- **F2 Go – erteilt (Nutzer 11.11.2026):** Runde 2 mit ⓪ (Fable) und ①–③ (Opus) wie oben; Spuren startet der Nutzer selbst.
 
 ## Fahrplan
 
