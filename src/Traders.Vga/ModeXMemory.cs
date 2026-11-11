@@ -22,10 +22,29 @@ public sealed class ModeXMemory
 
     private readonly byte[] _latch = new byte[4];
 
-    /// <summary>CPU read at an offset inside the A000 window: loads all latches, returns the read-map plane.</summary>
+    /// <summary>
+    /// Bytes written outside the A000h window (offsets relative to A0000h, i.e. physical address − A0000h).
+    /// [APPROX] Draw offsets that run past AFFFFh (or a page segment outside A000h) leave video memory and reach
+    /// ordinary RAM in T.EXE's machine; the port keeps that RAM here, initially zero, as the RefEmu does for memory
+    /// nothing is loaded into (B0000h and above). It is not shared with the atlas or any other buffer of the port.
+    /// </summary>
+    private readonly Dictionary<int, byte> _outside = [];
+
+    private static bool InWindow(int offset) => (uint)offset < PlaneSize;
+
+    /// <summary>
+    /// Window offset of the far address <paramref name="segment"/>:<paramref name="offset"/>: physical address
+    /// (wrapping at 1 MB, A20 off) minus A0000h; outside the window when not in [0, 10000h).
+    /// </summary>
+    public static int WindowOffset(ushort segment, ushort offset) => ((((segment << 4) + offset) & 0xFFFFF) - 0xA0000);
+
+    /// <summary>
+    /// CPU read at a window offset. Inside the window: loads all latches, returns the read-map plane. Outside: the
+    /// RAM byte there (latches unchanged).
+    /// </summary>
     public byte Read(int offset)
     {
-        offset &= 0xFFFF;
+        if (!InWindow(offset)) return ReadOutside(offset);
         for (int p = 0; p < 4; p++) _latch[p] = Planes[p][offset];
         return _latch[ReadMap & 3];
     }
@@ -33,18 +52,24 @@ public sealed class ModeXMemory
     /// <summary>CPU write (write mode 0, bit mask FFh): value goes to every plane enabled in the map mask.</summary>
     public void Write(int offset, byte value)
     {
-        offset &= 0xFFFF;
+        if (!InWindow(offset)) { _outside[offset] = value; return; }
         for (int p = 0; p < 4; p++)
             if ((MapMask & (1 << p)) != 0) Planes[p][offset] = value;
     }
 
-    /// <summary>CPU write with bit mask 00h: every enabled plane receives its latch (used for VRAM-to-VRAM copies).</summary>
-    public void WriteLatches(int offset)
+    /// <summary>
+    /// CPU write of <paramref name="value"/> with bit mask 00h: every enabled plane receives its latch (used for
+    /// VRAM-to-VRAM copies); outside the window the RAM byte receives the CPU value.
+    /// </summary>
+    public void WriteLatches(int offset, byte value)
     {
-        offset &= 0xFFFF;
+        if (!InWindow(offset)) { _outside[offset] = value; return; }
         for (int p = 0; p < 4; p++)
             if ((MapMask & (1 << p)) != 0) Planes[p][offset] = _latch[p];
     }
+
+    /// <summary>RAM byte outside the A000h window at a window offset (0 where nothing was written).</summary>
+    public byte ReadOutside(int offset) => _outside.GetValueOrDefault(offset);
 
     /// <summary>Pixel at (x, y) of a page whose plane offset is <paramref name="pageOffset"/>.</summary>
     public byte Pixel(int pageOffset, int x, int y) =>
@@ -81,6 +106,24 @@ public sealed class PlanarAtlas
     }
 
     public PlanarAtlas() : this(new byte[Length]) { }
+
+    /// <summary>
+    /// Bytes behind the end of <see cref="Data"/> that the driver wrote. [APPROX] The driver addresses the atlas with a
+    /// paragraph per row and a 16-bit offset, so runs of up to 64 KB (narrow widths, many rows) leave the buffer; in
+    /// T.EXE's machine that is whatever memory follows it. The port models it as RAM that holds zero until written,
+    /// as the RefEmu does where nothing is loaded behind the atlas.
+    /// </summary>
+    private readonly Dictionary<int, byte> _behind = [];
+
+    /// <summary>Byte at driver address <paramref name="index"/> (paragraph·16 + offset), also behind the buffer.</summary>
+    public byte Read(int index) => (uint)index < (uint)Data.Length ? Data[index] : _behind.GetValueOrDefault(index);
+
+    /// <summary>Writes the byte at driver address <paramref name="index"/>, also behind the buffer.</summary>
+    public void Write(int index, byte value)
+    {
+        if ((uint)index < (uint)Data.Length) Data[index] = value;
+        else _behind[index] = value;
+    }
 
     /// <summary>
     /// [ORIGINAL] 23CD:3079 – port of 3079(buf, rowBytes, rows): every row is copied to a scratch buffer and written

@@ -13,7 +13,9 @@
   rückt die Quelle um ein Byte weiter. Startversatz und Restbyte je Ebene wie bei `31A6`, Ausrichtung nach `dx`.
 - `3A9A`: schiebt das Breitenargument auf dem Stapel um 3 Bit nach links (·8) und springt nach `32D8`; das Argument des Aufrufers ist danach verändert (Borland-Aufrufer räumen ab, ohne Wirkung).
 - `3386`: wie `32D8`, liest aber zuvor das Ziel über Read Map = k und schreibt Ziel ODER Quelle. Innere Schleife mit `LOOP`:
-  trägt eine Ebene 0 Byte (w < 4), läuft sie 65536-mal je Zeile (wie das Original; Tests meiden das).
+  trägt eine Ebene 0 Byte (w < 4), läuft sie 65536-mal je Zeile (wie das Original). Der 16-Bit-Atlasoffset läuft dabei innerhalb des
+  Zeilensegments um und liest hinter dem Atlaspuffer (`PlanarAtlas`, `[APPROX]`: dort Speicher, der bis zum Schreiben null
+  ist, wie im RefEmu); Befund B1 des Gesamtreviews R2 (#57).
 - `3449`: Kopie im RAM-Atlas, vier Durchgänge; der erste trägt `w/4` + 1, solange Restpixel übrig sind; Quell- und Zielebene
   rücken je Durchgang um eins weiter, beim Überlauf auf Ebene 0 rückt der Byteoffset um eins.
 - `351E`: dieselbe Zählweise innerhalb der Zeichenseite, je Durchgang Read Map = Quellebene, Map Mask = Zielebene; Ende Map Mask 0Fh.
@@ -31,4 +33,4 @@ VGA-Register (Map Mask, Read Map, bei `328E` Bitmaske) und Video-RAM bzw. RAM-At
 `DriverDifferentialTests`: je Routine 40 zufällige Aufrufe (`…_32D8_…`, `…_3A9A_…`, `…_3386_…` mit w ≥ 4, `…_3449_…` mit
 Atlasvergleich und unverändertem VRAM, `…_351E_…`, `LatchCopy_328E_…` zwischen A000h/A400h); nach jedem Aufruf VRAM bzw.
 Atlas und Register gleich. Zusätzlich Bildprobe `Full_screen_blit_of_a_converted_picture_shows_the_picture` (V-MENU, ohne RefEmu).
-Grenzfälle in `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`: Ränder (`32D8`, `351E`), Breiten 1–9 mit allen 16 Kombinationen der Quell- und Zielebene (`32D8`, `351E`, `3449`). Nicht geprüft: `3386` mit w < 4 (65536 Durchläufe je Zeile) und `h` = 0 der Kopien.
+Grenzfälle in `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`: Ränder (`32D8`, `351E`), Breiten 1–9 mit allen 16 Kombinationen der Quell- und Zielebene (`32D8`, `351E`, `3449`). `3386` mit w = 1–3 bei allen Zielebenen, Atlaszeilen 150–204 und Seiten A000h/A400h sowie die Gegenprobe B1 (Zeile 200) in `tests/Traders.Tests/Vga/DriverWrapTests.cs`; `328E` von/nach B000h/B100h (außerhalb des Fensters) ebenda. Nicht geprüft: `h` = 0 der Kopien.

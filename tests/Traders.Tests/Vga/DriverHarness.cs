@@ -135,6 +135,31 @@ internal sealed class DriverHarness
             Assert.Fail($"{what}: atlas byte {i:X5} original {a[i]:X2} port {Port.Atlas.Data[i]:X2}");
     }
 
+    /// <summary>
+    /// Memory behind the A000h window (B0000h–BFFFFh) equal on both sides: in the emulator plain RAM, in the port
+    /// <see cref="ModeXMemory.ReadOutside"/> (offsets relative to A0000h).
+    /// </summary>
+    public void AssertOutsideWindowEqual(string what)
+    {
+        var mem = Original.Machine.Mem;
+        for (int k = ModeXMemory.PlaneSize; k < 2 * ModeXMemory.PlaneSize; k++)
+        {
+            byte a = mem.Read8((uint)(0xA0000 + k)), b = Port.Vram.ReadOutside(k);
+            if (a != b) Assert.Fail($"{what}: memory {0xA0000 + k:X5} behind the window original {a:X2} port {b:X2}");
+        }
+    }
+
+    /// <summary>
+    /// Clears the emulator's mask segment behind the 8000 bytes of MASKS.PP (font table, glyphs and the other buffers
+    /// placed there), so that mask runs past MASKS.PP read empty memory on both sides. Text and objects do not work
+    /// afterwards.
+    /// </summary>
+    public void ClearMaskSegmentBehindMasks()
+    {
+        var mem = Original.Machine.Mem;
+        for (int k = Port.Masks.Length; k < 0x10000; k++) mem.Write8((uint)((MaskSeg << 4) + k), 0);
+    }
+
     private static int FirstDifference(byte[] a, byte[] b)
     {
         int n = Math.Min(a.Length, b.Length);

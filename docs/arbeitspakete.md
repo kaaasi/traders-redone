@@ -76,7 +76,8 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   VRAM-Vergleich gegen `VgaAdapter` des RefEmu, Erwartungswerte nie aus dem Port. Die Treiberroutinen liegen hinter der
   Vektortabelle und sind keine Far-Einsprünge: Lehnt `abdeckung.py` solche Adressen ab, im PR melden (Werkzeug gehört nicht zu ②).
 - **Abhängigkeiten:** keine (⓪ gemergt). **Status:** gemergt 11.11.2026 (`7a9554c`), Review „Ja“ (#47), P3 #50; `tools/exeimg.py`
-  nicht übernommen (`segmap.py` deckt die Disassemblierung ab).
+  nicht übernommen (`segmap.py` deckt die Disassemblierung ab). Fixlauf Gesamtreview R2 (B1 #57, B2 #58, #50): PR #59, Delta-Prüfung
+  Leitstelle ausstehend.
 
 ### ③ `phasen` – Wochenschleife und Aufrufgraph-Werkzeug (Quelle `dev/ap5-phasen`, `8ed0d34`; zugeschnitten nach BESTAND §3.1)
 
