@@ -111,7 +111,8 @@ dann über `integration/runde-2`.
 - **F2 Go – erteilt (Nutzer 11.11.2026):** Runde 2 mit ⓪ (Fable) und ①–③ (Opus) wie oben; Spuren startet der Nutzer selbst.
 - **Entschieden (Nutzer 11.11.2026, BESTAND §3.3):** nur VGA; Zwischenziel „Gesamtpartie ohne Roboterkampf“ vor dem Roboterkampf
   (`PORTIERUNGSPLAN.md` §5, Fahrplan unten).
-- **F3 Zufall beim Bildaufbau (BESTAND B8, vor dem Plan von R3):** Das Original zieht in Bildschleifen Zufall (Proben P4, P5); der
+- **F3 Zufall beim Bildaufbau (BESTAND B8) – entschieden: A (Nutzer 11.11.2026).** Präzisierung von `AGENTS.md` §4 mit der
+  Phasenmaschinen-Spur in R3. Vorlage: Das Original zieht in Bildschleifen Zufall (Proben P4, P5); der
   Zufallszustand bei Partiebeginn hängt von der Verweildauer im Menü ab. `AGENTS.md` §4 verlangt „Szenen … verbrauchen keinen
   Zufall“ und „was das Original beim Bildaufbau ändert, ist ein Ereignis im Kern“. **A (Vorschlag):** Regel präzisieren – jeder
   Zufallsverbrauch je Bild ist ein Kern-Ereignis im Takt der Phasenmaschine, die Szene löst es genau einmal je Bild aus; Entwurf in
@@ -124,7 +125,7 @@ Nach Runde 2, je Runde 2–4 Spuren; Vorschlag nach BESTAND §3.2 (Leitstelle 11
 
 | Runde | Themen | Segmente |
 |---|---|---|
-| R3 | Phasenmaschine mit Takt und Zufallsereignissen (F3) · Wochenregeln ohne Bildschirm · Grafikschichten · App-Host mit Eingabe · Ton-Analyse | `1777`, Teile von `0825`/`0609`/`22A3`/`08CF`/`0B9F`; `0A96`, `0A69`, `0B67`, `21AF`, `21FD`-Paletten; `0E9E`/`27C6` |
+| R3 | Phasenmaschine mit Takt und Zufallsereignissen (F3 = A) · Wochenregeln ohne Bildschirm · Grafikschichten · App-Host mit Eingabe · Ton-Analyse | `1777`, Teile von `0825`/`0609`/`22A3`/`08CF`/`0B9F`; `0A96`, `0A69`, `0B67`, `21AF`, `21FD`-Paletten; `0E9E`/`27C6` |
 | R4 | Menüs · neue Partie · Start/Code-Abfrage · Spielfeldschicht | `192D`, `0E31`, `0DFD`, `21FD:0687`, Teile von `0609` |
 | R5 | Anbau · Anbau-KI und Wochenplanung · Wochenbilanz | `0609`, `135D`, `11A3`, `0825` |
 | R6 | Produktion/Ernte/Wetter · Katastrophen · Wochenereignisse | `22A3`, `111D`, `17CB` |
