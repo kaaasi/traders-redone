@@ -77,34 +77,92 @@ internal sealed class RefEmuWeekOracle
     private static bool IsInterruptOwned(int offset) =>
         InterruptOwned.Any(r => offset >= r.Offset && offset < r.Offset + r.Length);
 
-    /// <summary>Handler for one call step: RefEmu to the call site (compare), on to the return, hand over DS and AL.</summary>
-    public IWeekStepHandler Handler(Dgroup core) => new StepHandler(this, core);
+    /// <summary>
+    /// Handler for one call step: RefEmu to the call site (compare), on to the return, hand over DS and AL.
+    /// <paramref name="atCallSite"/> runs at the call site after the comparison (for example to schedule key presses).
+    /// </summary>
+    public IWeekStepHandler Handler(Dgroup core, Action<OriginalProgram>? atCallSite = null) => new StepHandler(this, core, atCallSite);
 
-    private sealed class StepHandler(RefEmuWeekOracle o, Dgroup core) : IWeekStepHandler
+    /// <summary>
+    /// Handler for a ported call step: RefEmu to the call site (compare), the RefEmu data segment is taken over by the core,
+    /// <paramref name="port"/> runs on it, the RefEmu runs on to the return, and the core result is compared with the RefEmu
+    /// there (whole data segment outside <see cref="InterruptOwned"/>, which includes the random state DS:10D2). Afterwards
+    /// the core continues from the RefEmu data segment. A difference after the port ends the run at once (exception with
+    /// the first differing byte).
+    /// </summary>
+    public IWeekStepHandler PortHandler(Dgroup core, IWeekStepHandler port) => new PortStepHandler(this, core, port);
+
+    /// <summary>Ported steps compared at their return, in order (week, call number, random draws of the port).</summary>
+    public List<(int Week, int Step, long Draws)> PortedSteps { get; } = [];
+
+    /// <summary>Runs the RefEmu to the call site of <paramref name="step"/>, passing markers and return addresses on the way.</summary>
+    private void RunToCallSite(WeekStep step)
+    {
+        // a return address can be the next call site; marker calls on the way are passed, the core passes its markers itself
+        while (!IsAtLoop(step.Site))
+        {
+            if (!RunToNextStop()) throw new InvalidOperationException($"RefEmu did not reach step {step}");
+            ushort at = Passed[^1];
+            bool markerSite = WeekLoop.Steps.Any(s => s.Kind == WeekStepKind.Marker && (s.Site == at || s.Site + 5 == at));
+            bool returnSite = WeekLoop.Steps.Any(s => s.Site + 5 == at);
+            if (!markerSite && !returnSite && at != step.Site)
+                throw new InvalidOperationException($"RefEmu at 1777:{at:X4} instead of step {step}");
+            if (WeekLoop.Steps.FirstOrDefault(s => s.Site == at) is { Kind: WeekStepKind.Call } other && other != step)
+                throw new InvalidOperationException($"RefEmu calls {other} instead of step {step}");
+        }
+    }
+
+    private void RunToReturn(WeekStep step)
+    {
+        if (!RunToNextStop() || !IsAtLoop((ushort)(step.Site + 5)))
+            throw new InvalidOperationException($"RefEmu did not return from step {step}");
+    }
+
+    private void TakeOver(Dgroup core) => _p.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(core.Bytes);
+
+    private sealed class StepHandler(RefEmuWeekOracle o, Dgroup core, Action<OriginalProgram>? atCallSite) : IWeekStepHandler
     {
         public StepOutcome Begin(StepContext context)
         {
             var step = context.Step;
-            // to the call site of this step (a return address can be the next call site); marker calls on the way are passed,
-            // the core passes its markers itself
-            while (!o.IsAtLoop(step.Site))
-            {
-                if (!o.RunToNextStop()) throw new InvalidOperationException($"RefEmu did not reach step {step}");
-                ushort at = o.Passed[^1];
-                bool markerSite = WeekLoop.Steps.Any(s => s.Kind == WeekStepKind.Marker && (s.Site == at || s.Site + 5 == at));
-                bool returnSite = WeekLoop.Steps.Any(s => s.Site + 5 == at);
-                if (!markerSite && !returnSite && at != step.Site)
-                    throw new InvalidOperationException($"RefEmu at 1777:{at:X4} instead of step {step}");
-                if (WeekLoop.Steps.FirstOrDefault(s => s.Site == at) is { Kind: WeekStepKind.Call } other && other != step)
-                    throw new InvalidOperationException($"RefEmu calls {other} instead of step {step}");
-            }
+            o.RunToCallSite(step);
             o.Compare(core, $"week {o._p.Week} at {step}");
-            if (!o.RunToNextStop() || !o.IsAtLoop((ushort)(step.Site + 5)))
-                throw new InvalidOperationException($"RefEmu did not return from step {step}");
-            o._p.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(core.Bytes);
+            atCallSite?.Invoke(o._p);
+            o.RunToReturn(step);
+            o.TakeOver(core);
             return StepOutcome.Finished((byte)o._p.Machine.Cpu.Ax);
         }
 
         public StepOutcome Tick(StepContext context) => throw new InvalidOperationException("oracle steps finish at once");
+    }
+
+    private sealed class PortStepHandler(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port) : IWeekStepHandler
+    {
+        public StepOutcome Begin(StepContext context)
+        {
+            var step = context.Step;
+            o.RunToCallSite(step);
+            int week = o._p.Week; // after the counter step of the previous week
+            o.Compare(core, $"week {week} at {step}");
+            o.TakeOver(core);
+            // the machine seeded the generator from DS:10D2 before this call; the RefEmu state just taken over replaces it
+            context.Random.Seed = core.U32(DgroupLayout.RandomSeed);
+            long draws = context.Random.Calls;
+            var outcome = port.Begin(context);
+            if (!outcome.Done) throw new InvalidOperationException($"ported step {step} did not finish at once");
+            // the machine stores the seed back after this handler; the comparison needs it now
+            core.Set(DgroupLayout.RandomSeed, context.Random.Seed);
+            o.RunToReturn(step);
+            o.PortedSteps.Add((week, step.Number, context.Random.Calls - draws));
+            int known = o.Differences.Count;
+            o.Compare(core, $"week {week} after {step} (port)");
+            // a wrong port fails at once instead of after the remaining weeks
+            if (o.Differences.Count != known) throw new InvalidOperationException(o.Differences[^1]);
+            o.TakeOver(core);
+            context.Random.Seed = core.U32(DgroupLayout.RandomSeed);
+            return StepOutcome.Finished((byte)o._p.Machine.Cpu.Ax);
+        }
+
+        public StepOutcome Tick(StepContext context) => throw new InvalidOperationException("ported rule steps finish at once");
     }
 }

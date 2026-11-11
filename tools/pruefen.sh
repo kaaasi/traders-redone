@@ -4,6 +4,7 @@
 #   tools/pruefen.sh            hashes, architecture, coverage, restore (lock files), build without warnings and three test runs
 #                               (integration PRs, first reviews, changes to the test infrastructure)
 #   tools/pruefen.sh --schnell  the same with one test run: with original data if present, otherwise without (normal PR)
+#                               and without the long RefEmu runs (trait Dauer=lang, multi-round probe)
 #
 # Test runs:
 #   1. with original data   TR_REQUIRE_GAMEDATA=1 - fails if gamedata/ is missing (only when present)
@@ -20,6 +21,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 SLN=TradersRedone.slnx
 QUICK=0; [ "${1:-}" = "--schnell" ] && QUICK=1
+# --schnell leaves out the long RefEmu runs over several weeks (trait Dauer=lang); the full run includes them.
+FILTER=(); [ "$QUICK" -eq 1 ] && FILTER=(--filter "Dauer!=lang")
 GAMEDATA="${TRADERS_GAMEDATA:-$ROOT/gamedata}"
 DATA=0; [ -f "$GAMEDATA/dos/T.EXE" ] && DATA=1
 LOG="$(mktemp -d)"
@@ -71,7 +74,7 @@ lauf() {   # lauf <id> <name> <must_fail 0|1> <env...>   (TRX results in $LOG/tr
   local id="$1" name="$2" soll="$3"; shift 3
   local log="$LOG/test-$id.txt" rc=0
   schritt "Tests: $name"
-  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
+  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --results-directory "$LOG/trx-$id" "${FILTER[@]}" >"$log" 2>&1 || rc=$?
   local zeilen; zeilen=$(grep -E "^(Passed|Failed)! " "$log" || true)
   summe() { printf '%s\n' "$zeilen" | grep -oE "$1: +[0-9]+" | grep -oE "[0-9]+" | awk '{s+=$1} END {print s+0}'; }
   if [ "$soll" -eq 1 ]; then

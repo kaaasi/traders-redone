@@ -19,7 +19,8 @@ public class PhaseMachineDifferentialTests
 
     private sealed record Lockstep(PhaseMachine Machine, Dgroup Core, RefEmuWeekOracle Oracle, OriginalProgram Program, List<PhaseEvent> Events);
 
-    private static Lockstep Start(Action<OriginalProgram>? beforeWeek = null)
+    private static Lockstep Start(Action<OriginalProgram>? beforeWeek = null,
+        IReadOnlyDictionary<int, Action<OriginalProgram>>? atCallSite = null)
     {
         var p = OriginalProgram.StartGame(Dir);
         Assert.True(p.RunToWeekStart(0, 5), "week 0 did not start within 5 s after the menu");
@@ -27,7 +28,7 @@ public class PhaseMachineDifferentialTests
         // The RefEmu is now at 1777:02DC (entry of call 1); the tests run it to the return of call 1 and start the core at call 2.
         var core = new Dgroup(p.DataSegment().AsSpan(0, DgroupLayout.Size).ToArray());
         var oracle = new RefEmuWeekOracle(p);
-        var handlers = WeekLoop.Steps.Where(s => s.Kind == WeekStepKind.Call).ToDictionary(s => s.Number, _ => oracle.Handler(core));
+        var handlers = WeekLoop.Steps.Where(s => s.Kind == WeekStepKind.Call).ToDictionary(s => s.Number, s => oracle.Handler(core, atCallSite?.GetValueOrDefault(s.Number)));
         var machine = new PhaseMachine(core, new OriginalRandom(new RecordedClock([])), handlers, nextStep: 2);
         return new Lockstep(machine, core, oracle, p, []);
     }
@@ -104,5 +105,51 @@ public class PhaseMachineDifferentialTests
         Assert.Equal(0, l.Program.Machine.Cpu.Ax & 0xFF);
         Assert.Equal([2, 3], EmuCalls(l.Oracle));
         Assert.Equal(0, l.Machine.Week);
+    }
+
+    /// <summary>
+    /// Exit B by a set state: the target wealth DS:08F4 (dword, compared at 20B3:0026) is set to 0 before week 0, so the end
+    /// check of week 0 finds player 0 at or above it, shows the end screens and returns AL = 1. The core exits after call 19
+    /// with AL = 1, without markers 4..6 and without its own counter step; the original returns into main with AL = 1.
+    /// Counter-check (local): target left as it is → the end check returns 0 and the test fails.
+    /// </summary>
+    [GameDataFact]
+    [Trait(Long.Trait, Long.Value)]
+    public void Exit_B_in_lockstep_with_the_original()
+    {
+        // The end screens close with the any-key wait 27C6:00D2 (DS:115D); a key every 10 s from the end check on ends it.
+        var keys = new Dictionary<int, Action<OriginalProgram>>
+        {
+            [19] = p =>
+            {
+                for (int k = 1; k <= 30; k++) p.Press(Scancodes.Enter, delay: 10 * k);
+            },
+        };
+        var l = Start(p =>
+        {
+            p.WriteWord(DgroupLayout.Target, 0);
+            p.WriteWord(DgroupLayout.Target + 2, 0);
+        }, keys);
+        Assert.True(l.Oracle.RunToNextStop() && l.Oracle.IsAtLoop((ushort)(WeekLoop.Step(1).Site + 5)), "return of call 1");
+        l.Program.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(l.Core.Bytes);
+        l.Oracle.ResetPassed();
+
+        Run(l, x => x.Machine.Status == PhaseStatus.Finished, maxFrames: 1);
+
+        Assert.Empty(l.Oracle.Differences);
+        Assert.Equal(PhaseStatus.Finished, l.Machine.Status);
+        Assert.Equal(WeekLoop.ResultGameOver, l.Machine.Result);
+        var expected = Enumerable.Range(2, 18).ToList(); // calls 2..19 of week 0, markers 0..3 among them
+        Assert.Equal(expected, CoreCalls(l.Events));
+        Assert.Equal([0, 1, 2, 3], l.Events.Where(e => e.Kind == PhaseEventKind.MarkerPassed).Select(e => e.Value));
+        Assert.DoesNotContain(l.Events, e => e.Kind == PhaseEventKind.WeekAdvanced);
+        Assert.Equal(PhaseEventKind.Exited, l.Events.Last(e => e.Kind != PhaseEventKind.Frame).Kind);
+        // the original: after the return of call 19 straight back into main, AL = 1
+        Assert.True(l.Oracle.RunToNextStop(), "RefEmu did not leave the loop");
+        Assert.Equal(WeekLoopSequence.ReturnInMain, l.Oracle.Passed[^1]);
+        Assert.Equal(1, l.Program.Machine.Cpu.Ax & 0xFF);
+        Assert.Equal(expected, EmuCalls(l.Oracle));
+        // the end check increments DS:4B9A itself (20B3:0071); the core has that from the RefEmu, not from its counter step
+        Assert.Equal(l.Program.Week, l.Machine.Week);
     }
 }

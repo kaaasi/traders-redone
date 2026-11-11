@@ -47,8 +47,8 @@
 | 30 | `02CE` | `1F63:0B03` | Wettbewerb/Auswertung nach dem Einkauf |
 | – | `02D3` | `inc word [DS:4B9A]` | Wochenzähler +1, danach `jmp 01FB` |
 
-Argumente werden als Byte (`mov al,n` / `push ax`, Aufrufe 3, 6, 21) bzw. Wort (`mov ax,n` / `push ax`, Marken) übergeben und
-mit `pop cx` abgeräumt. Dieselbe Folge erzeugt `tools/callgraph.py` als `phases.dot` (lokale Ausgabe).
+Argumente werden als Byte (`mov al,n` / `push ax`, Aufrufe 3, 6, 21) bzw. Wort (`mov ax,n` / `push ax`, Marken 1–6; Marke 0
+mit `xor ax,ax` / `push ax` bei `022D`) übergeben und mit `pop cx` abgeräumt. Dieselbe Folge erzeugt `tools/callgraph.py` als `phases.dot` (lokale Ausgabe).
 
 ## Zustand
 | DS-Offset | Breite | Vorzeichen | Bedeutung | gelesen/geschrieben |
@@ -75,6 +75,10 @@ Tastaturhandler), kein Ton. Alle Wirkungen liegen in den 30 Aufrufen. Die Marke 
 ## C#-Umsetzung
 R3 Spur `takt` Teil 2: `src/Traders.Core/Phases/WeekLoop.cs` (die 30 Aufrufe als Daten mit Schrittnummer nach `BESTAND.md`
 §1.4, Argument, Bildschirm/Zufall laut §1.4 und Ausstiegsprüfung) und `PhaseMachine.cs` (Ablauf auf `Dgroup`).
+Teil 3: `WeekRuleSteps.cs` bindet die bildschirmlosen Schritte an die Regeln aus Spur `regeln` (`Traders.Core.Rules`):
+Aufruf 1 `1777:02DC`, 2 `0825:07C4`, 5 und 20 `0609:1178`, 12 `21FD:021F`, 13 `22A3:0003`, 14 `22A3:026B`, 27 `08CF:11D7`
+(Planschritte 1, 2, 5/16, 10, 11, 12, 21). Zufallsregeln ziehen aus dem `OriginalRandom` des Aufrufers, den die Maschine aus
+`DS:10D2` lädt und danach zurückschreibt; die übrigen 22 Aufrufe bleiben ausstehend.
 
 - **Takt:** einzige Zeiteingabe ist `Advance(PhaseTick)` mit der Bildnummer des Hosts; jedes Bild wird genau einmal und der Reihe
   nach verarbeitet (Nachholen im Kern, alte Nummern ohne Wirkung). Ein laufender Bildschirmschritt bekommt je Bild einen `Tick`;
@@ -93,10 +97,13 @@ R3 Spur `takt` Teil 2: `src/Traders.Core/Phases/WeekLoop.cs` (die 30 Aufrufe als
 ## Prüfung
 - **Statisch (S):** Disassemblierung `1777:01F8`–`02DB` (`tools/segmap.py` bzw. `tools/callgraph.py`), alle Ziele sind
   verlagerte Far-Aufrufe.
-- **Probelauf (P):** `bash experiments/phasen/phasentrace.sh <aus> 400` auf `main` `657805b`, Lauf A (Vorgaben, vier
-  Computerspieler, nur Eingabetaste): Woche 0 und Woche 1 jeweils `1777:02DC` → Marken 0, 1, 2, 3, 4, 5, 6 in dieser Folge,
-  danach `1777:02DC` mit `DS:4B9A` um 1 erhöht; Woche 2 bis Marke 4 im Zeitfenster. Emulierte Zeiten der Marken in Woche 0:
-  25,3 / 56,2 / 69,0 / 77,4 / 77,4 / 147,3 / 161,6 s (Lauf bitgleich wiederholbar, `BESTAND.md` P1).
+- **Probelauf (P):** `bash experiments/phasen/phasentrace.sh <aus> 400`, Lauf A (Vorgaben, vier Computerspieler, nur
+  Eingabetaste): Woche 0 und Woche 1 jeweils `1777:02DC` → Marken 0, 1, 2, 3, 4, 5, 6 in dieser Folge, danach `1777:02DC` mit
+  `DS:4B9A` um 1 erhöht. Emulierte Zeiten der Marken in Woche 0 auf `paket/takt` nach Merge von `main` `c6d240f` (RefEmu seit
+  Spur ① unverändert): 25,31 / 46,11 / 58,66 / 66,96 / 66,97 / 165,43 / 188,71 s, Woche 1 Marke 0 bei 222,35 s, Woche 2 im
+  Fenster nur bis Marke 0 (397,69 s); gleiche Werte wie im Review r2-phasen B1 für den damaligen Head. Auf `657805b` (vor ①)
+  lagen sie bei 25,3 / 56,2 / 69,0 / 77,4 / 77,4 / 147,3 / 161,6 s; die Folge ist auf beiden Ständen gleich (Lauf bitgleich
+  wiederholbar, `BESTAND.md` P1).
 - **RefEmu-Test (T):** `tests/Traders.Tests/Phases/WeekLoopTests.cs` (Spur `phasen` Teil 3) prüft gegen die Tabelle oben
   (`WeekLoopSequence.cs`, statisch gelesen, nicht aus dem Lauf): Vorgabepartie bis zum Beginn von Woche 2 – je Woche die 30
   Aufrufstellen mit ihren Zielen, Marken 0–6 an ihren Stellen, `DS:4B9A` 0 → 1 → 2 genau bei `02D3`. Abbruchweg A:
@@ -111,4 +118,16 @@ R3 Spur `takt` Teil 2: `src/Traders.Core/Phases/WeekLoop.cs` (die 30 Aufrufe als
   Aufruf 1 der Woche 1 sowie Abbruchweg A (Rücktaste während der Bilanz). Gegenproben (lokal): Zähler +2 statt +1 bzw.
   Ausstieg A abgeschaltet → beide rot. Ohne Originaldaten: `PhaseMachineTests.cs` (Tabelle gegen `WeekLoopSequence`,
   ausstehende Schritte, Bild genau einmal, Zufall je Bild, Befehle, Ausstiege A/B mit `AL` = 0/1/2, 16-Bit-Überlauf).
-- **Nicht ausgeführt:** Abbruchweg B (Partieende) im RefEmu (Teil 3 per gesetztem Zustand).
+- **Abbruchweg B (D, Teil 3):** `Exit_B_in_lockstep_with_the_original` – Zielvermögen `DS:08F4` vor Woche 0 auf 0 gesetzt;
+  die Endprüfung `20B3:0005` vergleicht bei `0026` das Vermögen `DS:2F06` des Spielers mit dem Ziel, zeigt die Endbilder und
+  wartet zuletzt in `27C6:00D2` auf eine beliebige Taste (`DS:115D`; der Test drückt ab der Aufrufstelle alle 10 s die
+  Eingabetaste). Kern und Original: Aufrufe 2–19, Marken 0–3, `AL` = 1, Rückkehr nach `main`; den Wochenzähler erhöht
+  `20B3:0071` selbst, der Kern hat ihn aus dem RefEmu und zählt nicht nach. Gegenprobe (lokal): Ziel unverändert → rot
+  (Maschine nicht beendet).
+- **Mehrrundenprobe (D, Teil 3):** `MultiWeekDifferentialTests.cs` – Vorgabepartie, Wochen 0–3 und Aufruf 1 der Woche 4: an
+  jedem gebundenen Regelschritt (`WeekRuleSteps`) übernimmt der Kern das Datensegment des RefEmu an der Aufrufstelle, rechnet den
+  Port und wird beim Rücksprung mit dem RefEmu verglichen (ganzes Datensegment einschließlich `DS:10D2`, außer den
+  Interrupt-Bytes oben); Bildschirmschritte rechnet der RefEmu. Dazu Folge der 30 Aufrufe und Marken je Woche, Wochenzähler
+  1–4, Zahl der Ziehungen von Wetter und Edelsteinkurs. Gegenprobe (lokal): Aufrufe 13 und 14 vertauscht → rot in Woche 0
+  bei Aufruf 13 (`DS:2EB0`). Laufzeit rund 10 min (eine Woche ≈ 200 s emuliert, ≈ 600 Mio. Befehle); deshalb wie Abbruchweg B
+  mit Merkmal `Dauer=lang` außerhalb von `tools/pruefen.sh --schnell`, im vollen Lauf und in der CI mit Originaldaten.
