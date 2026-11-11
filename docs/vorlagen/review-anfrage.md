@@ -13,7 +13,8 @@
 > `review-nein`. Diese GitHub-Schreibaktionen sind ausdrücklich autorisiert. Nicht mergen. Falls Schreiben nicht möglich ist,
 > stelle die fertige Datei bereit.
 
-**Geplanter Lauf:** zusätzlich „Unbeaufsichtigt, keine Rückfragen.“ **Nachprüfung:** zusätzlich „Nachprüfung des Reviews
+**Geplanter Lauf:** zusätzlich „Unbeaufsichtigt, keine Rückfragen.“ und – weil Originaldaten nötig sind – der Zugriffsabsatz
+aus `spur-start.md` (Kurzaufruf „Geplanter Lauf“). **Nachprüfung:** zusätzlich „Nachprüfung des Reviews
 `<datei>`, bisher geprüfter Head `<sha>`, nur Delta `<alt>..<neu>` und die genannten Befunde.“, Ablage `…-nachpruefung.md`.
 **Gesamtreview am Rundenende** und **Aufrufe für ChatGPT/Codex:** `docs/prozess/anhang.md` C und D.
 
@@ -21,12 +22,13 @@
 
 1. Lies `AGENTS.md` und `docs/prozess/zusammenarbeit.md` §5–6. Hast du an diesem PR mitgearbeitet, brich ab und sag es – das
    Review muss aus einer anderen Sitzung kommen.
-2. SDK nach `AGENTS.md` §3 einrichten (Claude: `CLAUDE.md`). Prüfe genau den genannten Head: `git rev-parse HEAD` = Head-SHA und
-   `git status --porcelain` leer, sonst „unverifizierter Stand“ (`anhang.md` E). Selbst bauen und `tools/pruefen.sh` ausführen;
-   Aussagen der PR-Beschreibung nicht ungeprüft übernehmen.
+2. SDK und Originaldaten nach `AGENTS.md` §3 einrichten (Claude: `CLAUDE.md`, `tools/claude/fetch-reference.sh original`). Prüfe genau den genannten Head: `git rev-parse HEAD` = Head-SHA und
+   `git status --porcelain` leer, sonst „unverifizierter Stand“ (`anhang.md` E). Selbst bauen und `tools/pruefen.sh` ausführen –
+   Erstreview: alle drei Läufe; Nachprüfung und Gesamtreview: `--schnell`. Ohne Originaldaten im Bericht „Originaldaten nicht
+   geprüft“. Aussagen der PR-Beschreibung nicht ungeprüft übernehmen.
 3. Zuerst die genannten Gegenbeispiele erneut ausführen, dann Diff, betroffene Aufrufer, neue Tests. Eine Gegenprobe pro neuem
    Test, wo es geht (gezielte Mutation in temporärer Kopie → Test muss rot werden). Bei portierten Routinen: Fundstelle in `T.EXE`
-   (`tools/segmap.py`/`docs/analyse/disasm/`) gegen den Befund in `docs/routines/` lesen und prüfen, dass der Differenztest den
+   (`tools/segmap.py` bzw. `fetch-reference.sh disasm`) gegen den Befund in `docs/routines/` lesen und prüfen, dass der Differenztest den
    Erwartungswert aus dem RefEmu und nicht aus dem Port gewinnt.
 4. Bericht mit genau drei Teilen, **höchstens 120 Zeilen**, keine Wiederholung der PR-Beschreibung, keine Freigabe nach Testanzahl:
    1. **Merge-Empfehlung** ja/nein für genau diesen Head, mit Begründung
@@ -36,7 +38,7 @@
 
    Ohne nachgewiesenen Checkout (nur Codelesen) kein Testnachweis nach `zusammenarbeit.md` §6 Nr. 4; die Empfehlung sagt dann
    ausdrücklich „nur Codelesen“.
-5. Ablage: nichts am Code oder am geprüften PR ändern (außer dem Label in Schritt 6). Datei auf neuem Branch `review/<thema>`
+5. Ablage: nichts am Code oder am geprüften PR ändern (außer dem Label in Schritt 6), nichts ins Referenz-Repo schreiben. Datei auf neuem Branch `review/<thema>`
    (Basis `main`), PR mit **nur dieser Datei**, Commit-Trailer mit deinem Agentennamen. Ohne Schreibzugriff: Datei an den Nutzer.
 6. Am geprüften PR `review-ja` bzw. `review-nein` setzen (das andere entfernen). Ohne Schreibzugriff setzt es die Leitstelle.
 7. Antwort an den Nutzer: Link zum Review-PR, Empfehlung in einem Satz.

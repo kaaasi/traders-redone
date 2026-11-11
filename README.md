@@ -6,7 +6,7 @@ moderne Grafik, Netzwerkspiel, Dedicated Server).
 
 - **Aktueller Stand: [STATUS.md](STATUS.md)** · Zwischenstände: [CHANGELOG.md](CHANGELOG.md)
 - Runden und Spuren: [docs/arbeitspakete.md](docs/arbeitspakete.md)
-- Referenzbilder aus den Videos: [reference/](reference/)
+- Originaldateien und Referenzbilder: privates Repo `kaaasi/traders-referenz` (`tools/claude/fetch-reference.sh`)
 - Plan und Meilensteine: [docs/PORTIERUNGSPLAN.md](docs/PORTIERUNGSPLAN.md)
 - Erkenntnisse aus dem Vorversuch: [docs/ERKENNTNISSE_VORVERSUCH.md](docs/ERKENNTNISSE_VORVERSUCH.md)
 - Ressourcenformate: [docs/RESSOURCENFORMATE.md](docs/RESSOURCENFORMATE.md)
@@ -17,8 +17,9 @@ moderne Grafik, Netzwerkspiel, Dedicated Server).
 Voraussetzung: .NET-SDK nach `global.json` (10.0.402). Claude-Sitzungen: [CLAUDE.md](CLAUDE.md).
 
 ```
-tools/pruefen.sh                                   # Prüfung wie in der CI (Build, Tests, Hashes, Marker)
-dotnet run --project src/Traders.Tools -- export original/dos out/assets
+tools/pruefen.sh --schnell                         # Prüfung wie in der CI (Build, Tests, Hashes, Marker)
+tools/claude/fetch-reference.sh original           # Originaldateien nach gamedata/ (Leserecht auf traders-referenz)
+dotnet run --project src/Traders.Tools -- export gamedata/dos out/assets
 dotnet run --project src/Traders.Viewer            # Asset-Viewer
 ```
 
@@ -31,7 +32,8 @@ Esc = Ende. Koordinate und Palettenindex unter der Maus stehen im Fenstertitel.
 Windows-Build und Viewer-Downloads (Windows, Linux, macOS) nur per Hand („Run workflow“). `werkzeuge.yml` hält SDK und
 NuGet-Spiegel für Claude im Release `claude-werkzeuge` aktuell.
 
-`original/` enthält die Originaldateien (privates Repo). `original/SHA256SUMS.*` sichert die analysierte Fassung ab.
+Die Originaldateien liegen nur im privaten Repo `kaaasi/traders-referenz`; die CI holt sie über das Secret
+`TRADERS_REFERENZ_TOKEN`. `tools/originale/SHA256SUMS.*` sichert die analysierte Fassung ab.
 
 ## Mitarbeit
 

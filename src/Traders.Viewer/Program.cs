@@ -1,7 +1,7 @@
 using Traders.Assets;
 using Traders.Viewer;
 
-// Usage: traders-viewer [path-to-original/dos] [--screenshot <out-dir>]
+// Usage: traders-viewer [path-to-gamedata/dos] [--screenshot <out-dir>]
 string? dir = null, screenshotDir = null;
 for (int i = 0; i < args.Length; i++)
 {
@@ -11,7 +11,7 @@ for (int i = 0; i < args.Length; i++)
 dir ??= AssetLibrary.FindOriginalDos() ?? AssetLibrary.FindOriginalDos(Environment.CurrentDirectory);
 if (dir is null)
 {
-    Console.Error.WriteLine("Original directory not found. Usage: traders-viewer [path-to-original/dos] [--screenshot <out-dir>]");
+    Console.Error.WriteLine("Original directory not found. Usage: traders-viewer [path-to-gamedata/dos] [--screenshot <out-dir>]");
     return 1;
 }
 

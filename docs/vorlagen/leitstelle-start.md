@@ -8,8 +8,9 @@
 
 ## Ablauf für die Leitstelle
 
-0. **Zugriff:** `add_repo` für `kaaasi/traders-redone` (access `push`; ggf. erst per `ToolSearch` mit
-   `select:mcp__claude-code-remote__add_repo` laden). Lehnt die Freigabe ab, dem Nutzer melden.
+0. **Zugriff:** immer Lese- und Schreibzugriff auf beide Repos: `add_repo` für `kaaasi/traders-redone` und
+   `kaaasi/traders-referenz`, jeweils access `push` (ggf. erst per `ToolSearch` mit `select:mcp__claude-code-remote__add_repo`
+   laden). Lehnt die Freigabe ab, dem Nutzer melden.
 1. Lies `AGENTS.md`, `docs/prozess/zusammenarbeit.md` und `docs/prozess/anhang.md` (vollständig), in `docs/arbeitspakete.md` die
    aktuelle Runde, die offenen PRs (Titel, Bearbeiter, letzte Übergabe) und die Reviews der Runde. Kein Vorwissen aus Chats nötig.
 2. **Planen:** Runde mit Ziel, Spuren (Teile, Dateigrenzen, Abnahme, Modell, Abhängigkeiten), Zuständigkeit gemeinsamer Dateien,
@@ -19,7 +20,7 @@
 4. **Review anlegen:** je fertiger Spur Erstreview als geplanter Lauf (frische Sitzung, Kurzaufruf aus `review-anfrage.md`);
    Gesamtreview am Rundenende: dem Nutzer den ausgefüllten Kurzaufruf für ChatGPT geben (`anhang.md` C, D).
 5. **Integration:** Spur-PRs nach Review und Merge-Prüfung (`zusammenarbeit.md` §6) in der Integrationsfolge mergen. Ist `main`
-   seit dem Review neu und der PR **ohne Konflikt**, wird **nicht** rebased: vorher lokal `tools/pruefen.sh` auf `main` + PR,
+   seit dem Review neu und der PR **ohne Konflikt**, wird **nicht** rebased: vorher lokal `tools/pruefen.sh --schnell` mit Originaldaten auf `main` + PR,
    Tabelle im Merge-Kommentar. `integration/<runde>` nur bei Konflikten zwischen Spuren. Eigene Integrations-Commits brauchen
    das Review wie jede andere Änderung.
 6. **Nach jedem Merge:** `STATUS.md` (Meilensteine, Routinen – Erzeugung nach `tools/abdeckung.py`, sobald vorhanden),

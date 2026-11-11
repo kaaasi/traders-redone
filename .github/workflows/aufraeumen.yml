@@ -1,0 +1,63 @@
+name: Branches aufräumen
+
+# By hand only (Actions -> "Branches aufräumen" -> Run workflow). Deletes branches that are fully contained in main and have
+# no open pull request; additionally the branches named in "zusaetzlich" (e.g. obsolete branches with unmerged commits).
+# With "nur_anzeigen" it only lists. Claude sessions cannot delete branches (proxy), so this workflow does it.
+# Modelled on kaaasi/eishockey-manager-redone, .github/workflows/aufraeumen.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      nur_anzeigen:
+        description: "Nur auflisten, nichts löschen"
+        type: boolean
+        default: true
+      zusaetzlich:
+        description: "Weitere Branches, durch Leerzeichen getrennt, die auch ohne Merge gelöscht werden (z. B. ci-results)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  aufraeumen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Merged branches without open PR (plus explicitly named ones)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUR_ANZEIGEN: ${{ inputs.nur_anzeigen }}
+          ZUSAETZLICH: ${{ inputs.zusaetzlich }}
+        run: |
+          repo="${{ github.repository }}"; owner="${repo%%/*}"
+          anzahl=0
+          echo "| Branch | geprüfter Stand | Grund | Aktion |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for b in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin); do
+            case "$b" in HEAD|main) continue ;; esac
+            sha=$(git rev-parse "origin/$b")
+            if git merge-base --is-ancestor "$sha" origin/main; then grund="in main"
+            elif [[ " $ZUSAETZLICH " == *" $b "* ]]; then grund="ausdrücklich genannt"
+            else continue; fi
+            # Query open PRs right before deleting, not only once at the start.
+            offen=$(gh api "repos/$repo/pulls?state=open&head=$owner:$b" -q 'length')
+            [ "$offen" = "0" ] || continue
+            anzahl=$((anzahl+1))
+            if [ "$NUR_ANZEIGEN" = "true" ]; then
+              echo "| \`$b\` | \`${sha:0:7}\` | $grund | würde gelöscht |" >> "$GITHUB_STEP_SUMMARY"
+            # Delete only if the branch is still exactly at the checked SHA: a newly pushed commit makes
+            # --force-with-lease fail and the branch is kept.
+            elif git push --force-with-lease="refs/heads/$b:$sha" origin ":refs/heads/$b"; then
+              echo "| \`$b\` | \`${sha:0:7}\` | $grund | gelöscht |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| \`$b\` | \`${sha:0:7}\` | $grund | **nicht gelöscht** (Stand hat sich geändert) |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "$anzahl Branches ohne offenen PR betroffen." >> "$GITHUB_STEP_SUMMARY"

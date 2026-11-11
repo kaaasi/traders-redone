@@ -54,7 +54,7 @@ TradersRedone.sln
 │                          und ganze Partien aus → Referenzspuren
 ├─ tests/Traders.Tests     xUnit: Einheiten-, Differenz- (C# vs. RefEmu) und Bildtests
 ├─ tools/                  Analyse-Skripte (Python), Disassemblierung, Exporte
-├─ original/               Originaldateien (privat) + SHA256SUMS
+├─ tools/originale/        SHA256SUMS der Originale (Dateien selbst im privaten Repo kaaasi/traders-referenz)
 └─ docs/                   Plan, Routinenbefunde (docs/routines/*.md), Datenlayout
 ```
 

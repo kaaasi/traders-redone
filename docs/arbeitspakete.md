@@ -8,7 +8,8 @@ abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](arc
 ## Aktuelle Runde: Runde 1 – Umstellung auf den Ablauf des Eishockey-Managers (Go Nutzer 10.11.2026)
 
 Grundlage: Umstellungsplan im claude.ai-Projekt „Traders Redone“ (`claude/UMSTELLUNGSPLAN.md`), Entscheidungen D1–D6 vom
-10.11.2026: Originale bleiben im Repo (D1, D2 entfällt), Rollen wie Eishockey (D3), Windows-Build nur per Hand (D4), Kommentare
+10.11.2026: Originale bleiben im Repo (D1, **ersetzt 11.11.2026:** Originale und Videobilder ins private Repo
+`kaaasi/traders-referenz`, damit gilt D2 Token-Secret für die CI), Rollen wie Eishockey (D3), Windows-Build nur per Hand (D4), Kommentare
 Deutsch (D5, ersetzt 11.11.2026: Kommentare Englisch, `AGENTS.md` §1), R1 setzt die Leitstelle selbst um und eine frische Sitzung reviewt (D6).
 
 **Leitstelle R1:** Claude (Sitzung vom 10.11.2026). Folge: ① → ② → ③; ① und ② sind dateigetrennt und dürfen parallel
@@ -41,6 +42,19 @@ reviewt werden, gemergt wird in dieser Folge.
   `[DIFFERENTIAL]`-Test oder ein Marker ohne gültige Adresse auftaucht.
 - **Status:** gemergt 11.11.2026 (`18e6502`) nach Review R1③ „Nein“ (#16), Fixlauf und Delta-Prüfung der Leitstelle (nur
   P2/P3); Issues #7–#13 geschlossen.
+
+### ④ `prozess/referenz` – Originale ins Referenz-Repo (Nutzer 11.11.2026)
+
+- **Inhalt:** Referenz-Repo `kaaasi/traders-referenz` (PR traders-referenz#1: `original/`, `analyse/disasm/`, `refemu/`,
+  `videos/`); hier entfernt: `original/`, `reference/`, `docs/analyse/disasm/`, RefEmu-PNGs. Neu: `tools/claude/fetch-reference.sh`,
+  Prüfsummen unter `tools/originale/`, `[GameDataFact]`/`[GameDataTheory]` (`tests/Traders.Tests/Support/TestGameData.cs`),
+  `tools/pruefen.sh` mit drei Läufen, CI holt die Daten über Secret `TRADERS_REFERENZ_TOKEN`, Doku (AGENTS §2.1, §3, §5,
+  CLAUDE, Vorlagen, Anhang).
+- **Abnahme:** mit Daten 396 Tests grün; ohne Daten (versteckt) alle übrigen grün, Daten-Tests sichtbar übersprungen; Pflichtlauf
+  ohne Daten scheitert; keine Originaldatei mehr im Baum.
+- **Nutzer:** Secret `TRADERS_REFERENZ_TOKEN` anlegen (fein granuliertes Token, nur `kaaasi/traders-referenz`, Contents: Read);
+  traders-referenz#1 mergen. In der Git-Historie dieses Repos bleiben die Dateien (privat; Umschreiben nur auf Wunsch).
+- **Status:** fertig, Review offen.
 
 ### Zuständigkeit gemeinsamer Dateien in R1
 
