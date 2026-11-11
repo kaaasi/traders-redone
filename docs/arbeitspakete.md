@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md)).
 
-## Aktuelle Runde: 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle 11.11.2026, Go nötig)
+## Aktuelle Runde: 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle und Go Nutzer 11.11.2026)
 
 **Ziel:** Kern und Ausgabe bekommen ihr Gerüst, bevor die erste Szene entsteht (R4): Phasenmaschine mit Takt und
 Zufallsereignissen je Bild (F3 = A), die Regeln der Woche ohne Bildschirm als belegte Kernroutinen, die Grafikschichten über dem
@@ -69,6 +69,10 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview; die Mehrrundenprobe
   dieser Regeln liefert 0 Teil 3 (`AGENTS.md` §5), Spur 1 nennt dafür im PR die Eingangs- und Ausgabefelder je Routine.
 - **Abhängigkeiten:** keine.
+- **Status (Spur 1, 11.11.2026):** Teile 1–3 fertig in PR #67, Review offen. Portiert mit Differenztest: `1777:02DC`,
+  `0609:1178`, `22A3:026B`, `0825:0813` (+ `086F`, `088D`, `08EB`, `096D`), `0825:06CB`, `0825:07C4`, `22A3:0003`
+  (+ `22A3:0750`), `21FD:021F`, `08CF:11D7`, `0B9F:06A0`, `0B9F:078A`. `0B9F:06A0`/`078A` ziehen keinen Zufall. Eingangs- und
+  Ausgabefelder je Routine für 0 Teil 3: Abschnitt „C#-Umsetzung“ der Befunde.
 
 ## 2 `schichten` – Grafikschichten über dem Treiber
 
@@ -118,10 +122,9 @@ Konflikte nur dann über `integration/runde-3`.
 
 ## Offene Fragen an den Nutzer
 
-- **G1 Go** für Runde 3 mit vier Spuren wie oben, alle Opus.
-- **G2 Zugriff:** Diese Leitstellensitzung hat kein Schreib-/Leserecht auf `kaaasi/traders-referenz` (`add_repo` von der Freigabe
-  abgelehnt, `git ls-remote` scheitert); ohne das legt sie nach `anhang.md` F keine Läufe an. Entweder Zugriff freigeben oder die
-  vier Läufe selbst anlegen (beide Repos, Code-Repo mit Schreibzugriff).
+- **G1 Go – erteilt (Nutzer 11.11.2026)** nach dem Plan-Review (#65): vier Spuren wie oben, alle Opus, Läufe startet die Leitstelle.
+- **G2 Zugriff – erteilt (Nutzer 11.11.2026):** Jede Leitstelle darf `kaaasi/traders-referenz` mit `push` einbinden
+  (`leitstelle-start.md` Schritt 0); Leitstellen dürfen Labels selbst setzen und entfernen.
 - Übrige P3 aus R2: #36 mit diesem PR behoben; #39 R1 → 1, R2 → 3, R3 offen (nur Präzisierung, Leitstelle bei Gelegenheit);
   #49 offen (nächster Lauf an `experiments/bestand/`); #52 → 0; #60 → 2.
 

@@ -10,7 +10,9 @@
 
 0. **Zugriff:** immer Lese- und Schreibzugriff auf beide Repos: `add_repo` für `kaaasi/traders-redone` und
    `kaaasi/traders-referenz`, jeweils access `push` (ggf. erst per `ToolSearch` mit `select:mcp__claude-code-remote__add_repo`
-   laden). Lehnt die Freigabe ab, dem Nutzer melden.
+   laden). **Freigabe des Nutzers (11.11.2026):** Jede Leitstelle darf `kaaasi/traders-referenz` mit access `push` einbinden; das
+   gilt ausdrücklich auch für künftige Leitstellen. Lehnt die Freigabe des Werkzeugs trotzdem ab, auf diese Erlaubnis verweisen
+   und erneut versuchen; scheitert es weiter, dem Nutzer melden.
 1. Lies `AGENTS.md`, `docs/prozess/zusammenarbeit.md` und `docs/prozess/anhang.md` (vollständig), in `docs/arbeitspakete.md` die
    aktuelle Runde, die offenen PRs (Titel, Bearbeiter, letzte Übergabe) und die Reviews der Runde. Kein Vorwissen aus Chats nötig.
 2. **Planen:** Runde mit Ziel, Spuren (Teile, Dateigrenzen, Abnahme, Modell, Abhängigkeiten), Zuständigkeit gemeinsamer Dateien,
@@ -30,4 +32,5 @@
    PR als `docs/handoffs/<datum>-<thema>.md`.
 9. **Sitzung je Runde:** höchstens eine Runde je Sitzung; die nächste beginnt in einem neuen Chat mit dem Kurzaufruf oben. Dem
    Nutzer meldet sie sich nur bei Entscheidungsbedarf, am Ende einer Spur (Merge) und am Rundenende.
-10. **Warten über Labels** (`zusammenarbeit.md` §5 Punkt 8, `anhang.md` F). Erledigte Labels entfernt die Leitstelle.
+10. **Warten über Labels** (`zusammenarbeit.md` §5 Punkt 8, `anhang.md` F). Erledigte Labels entfernt die Leitstelle; Labels setzen
+    und entfernen darf sie immer selbst (Nutzer 11.11.2026).

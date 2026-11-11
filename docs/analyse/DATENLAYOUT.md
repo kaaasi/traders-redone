@@ -190,3 +190,29 @@ Portierung gehört zu M11; Rechenreihenfolge und 32-Bit-Zwischenwerte dabei aus 
 - Zuordnung Feldart 0–2 → Ware (Tabelle `DS:08E4`: Art 0→2, 1→0, 2→1) und Warennamen
   (Wasser/Blumen/Parfüm laut Wettertexten; vierte Ware offen).
 - Bedeutung `StationValue` und `StationVisited` (M9).
+
+## 7. Runde 3, Spur `regeln` (Wochenregeln)
+
+Ergänzungen mit Beleg aus den portierten Routinen; Namen in `DgroupLayout.cs` (additiv). Die Einträge `43F4`, `48A0`,
+`40CC`, `3746`, `4B98`, `2F26`, `48A2` in §4 gelten weiter; hier nur Neues und Präzisierungen.
+
+| DS | Breite | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `34A2` | W s | `LottoPrize` | Lottowert der Woche: Durchschnittsbargeld / 20, 10, 5 je Lotto-Einstellung, mindestens 20; bei ungültiger Einstellung unverändert (vorläufig: Gewinn) | G – `1777:02DC`, gelesen `08CF:10C8`, `08CF:1668`; Differenztest |
+| `40CC` | W s | `LottoPrice` | `34A2` / 32 (vorläufig: Lospreis) | G – `1777:02DC`; Differenztest |
+| `4B98` | W s | `ShopOil` | (Bargeldsumme · Woche) mod (2 · (Spalten·Zeilen − `2F05`) + 1), 16-bittig; `08CF:05A3` zählt herunter | G – `1777:02DC`; Differenztest |
+| `43F4` / `48A0` / `3746` | W s | `OilPrice` / `RocketPrice` / `LandPrice` | Formeln in [1777_02DC_wochenpreise.md](../routines/1777_02DC_wochenpreise.md) | G – Differenztest |
+| `2F26` / `48A2` | B s | `LimitLow` / `LimitHigh` | 8-Bit-Rechnung mit vorzeichenbehaftetem Vergleich ([0609_1178_obergrenzen.md](../routines/0609_1178_obergrenzen.md)) | G – Differenztest; Bedeutung offen |
+| `45D0` | W s | `LoopWare` | globale Schleifenvariable; nach `0609:1178` = 3, nach `22A3:026B` = 4 | G – Differenztest |
+| `2F06` | D[4] s | `CurrentWealth` | Vermögen je Spieler, nur von `0825:06CB` geschrieben | G – Differenztest |
+| `3D42` | B[4] u | `Rank` | 3 − Zahl der anderen mit Vermögen ≤ eigenem; Gleichstand senkt beide (präzisiert §4) | G – `0825:06CB`; Differenztest |
+| `302A` | B[4] u | `RankUnique` | wie `3D42`, Gleichstand zugunsten der kleineren Spielernummer (eindeutig 0–3) | G – `0825:06CB`; Differenztest |
+| `342C` | B[4][3] u | `ProductionShares` | Anteil der Art an den eigenen Produktionsfeldern in % | G – `22A3:0750`; Differenztest |
+| `57F0` / `57F2` | W s | `ProductionIdle` / `ProductionActive` | Felder ohne Ertrag (unbebaut oder Vorrat < `2F26`) / mit Verbrauch | G (Zählung), W (Verwendung) – `22A3:0003` |
+| `2EB0` / `2F00` | B s | `LoopX` / `LoopY` | nach `22A3:0003` = Spalten / Zeilen | G – Differenztest |
+| `08E4` / `0902` / `112C` | B s | `KindWare` / `QualityTable` / `WeatherTable` | Ware je Art; Güte-Zuschlag [Art·4 + Güte]; Wetter-% [Art·6 + Wetter] | G – `22A3:0003`; Differenztest |
+| `2BC2` / `2BBE` | W s | `AuctionStartPrice` / `AuctionBestBid` | Startpreis (Kopie des Warenpreises, `0B9F:0093`) / Höchstgebot der Versteigerung, 0 = keins (vorläufig) | G – `0B9F:078A`; Differenztest |
+
+Präzisierung zu §5 (Vermögen): Edelsteine = Steine · (Grundeinheit · Kurs / 100) + Grundeinheit · Konto / 100; Land-, Waren-,
+Raketen- und Ölprodukte werden auf 16 Bit abgeschnitten; Öl zählt nur bei `45BA` = 1
+([0825_0813_vermoegen.md](../routines/0825_0813_vermoegen.md)).
