@@ -14,14 +14,23 @@ __pycache__/
 ci-out/
 .worktrees/
 
-# Original files and reference material live only in the private repo kaaasi/traders-referenz (AGENTS.md 2.1)
+# Original files and reference material live only in the private repo kaaasi/traders-referenz (AGENTS.md 2.1).
+# Patterns ignore case where the original names vary (T.EXE/t.exe, *.PP/*.pp); layout of the reference repo included.
 /gamedata
 /original/
 /reference/
+/videos/
+/analyse/
+/refemu/
 docs/analyse/disasm/
-*.PP
-*.CMF
-T.EXE
-FXDRIVER.EXE
-*.adf
 /.referenz/
+[Tt].[Ee][Xx][Ee]
+[Ff][Xx][Dd][Rr][Ii][Vv][Ee][Rr].[Ee][Xx][Ee]
+[Tt][Rr][Aa][Dd][Ee][Rr][Ss].[Bb][Aa][Tt]
+[Ee][Nn][Gg][Ll][Ii][Ss][Cc][Hh].[Tt][Xx][Tt]
+*.[Pp][Pp]
+*.[Cc][Mm][Ff]
+*.[Aa][Dd][Ff]
+*.zip
+*.jpg
+refemu-*.png

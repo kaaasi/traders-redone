@@ -11,5 +11,7 @@ sind, GitHub aber erreichbar ist. Damit Claude trotzdem selbst bauen und testen 
 3. Danach: `source ~/claude-tools-traders/env.sh` und `tools/pruefen.sh --schnell`.
 
 Die Originaldateien liegen im privaten Repo `kaaasi/traders-referenz`; `tools/claude/fetch-reference.sh original` lädt sie
-nach `~/traders-referenz/` und verknüpft sie als `gamedata/`. Das Release enthält keine
+nach `~/traders-referenz/` und verknüpft sie als `gamedata/`. Ein vorhandener (flacher) Klon wird um die genannten Teile
+ergänzt und auf den aktuellen Stand gesetzt; lokale Änderungen oder Commits dort brechen mit Rückgabe 3 ab (Selbsttest:
+`tools/claude/fetch-reference-selbsttest.sh`, läuft in `tools/pruefen.sh`). Das Release enthält keine
 Originaldateien und kann jederzeit gelöscht werden – es entsteht beim nächsten Workflow-Lauf neu.

@@ -42,7 +42,7 @@ public class MachineTests
         Assert.Equal((ushort)0x20CD, m.Mem.Read16(m.PspSegment, 0));
     }
 
-    [GameDataFact]
+    [Fact]
     public void Default_vectors_point_to_host_stubs_and_int64_is_optional()
     {
         var with = NewMachine(sound: true);

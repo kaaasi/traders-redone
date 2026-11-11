@@ -5,7 +5,9 @@
 #   tools/claude/fetch-reference.sh [original] [disasm] [refemu] [videos]     default: original
 #
 # Target: $TRADERS_REFERENZ_DIR (default ~/traders-referenz); branch: $TRADERS_REFERENZ_REF (default main).
-# An existing clone is extended; if it is behind the remote branch, it is updated (fast-forward only).
+# An existing clone is extended by the requested folders and moved to the current state of the remote branch. The clone is
+# shallow (--depth 1), so old and new states share no history: the branch is reset to the fetched commit instead of merged.
+# Local changes and local commits are never overwritten (exit code 3); commit them on a branch daten/... in the reference repo first.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -29,9 +31,18 @@ if [ ! -d "$DEST/.git" ]; then
   git clone --depth 1 --filter=blob:none --sparse --branch "$REF" "$URL" "$DEST"
   git -C "$DEST" sparse-checkout set "${dirs[@]}"
 else
+  if [ -n "$(git -C "$DEST" status --porcelain --untracked-files=no)" ]; then
+    echo "Lokale Änderungen in $DEST – nicht aktualisiert (erst sichern oder verwerfen):" >&2
+    git -C "$DEST" status --short --untracked-files=no >&2
+    exit 3
+  fi
+  if [ -z "$(git -C "$DEST" branch -r --points-at HEAD)" ]; then
+    echo "Lokale Commits in $DEST ($(git -C "$DEST" rev-parse --short HEAD) liegt auf keinem Remote-Branch) – nicht aktualisiert" >&2
+    exit 3
+  fi
+  git -C "$DEST" fetch -q --depth 1 origin "$REF"
+  git -C "$DEST" checkout -q -B "$REF" FETCH_HEAD
   git -C "$DEST" sparse-checkout add "${dirs[@]}"
-  git -C "$DEST" fetch --depth 1 origin "$REF"
-  git -C "$DEST" merge --ff-only FETCH_HEAD >/dev/null
 fi
 
 if [[ " ${dirs[*]} " == *" original "* ]]; then
