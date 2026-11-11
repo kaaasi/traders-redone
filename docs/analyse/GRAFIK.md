@@ -119,3 +119,30 @@ berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die e
 - Grenzfälle (Ränder ohne Abschneiden, kleine Breiten, `h` = 0, extreme Linien, Seitenwechsel) in `DriverEdgeCaseTests`.
 - Nicht in ②: EGA (`0797`), Tandy (`1645`, `3F0A`), Umwandlung `166A` (nur VGA); `0A96`, `0A69`, `0B67`, `21AF`,
   Paletten/Blenden und Farbregister → R3.
+
+## 8. Grafikschichten (Spur `schichten`, R3)
+
+- **Teil 1** (portiert mit Differenztest, `src/Traders.Vga/Layers/`): Seitenverwaltung `0B67` (`0002` nur VGA, `016B`, `0196`,
+  `01B5`, `01D4`, `0206`, `0238`, `028F`, `0299`), Paletten und Blenden `21FD:026C…04DA` mit Warten `0185`, Seitenwechsel
+  `21FD:051F`, Farbregister `2295:006D/00C5`, Rückschreibsätze `21AF:04A2/04CD`. Befunde: `docs/routines/0B67_0002_seiten.md`,
+  `21FD_026C_paletten.md`, `21FD_051F_seitenwechsel.md`, `2295_006D_farbregister.md`, `21AF_000D_objekte.md`; DS-Adressen in
+  `DATENLAYOUT.md` (Unterabschnitt „Grafikschichten“).
+- Die Schichten arbeiten auf dem DS-Abbild an den Originaloffsets; DAC als `VgaDac` (6 Bit je Kanal). Jedes Warten auf den
+  Strahlrücklauf (`0D73:00D3`) ist genau ein Aufruf von `IRetraceWait` – keine eigene Uhr; die Tests zählen die Warten gegen den RefEmu.
+- Korrektur zu §5: In `03EB` sind auch Ergebnisse jenseits des Ziels möglich (Schritt als Byte, Vergleich vorzeichenbehaftet:
+  Stufe 16 ergibt Schritt 80h). Ausblenden ruft zusätzlich `21AF:04CD` (Rückschreibsätze `DS:33E4` nullen), zeichnet aber keine Objekte.
+- **Teil 2** (portiert mit Differenztest): Befehlsliste `0A96` (alle 17 Typen, Einreihen, `06A8`, Text `0C68`, `0C3F`), Zahl
+  `2295:0001/0062`, Hilfen `0A69` einschließlich Schreibmaschinentext `01AD/0243/0288` (Tastenklick und Zeitgeber-Warten als
+  Ereignisse `ITypewriterEffects`). Befunde `docs/routines/0A96_06A8_befehlsliste.md`, `0A69_000B_hilfen.md`, `2295_0001_zahl.md`.
+- Korrektur zu §2: `06A8` leert die Liste **nicht**; Zähler und Zeiger stehen danach wieder hinter dem letzten Eintrag, ein zweiter
+  Aufruf zeichnet dieselben Einträge erneut (`21FD:060D`). Leeren nur `001B`. Zahlen mit mehr als 7 (`$`: 6) Stellen überschreiben
+  das Typwort ihres Eintrags.
+- **Teil 3** (portiert mit Differenztest): Objektverwaltung `21AF` (`000D`, `00CA`, `022B`, `0412`, `045E`, `0472`) und die Brücke
+  von den DS-Sätzen zu `23CD:06E9/071C` (`GraphicsLayers.DrawObjects/RestoreObjects`). Befund `docs/routines/21AF_000D_objekte.md`.
+  Korrektur zu §4: +10 zeigt direkt auf die Rückschreibsätze (4 Byte je Seite, ab `DS:33E4 + 8·i`), nicht auf Zeiger; Bildzeiger
+  (VGA) werden über `0000:5101` normalisiert; Sicherungspuffer liegen im RAM-Atlas.
+- **P3 #60** (maskierter Blit `35DF` bzw. Maske füllen `3CE8` mit w < 4 und ungeradem Maskenoffset): statisch nicht erreichbar.
+  Einzige Aufrufer sind `0A96:0798/07E4` (Typ 3/4); die zehn Einreihaufrufe von `0A96:013B/01AA` (`0535`, `0609`, `0EDE`, `192D`,
+  `1C68` zweimal, `1DEF` zweimal, `20B3`, `1F63`-Grenze) übergeben alle feste Breiten 7…59 (7, 8, 0Fh, 10h, 20h, 38h, 3Bh).
+  Aufrufe über Funktionszeiger auf `013B/01AA` gibt es nicht (Suche nach den Adressen in der Disassemblierung).
+
