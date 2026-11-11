@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 11.11.2026 · Runde 1 (Umstellung) abgeschlossen, Gesamtreview offen
+Stand: 11.11.2026 · Runde 1 (Umstellung) abgeschlossen; nächste: Runde 2 (Altbestand AP1/AP2/AP5)
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
