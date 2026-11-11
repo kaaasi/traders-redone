@@ -87,6 +87,31 @@ public static class DgroupLayout
     public const int Robot33DC = 0x33DC;       // uword[4]    init 30 (robot battle, tentative)
     public const int Robot3016 = 0x3016;       // uword[4]    init 0 (robot battle, tentative)
 
+    // ---- derived weekly values and loop variables (round 3, track "regeln"; docs/analyse/DATENLAYOUT.md §7) ----
+    public const int LoopWare = 0x45D0;        // word        global loop variable (ware / kind), left behind by loops
+    public const int ShopOil = 0x4B98;         // word        oil stock of the shop, set by 1777:02DC
+    public const int OilPrice = 0x43F4;        // word        set by 1777:02DC, at least 1
+    public const int RocketPrice = 0x48A0;     // word        set by 1777:02DC
+    public const int LottoPrize = 0x34A2;      // word        set by 1777:02DC, at least 20 (tentative: prize/pool)
+    public const int LottoPrice = 0x40CC;      // word        LottoPrize / 32 (tentative: ticket price)
+    public const int LandPrice = 0x3746;       // word        set by 1777:02DC, 100..550
+    public const int LimitLow = 0x2F26;        // sbyte       min(30, F/2 + 3) from 0609:1178 (meaning open)
+    public const int LimitHigh = 0x48A2;       // sbyte       min(30, F/2 + 6) from 0609:1178 (meaning open)
+    public const int CurrentWealth = 0x2F06;   // dword[4]    total wealth per player, set by 0825:06CB
+    public const int Rank = 0x3D42;            // byte[4]     3 - number of others with wealth <= own (ties count)
+    public const int RankUnique = 0x302A;      // byte[4]     rank with ties broken toward the lower player number
+    public const int ProductionShares = 0x342C; // byte[4][3] stride 3: percent of the production fields per kind
+    public const int ProductionResult = 0x48F4; // byte[9][26] stride 26: production per field (4..60), see 22A3:0003
+    public const int ProductionIdle = 0x57F0;  // word        owned fields that produced nothing this week (tentative)
+    public const int ProductionActive = 0x57F2; // word       fields that consumed stock and produced (tentative)
+    public const int LoopX = 0x2EB0;           // sbyte       global loop variable field column
+    public const int LoopY = 0x2F00;           // sbyte       global loop variable field row
+    public const int KindWare = 0x08E4;        // sbyte[3]    ware consumed by field kind 0..2 (initialised data)
+    public const int QualityTable = 0x0902;    // sbyte[3][4] stride 4: yield bonus per kind and land quality
+    public const int AuctionBestBid = 0x2BBE;  // word        highest bid of the ware auction, 0 = none (tentative, 0C29:04B6)
+    public const int AuctionStartPrice = 0x2BC2; // word      ware price at the start of the auction (0B9F:0093)
+    public const int WeatherTable = 0x112C;    // sbyte[3][6] stride 6: percent change per kind and weather
+
     /// <summary>Index into the field grid arrays (x = column, y = row).</summary>
     public static int FieldIndex(int x, int y) => x * FieldRowsMax + y;
 }
