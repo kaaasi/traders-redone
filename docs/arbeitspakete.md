@@ -75,7 +75,8 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview (Mutation → rot);
   VRAM-Vergleich gegen `VgaAdapter` des RefEmu, Erwartungswerte nie aus dem Port. Die Treiberroutinen liegen hinter der
   Vektortabelle und sind keine Far-Einsprünge: Lehnt `abdeckung.py` solche Adressen ab, im PR melden (Werkzeug gehört nicht zu ②).
-- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** offen, Start durch den Nutzer.
+- **Abhängigkeiten:** keine (⓪ gemergt). **Status:** Teile 1–3 fertig, PR #43 bereit zum Erstreview (11.11.2026); `tools/exeimg.py`
+  nicht übernommen (`segmap.py` deckt die Disassemblierung ab).
 
 ### ③ `phasen` – Wochenschleife und Aufrufgraph-Werkzeug (Quelle `dev/ap5-phasen`, `8ed0d34`; zugeschnitten nach BESTAND §3.1)
 
