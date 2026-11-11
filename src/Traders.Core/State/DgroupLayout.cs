@@ -108,6 +108,8 @@ public static class DgroupLayout
     public const int LoopY = 0x2F00;           // sbyte       global loop variable field row
     public const int KindWare = 0x08E4;        // sbyte[3]    ware consumed by field kind 0..2 (initialised data)
     public const int QualityTable = 0x0902;    // sbyte[3][4] stride 4: yield bonus per kind and land quality
+    public const int AuctionBestBid = 0x2BBE;  // word        highest bid of the ware auction, 0 = none (tentative, 0C29:04B6)
+    public const int AuctionStartPrice = 0x2BC2; // word      ware price at the start of the auction (0B9F:0093)
     public const int WeatherTable = 0x112C;    // sbyte[3][6] stride 6: percent change per kind and weather
 
     /// <summary>Index into the field grid arrays (x = column, y = row).</summary>

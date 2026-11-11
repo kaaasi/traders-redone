@@ -179,6 +179,7 @@ Ergänzungen mit Beleg aus den portierten Routinen; Namen in `DgroupLayout.cs` (
 | `57F0` / `57F2` | W s | `ProductionIdle` / `ProductionActive` | Felder ohne Ertrag (unbebaut oder Vorrat < `2F26`) / mit Verbrauch | G (Zählung), W (Verwendung) – `22A3:0003` |
 | `2EB0` / `2F00` | B s | `LoopX` / `LoopY` | nach `22A3:0003` = Spalten / Zeilen | G – Differenztest |
 | `08E4` / `0902` / `112C` | B s | `KindWare` / `QualityTable` / `WeatherTable` | Ware je Art; Güte-Zuschlag [Art·4 + Güte]; Wetter-% [Art·6 + Wetter] | G – `22A3:0003`; Differenztest |
+| `2BC2` / `2BBE` | W s | `AuctionStartPrice` / `AuctionBestBid` | Startpreis (Kopie des Warenpreises, `0B9F:0093`) / Höchstgebot der Versteigerung, 0 = keins (vorläufig) | G – `0B9F:078A`; Differenztest |
 
 Präzisierung zu §5 (Vermögen): Edelsteine = Steine · (Grundeinheit · Kurs / 100) + Grundeinheit · Konto / 100; Land-, Waren-,
 Raketen- und Ölprodukte werden auf 16 Bit abgeschnitten; Öl zählt nur bei `45BA` = 1
