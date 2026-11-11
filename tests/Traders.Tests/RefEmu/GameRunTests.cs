@@ -105,10 +105,13 @@ public class GameRunTests
 
     private sealed record Marker(int Week, int Number, double Seconds, uint RandomState);
 
-    private sealed record WeekRun(List<Marker> Markers, uint RandomAtNewGame, double WeekOneStart, uint RandomAtWeekOne,
-        long Instructions, byte[] Data);
+    private sealed record WeekRun(List<Marker> Markers, uint RandomAtNewGame, double WeekZeroStart, int WeekCounterAtWeekZero,
+        uint RandomAtWeekZero, double WeekOneStart, int WeekCounterAtWeekOne, uint RandomAtWeekOne, long Instructions, byte[] Data);
 
-    /// <summary>Plays the default game (four computer players) through week 0 up to the start of week 1.</summary>
+    /// <summary>
+    /// Plays the default game (four computer players) through week 0 up to the start of week 1. Week 1 is found as the next
+    /// entry of the weekly prices, not via the week counter, so a wrong counter shows up in <see cref="WeekRun.WeekCounterAtWeekOne"/>.
+    /// </summary>
     private static WeekRun RunFirstWeek(bool runFxDriver)
     {
         var p = OriginalProgram.StartGame(Dir, runFxDriver: runFxDriver);
@@ -119,14 +122,22 @@ public class GameRunTests
         m.AddCodeHook(p.Segment(OriginalProgram.PhaseMarkerSegment), OriginalProgram.PhaseMarkerOffset,
             mm => markers.Add(new Marker(p.Week, p.StackArgument(0), mm.Seconds, p.RandomState)));
         Assert.True(p.RunToWeekStart(0, 5), "week 0 did not start within 5 s after the menu");
-        Assert.True(p.RunToWeekStart(1, 240), $"week 1 not reached; markers: {string.Join(", ", markers)}");
-        return new WeekRun(markers, atNewGame, m.Seconds, p.RandomState, m.Cpu.InstructionCount, p.DataSegment());
+        double weekZeroStart = m.Seconds;
+        int weekZeroCounter = p.Week;
+        uint atWeekZero = p.RandomState;
+        m.Run(1);
+        m.RunFor(240, _ => p.IsAt(OriginalProgram.WeekStartSegment, OriginalProgram.WeekStartOffset));
+        Assert.True(!m.Exited && p.IsAt(OriginalProgram.WeekStartSegment, OriginalProgram.WeekStartOffset),
+            $"week 1 not reached; markers: {string.Join(", ", markers)}");
+        return new WeekRun(markers, atNewGame, weekZeroStart, weekZeroCounter, atWeekZero, m.Seconds, p.Week, p.RandomState,
+            m.Cpu.InstructionCount, p.DataSegment());
     }
 
     /// <summary>
     /// The week run as oracle (docs/analyse/BESTAND.md §3.1): after the main menu the game passes the phase markers
     /// 0..6 of week 0 in order and starts week 1; a second run with the same inputs is bit-identical, including the
-    /// random state at every marker. Expected times and random states come from the independent probes P1/P5 of BESTAND.md.
+    /// random state at every marker. Expected times, week counters and random states come from the independent probes
+    /// P1/P5 of BESTAND.md (appendix A), never from this run.
     /// </summary>
     [GameDataFact]
     public void Game_runs_through_week_0_and_repeats_bit_identically()
@@ -135,10 +146,17 @@ public class GameRunTests
         var a = runs[0];
 
         Assert.Equal(0xF9D5A4ACu, a.RandomAtNewGame);                                  // P5, RETURN after 0.5 s
+        Assert.InRange(a.WeekZeroStart, 18.07, 18.17);                                // P1: week 0 at 18.12 s
+        Assert.Equal(0, a.WeekCounterAtWeekZero);
+        Assert.Equal(0x2DF78CD0u, a.RandomAtWeekZero);                                // P1: seed at week 0
         Assert.Equal(Enumerable.Range(0, 7), a.Markers.Select(x => x.Number));
         Assert.All(a.Markers, x => Assert.Equal(0, x.Week));
+        // P1: seed at markers 0..6 of week 0
+        Assert.Equal([0xA106A091u, 0xFBBDAB8Du, 0xDB5C7693u, 0x11194A03u, 0x6BB0B488u, 0x76FAFF29u, 0xD89CF6FBu],
+            a.Markers.Select(x => x.RandomState));
         Assert.InRange(a.WeekOneStart, 220.80, 220.90);                               // P1: week 1 at 220.85 s
-        Assert.True(a.Markers.Select(x => x.RandomState).Distinct().Count() > 1, "random() is not used between the phases");
+        Assert.Equal(1, a.WeekCounterAtWeekOne);                                      // P1: week=1 at the weekly prices
+        Assert.Equal(0x86DB21CAu, a.RandomAtWeekOne);                                 // P1: seed at week 1
 
         var b = runs[1];
         Assert.Equal(a.Markers, b.Markers);
@@ -154,9 +172,29 @@ public class GameRunTests
         var r = RunFirstWeek(runFxDriver: true);
         Assert.Equal(Enumerable.Range(0, 7), r.Markers.Select(x => x.Number));
         Assert.InRange(r.WeekOneStart, 214.00, 214.10);
+        Assert.Equal(1, r.WeekCounterAtWeekOne);
     }
 
-    /// <summary><see cref="OriginalProgram.RunToMarker"/> stops before the marker routine and can be resumed to the next marker.</summary>
+    /// <summary>
+    /// The random state at the new game depends on the time of RETURN in the main menu (P5 of BESTAND.md appendix A).
+    /// </summary>
+    [GameDataTheory]
+    [InlineData(1.5, 0x211A7193u)]
+    [InlineData(3.0, 0x17ED9B74u)]
+    public void New_game_seed_depends_on_the_menu_time(double menuDelay, uint expected)
+    {
+        var p = OriginalProgram.StartGame(Dir, menuDelay: menuDelay);
+        var m = p.Machine;
+        uint? atNewGame = null;
+        m.AddCodeHook(p.Segment(OriginalProgram.NewGameSegment), OriginalProgram.NewGameOffset, _ => atNewGame ??= p.RandomState);
+        m.RunFor(menuDelay + 2, _ => atNewGame is not null);
+        Assert.Equal(expected, atNewGame);
+    }
+
+    /// <summary>
+    /// <see cref="OriginalProgram.RunToMarker"/> stops before the marker routine and can be resumed to the next marker.
+    /// The week counter itself is only distinguishable from week 1 on; it is checked in the week runs above.
+    /// </summary>
     [GameDataFact]
     public void Run_to_marker_stops_at_the_entry_and_resumes()
     {
@@ -164,7 +202,6 @@ public class GameRunTests
         Assert.True(p.RunToMarker(0, 3, 120));
         Assert.True(p.IsAt(OriginalProgram.PhaseMarkerSegment, OriginalProgram.PhaseMarkerOffset));
         Assert.Equal(3, p.StackArgument(0));
-        Assert.Equal(0, p.Week);
         double at3 = p.Machine.Seconds;
         Assert.InRange(at3, 83.70, 83.85);                                            // P1: markers 3 and 4 close together
         Assert.True(p.RunToMarker(0, 4, 1));
