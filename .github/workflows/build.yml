@@ -48,12 +48,15 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
-      # Exactly the SDK from global.json, as in the Claude session (release claude-werkzeuge); global-json-file would
-      # install the latest patch because of rollForward latestPatch.
+      # Exactly the SDK from global.json, as in the Claude session (release claude-werkzeuge). global-json-file would
+      # install the latest patch, and the runner image ships newer patches that rollForward latestPatch would pick, so
+      # the SDK goes into its own folder that contains nothing else.
       - name: SDK version from global.json
         id: sdk
         run: echo "version=$(jq -r .sdk.version global.json)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: ${{ steps.sdk.outputs.version }}
       - name: Check SDK version
@@ -69,7 +72,7 @@ jobs:
           bash tools/pruefen.sh | tee pruefen.txt
       - name: Zusammenfassung
         if: success() || failure()
-        run: sed -n '/^### Markerbericht/,$p' pruefen.txt >> "$GITHUB_STEP_SUMMARY"
+        run: if [ -f pruefen.txt ]; then sed -n '/^### Markerbericht/,$p' pruefen.txt >> "$GITHUB_STEP_SUMMARY"; fi
 
   # By hand only: Windows build and tests.
   windows:
