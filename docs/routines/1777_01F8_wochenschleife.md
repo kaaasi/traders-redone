@@ -129,5 +129,5 @@ Aufruf 1 `1777:02DC`, 2 `0825:07C4`, 5 und 20 `0609:1178`, 12 `21FD:021F`, 13 `2
   Port und wird beim Rücksprung mit dem RefEmu verglichen (ganzes Datensegment einschließlich `DS:10D2`, außer den
   Interrupt-Bytes oben); Bildschirmschritte rechnet der RefEmu. Dazu Folge der 30 Aufrufe und Marken je Woche, Wochenzähler
   1–4, Zahl der Ziehungen von Wetter und Edelsteinkurs. Gegenprobe (lokal): Aufrufe 13 und 14 vertauscht → rot in Woche 0
-  bei Aufruf 13 (`DS:2EB0`). Laufzeit rund 10 min (eine Woche ≈ 200 s emuliert, ≈ 600 Mio. Befehle); deshalb wie Abbruchweg B
-  mit Merkmal `Dauer=lang` außerhalb von `tools/pruefen.sh --schnell`, im vollen Lauf und in der CI mit Originaldaten.
+  bei Aufruf 13 (`DS:2EB0`). Laufzeit im Release-Lauf von `tools/pruefen.sh` rund 90 s (Abbruchweg B
+  rund 35 s; eine Woche ≈ 200 s emuliert, ≈ 600 Mio. Befehle); `--schnell` wird dadurch rund 45 s länger (parallel).

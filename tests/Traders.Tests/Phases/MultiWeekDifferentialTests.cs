@@ -25,7 +25,6 @@ public class MultiWeekDifferentialTests
     /// ran in every week, and the random rules drew in the core exactly as the original.
     /// </summary>
     [GameDataFact]
-    [Trait(Long.Trait, Long.Value)]
     public void Four_weeks_with_ported_rule_steps_match_the_original()
     {
         var p = OriginalProgram.StartGame(Dir);

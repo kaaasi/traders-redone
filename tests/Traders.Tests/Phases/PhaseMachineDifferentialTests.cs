@@ -114,7 +114,6 @@ public class PhaseMachineDifferentialTests
     /// Counter-check (local): target left as it is → the end check returns 0 and the test fails.
     /// </summary>
     [GameDataFact]
-    [Trait(Long.Trait, Long.Value)]
     public void Exit_B_in_lockstep_with_the_original()
     {
         // The end screens close with the any-key wait 27C6:00D2 (DS:115D); a key every 10 s from the end check on ends it.
