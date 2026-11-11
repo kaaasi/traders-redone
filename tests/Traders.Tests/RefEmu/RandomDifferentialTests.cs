@@ -8,6 +8,7 @@ namespace Traders.Tests.RefEmu;
 /// Differential test of 21FD:01BA random(n): the original code is executed in the reference
 /// emulator and compared with <see cref="OriginalRandom"/> (return value and seed at DS:10D2).
 /// </summary>
+// [DIFFERENTIAL] 21FD:01BA
 public class RandomDifferentialTests
 {
     private const ushort RandomSeg = 0x21FD, RandomOff = 0x01BA;

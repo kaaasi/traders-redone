@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""Abdeckung von T.EXE: erzeugt die Portierungstabellen in STATUS.md aus Original, Befunden, Code-Markern und Tests.
+"""Coverage of T.EXE: generates the porting tables in STATUS.md from the original, findings, code markers and tests.
 
-Quellen (nichts davon wird von Hand in die Tabellen eingetragen):
-  - original/dos/T.EXE           Segmente und Far-Einsprünge (gleiche Ermittlung wie tools/segmap.py)
-  - docs/routines/SSSS_OOOO_*.md Befunde; abgedeckt sind die Adressen SSSS:OOOO in der Titelzeile
-  - src/**/*.cs                  Marker „[ORIGINAL] SSSS:OOOO“ an der portierten Stelle
-  - tests/**/*Differential*.cs   Differenztests gegen den RefEmu; zählen für jede darin genannte Adresse SSSS:OOOO
+Sources (none of them is entered into the tables by hand):
+  - original/dos/T.EXE           segments and far entry points (same method as tools/segmap.py)
+  - docs/routines/SSSS_OOOO_*.md findings; covered are the addresses SSSS:OOOO in the title line
+  - src/**/*.cs                  markers "[ORIGINAL] SSSS:OOOO" at the ported code
+  - tests/**/*.cs                explicit tags "[DIFFERENTIAL] SSSS:OOOO" in differential tests against the RefEmu;
+                                 plain addresses in comments do not count
 
-Aufruf:
-  python3 tools/abdeckung.py --write   Tabellen zwischen <!-- abdeckung:anfang --> und <!-- abdeckung:ende --> erneuern
-  python3 tools/abdeckung.py --check   Exit 1, wenn STATUS.md veraltet ist oder ein Marker ohne Befund bzw. ein
-                                       portierter Befund ohne Differenztest auftaucht (Teil von tools/pruefen.sh)
+Every [ORIGINAL] in src/ and every [DIFFERENTIAL] in tests/ must be followed by a valid address (4+4 upper-case hex
+digits); anything else is an error, so a marker in another spelling cannot be ignored silently.
+
+Usage:
+  python3 tools/abdeckung.py --write   renew the tables between <!-- abdeckung:anfang --> and <!-- abdeckung:ende -->
+  python3 tools/abdeckung.py --check   exit 1 if STATUS.md is stale, a marker has no finding, a ported finding has no
+                                       differential test or a marker/tag has no valid address (part of tools/pruefen.sh)
 """
 import collections
 import pathlib
@@ -22,12 +26,14 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 STATUS = ROOT / "STATUS.md"
 BEGIN, END = "<!-- abdeckung:anfang -->", "<!-- abdeckung:ende -->"
 ADDR = re.compile(r"\b([0-9A-F]{4}):([0-9A-F]{4})\b")
-MARKER = re.compile(r"\[ORIGINAL\]\s+([0-9A-F]{4}):([0-9A-F]{4})")
+TAG_ADDR = r"\s+([0-9A-F]{4}):([0-9A-F]{4})\b"
+MARKER = re.compile(r"\[ORIGINAL\]" + TAG_ADDR)
+DIFF_TAG = re.compile(r"\[DIFFERENTIAL\]" + TAG_ADDR)
 DGROUP = 0x28DC
 
 
 def segments(exe: pathlib.Path):
-    """Codesegmente (Paragraph → Größe) und Far-Einsprünge je Segment, wie tools/segmap.py."""
+    """Code segments (paragraph -> size) and far entry points per segment, as in tools/segmap.py."""
     d = exe.read_bytes()
     hdr_para, nrel, relo = struct.unpack_from("<H", d, 8)[0], struct.unpack_from("<H", d, 6)[0], struct.unpack_from("<H", d, 0x18)[0]
     img = d[hdr_para * 16:]
@@ -48,7 +54,7 @@ def segments(exe: pathlib.Path):
 
 
 def findings():
-    """Befunde mit Adresse: Adresse → Datei (relativ zu docs/routines)."""
+    """Findings with an address: address -> file name (relative to docs/routines)."""
     result = {}
     for f in sorted((ROOT / "docs/routines").glob("*.md")):
         if f.name.startswith("_"):
@@ -59,24 +65,31 @@ def findings():
     return result
 
 
-def scan(pattern: re.Pattern, files):
+def scan(tag: str, pattern: re.Pattern, files, errors):
+    """Addresses after `tag` (address -> files); a `tag` without a valid address is reported in `errors`."""
     hits = collections.defaultdict(set)
     for f in files:
         if "bin" in f.parts or "obj" in f.parts:
             continue
-        for s, o in pattern.findall(f.read_text(encoding="utf-8", errors="replace")):
-            hits[(int(s, 16), int(o, 16))].add(f.relative_to(ROOT).as_posix())
+        rel = f.relative_to(ROOT).as_posix()
+        for n, line in enumerate(f.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            valid = pattern.findall(line)
+            for s, o in valid:
+                hits[(int(s, 16), int(o, 16))].add(rel)
+            if line.count(tag) > len(valid):
+                errors.append(f"{tag} ohne gültige Adresse SSSS:OOOO (Großbuchstaben) in {rel}:{n}: {line.strip()}")
     return hits
 
 
 def build():
     size, far = segments(ROOT / "original/dos/T.EXE")
     found = findings()
-    markers = scan(MARKER, (ROOT / "src").rglob("*.cs"))
-    tests = scan(ADDR, [p for p in (ROOT / "tests").rglob("*.cs") if "Differential" in p.name])
-    errors = [f"Marker [ORIGINAL] {s:04X}:{o:04X} ohne Befund in docs/routines/ ({', '.join(sorted(markers[(s, o)]))})"
+    errors = []
+    markers = scan("[ORIGINAL]", MARKER, sorted((ROOT / "src").rglob("*.cs")), errors)
+    tests = scan("[DIFFERENTIAL]", DIFF_TAG, sorted((ROOT / "tests").rglob("*.cs")), errors)
+    errors += [f"Marker [ORIGINAL] {s:04X}:{o:04X} ohne Befund in docs/routines/ ({', '.join(sorted(markers[(s, o)]))})"
               for (s, o) in sorted(markers) if (s, o) not in found]
-    errors += [f"{s:04X}:{o:04X} ist portiert (Marker), aber ohne Differenztest (tests/**/*Differential*.cs)"
+    errors += [f"{s:04X}:{o:04X} ist portiert (Marker), aber ohne Differenztest ([DIFFERENTIAL] in tests/**/*.cs)"
                for (s, o) in sorted(markers) if (s, o) in found and (s, o) not in tests]
 
     def seg_of(addr):
@@ -90,7 +103,7 @@ def build():
         status = "✅" if m and t else ("🟢" if m else "🔍")
         lines.append(f"| `{addr[0]:04X}:{addr[1]:04X}` | [{found[addr]}](docs/routines/{found[addr]}) | "
                      f"{', '.join(f'`{x}`' for x in m) or '–'} | {', '.join(f'`{pathlib.PurePosixPath(x).name}`' for x in t) or '–'} | {status} |")
-    lines += ["", "Status: ✅ portiert mit Differenztest · 🟢 portiert, Differenztest fehlt · 🔍 nur Befund.", "",
+    lines += ["", "Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Differenztest fehlt · 🔍 nur Befund.", "",
               "### Abdeckung je Segment", "",
               "| Segment | Größe | Far-Einsprünge | mit Befund | portiert | mit Differenztest |", "|---|---:|---:|---:|---:|---:|"]
     total = collections.Counter()

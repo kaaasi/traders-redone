@@ -12,7 +12,7 @@ namespace Traders.Core;
 /// Seed lives at DS:10D2 (32 bit) and starts at 1. The result range is 0..n inclusive.
 /// The clock value for re-seeding is an explicit input so games can be replayed.
 /// </summary>
-// [ORIGINAL] 21FD:01BA – random(n), Befund docs/routines/21FD_01BA_random.md
+// [ORIGINAL] 21FD:01BA – random(n), finding docs/routines/21FD_01BA_random.md
 public sealed class OriginalRandom
 {
     public const uint Multiplier = 0xBB40E62Du;

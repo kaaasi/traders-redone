@@ -1,15 +1,31 @@
 name: Build
 
-# Actions-Minuten sparen (GitHub Free, Vorbild Eishockey-Manager): reine Doku-Änderungen bauen nicht, Draft-PRs bauen erst
-# bei „Ready for review“, ein neuer Push bricht den überholten Lauf desselben PRs ab. Windows-Build und Downloads nur per
-# Hand („Run workflow“, Entscheidung Nutzer 10.11.2026). Keine Tags.
+# Saves Actions minutes (GitHub Free, modelled on the Eishockey-Manager): pure documentation changes do not build, draft PRs
+# build only on "Ready for review", a new push cancels the outdated run of the same PR. Windows build and downloads only by
+# hand ("Run workflow", user decision 10.11.2026). No tags (the release tag claude-werkzeuge of werkzeuge.yml is the only
+# exception, AGENTS.md section 6).
+#
+# Path filter: the last matching pattern wins. docs/routines/** and STATUS.md are inputs of tools/abdeckung.py --check and
+# therefore always build, although they are documentation.
 on:
   push:
     branches: [main]
-    paths-ignore: ['docs/**', '**/*.md', 'reference/**']
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/*.md'
+      - '!reference/**'
+      - 'docs/routines/**'
+      - 'STATUS.md'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore: ['docs/**', '**/*.md', 'reference/**']
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/*.md'
+      - '!reference/**'
+      - 'docs/routines/**'
+      - 'STATUS.md'
   workflow_dispatch:
 
 permissions:
@@ -32,14 +48,21 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+      # Exactly the SDK from global.json, as in the Claude session (release claude-werkzeuge); global-json-file would
+      # install the latest patch because of rollForward latestPatch.
+      - name: SDK version from global.json
+        id: sdk
+        run: echo "version=$(jq -r .sdk.version global.json)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
-          global-json-file: global.json
+          dotnet-version: ${{ steps.sdk.outputs.version }}
+      - name: Check SDK version
+        run: test "$(dotnet --version)" = "${{ steps.sdk.outputs.version }}" || { echo "dotnet $(dotnet --version) instead of ${{ steps.sdk.outputs.version }}" >&2; exit 1; }
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.nuget/packages
           key: nuget-linux-${{ hashFiles('**/packages.lock.json', 'global.json') }}
-      # Dieselbe Prüfung wie lokal; die Tabelle landet in der Zusammenfassung des Laufs.
+      # The same check as locally; the table goes into the run summary.
       - name: tools/pruefen.sh
         run: |
           set -o pipefail
@@ -48,7 +71,7 @@ jobs:
         if: success() || failure()
         run: sed -n '/^### Markerbericht/,$p' pruefen.txt >> "$GITHUB_STEP_SUMMARY"
 
-  # Nur per Hand: Windows-Build und -Tests.
+  # By hand only: Windows build and tests.
   windows:
     if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
@@ -67,7 +90,7 @@ jobs:
       - run: dotnet build TradersRedone.slnx -c Release --no-restore -warnaserror
       - run: dotnet test TradersRedone.slnx -c Release --no-build
 
-  # Nur per Hand: lauffähiger Viewer zum Herunterladen (Actions → Lauf → Artifacts), kurze Aufbewahrung.
+  # By hand only: runnable viewer for download (Actions -> run -> Artifacts), short retention.
   downloads:
     if: github.event_name == 'workflow_dispatch'
     needs: linux
