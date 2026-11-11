@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 11.11.2026 · Runde 2 (Altbestand) läuft: ⓪ Bestandsaufnahme gemergt ([BESTAND.md](docs/analyse/BESTAND.md)), ① im Review
+Stand: 11.11.2026 · Runde 2 (Altbestand) abgeschlossen bis auf das Gesamtreview: ⓪–③ gemergt
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -11,8 +11,8 @@ Stand: 11.11.2026 · Runde 2 (Altbestand) läuft: ⓪ Bestandsaufnahme gemergt (
 |---|---|---|---|
 | M0 | Fundament (Repo, CI, Originale, Plan) | ✅ | Hash-Prüfung der Originale in CI |
 | M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
-| M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, T.EXE bis Hauptmenü, Bildabzug, Differenztests (AP1) |
-| M3 | Kern-Fundament | 🟡 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand (AP3) fertig; Phasenmodell offen (AP5) |
+| M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 ①); Bestandsaufnahme aller 45 Segmente (R2 ⓪) |
+| M3 | Kern-Fundament | 🟡 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand fertig; Wochenschleife `1777:01F8` belegt (R2 ③), VGA-Treiber `23CD` portiert (R2 ②); Phasenmaschine offen (R3) |
 | M4 | Menü & Setup | ⬜ | |
 | M5 | Anbau | ⬜ | |
 | M6 | Produktion & Wetter | ⬜ | |
@@ -70,7 +70,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
-| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🔍 |
+| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🔍 `000C`/`01F8` mit Befund und RefEmu-Test (R2 ③) |
 | `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ⬜ |
 | `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🔍 |
 | `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | 🔍 |
@@ -87,7 +87,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🔍 |
 | `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | ⬜ |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
-| `23CD` | 0x3F90 | Grafiktreiber in Assembler; portiert wird nur der VGA-Teil (Mode X), Objekte `06E9/071C`, Atlas `166A/3079` | 🔍 |
+| `23CD` | 0x3F90 | Grafiktreiber in Assembler; portiert wird nur der VGA-Teil (Mode X), Objekte `06E9/071C`, Atlas `166A/3079` | ✅ VGA-Teil (29 Adressen mit Differenztest, R2 ②) |
 | `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🔍 |
 | `2821` | 0x2F0 | PP20-Entpacker (`PowerPacker` aus Formatwissen, ohne Differenztest) | 🟢 |
 | `2850` | 0x8A0 | PC-Lautsprecher-Effekte | – entfällt (nur VGA/AdLib) |
