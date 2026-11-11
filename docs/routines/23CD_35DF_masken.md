@@ -13,7 +13,10 @@
 - Vier Durchgänge wie `3449`/`351E` (Ebene des Ziels und der Quelle rücken je Durchgang weiter); im Durchgang i wird das
   Maskenwort um i nach links geschoben, je Zielbyte wird eines der Bits 15, 11, 7, 3 geprüft, dann das nächste Wort.
 - Nach jeder Zeile: Masken-Zeiger um die gelesenen Wörter zurück und um 40 vor; Quelle um 320, Ziel um 80.
-- Ein Durchgang mit 0 Byte (w < 4) läuft 65536 Byte je Zeile (Zähler läuft unter 0); Tests meiden das.
+- Ein Durchgang mit 0 Byte (w < 4) läuft 65536 Byte je Zeile (Zähler läuft unter 0) und liest dabei 32 KB Maske über
+  MASKS.PP hinaus (im Maskensegment) sowie bis zu 64 KB hinter dem Atlas. Ist der Maskenoffset dabei ungerade, trifft das
+  Wortlesen `mov ax,[bx]` Offset FFFFh: Ausnahme 13 auf einem 286, im RefEmu kehrt der Aufruf nicht zurück; der Port liest
+  umlaufend (`[APPROX]`).
 
 ## Seiteneffekte in Reihenfolge
 Map Mask und Video-RAM; Ende Map Mask 0Fh. Kein Zufall, keine Uhr, kein DS-Zugriff.
@@ -23,4 +26,4 @@ Map Mask und Video-RAM; Ende Map Mask 0Fh. Kein Zufall, keine Uhr, kein DS-Zugri
 
 ## Prüfung
 `DriverDifferentialTests.MaskedBlit_35DF_matches_original`, `MaskFill_3CE8_matches_original`: je 40 zufällige Aufrufe
-(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Rand: `Rectangles_across_the_border_wrap_like_the_original` (`tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`). Nicht geprüft: w < 4 (65536 Byte je Zeile).
+(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Rand: `Rectangles_across_the_border_wrap_like_the_original` (`tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`). w = 1–3 (65536 Byte je Zeile, gerader Maskenoffset, ganzes Maskensegment des RefEmu im Port, Seiten A000h/A400h): `Narrow_masked_blits_and_fills_match_original` in `tests/Traders.Tests/Vga/DriverWrapTests.cs`. Nicht geprüft: ungerader Maskenoffset mit w < 4 (Original hängt, s. o.).

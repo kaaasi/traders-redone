@@ -18,10 +18,12 @@ Zufall, keine Uhr, kein DS-Zugriff.
 ## C#-Umsetzung
 `src/Traders.Vga/ModeXSetup.cs`: `SelectCard` (0, 2, 63h → `NotSupportedException`, Entscheidung „nur VGA“, `BESTAND.md`
 §3.3), `InitializeVga`. Die Vektorkopie entfällt (Methoden). `[APPROX]`: Wirkung des BIOS-Moduswechsels wie im RefEmu-Stub
-(alle Ebenen gelöscht, Map Mask 0Fh, Startadresse 0). Ebenfalls `[APPROX]`: das Original beginnt mit Zeichenseite `CS:0002`
-= 0, der Port mit A000h.
+(alle Ebenen gelöscht, Map Mask 0Fh, Startadresse 0). Die Anfangsseite ist originalgetreu (`[ORIGINAL] 23CD:311A` am Vorgabewert von `PageSegment`):
+das Datenwort `CS:0002` steht im Ladebild bereits auf A000h (`CS:0000` = 0) und bleibt nach `04F6(1)` so (RefEmu-Probe im
+Review R2 `grafik` P3-1, #50); der Port beginnt ebenfalls mit A000h.
 
 ## Prüfung
 `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs` `Card_selection_04F6_sets_up_mode_x_like_the_original`: Modus 7 ändert
 nichts; Modus 1 nach zufälligem VRAM, Map Mask 5, Read Map 2, Anzeigestart 4123h: VRAM, Register und Startadresse gleich,
-im RefEmu Chain-4 aus, CRTC 14h/17h wie oben; Modus 0 wirft im Port. Gegenprobe (lokal): ohne Löschen → rot.
+im RefEmu Chain-4 aus, CRTC 14h/17h wie oben; Modus 0 wirft im Port. `Initial_draw_page_is_the_one_in_the_original_image`: `CS:0000`/`CS:0002` nach
+`LoadOnly` und nach `04F6(1)` gleich den Vorgabewerten des Ports (0, A000h). Gegenprobe (lokal): ohne Löschen → rot.

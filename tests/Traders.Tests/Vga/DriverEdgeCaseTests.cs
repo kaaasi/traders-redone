@@ -162,4 +162,20 @@ public class DriverEdgeCaseTests
 
         Assert.Throws<NotSupportedException>(() => h.Port.SelectCard(0));
     }
+
+    // [DIFFERENTIAL] 23CD:04F6
+    // [DIFFERENTIAL] 23CD:311A
+    [GameDataFact]
+    public void Initial_draw_page_is_the_one_in_the_original_image()
+    {
+        var original = Traders.RefEmu.OriginalProgram.LoadOnly(TestGameData.DosDir);
+        var port = new ModeXDriver();
+        ushort cs = original.Segment(0x23CD);
+        Assert.Equal(original.Machine.Mem.Read16(cs, 0x0002), port.PageSegment);
+        Assert.Equal(original.Machine.Mem.Read16(cs, 0x0000), port.PageOffset);
+        original.Call(0x23CD, 0x04F6, 1);
+        port.SelectCard(1);
+        Assert.Equal(original.Machine.Mem.Read16(cs, 0x0002), port.PageSegment);
+        Assert.Equal(original.Machine.Mem.Read16(cs, 0x0000), port.PageOffset);
+    }
 }

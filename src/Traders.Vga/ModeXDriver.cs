@@ -7,9 +7,10 @@ namespace Traders.Vga;
 /// original loops (see docs/analyse/GRAFIK.md and the findings docs/routines/23CD_*.md).
 ///
 /// Addressing: the draw page is a VRAM segment (CS:0002); a pixel (x, y) lives in plane x&amp;3 at
-/// page offset y·80 + x/4. The RAM atlas and the mask atlas are addressed from offset 0 of
-/// their buffers (the original far pointers' offsets do not change any result as long as no
-/// 64 KB wrap occurs inside one row run).
+/// page offset y·80 + x/4; offsets that run past AFFFFh leave video memory (see <see cref="ModeXMemory"/>).
+/// The RAM atlas and the mask atlas are addressed from offset 0 of their buffers (the original far
+/// pointers' offsets do not change any result as long as no 64 KB wrap occurs inside one row run);
+/// 64 KB runs of narrow widths read and write behind the buffers like the RefEmu (see <see cref="PlanarAtlas"/>).
 /// </summary>
 public sealed partial class ModeXDriver
 {
@@ -24,8 +25,8 @@ public sealed partial class ModeXDriver
     public IReadOnlyList<FontDescriptor> Fonts { get; set; } = [];
 
     /// <summary>
-    /// Draw page segment (CS:0002, set by 23CD:311A); A000h = first page. [APPROX] The original starts with 0 here
-    /// until the game selects a page; A000h is a usable default for the port.
+    /// Draw page segment (CS:0002, set by 23CD:311A); A000h = first page. [ORIGINAL] 23CD:311A – the word that 311A
+    /// stores into (CS:0002) already holds A000h in the T.EXE image, before any page is selected (CS:0000 holds 0).
     /// </summary>
     public ushort PageSegment { get; set; } = 0xA000;
     /// <summary>Draw page offset (CS:0000); stored by 23CD:311A but never used for addressing.</summary>
@@ -39,8 +40,8 @@ public sealed partial class ModeXDriver
     /// <summary>CRTC start address (registers 0C/0D) as last set by 23CD:30E9.</summary>
     public ushort DisplayStart { get; private set; }
 
-    private int PageBase => (PageSegment - 0xA000) << 4;
-    private int Page(ushort di) => PageBase + di;
+    /// <summary>Window offset of PageSegment:di; beyond AFFFFh it lies outside video memory (see <see cref="ModeXMemory"/>).</summary>
+    private int Page(ushort di) => ModeXMemory.WindowOffset(PageSegment, di);
 
     // ------------------------------------------------------------------ helpers
 
@@ -51,13 +52,20 @@ public sealed partial class ModeXDriver
     private static (int Para, ushort Off) AtlasAddr(ushort x, ushort y) =>
         ((ushort)(y * 20), (ushort)((x >> 2) + PlanarAtlas.HeaderSize));
 
-    private byte AtlasRead(int para, ushort off) => Atlas.Data[para * 16 + off];
-    private void AtlasWrite(int para, ushort off, byte v) => Atlas.Data[para * 16 + off] = v;
+    private byte AtlasRead(int para, ushort off) => Atlas.Read(para * 16 + off);
+    private void AtlasWrite(int para, ushort off, byte v) => Atlas.Write(para * 16 + off, v);
 
     /// <summary>23CD:054B: mask atlas offset of (x, y); the low three bits of x are dropped.</summary>
     private static ushort MaskAddr(ushort x, ushort y) => (ushort)(y * 40 + (x >> 3));
 
-    private ushort MaskWord(ushort off) => (ushort)(Masks[off] << 8 | Masks[(ushort)(off + 1)]);
+    /// <summary>
+    /// Big-endian mask word at offset <paramref name="off"/> of the mask segment. [APPROX] Bytes past the end of
+    /// <see cref="Masks"/> (64 KB runs of narrow widths) read as zero, i.e. empty memory behind MASKS.PP. A word at
+    /// offset FFFFh faults on a 286 (the original then does not return); the port wraps to offset 0 instead.
+    /// </summary>
+    private ushort MaskWord(ushort off) => (ushort)(MaskByte(off) << 8 | MaskByte((ushort)(off + 1)));
+
+    private byte MaskByte(ushort off) => off < Masks.Length ? Masks[off] : (byte)0;
 
     /// <summary>23CD:312D: per-plane start skip (bh) and extra-byte (bl) bits, whole bytes (cx).</summary>
     private static (byte Bh, byte Bl, ushort Cx) Align(ushort x, ushort width)
@@ -376,15 +384,14 @@ public sealed partial class ModeXDriver
     /// </summary>
     public void LatchCopy(ushort srcOff, ushort srcSeg, ushort dstOff, ushort dstSeg, ushort w, ushort h)
     {
-        int srcBase = (srcSeg - 0xA000) << 4, dstBase = (dstSeg - 0xA000) << 4;
         ushort si = srcOff, di = dstOff, skip = (ushort)(80 - w);
         ushort rows = h;
         do
         {
             for (ushort i = 0; i < w; i++)
             {
-                Vram.Read(srcBase + si++);
-                Vram.WriteLatches(dstBase + di++);
+                byte v = Vram.Read(ModeXMemory.WindowOffset(srcSeg, si++));   // rep movsb
+                Vram.WriteLatches(ModeXMemory.WindowOffset(dstSeg, di++), v);
             }
             si = (ushort)(si + skip);
             di = (ushort)(di + skip);
