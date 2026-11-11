@@ -91,7 +91,7 @@ alle drei zweigen bei `b6d9057` ab, `main` ist 45 Commits weiter.
   Probe; Test aus Teil 3 wird rot, wenn eine Marke vertauscht oder ausgelassen wird (Gegenprobe im Review); Laufzeit: der Test
   verlängert `pruefen.sh --schnell` um höchstens 3 Minuten, sonst als eigenes Filtermerkmal außerhalb von `--schnell` führen und
   im PR nennen (N3); kein Originaltext im Repo.
-- **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von ①. **Status:** offen, Start durch den Nutzer.
+- **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von ①. **Status:** Teile 1–2 fertig, PR #44 (Draft); Teil 3 wartet auf ① (#37).
 
 ### Zuständigkeit gemeinsamer Dateien in R2
 
