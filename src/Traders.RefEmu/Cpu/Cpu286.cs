@@ -70,6 +70,31 @@ public sealed class Cpu286
     public ushort Ss { get => S[SS]; set => S[SS] = value; }
     public ushort Ds { get => S[DS]; set => S[DS] = value; }
 
+    // ---------------------------------------------------------------- machine snapshot (between instructions)
+
+    /// <summary>Writes the architectural state; per-instruction decode fields are not needed between two instructions.</summary>
+    internal void SaveState(BinaryWriter w)
+    {
+        foreach (var v in R) w.Write(v);
+        foreach (var v in S) w.Write(v);
+        w.Write(IP);
+        w.Write(_flags);
+        w.Write(Halted);
+        w.Write(InstructionCount);
+        w.Write(InterruptShadow);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        for (int i = 0; i < R.Length; i++) R[i] = r.ReadUInt16();
+        for (int i = 0; i < S.Length; i++) S[i] = r.ReadUInt16();
+        IP = r.ReadUInt16();
+        _flags = r.ReadUInt16();
+        Halted = r.ReadBoolean();
+        InstructionCount = r.ReadInt64();
+        InterruptShadow = r.ReadBoolean();
+    }
+
     public byte GetReg8(int i) => i < 4 ? (byte)R[i] : (byte)(R[i - 4] >> 8);
 
     public void SetReg8(int i, byte v)

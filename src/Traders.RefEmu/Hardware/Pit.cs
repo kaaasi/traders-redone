@@ -28,6 +28,40 @@ public sealed class Pit
     /// <summary>Current period of channel 0 in PIT clocks (65536 for a written 0).</summary>
     public int Channel0Period => _ch[0].Reload;
 
+    /// <summary>Snapshot of all three channels; restoring does not raise <see cref="ReloadChanged"/>.</summary>
+    internal void SaveState(BinaryWriter w)
+    {
+        foreach (var c in _ch)
+        {
+            w.Write(c.Reload);
+            w.Write(c.LoadTime);
+            w.Write(c.AccessMode);
+            w.Write(c.Mode);
+            w.Write(c.WriteHigh);
+            w.Write(c.PendingLow);
+            w.Write(c.ReadHigh);
+            w.Write(c.Latched.HasValue);
+            w.Write(c.Latched ?? 0);
+        }
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        foreach (var c in _ch)
+        {
+            c.Reload = r.ReadInt32();
+            c.LoadTime = r.ReadInt64();
+            c.AccessMode = r.ReadInt32();
+            c.Mode = r.ReadInt32();
+            c.WriteHigh = r.ReadBoolean();
+            c.PendingLow = r.ReadInt32();
+            c.ReadHigh = r.ReadBoolean();
+            bool latched = r.ReadBoolean();
+            int value = r.ReadInt32();
+            c.Latched = latched ? value : null;
+        }
+    }
+
     public int Period(int channel) => _ch[channel].Reload;
 
     private int Count(Channel c, long now)

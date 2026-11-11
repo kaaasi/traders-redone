@@ -40,6 +40,58 @@ public sealed class VgaAdapter : IMemoryDevice
     /// <summary>Called for every write to an I/O port this adapter does not model (port, value).</summary>
     public Action<ushort, byte>? UnknownPort { get; set; }
 
+    // ------------------------------------------------------------------ snapshot
+
+    internal void SaveState(BinaryWriter w)
+    {
+        foreach (var p in Planes) w.Write(p);
+        w.Write(Seq);
+        w.Write(Gc);
+        w.Write(Crtc);
+        w.Write(Attr);
+        w.Write(Dac);
+        w.Write(Misc);
+        w.Write(PelMask);
+        w.Write(_latch);
+        w.Write(_seqIndex);
+        w.Write(_gcIndex);
+        w.Write(_crtcIndex);
+        w.Write(_attrIndex);
+        w.Write(_attrFlipFlop);
+        w.Write(_dacWrite);
+        w.Write(_dacRead);
+        w.Write(_dacWriteComp);
+        w.Write(_dacReadComp);
+        w.Write(_dacReading);
+        w.Write(FramePeriod);
+        w.Write(StartAddressWrites);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        foreach (var p in Planes) r.ReadExactly(p);
+        r.ReadExactly(Seq);
+        r.ReadExactly(Gc);
+        r.ReadExactly(Crtc);
+        r.ReadExactly(Attr);
+        r.ReadExactly(Dac);
+        Misc = r.ReadByte();
+        PelMask = r.ReadByte();
+        r.ReadExactly(_latch);
+        _seqIndex = r.ReadInt32();
+        _gcIndex = r.ReadInt32();
+        _crtcIndex = r.ReadInt32();
+        _attrIndex = r.ReadInt32();
+        _attrFlipFlop = r.ReadBoolean();
+        _dacWrite = r.ReadInt32();
+        _dacRead = r.ReadInt32();
+        _dacWriteComp = r.ReadInt32();
+        _dacReadComp = r.ReadInt32();
+        _dacReading = r.ReadBoolean();
+        FramePeriod = r.ReadInt64();
+        StartAddressWrites = r.ReadInt32();
+    }
+
     // ------------------------------------------------------------------ memory
 
     private bool Chain4 => (Seq[4] & 0x08) != 0;

@@ -173,6 +173,26 @@ public sealed class OriginalProgram
         return !Machine.Exited && condition();
     }
 
+    // ------------------------------------------------------------------ machine snapshot (docs/analyse/REFEMU.md)
+
+    /// <summary>
+    /// Captures the whole machine at the current stop (for example after <see cref="RunToMarker"/>). The snapshot holds
+    /// memory derived from T.EXE: keep it in memory or in a temporary folder, never in the repository.
+    /// </summary>
+    public MachineSnapshot Snapshot() => MachineSnapshot.Capture(Machine);
+
+    /// <summary>
+    /// Continues a run from <paramref name="snapshot"/> in a new machine. If FXDRIVER is resident in the snapshot
+    /// (int 64h points outside the host stubs) its calls are logged again as in <see cref="Start"/>.
+    /// </summary>
+    public static OriginalProgram Resume(string dosDirectory, MachineSnapshot snapshot, SnapshotParts parts = SnapshotParts.All)
+    {
+        var p = new OriginalProgram(snapshot.Restore(dosDirectory, parts));
+        ushort seg = p.Machine.Mem.Read16(0, 0x64 * 4 + 2);
+        if (seg != 0 && seg != PcMachine.StubSegment) p.HookSoundDriverCalls();
+        return p;
+    }
+
     /// <summary>Calls a far routine given by its image address; returns DX:AX.</summary>
     public (ushort Ax, ushort Dx) Call(ushort imageSegment, ushort offset, params ushort[] args) =>
         Machine.CallFar(Segment(imageSegment), offset, args);

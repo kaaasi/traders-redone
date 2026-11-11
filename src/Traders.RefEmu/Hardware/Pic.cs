@@ -10,6 +10,28 @@ public sealed class Pic
 
     public int VectorBase { get; private set; } = 8;
 
+    internal void SaveState(BinaryWriter w)
+    {
+        w.Write(_irr);
+        w.Write(_isr);
+        w.Write(_imr);
+        w.Write(_icwStep);
+        w.Write(_icw4);
+        w.Write(_readIsr);
+        w.Write(VectorBase);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        _irr = r.ReadByte();
+        _isr = r.ReadByte();
+        _imr = r.ReadByte();
+        _icwStep = r.ReadInt32();
+        _icw4 = r.ReadBoolean();
+        _readIsr = r.ReadBoolean();
+        VectorBase = r.ReadInt32();
+    }
+
     public void Raise(int irq) => _irr |= (byte)(1 << irq);
 
     /// <summary>Highest-priority deliverable IRQ (not masked, nothing of equal/higher priority in service), or -1.</summary>
