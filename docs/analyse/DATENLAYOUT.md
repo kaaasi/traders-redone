@@ -132,8 +132,9 @@ Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`
 | `40CC` | W | – | Lottopreis | W – `1777:02DC`, Ladenanzeige |
 | `3746` | W | – | Landpreis (Vermögen = Felder·Preis/3) | G – `1777:02DC` |
 | `4B98` | W | – | Ölvorrat des Ladens | G – `08CF:05A3` |
-| `2F26` | B | – | Betriebsmittel je Produktionsfeld (Standard 30) | W – `0609:1178` |
-| `48F4` | B[9·26] | – | Produktionsergebnis je Feld (4–60), Zwischenspeicher | W – `22A3:0003` |
+| `2F26` | B | – | Obergrenze je Woche = min(30, F/2 + 3), F = Produktionsfelder aller Spieler; Bedeutung offen (BESTAND B3) | W – `0609:1178` (zweimal je Woche), RefEmu-Probe P3 |
+| `48A2` | B | – | Obergrenze je Woche = min(30, F/2 + 6); Bedeutung offen (BESTAND B3) | W – `0609:1178`, Probe P3 |
+| `48F4` | B[9·26] | – | Produktionsergebnis je Feld (4–60), Zwischenspeicher; im Roboterkampf dasselbe Raster als Kampffeld (`1E7E` u. a., BESTAND B5) | W – `22A3:0003`; S – `1E7E` |
 | `451E` / `4528` | W | – | Spielfeldursprung x = (320 − Spalten·32)/2, y = ((146 − Zeilen·22) − 14)/2 + 58 | G – `192D:0058`, Differenztest |
 | `117E` / `1180` | W | – | Tickzähler des Timer-Interrupts | G – `27C6:03C3` |
 | `5330` / `5332` | W | – | Menü-Kopie von Spalten/Zeilen | G |
@@ -144,8 +145,8 @@ Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`
 
 ## 5. Abgeleitete Werte
 
-Preise (`43F4`, `48A0`, `40CC`, `3746`, `4B98`) werden in `1777:02DC` (benutzt die Uhr)
-berechnet und nicht gespeichert. Vermögen (`0825:0813`) = Bargeld + Land
+Preise (`43F4`, `48A0`, `40CC`, `3746`, `4B98`) werden in `1777:02DC` aus Bargeld der Spieler, Feldzahlen, Woche und
+Lotto-Einstellung berechnet – ohne Uhr, Zufall oder Host-Dienst (RefEmu-Probe P2, BESTAND B1) – und nicht gespeichert. Vermögen (`0825:0813`) = Bargeld + Land
 (`FieldCount·[3746]/3`) + Waren (Σ `Stock/10·WarePrice`) + Edelsteine (nur wenn an:
 `Gems·BaseUnit·GemPriceFactor/100 + GemCredit·BaseUnit/100`) + Sonstiges
 (`(Rockets + FieldsByKind[3])·[48A0]`, plus `Oil·[43F4]` wenn Ölverbrauch an).
