@@ -121,6 +121,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 
 | Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
+| `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | – | – | 🔍 |
+| `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | – | – | 🔍 |
 | `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `RandomDifferentialTests.cs` | ✅ |
 | `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | – | – | 🔍 |
 | `2336:000A` | [2336_000A_spielstand.md](docs/routines/2336_000A_spielstand.md) | `src/Traders.Core/State/SaveGame.cs` | `SaveGameDifferentialTests.cs` | ✅ |
@@ -183,7 +185,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `141D` | 0xF20 | 17 | 0 | 0 | 0 |
 | `150F` | 0x1C70 | 41 | 0 | 0 | 0 |
 | `16D6` | 0xA10 | 12 | 0 | 0 | 0 |
-| `1777` | 0x540 | 4 | 0 | 0 | 0 |
+| `1777` | 0x540 | 4 | 2 | 0 | 0 |
 | `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
 | `186C` | 0xC10 | 19 | 0 | 0 | 0 |
 | `192D` | 0x1D60 | 74 | 0 | 0 | 0 |
@@ -206,7 +208,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **33** | **32** | **32** |
+| **Summe** | **0x28DC0** | **891** | **35** | **32** | **32** |
 
 <!-- abdeckung:ende -->
 
