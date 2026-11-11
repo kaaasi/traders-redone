@@ -21,7 +21,7 @@ Es gibt **keine automatische Integration**, nur weil ein Kontingent erschöpft i
 | Merge per REST mit `sha` | verfügbar | einzige serverseitige Bindung an den geprüften Head |
 | Draft-PRs | verfügbar | Sperre für Branches; CI baut Drafts nicht |
 | Issues, Labels | verfügbar | Befunde als Issues (§5) |
-| GitHub Actions | 2.000 Minuten/Monat (Windows zählt doppelt), 500 MB Artefakte | Windows und Downloads nur per Hand; Artefakte 7 Tage |
+| GitHub Actions | 2.000 Minuten/Monat (Windows zählt doppelt), 500 MB Artefakte | Windows und Downloads nur per Hand; Artefakte 7 Tage; bezahlte Actions-Nutzung im Konto deaktiviert lassen (Ausgabenlimit 0) |
 
 ## C. Gesamtreview am Rundenende (risikoorientiert)
 
