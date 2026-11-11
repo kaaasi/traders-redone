@@ -54,7 +54,9 @@ reviewt werden, gemergt wird in dieser Folge.
   ohne Daten scheitert; keine Originaldatei mehr im Baum.
 - **Nutzer:** Secret `TRADERS_REFERENZ_TOKEN` anlegen (fein granuliertes Token, nur `kaaasi/traders-referenz`, Contents: Read);
   traders-referenz#1 mergen. In der Git-Historie dieses Repos bleiben die Dateien (privat; Umschreiben nur auf Wunsch).
-- **Status:** fertig, Review offen.
+- **Status:** gemergt 11.11.2026 (`1aead2b`) nach Review R1④ „Nein“ (#24, nur R19-1 P2), Fixlauf und Delta-Prüfung der
+  Leitstelle; Issues #20–#23 geschlossen. traders-referenz#1 gemergt, Secret angelegt (CI mit Originaldaten). Git-Historie am
+  11.11.2026 bereinigt (Nutzerauftrag); alte PR-Refs hält nur noch GitHub (Support-Anfrage optional, Nutzer).
 
 ### Zuständigkeit gemeinsamer Dateien in R1
 
@@ -62,10 +64,7 @@ reviewt werden, gemergt wird in dieser Folge.
 
 ### Danach (Leitstelle nach dem Merge von ①–③)
 
-Alte Branches aufräumen – **ausstehend, Löschen braucht die Freigabe des Nutzers** (in der Sitzung abgelehnt): `ci-results`,
-`dev/ci-probe` (nur überholte Probe `ci/experiment.sh`), `dev/integration-*`, `dev/repo-*`, `dev/ap3-state` und die gemergten
-`prozess/*`/`review/*` haben keine unintegrierten Commits (`git rev-list --count main..<b>` = 0, außer `dev/ci-probe`).
-`dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
+Alte Branches aufgeräumt (11.11.2026, Nutzer per Hand bzw. Workflow „Branches aufräumen“, PR #18); `dev/ap1-refemu`, `dev/ap2-vga`, `dev/ap5-phasen` bleiben bis zur Übernahme in Runde 2.
 Offen: Gesamtreview Runde 1 (ChatGPT), danach Archiv `docs/archiv/runde-1.md` und Plan Runde 2.
 
 ## Vorschau: Runde 2 – Altbestand übernehmen (Plan folgt, Go nötig)
