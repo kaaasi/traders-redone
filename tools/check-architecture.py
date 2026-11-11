@@ -7,7 +7,9 @@ import xml.etree.ElementTree as ET
 root = Path(__file__).resolve().parents[1]
 errors = []
 for name, allowed in {'Traders.Core': set(), 'Traders.Assets': set(),
-                      'Traders.Vga': {'Traders.Assets'}, 'Traders.Audio': {'Traders.Assets'}}.items():
+                      'Traders.Vga': {'Traders.Assets'}, 'Traders.Audio': {'Traders.Assets'},
+                      # Host (R3P-3): no oracle in the shipped program, nothing depends back on it
+                      'Traders.App': {'Traders.Core', 'Traders.Assets', 'Traders.Vga', 'Traders.Audio'}}.items():
     project = root / 'src' / name / (name + '.csproj')
     for node in ET.parse(project).iter('ProjectReference'):
         target = node.attrib['Include'].replace('\\', '/').split('/')[-1].removesuffix('.csproj')

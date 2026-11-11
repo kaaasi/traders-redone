@@ -163,12 +163,12 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `23CD:3CE8` | [23CD_35DF_masken.md](docs/routines/23CD_35DF_masken.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs`, `DriverWrapTests.cs` | ✅ |
 | `27C6:0000` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
 | `27C6:0027` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:0043` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:00AC` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
+| `27C6:0043` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Input/KeyStateTable.cs` | `HostInputDifferentialTests.cs` | ✅ |
+| `27C6:00AC` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Input/KeyStateTable.cs` | `HostInputDifferentialTests.cs` | ✅ |
 | `27C6:00D2` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:037A` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
+| `27C6:037A` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Timing/HostClock.cs` | `HostTimerTests.cs` | ✅ |
 | `27C6:03C3` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:03E4` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
+| `27C6:03E4` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Timing/TimerTicks.cs` | `HostTimerTests.cs` | ✅ |
 | `27C6:041B` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
 | `27C6:0551` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
 | `27C6:0576` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
@@ -219,12 +219,12 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `22A3` | 0x930 | 15 | 0 | 0 | 0 |
 | `2336` | 0x970 | 4 | 2 | 2 | 2 |
 | `23CD` | 0x3F90 | 25 | 29 | 29 | 29 |
-| `27C6` | 0x5B0 | 15 | 11 | 0 | 0 |
+| `27C6` | 0x5B0 | 15 | 11 | 4 | 4 |
 | `2821` | 0x2F0 | 1 | 0 | 0 | 0 |
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **51** | **32** | **32** |
+| **Summe** | **0x28DC0** | **891** | **51** | **36** | **36** |
 
 <!-- abdeckung:ende -->
 

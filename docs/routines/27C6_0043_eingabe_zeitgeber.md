@@ -59,8 +59,13 @@ PIT-Tick 72,82 Hz für den Tonrückruf.
 
 ## C#-Umsetzung
 
-Noch keine (Teil 1 der Spur `host`). Teil 2: Tastenzustand und Tickzählung im Host (`src/Traders.App`), gespeist aus
-Host-Ereignissen statt aus Ports – `[APPROX]`, wo der Host-Ersatz (Fenster-Ereignisse, Host-Uhr) keinen Differenztest erlaubt.
+`src/Traders.App` (Host, R3): `Input/KeyStateTable.cs` (`0043` als `Receive`, Tabellenteil von `00AC` als `Clear`, Abbild in
+ein DGROUP-Bytefeld mit `CopyTo`), `Timing/TimerTicks.cs` (`03E4`: Rückruf, beide Zähler, Weitergabe), `Timing/HostClock.cs`
+(Teiler aus `037A`; Host-Zeit → Ticks und Bilder ohne Rundungsdrift; Bildtakt 70 Hz wie der RefEmu, `[APPROX]`).
+Host-Ersatz ohne Original: `Input/HostKeyMap.cs` (Host-Taste → Set-1-Bytes mit `E0h`, US-Belegung nach Beschriftung statt
+Position, `[APPROX]`), `Input/KeyboardEdges.cs` (Reihenfolge gleichzeitiger Änderungen, keine Tastenwiederholung, `[APPROX]`),
+`HostGame.MaxStep` (Stillstand > 0,25 s wird nicht nachgeholt, `[APPROX]`). Nicht portiert: Vektor- und PIT-Verwaltung, DOS-Filter,
+`00D2` (Warteschleife; im Host Sache der Phasenmaschine), Joystick.
 
 ## Prüfung
 
@@ -68,3 +73,10 @@ RefEmu-Proben `tests/Traders.Tests/App/OriginalInputProbeTests.cs` (nach dem Hoc
 `03E4`/`0043`, PIT-Teiler `4000h`; Tickzähler +728 ± 1 in 10 emulierten Sekunden, BIOS-Uhr `0040:006C` ein Viertel davon;
 Make/Break von Umschalt links (Tabelle, letzter Code, Zähler); `E0 48`/`E0 C8` (Tabelle 60h gelöscht, Cursor wie `48h`);
 Überlauf des Make-Zählers ohne Nachbarbyte. Nicht geprüft: Joystick (RefEmu ohne Port 201h-Gerät), Rückruf je Tick (Teil 3).
+
+Differenztests: `tests/Traders.Tests/App/HostInputDifferentialTests.cs` – 300 zufällige Bytes (Umschalt-, Sperr- und unbelegte
+Tasten, `E0h`, Codes `00h`/`7Fh`/`FFh`) nach dem Hochlauf, nach jedem Byte Tabelle, letzter Make-Code und Zähler gleich; `00AC`
+auf zufälliger Tabelle (Nachbarwörter unberührt); Host-Tasten → Tabelle → `0E9E:0035` im Original. `HostTimerTests.cs` – `037A`
+auf dem Ladebild (Teiler, Zähler 0, Vektor 8); `03E4` mit Startwerten 0/0, FFF0h/FFFEh (Überlauf), 7/1, 8000h/3 über 1,5–5 s:
+Zähler und Anzahl der Weitergaben (BIOS-Uhr) gleich, Tickzahl = Zeit · 72,82 Hz ± 1. Host-Uhr unabhängig von der Bildrate
+(30–1000 Hz, unregelmäßige Schritte).
