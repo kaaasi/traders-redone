@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md)).
 
-## Aktuelle Runde: 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle 11.11.2026, Go nötig)
+## Aktuelle Runde: 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle und Go Nutzer 11.11.2026)
 
 **Ziel:** Kern und Ausgabe bekommen ihr Gerüst, bevor die erste Szene entsteht (R4): Phasenmaschine mit Takt und
 Zufallsereignissen je Bild (F3 = A), die Regeln der Woche ohne Bildschirm als belegte Kernroutinen, die Grafikschichten über dem
@@ -117,10 +117,9 @@ Konflikte nur dann über `integration/runde-3`.
 
 ## Offene Fragen an den Nutzer
 
-- **G1 Go** für Runde 3 mit vier Spuren wie oben, alle Opus.
-- **G2 Zugriff:** Diese Leitstellensitzung hat kein Schreib-/Leserecht auf `kaaasi/traders-referenz` (`add_repo` von der Freigabe
-  abgelehnt, `git ls-remote` scheitert); ohne das legt sie nach `anhang.md` F keine Läufe an. Entweder Zugriff freigeben oder die
-  vier Läufe selbst anlegen (beide Repos, Code-Repo mit Schreibzugriff).
+- **G1 Go – erteilt (Nutzer 11.11.2026)** nach dem Plan-Review (#65): vier Spuren wie oben, alle Opus, Läufe startet die Leitstelle.
+- **G2 Zugriff – erteilt (Nutzer 11.11.2026):** Jede Leitstelle darf `kaaasi/traders-referenz` mit `push` einbinden
+  (`leitstelle-start.md` Schritt 0); Leitstellen dürfen Labels selbst setzen und entfernen.
 - Übrige P3 aus R2: #36 mit diesem PR behoben; #39 R1 → 1, R2 → 3, R3 offen (nur Präzisierung, Leitstelle bei Gelegenheit);
   #49 offen (nächster Lauf an `experiments/bestand/`); #52 → 0; #60 → 2.
 
