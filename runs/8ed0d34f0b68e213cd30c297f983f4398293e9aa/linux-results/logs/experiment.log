@@ -1,0 +1,12 @@
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.79
+ci/experiment.sh: line 219:  2757 Aborted                 (core dumped) dotnet "$dll" "$repo" "$out" B-roboter 1500 08EA=3 411A=1:b 45BA=1:b 4BF2=1:b 2F30=1:b 0900=3 2E8E=2 > "$out/B.log" 2>&1
+ci/experiment.sh: line 217:  2756 Aborted                 (core dumped) dotnet "$dll" "$repo" "$out" A-standard 1500 > "$out/A.log" 2>&1
+8.0K	/home/runner/work/traders-redone/traders-redone/ci-out/experiment/A-standard
+4.0K	/home/runner/work/traders-redone/traders-redone/ci-out/experiment/A.log
+8.0K	/home/runner/work/traders-redone/traders-redone/ci-out/experiment/B-roboter
+4.0K	/home/runner/work/traders-redone/traders-redone/ci-out/experiment/B.log

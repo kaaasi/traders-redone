@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Assets\Traders.Assets.csproj (in 180 ms).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Core\Traders.Core.csproj (in 2 ms).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.RefEmu\Traders.RefEmu.csproj (in 314 ms).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Audio\Traders.Audio.csproj (in 53 ms).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Viewer\Traders.Viewer.csproj (in 4.73 sec).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Vga\Traders.Vga.csproj (in 9 ms).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Tools\Traders.Tools.csproj (in 2 ms).
+  Restored D:\a\traders-redone\traders-redone\tests\Traders.Tests\Traders.Tests.csproj (in 11.4 sec).
+  Traders.Core -> D:\a\traders-redone\traders-redone\src\Traders.Core\bin\Release\net10.0\Traders.Core.dll
+  Traders.Assets -> D:\a\traders-redone\traders-redone\src\Traders.Assets\bin\Release\net10.0\Traders.Assets.dll
+  Traders.Vga -> D:\a\traders-redone\traders-redone\src\Traders.Vga\bin\Release\net10.0\Traders.Vga.dll
+  Traders.RefEmu -> D:\a\traders-redone\traders-redone\src\Traders.RefEmu\bin\Release\net10.0\Traders.RefEmu.dll
+  Traders.Tools -> D:\a\traders-redone\traders-redone\src\Traders.Tools\bin\Release\net10.0\traders-tools.dll
+  Traders.Viewer -> D:\a\traders-redone\traders-redone\src\Traders.Viewer\bin\Release\net10.0\traders-viewer.dll
+  Traders.Audio -> D:\a\traders-redone\traders-redone\src\Traders.Audio\bin\Release\net10.0\Traders.Audio.dll
+  Traders.Tests -> D:\a\traders-redone\traders-redone\tests\Traders.Tests\bin\Release\net10.0\Traders.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:28.76

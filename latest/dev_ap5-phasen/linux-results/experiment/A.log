@@ -1,0 +1,5 @@
+Unhandled exception. System.IO.FileNotFoundException: T.EXE
+   at Traders.RefEmu.Machine.PcMachine.LoadProgram(String exeName, String commandTail) in /home/runner/work/traders-redone/traders-redone/src/Traders.RefEmu/Machine/PcMachine.Dos.cs:line 46
+   at Traders.RefEmu.OriginalProgram.BootToMainMenu(String dosDirectory, MachineOptions options) in /home/runner/work/traders-redone/traders-redone/src/Traders.RefEmu/OriginalProgram.cs:line 50
+   at Program.<Main>$(String[] args) in /tmp/tmp.uaiWFusKrd/PhaseTrace/Program.cs:line 59
+run A failed

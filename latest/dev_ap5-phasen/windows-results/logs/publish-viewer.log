@@ -1,0 +1,6 @@
+  Determining projects to restore...
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Assets\Traders.Assets.csproj (in 8.75 sec).
+  Restored D:\a\traders-redone\traders-redone\src\Traders.Viewer\Traders.Viewer.csproj (in 8.42 sec).
+  Traders.Assets -> D:\a\traders-redone\traders-redone\src\Traders.Assets\bin\Release\net10.0\Traders.Assets.dll
+  Traders.Viewer -> D:\a\traders-redone\traders-redone\src\Traders.Viewer\bin\Release\net10.0\win-x64\traders-viewer.dll
+  Traders.Viewer -> D:\a\traders-redone\traders-redone\out\traders-viewer-win-x64\
