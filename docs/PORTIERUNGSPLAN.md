@@ -3,7 +3,7 @@
 Ziel: *Traders – The Intergalactic Trading Game* (Linel, 1991) originalgetreu von der
 DOS-Fassung nach C# portieren und danach um neue Funktionen erweitern.
 
-Stand: 25.10.2026 · Basis: `T.EXE` SHA-256 `b73a2170…af0185` (identisch mit der Fassung
+Stand: 25.10.2026, Entscheidungen ergänzt 11.11.2026 · Basis: `T.EXE` SHA-256 `b73a2170…af0185` (identisch mit der Fassung
 des Vorversuchs, alle dort genannten Adressen gelten).
 
 ---
@@ -16,7 +16,7 @@ des Vorversuchs, alle dort genannten Adressen gelten).
 | Ressourcenliste bei `DS:09CE`, 10 Einträge à 19 Byte, je Far-Pointer auf `V-*.PP` und `E-*.PP` | Befund aus dem Vorversuch bestätigt. `V-` = VGA, `E-` = EGA. |
 | `*.PP` sind PowerPacker PP20 | Entpacker bereits geschrieben (`tools/pp20.py`). |
 | `V-*.PP` entpackt: 768 Byte Palette (6-Bit-RGB) + 320×256 Pixel (8 Bit) + 4 Byte | Atlas inklusive Sprites unterhalb der sichtbaren 200 Zeilen. |
-| `E-*.PP`: 40964 Byte (EGA-Planar) | Für den Port zweitrangig, nur zur Gegenprüfung. |
+| `E-*.PP`: 40964 Byte (EGA-Planar) | Wird nicht portiert: nur VGA (Nutzer 11.11.2026); EGA-, Tandy-Teil des Treibers `23CD` und PC-Lautsprecher `2850` entfallen ebenfalls. |
 | `FONTS.PP` (2150 B), `MASKS.PP` (8000 B), `ENGLISCH.TXT` | Schrift, Masken, alle Spieltexte (englisch). |
 | `*.CMF` mit Kennung `A.H.` (kein Creative-CMF) + `FXDRIVER.EXE` (Linel, 1991) | Eigenes Musikformat + AdLib-Treiber → OPL2-Emulation nötig. |
 | Amiga-ADFs (3 Fassungen): u. a. `AnbauBild.bm`, `SchlachtBild.bm`, … | Zweite Quelle für Logik (68k-Code) und Samples; nur zur Gegenprüfung. |
@@ -98,6 +98,10 @@ Jeder Meilenstein endet mit einem lauffähigen Zwischenstand auf `main`, festgeh
 | **M13** | Ende | Siegprüfung, Abendbild, Rang-Mosaik aus echten Werten | Endbild vs. Video |
 | **M14** | Ton | A.H.-Format, OPL2-Emulation, FX-Treiber-Effekte | Hörvergleich mit Video |
 | **M15** | Gesamtpartie | Komplette Partien mit aufgezeichneten Eingaben C# vs. RefEmu | Zustand pro Runde identisch → **v1.0 Originalport** |
+
+**Zwischenziel (Nutzer 11.11.2026):** eine spielbare **Gesamtpartie ohne Roboterkampf** (Stufen 0–2, in denen er aus ist) vor M12;
+der Roboterkampf folgt danach in eigenen Runden. Grundlage: [analyse/BESTAND.md](analyse/BESTAND.md) §3.2–3.3; Reihenfolge der
+Runden im Fahrplan von [arbeitspakete.md](arbeitspakete.md). Die Nummern M4–M15 bleiben Themen, nicht Reihenfolge.
 
 ## 6. Erweiterungen (nach v1.0, Reihenfolge änderbar)
 
