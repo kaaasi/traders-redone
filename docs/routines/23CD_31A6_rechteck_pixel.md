@@ -21,7 +21,7 @@
 ## Ablauf (eigene Worte)
 - `31A6`: für jede Ebene 1, 2, 4, 8 (Map Mask) wird der Startoffset um ein Byte erhöht, wenn die Ebene links vor `x`
   liegt, und die Bytezahl `w/4` um eins, wenn die Ebene ein Restpixel trägt; dann `h` Zeilen zu je 80 Byte.
-  Am Ende Map Mask = 0Fh. Zeilenzähler läuft bis 0 herunter: `h` = 0 bedeutet 65536 Zeilen (Grenzfall, Teil 3).
+  Am Ende Map Mask = 0Fh. Zeilenzähler läuft bis 0 herunter: `h` = 0 bedeutet 65536 Zeilen.
 - `373B`: Map Mask = `1 << (x & 3)`, ein Byte schreiben, danach Map Mask = FFh (nicht 0Fh).
 - `3764`: Read Map = `x & 3`, ein Byte lesen, danach direkter Aufruf von `30D1` (Read Map 0).
 
@@ -35,4 +35,4 @@ Nur VGA-Register und Video-RAM; kein Zufall, keine Uhr, kein DS-Zugriff.
 `tests/Traders.Tests/Vga/DriverDifferentialTests.cs` (RefEmu, `DriverHarness`: zufälliges VRAM, Seite A000h/A400h zufällig):
 `FillRect_31A6_matches_original` (40 Aufrufe, Farbe, x, y, w ≤ 90, h ≤ 50 zufällig),
 `SetPixel_373B_and_GetPixel_3764_match_original` (200 gemischte Aufrufe, Rückgabe `al` verglichen), `Drawing_goes_to_the_selected_page`.
-Nach jedem Aufruf ganzes VRAM (4 × 64 KB), Map Mask und Read Map gleich. Grenzfälle (`h` = 0, Ränder) offen → Teil 3.
+Nach jedem Aufruf ganzes VRAM (4 × 64 KB), Map Mask und Read Map gleich. Grenzfälle in `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`: über den rechten und unteren Rand (kein Abschneiden, Umlauf in die nächste Zeile), Breiten 1–9 mit jeder Ebenenlage, `h` = 0 auf Seite A000h.

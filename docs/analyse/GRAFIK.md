@@ -115,7 +115,7 @@ berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die e
 ## 7. Portierungsstand (Spur ②)
 
 - Portiert mit Differenztest: alle 19 Vektoren; Text `05DD`, Setzer `05B6`/`05C3`/`05D0`, Linienauswahl `06BE`,
-  Objektschleifen `06E9`/`071C`, Atlas-Umwandlung `3079`.
-- Offen in ②: Grenzfälle, Kartenwahl `04F6` und VGA-Init `3042`.
+  Objektschleifen `06E9`/`071C`, Atlas-Umwandlung `3079`, Kartenwahl `04F6` (nur Modus 1) mit VGA-Init `3042`.
+- Grenzfälle (Ränder ohne Abschneiden, kleine Breiten, `h` = 0, extreme Linien, Seitenwechsel) in `DriverEdgeCaseTests`.
 - Nicht in ②: EGA (`0797`), Tandy (`1645`, `3F0A`), Umwandlung `166A` (nur VGA); `0A96`, `0A69`, `0B67`, `21AF`,
   Paletten/Blenden und Farbregister → R3.

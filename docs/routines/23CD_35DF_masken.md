@@ -23,4 +23,4 @@ Map Mask und Video-RAM; Ende Map Mask 0Fh. Kein Zufall, keine Uhr, kein DS-Zugri
 
 ## Prüfung
 `DriverDifferentialTests.MaskedBlit_35DF_matches_original`, `MaskFill_3CE8_matches_original`: je 40 zufällige Aufrufe
-(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Grenzfälle offen → Teil 3.
+(Masken- und Atlasinhalt zufällig, w ≥ 4), VRAM und Register gleich. Rand: `Rectangles_across_the_border_wrap_like_the_original` (`tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`). Nicht geprüft: w < 4 (65536 Byte je Zeile).

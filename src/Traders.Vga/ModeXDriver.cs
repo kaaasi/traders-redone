@@ -23,7 +23,10 @@ public sealed partial class ModeXDriver
     /// <summary>Font table; CS:057A.</summary>
     public IReadOnlyList<FontDescriptor> Fonts { get; set; } = [];
 
-    /// <summary>Draw page segment (CS:0002, set by 23CD:311A); A000h = first page.</summary>
+    /// <summary>
+    /// Draw page segment (CS:0002, set by 23CD:311A); A000h = first page. [APPROX] The original starts with 0 here
+    /// until the game selects a page; A000h is a usable default for the port.
+    /// </summary>
     public ushort PageSegment { get; set; } = 0xA000;
     /// <summary>Draw page offset (CS:0000); stored by 23CD:311A but never used for addressing.</summary>
     public ushort PageOffset { get; set; }

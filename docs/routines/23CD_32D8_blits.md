@@ -31,4 +31,4 @@ VGA-Register (Map Mask, Read Map, bei `328E` Bitmaske) und Video-RAM bzw. RAM-At
 `DriverDifferentialTests`: je Routine 40 zufällige Aufrufe (`…_32D8_…`, `…_3A9A_…`, `…_3386_…` mit w ≥ 4, `…_3449_…` mit
 Atlasvergleich und unverändertem VRAM, `…_351E_…`, `LatchCopy_328E_…` zwischen A000h/A400h); nach jedem Aufruf VRAM bzw.
 Atlas und Register gleich. Zusätzlich Bildprobe `Full_screen_blit_of_a_converted_picture_shows_the_picture` (V-MENU, ohne RefEmu).
-Grenzfälle (Seitenende, w < 4, h = 0) offen → Teil 3.
+Grenzfälle in `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs`: Ränder (`32D8`, `351E`), Breiten 1–9 mit allen 16 Kombinationen der Quell- und Zielebene (`32D8`, `351E`, `3449`). Nicht geprüft: `3386` mit w < 4 (65536 Durchläufe je Zeile) und `h` = 0 der Kopien.

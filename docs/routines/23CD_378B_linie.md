@@ -32,4 +32,4 @@ Map Mask und Video-RAM. Kein Zufall, keine Uhr, kein DS-Zugriff.
 zufällig, jedes siebte FFFFh), `DrawLine_06BE_…` (je 60 Linien: jede fünfte senkrecht, jede fünfte waagrecht, jede fünfte steil,
 Rest beliebig; Seite und Farbe zufällig). VRAM und Register gleich. Gegenproben (lokal): Fehlertest `<= 0` statt `< 0`, Musterbit
 invertiert → rot; Führungsachse `dy >= dx` bleibt grün (gleichwertig: bei dx = dy liefern beide Zweige dieselben Pixel).
-Grenzfälle außerhalb des Bildes → Teil 3.
+Grenzfälle in `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs` `Lines_with_extreme_coordinates_match_original`: Diagonalen, Punkt, Bildränder, Koordinaten über 320 und mit gesetztem Bit 15 (vorzeichenbehafteter Vergleich, Tausch, umgekehrter y-Schritt).

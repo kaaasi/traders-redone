@@ -25,4 +25,4 @@ die übrigen Register bleiben im Modell fest auf dem Grundzustand), Eigenschaft 
 ## Prüfung
 `DriverDifferentialTests.SetDisplayStart_30E9_matches_original` (vier Seiten, CRTC-Startadresse gleich),
 `Driver_state_setters_and_controller_reset_match_original` (40 zufällige Werte: `CS:0000/0002/04F4`, Read Map nach `30D1`),
-`Drawing_goes_to_the_selected_page` (Seiten A000h, A400h, A800h, AC00h, A123h). Seitenwechsel mitten im Bild → Teil 3.
+`Drawing_goes_to_the_selected_page` (Seiten A000h, A400h, A800h, AC00h, A123h); `tests/Traders.Tests/Vga/DriverEdgeCaseTests.cs` `Page_flip_shows_the_page_drawn_to`: auf A400h/A000h zeichnen, Anzeigestart umschalten, das vom RefEmu dargestellte Bild (320 × 200) gleich `PageToLinear(DisplayStart)`. Grenze des Modells: eine Seite, deren Offset über das Ende des A000-Fensters läuft (Segment + Offset > AFFFFh), schreibt im Original außerhalb des Bildspeichers, im Port umlaufend; ungeprüft.
