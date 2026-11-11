@@ -1,6 +1,9 @@
 """Call graph of T.EXE (Turbo C++ 1990) with texts, random calls, images and phase markers.
 
-Usage: python3 -I tools/callgraph.py original/dos/T.EXE docs/analyse/callgraph
+Usage: python3 -I tools/callgraph.py gamedata/dos/T.EXE <output dir>
+
+The output contains original texts and stays local (AGENTS.md 2.1, decision F1): use a directory outside the
+repository or docs/analyse/callgraph/, which is ignored by git. A second run on the same T.EXE gives identical files.
 
 Writes into the output directory:
   callgraph.json   all functions with callees (incl. immediate arguments), callers,
@@ -115,9 +118,6 @@ def main():
         if b[:1] == b'\x9a' and len(b) == 5 and a + 3 in reloc:
             off, seg = struct.unpack_from('<HH', b, 1)
             starts.setdefault(seg * 16 + off, seg)
-    for a, b, t in ins:
-        if b == b'\x55' :
-            pass
     idx = {a: i for i, (a, b, t) in enumerate(ins)}
     for i, (a, b, t) in enumerate(ins[:-1]):
         if b == b'\x55' and ins[i + 1][1] in (b'\x8b\xec', b'\x89\xe5'):
