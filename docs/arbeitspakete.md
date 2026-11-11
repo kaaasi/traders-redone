@@ -101,6 +101,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; `check-architecture.py` grün mit der neuen Regel (App hängt nicht vom RefEmu ab, Kern nicht von App; Gegenprobe im Review); Befunde mit
   RefEmu-Probe (z. B. Tickzähler nach *n* emulierten Sekunden, Tastenzustand nach `Press`); Windows-Start nur per Hand (Nutzer).
 - **Abhängigkeiten:** keine. Die Anbindung an die Phasenmaschine folgt in R4.
+- **Status:** in Arbeit (Claude, Teil 1 von 3).
 
 ## Zuständigkeit gemeinsamer Dateien in R3
 
