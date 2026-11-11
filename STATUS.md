@@ -121,6 +121,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 
 | Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
+| `0000:5101` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `0A69:000B` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:002C` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:004D` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
@@ -170,8 +171,14 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0D73:00D3` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PageLayerTests.cs` | ✅ |
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | – | – | 🔍 |
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | – | – | 🔍 |
-| `21AF:04A2` | [21AF_04A2_zeigerpaare.md](docs/routines/21AF_04A2_zeigerpaare.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
-| `21AF:04CD` | [21AF_04A2_zeigerpaare.md](docs/routines/21AF_04A2_zeigerpaare.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
+| `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:022B` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:0412` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:045E` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:0472` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:04A2` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
+| `21AF:04CD` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:0185` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `RandomDifferentialTests.cs` | ✅ |
 | `21FD:026C` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
@@ -196,8 +203,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `23CD:05D0` | [23CD_311A_seiten.md](docs/routines/23CD_311A_seiten.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
 | `23CD:05DD` | [23CD_05DD_text.md](docs/routines/23CD_05DD_text.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
 | `23CD:06BE` | [23CD_378B_linie.md](docs/routines/23CD_378B_linie.md) | `src/Traders.Vga/ModeXLines.cs` | `DriverLineAndObjectTests.cs` | ✅ |
-| `23CD:06E9` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs` | ✅ |
-| `23CD:071C` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs` | ✅ |
+| `23CD:06E9` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Vga/Layers/Objects.cs`, `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs`, `ObjectLayerTests.cs` | ✅ |
+| `23CD:071C` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Vga/Layers/Objects.cs`, `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `23CD:3042` | [23CD_04F6_kartenwahl.md](docs/routines/23CD_04F6_kartenwahl.md) | `src/Traders.Vga/ModeXSetup.cs` | `DriverEdgeCaseTests.cs` | ✅ |
 | `23CD:3079` | [23CD_3079_atlas.md](docs/routines/23CD_3079_atlas.md) | `src/Traders.Vga/ModeXMemory.cs` | `DriverDifferentialTests.cs` | ✅ |
 | `23CD:30D1` | [23CD_311A_seiten.md](docs/routines/23CD_311A_seiten.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
@@ -226,7 +233,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 
 | Segment | Größe | Far-Einsprünge | mit Befund | portiert | mit Differenztest |
 |---|---:|---:|---:|---:|---:|
-| `0000` | 0x5350 | 76 | 0 | 0 | 0 |
+| `0000` | 0x5350 | 76 | 1 | 1 | 1 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
 | `0609` | 0x21C0 | 56 | 0 | 0 | 0 |
 | `0825` | 0xAA0 | 16 | 0 | 0 | 0 |
@@ -260,7 +267,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `20B3` | 0xD80 | 27 | 0 | 0 | 0 |
 | `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
 | `21A7` | 0x80 | 3 | 0 | 0 | 0 |
-| `21AF` | 0x4E0 | 7 | 2 | 2 | 2 |
+| `21AF` | 0x4E0 | 7 | 8 | 8 | 8 |
 | `21FD` | 0x980 | 28 | 12 | 11 | 11 |
 | `2295` | 0xE0 | 4 | 4 | 4 | 4 |
 | `22A3` | 0x930 | 15 | 0 | 0 | 0 |
@@ -271,7 +278,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **98** | **95** | **95** |
+| **Summe** | **0x28DC0** | **891** | **105** | **102** | **102** |
 
 <!-- abdeckung:ende -->
 

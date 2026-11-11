@@ -15,8 +15,9 @@ public sealed partial class GraphicsLayers
     /// <summary>DS:10D8 – blend colour (12-bit RGB, one nibble per component) used by the fade-ins.</summary>
     public const int BlendColor = 0x10D8;
 
-    /// <summary>DS:33E4 – eight pairs of far pointers per moving object (8 bytes each), cleared by 21AF:04CD.</summary>
-    public const int ObjectPointerPairs = 0x33E4;
+    /// <summary>DS:33E4 – restore records of the moving objects, two per object (page 0, page 1; 4 bytes each: page offset,
+    /// x&amp;3, valid), cleared by 21AF:04A2/04CD.</summary>
+    public const int ObjectRestoreRecords = 0x33E4;
 
     /// <summary>
     /// [ORIGINAL] 2295:006D(index, rgb12): one DAC register from a 12-bit colour, each nibble shifted left by three
@@ -104,7 +105,7 @@ public sealed partial class GraphicsLayers
 
     /// <summary>
     /// [ORIGINAL] 21FD:037D(rgb12): fade out to the colour, steps 0…7, four retraces after each; then the colour
-    /// becomes the blend colour (04DA) and the object pointer pairs are cleared (21AF:04CD).
+    /// becomes the blend colour (04DA) and all restore records of the moving objects are cleared (21AF:04CD).
     /// </summary>
     public void FadeOut(ushort rgb12) => FadeOut(rgb12, 4);
 
@@ -119,23 +120,23 @@ public sealed partial class GraphicsLayers
             WaitRetraces(wait);
         }
         SetBlendColor(rgb12);
-        ClearObjectPointerPairs();
+        InvalidateAllRestoreRecords();
     }
 
     /// <summary>[ORIGINAL] 21FD:04DA(rgb12): DS:10D8 = blend colour.</summary>
     public void SetBlendColor(ushort rgb12) => Set16(BlendColor, rgb12);
 
-    /// <summary>[ORIGINAL] 21AF:04A2(i): both far pointers of entry <paramref name="i"/> at DS:33E4 + 8·i = 0.</summary>
-    public void ClearObjectPointerPair(ushort i)
+    /// <summary>[ORIGINAL] 21AF:04A2(i): both restore records of object <paramref name="i"/> at DS:33E4 + 8·i = 0.</summary>
+    public void InvalidateRestoreRecords(ushort i)
     {
         int at = (ushort)(i << 3);
-        for (int k = 0; k < 8; k++) Ds[(ObjectPointerPairs + at + k) & 0xFFFF] = 0;
+        for (int k = 0; k < 8; k++) Ds[(ObjectRestoreRecords + at + k) & 0xFFFF] = 0;
     }
 
     /// <summary>[ORIGINAL] 21AF:04CD: 04A2 for entries 0…7.</summary>
-    public void ClearObjectPointerPairs()
+    public void InvalidateAllRestoreRecords()
     {
-        for (ushort i = 0; i < 8; i++) ClearObjectPointerPair(i);
+        for (ushort i = 0; i < 8; i++) InvalidateRestoreRecords(i);
     }
 
     /// <summary>

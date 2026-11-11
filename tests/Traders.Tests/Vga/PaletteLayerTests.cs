@@ -142,7 +142,7 @@ public class PaletteLayerTests
         {
             ushort color = RandomColor(h);
             h.Randomize(GraphicsLayers.BasePalette, 768);
-            h.Randomize(GraphicsLayers.ObjectPointerPairs, 0x40);
+            h.Randomize(GraphicsLayers.ObjectRestoreRecords, 0x40);
             h.Randomize(GraphicsLayers.BlendColor, 2);
             if (i % 2 == 0)
             {
@@ -160,15 +160,15 @@ public class PaletteLayerTests
 
     // [DIFFERENTIAL] 21AF:04A2
     [GameDataFact]
-    public void ClearObjectPointerPair_21AF_04A2_matches_original()
+    public void InvalidateRestoreRecords_21AF_04A2_matches_original()
     {
         var h = new LayerHarness(170);
         for (int i = 0; i < 20; i++)
         {
-            h.Randomize(GraphicsLayers.ObjectPointerPairs - 8, 0x50);
+            h.Randomize(GraphicsLayers.ObjectRestoreRecords - 8, 0x50);
             ushort index = i < 8 ? (ushort)i : h.Next(0, 9);
             h.Call(Objects, 0x04A2, index);
-            h.Port.ClearObjectPointerPair(index);
+            h.Port.InvalidateRestoreRecords(index);
             h.AssertStateEqual($"04A2({index}) #{i}");
         }
     }

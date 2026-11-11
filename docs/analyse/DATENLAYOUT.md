@@ -163,7 +163,17 @@ Belege: Differenztests `tests/Traders.Tests/Vga/PageLayerTests.cs`, `PaletteLaye
 | `5017` | B[768] | `LoadedPalette` | Palette des zuletzt geladenen Bildes | G – `21FD:026C` |
 | `54E8` | B[768] | `WorkPalette` | Arbeitspalette (Ergebnis der Blende, an den DAC) | G – `21FD:03EB` |
 | `10D8` | W | `BlendColor` | Blendfarbe (12 Bit RGB) der Einblendungen | G – `21FD:04DA/0329` |
-| `33E4` | Far[2]·8 | `ObjectPointerPairs` | acht Paare von Far-Zeigern (8 Byte je Satz), beim Ausblenden genullt; Bedeutung in Teil 3 | G – `21AF:04A2/04CD` |
+| `33E4` | 4 B·2·8 | `ObjectRestoreRecords` | Rückschreibsätze der bewegten Objekte je Seite (Seitenoffset, x&3, gültig), beim Ausblenden genullt | G – `21AF:000D/04A2/04CD` |
+| `330C` | 1Ah·8 | `ObjectTable` | Objektsätze (Belegung `GRAFIK.md` §4) | G – `21AF:000D`, `23CD:06E9` |
+| `34A6` / `3068` | Far[21]·8 | `ObjectImages` / `ObjectMasks` | Bild- bzw. Maskenzeiger je Objekt und Bild | G – `21AF:00CA` |
+| `3438` | Far[2]·8 | `ObjectSaveBuffers` | Sicherungspuffer je Objekt und Seite (im RAM-Atlas) | G – `21AF:022B` |
+| `45D6` / `4BC6` | Far | `AtlasPointer` / `MaskPointer` | RAM-Atlas / Maskenatlas | G – `21AF:00CA` |
+| `15BA` / `15BE` / `15C0` | Far / W / 1Ch·n | `ListPointer` / `ListCount` / `ListStart` | Befehlsliste `0A96` | G – `0A96:001B/06A8` |
+| `0142` / `0143` | B s | `TextAdvance` / `ShadowHeight` | Schattenrechteck je Zeichen / Höhe | G – `0A96:000A/0C68` |
+| `01F4` | Far[17] | `HandlerTable` | Ausführende der Befehlsliste | G – `0A96:06A8` |
+| `1126` / `1127` | B / char[] | `NumberFill` | Füllzeichen / Format `%*lu` für Zahlen | G – `2295:0001/0062` |
+| `3CA8` / `34A4` | W | `FontAdvance` / `FontLineHeight` | Zeichenbreite / Zeilenhöhe der Schrift | G – `0A69:0090/0288` |
+| `0140` | char[2] | `TypewriterChar` | Ein-Zeichen-Text der Schreibmaschine | G – `0A69:01AD` |
 
 ## 5. Abgeleitete Werte
 
