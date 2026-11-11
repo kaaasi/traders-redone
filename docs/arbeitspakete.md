@@ -69,6 +69,10 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview; die Mehrrundenprobe
   dieser Regeln liefert 0 Teil 3 (`AGENTS.md` §5), Spur 1 nennt dafür im PR die Eingangs- und Ausgabefelder je Routine.
 - **Abhängigkeiten:** keine.
+- **Status (Spur 1, 11.11.2026):** Teile 1–3 fertig in PR #67, Review offen. Portiert mit Differenztest: `1777:02DC`,
+  `0609:1178`, `22A3:026B`, `0825:0813` (+ `086F`, `088D`, `08EB`, `096D`), `0825:06CB`, `0825:07C4`, `22A3:0003`
+  (+ `22A3:0750`), `21FD:021F`, `08CF:11D7`, `0B9F:06A0`, `0B9F:078A`. `0B9F:06A0`/`078A` ziehen keinen Zufall. Eingangs- und
+  Ausgabefelder je Routine für 0 Teil 3: Abschnitt „C#-Umsetzung“ der Befunde.
 
 ## 2 `schichten` – Grafikschichten über dem Treiber
 
