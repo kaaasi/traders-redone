@@ -11,14 +11,14 @@
 > Unbeaufsichtigt, keine Rückfragen. Teile und Selbstfortsetzung nach Abschnitt „Teile und Fortsetzung“; das Anlegen
 > einer Fortsetzung per `create_trigger` ist autorisiert (höchstens 3 je Spur). Modell der Spur: `<modell>`.
 > Zugriff zuerst prüfen: `git ls-remote https://github.com/kaaasi/traders-redone HEAD` und
-> `git ls-remote https://github.com/kaaasi/traders-referenz HEAD`. Scheitert eines, `add_repo` (ggf. erst per `ToolSearch` mit
+> `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` (prüft nur Lesen). Scheitert eines, `add_repo` (ggf. erst per `ToolSearch` mit
 > `select:mcp__claude-code-remote__add_repo` laden; meist nicht vorhanden) für `kaaasi/traders-redone` (access push) bzw.
 > `kaaasi/traders-referenz` (access read) – beides ausdrücklich autorisiert – und erneut prüfen; bleibt eines unerreichbar,
 > sofort blockiert melden (genaue Fehlermeldungen), keine Code-Arbeit; gibt es einen PR der Spur, dort Kommentar und Label
 > `spur-wartet`.
 
 **Anlegen** (Leitstelle oder Nutzer): dem Lauf beide Repos mitgeben, `kaaasi/traders-redone` mit Schreibzugriff und
-`kaaasi/traders-referenz`; der `add_repo`-Weg im Startaufruf ist nur der Rückfall.
+`kaaasi/traders-referenz` mindestens lesend; der `add_repo`-Weg im Startaufruf ist nur der Rückfall.
 
 **Einzelner Folgeteil ohne Fortsetzung:** wie oben, aber statt „Teile und Selbstfortsetzung … (höchstens 3 je Spur).“ der Satz
 „Teile nach Abschnitt ‚Teile und Fortsetzung‘; nur Teil <n>, keine Fortsetzung anlegen.“
@@ -35,7 +35,7 @@ Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Be
 1. Lies `AGENTS.md`, `docs/prozess/zusammenarbeit.md` §2–4 und in `docs/arbeitspakete.md` **nur** die aktuelle Runde und deine
    Spur. Archiv, alte Reviews und `docs/prozess/anhang.md` nur bei konkretem Bedarf.
 2. Einrichten nach `AGENTS.md` §3 (Claude: zusätzlich `CLAUDE.md`), Originaldaten nach `gamedata/`
-   (`tools/claude/fetch-reference.sh original`). Geplante Läufe erben Schreibrecht auf das Referenz-Repo, Spuren schreiben dort
+   (`tools/claude/fetch-reference.sh original`). Läufe der Leitstelle haben dort auch Schreibrecht, Spuren schreiben dort
    trotzdem nie; fehlen Daten oder Bilder, im PR melden – ablegen nur Leitstelle oder Nutzer.
 3. Offener PR der Spur mit Bearbeiter? Nur nach Übergabekommentar weiterarbeiten (Übernahme: `zusammenarbeit.md` §2), sonst den
    Nutzer fragen (geplante Läufe: „Teile und Fortsetzung“ Schritt 1). Neu: Branch `paket/<spur>` von aktuellem `main`, sofort
