@@ -94,6 +94,26 @@ public class RandomRulesDifferentialTests
 
     // [DIFFERENTIAL] 08CF:11D7
     [GameDataFact]
+    public void Gem_price_reset_upward_with_16_bit_overflow_P3_74()
+    {
+        // #74 R3R-1: week + 100 + random(30) above 32767 must be taken unsigned with high word 0 (08CF:1283-129A).
+        // Factor 100, week 32650: week + 45 = 32695 > 100 -> up, week + 100 = 32750 > 100 -> reset; random(30) >= 18
+        // crosses 32767 (signed reading would give a negative factor that the limit week + 160 no longer replaces).
+        var r = new Inputs(0x74);
+        bool crossed = false;
+        for (int s = 0; s < 40; s++)
+        {
+            var d = GemInput(r, 100, 32_650);
+            var (_, draws) = Harness.AssertSameWithRandom(d, 0x08CF, 0x11D7, GemPrice.Apply, $"seed {s}");
+            Assert.Equal(new short[] { 30 }, draws);
+            var drawn = new Traders.Core.OriginalRandom(new Traders.Core.RecordedClock([]), d.U32(L.RandomSeed)).Next(30);
+            crossed |= 32_750 + drawn > short.MaxValue;
+        }
+        Assert.True(crossed, "no seed crossed 32767");
+    }
+
+    // [DIFFERENTIAL] 08CF:11D7
+    [GameDataFact]
     public void Gem_price_follows_over_many_weeks()
     {
         // The factor of one week is the input of the next (and the random state carries over), as in a game.

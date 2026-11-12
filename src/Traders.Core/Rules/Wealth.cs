@@ -128,6 +128,8 @@ public static class WealthHistoryRecord
             d.Set(L.ActivePlayer, p);
             int wealth = Wealth.Total(d);
             ushort offset = Int16Math.U(L.WealthHistory + Int16Math.S(p * 0xA0) + Int16Math.S(slot << 2));
+            // [APPROX] offsets behind the data segment image (from week -4168, #74 R3R-2) throw instead of writing
+            // memory beyond DGROUP as the original does; unreachable in a game because the week counts up from 0.
             d.Set(offset, wealth);
         }
         d.Set(L.ActivePlayer, (sbyte)L.PlayerCount);

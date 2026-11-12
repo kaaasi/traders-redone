@@ -48,8 +48,9 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 - Abgeschlossene Branches erst löschen, wenn geprüft ist, dass keine unintegrierte Arbeit darauf liegt (`git log main..<branch>`).
 - Status nur in GitHub (`docs/arbeitspakete.md`, PRs, Labels, `STATUS.md`); ein GitHub-Project ist optional und darf keine
   zweite, von Hand gepflegte Statusquelle werden.
-- Geplante Läufe und Hintergrundagenten nur durch die Leitstelle oder als im Startaufruf autorisierte Fortsetzung, Nachprüfung bzw.
-  Review – sonst nicht ohne Auftrag des Nutzers.
+- **Geplante Läufe (Aufgaben) legt allein die Leitstelle an** (oder der Nutzer) – Spuren, Fixläufe und Reviews nie, auch nicht
+  als Fortsetzung oder Nachprüfung (Nutzer 12.11.2026). Sie melden Bedarf mit Label `spur-wartet` und fertigem Prompt in der
+  Übergabe. Hintergrundagenten nur mit Auftrag des Nutzers bzw. der Leitstelle.
 
 ## 5. Unabhängiges Review
 
@@ -75,8 +76,8 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      **ausführbaren Beleg** (roter Test oder RefEmu-Probe: Befehl, Eingangszustand, Ergebnis; bei „fehlt“ zusätzlich die erfolglose
      Codesuche). Ohne Beleg höchstens P3 „Verdacht“. Widerspricht ein Fixlauf mit eigenem Beleg: Label `beleg-strittig`, keine
      Nachprüfung für diesen Punkt; die Leitstelle führt beide Belege aus und entscheidet.
-  8. **Verkettung und Labels:** Der Fixlauf legt bei behobenem P0/P1 selbst die Nachprüfung als geplanten Lauf an (Kurzaufruf aus
-     `review-anfrage.md`); lehnt die Freigabe `create_trigger` ab: `spur-wartet`, Prompt im Übergabekommentar. Die Leitstelle
+  8. **Verkettung und Labels:** Der Fixlauf setzt bei behobenem P0/P1 `spur-wartet` und schreibt den fertigen Kurzaufruf der
+     Nachprüfung (`review-anfrage.md`) in die Übergabe; die Leitstelle legt sie an (Nutzer 12.11.2026). Die Leitstelle
      wartet auf Labels bzw. Review-PRs, nicht auf Kommentare. **Wer ein Label abarbeitet, entfernt es;** die Leitstelle darf Labels jederzeit setzen und entfernen (Nutzer 11.11.2026):
 
      | Label | gesetzt von, wann | entfernt von, wann |
@@ -84,7 +85,7 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      | `review-ja` / `review-nein` | jedes Review am geprüften PR (das andere entfernen) | durch das nächste Review; `review-nein` der Fixlauf mit dem Push des neuen Heads |
      | `leitstelle-delta` | Fixlauf, der nur P2/P3 behebt oder nur rebased | Leitstelle nach der Delta-Prüfung |
      | `beleg-strittig` | Fixlauf, der einem belegten Befund mit eigenem Beleg widerspricht | Leitstelle nach ihrer Entscheidung |
-     | `spur-wartet` | Lauf ohne Fortsetzung (blockiert, Kettenende, `create_trigger` abgelehnt) | Leitstelle nach Anlegen des Laufs bzw. Entscheidung oder Vorlage beim Nutzer |
+     | `spur-wartet` | jeder Lauf, nach dem ein weiterer nötig ist (Fortsetzung, Nachprüfung, Review) oder der blockiert ist | Leitstelle nach Anlegen des Laufs bzw. Entscheidung oder Vorlage beim Nutzer |
 
      Reviews ohne Netz (ChatGPT/Codex) setzen kein Label; dann wartet die Leitstelle auf den Review-PR (`review/*`) und setzt das
      Label beim Auswerten.

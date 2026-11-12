@@ -13,8 +13,9 @@
 > `review-nein`. Diese GitHub-Schreibaktionen sind ausdrücklich autorisiert. Nicht mergen. Falls Schreiben nicht möglich ist,
 > stelle die fertige Datei bereit.
 
-**Geplanter Lauf:** zusätzlich „Unbeaufsichtigt, keine Rückfragen.“ und – weil Originaldaten nötig sind – der Zugriffsabsatz
-aus `spur-start.md` (Kurzaufruf „Geplanter Lauf“). **Nachprüfung:** zusätzlich „Nachprüfung des Reviews
+**Geplanter Lauf:** zusätzlich „Unbeaufsichtigt, keine Rückfragen. Keine Aufgaben anlegen (kein `create_trigger`); das macht
+allein die Leitstelle (Nutzer 12.11.2026).“ und – weil Originaldaten nötig sind – der Zugriffsabsatz aus `spur-start.md`
+(Kurzaufruf „Geplanter Lauf mit Teilen“). **Nachprüfung:** zusätzlich „Nachprüfung des Reviews
 `<datei>`, bisher geprüfter Head `<sha>`, nur Delta `<alt>..<neu>` und die genannten Befunde.“, Ablage `…-nachpruefung.md`.
 **Gesamtreview am Rundenende** und **Aufrufe für ChatGPT/Codex:** `docs/prozess/anhang.md` C und D.
 
