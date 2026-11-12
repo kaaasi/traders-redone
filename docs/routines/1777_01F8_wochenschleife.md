@@ -126,8 +126,18 @@ Aufruf 1 `1777:02DC`, 2 `0825:07C4`, 5 und 20 `0609:1178`, 12 `21FD:021F`, 13 `2
   (Maschine nicht beendet).
 - **Mehrrundenprobe (D, Teil 3):** `MultiWeekDifferentialTests.cs` – Vorgabepartie, Wochen 0–3 und Aufruf 1 der Woche 4: an
   jedem gebundenen Regelschritt (`WeekRuleSteps`) übernimmt der Kern das Datensegment des RefEmu an der Aufrufstelle, rechnet den
-  Port und wird beim Rücksprung mit dem RefEmu verglichen (ganzes Datensegment einschließlich `DS:10D2`, außer den
-  Interrupt-Bytes oben); Bildschirmschritte rechnet der RefEmu. Dazu Folge der 30 Aufrufe und Marken je Woche, Wochenzähler
+  Port und wird beim Rücksprung mit dem RefEmu verglichen (ganzes Datensegment außer den Interrupt-Bytes oben, dazu der
+  Zufallszustand des Ports gegen `DS:10D2`); danach rechnet der Kern mit seinem eigenen Ergebnis weiter. `DS:10D2` schreibt
+  die Maschine nach dem Schritt zurück, der Vergleich an der nächsten Aufrufstelle prüft diesen Rückschreibeweg gegen den
+  RefEmu (Gegenprobe: Rückschreiben entfernt → rot in Woche 0 bei Aufruf 13). Bildschirmschritte rechnet der RefEmu. Dazu Folge der 30 Aufrufe und Marken je Woche, Wochenzähler
   1–4, Zahl der Ziehungen von Wetter und Edelsteinkurs. Gegenprobe (lokal): Aufrufe 13 und 14 vertauscht → rot in Woche 0
   bei Aufruf 13 (`DS:2EB0`). Laufzeit im Release-Lauf von `tools/pruefen.sh` rund 90 s (Abbruchweg B
   rund 35 s; eine Woche ≈ 200 s emuliert, ≈ 600 Mio. Befehle); `--schnell` wird dadurch rund 45 s länger (parallel).
+- **Mehrrundenprobe mit gemischten Feldarten (D, Fix B1):** `Four_weeks_with_mixed_field_kinds_match_the_original` – wie oben,
+  aber an der Aufrufstelle von `22A3:0003` setzt der Test je Woche im RefEmu einen Zustand mit gemischten Feldarten (freie
+  Felder an die Spieler, bis Spieler p mindestens 3 + p Produktionsfelder hat; Arten 0, 1, 2 reihum; `DS:2EE7` passend), den
+  der Kern mit dem Datensegment übernimmt. Die Vorgabepartie hat je Spieler nur eine Feldart (Anteil 100, Faktor 100); ein
+  gesetzter Zustand vor Woche 0 hält nicht, weil Aufruf 8 (Computerspieler) das Feld in Woche 0 neu aufbaut und später
+  umgruppiert. Geprüft: in jeder Woche produziert ein Feld bei einem Anteil `DS:342C` zwischen 0 und 100, der kein Vielfaches
+  von 4 ist. Gegenproben (lokal): Faktor aufgerundet bzw. `+ 26` statt `+ 25` → rot in Woche 0 bei Aufruf 13 (`DS:48F9`).
+  Laufzeit rund 55 s.
