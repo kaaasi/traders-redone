@@ -68,6 +68,8 @@ public class ProgramHostTests
     /// third pass of the main menu loop (192D:0345) seed and displayed picture – pixels through the DAC – are the original's
     /// (both pages hold the whole menu, so the picture does not depend on the page shown).
     /// </summary>
+    // Counter-check (local): a wrong font height in the host's font table → red.
+    // [DIFFERENTIAL] 0B67:0002 – pages of the host (VGA path) under the menu picture
     [GameDataFact]
     public void Main_menu_picture_of_the_host_is_the_original_screen()
     {

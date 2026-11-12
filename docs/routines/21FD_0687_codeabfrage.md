@@ -59,7 +59,8 @@ Ziffernblock 7 8 9 4 → gelesene Adressen `10F0, 10F1, 10F2, 10F4`, Ziffern 7 8
 ## C#-Umsetzung
 `src/Traders.Core/Startup/CodeQuery.cs` (Entscheidung F1 = B): `random(0)` aus dem Uhrwert des Hosts, Abfragebild in der
 Bildtabelle (`ImageTable.RecordLoad`), `DecodeTexts` (081D), `random(3FFh)`, Code in den Text, Ziffern (`Digit` = 08D3), dann
-die Texttafel über `ITextPlaque` (Spur `menue`). `[APPROX]`: kein Bild, keine Tafelzeichnung (nur deren Ziehungen), keine
+die Texttafel über `ITextPlaque`, im Programm `MenuTextPlaque` (`DS:5334`, Mauer `192D:131B` und Tafel `14FB` aus
+`MenuBackdrop` der Spur `menue`). `[APPROX]`: kein Bild, keine Tafelzeichnung (nur deren Ziehungen und Zeichenaufrufe), keine
 Palette, keine Kästchen `0863`, kein Warten auf Tasten (`DS:1158`, `3D47`) – das Original nimmt jede Eingabe an.
 
 ## Prüfung

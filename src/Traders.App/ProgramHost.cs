@@ -50,7 +50,8 @@ public sealed class ProgramHost
 
         Driver = new ModeXDriver();
         var fonts = PowerPacker.Decrunch(Load(ResourceTable.Fonts));
-        // [ORIGINAL] 0DFD:0158 – font table of the driver: small 5/6 at 5A0h, large 12/14 at 0, digits 5/5 from "/" at 7F8h
+        // [APPROX] Font table of the driver as 0DFD:0158 leaves it (small 5/6 at 5A0h, large 12/14 at 0, digits 5/5 from "/" at
+        // 7F8h; checked against the original's table in MenuSceneHarness and by the menu picture); 0158 itself is not ported.
         Driver.Fonts =
         [
             new FontDescriptor(fonts, 0x5A0, 5, 6, 0x20), new FontDescriptor(fonts, 0, 12, 14, 0x20),

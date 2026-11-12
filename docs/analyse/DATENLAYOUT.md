@@ -288,4 +288,5 @@ Differenztests `ProgramStartDifferentialTests`, `CodeQueryDifferentialTests`.
 | `10E0` | Far[4] | `CodeQuery.Texts` | Zeiger auf die vier verschlüsselten Abfragetexte (in DGROUP, `10FF`, `110C`, `110E`, …) | G/S `21FD:081D`; P |
 | `10E8` | Far | `CodeQuery.CodeText` | dritter Zeiger: Text „CODE: X-nn“ (Zeichen +6, +8, +9) | S `21FD:0717…075C`; P; T |
 | `10F0…10FA` | B[11] | – | Ziffernblock-Tabelle, adressiert als `[SI + 10A9h]` mit SI = 47h…51h (7 8 9 – 4 5 6 + 1 2 3) | G `21FD:07CD`; P |
+| `4884` | Far | `MenuLayout.TextBuffer` (`TextFile`) | Textpuffer von `192D:18B6`; im Port Far-Adresse des Hosts (Teil 3) | S `0DFD:0074`; T |
 | `10A9` | W | – | **aktuelles Musikstück** (FFFF aus der EXE, 0 nach `218B:0094(0, 0)` bei `0DFD:02FE`); kein Teil der Ziffernblock-Tabelle | S `218B:00EE`; P |
