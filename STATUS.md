@@ -59,7 +59,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `0B9F` | 0x8A0 | Handel: Ablauf und Regeln (Angebote, Warenpreise `DS:4898`) | 🟡 Warenpreise `06A0`/`078A` portiert (R3 Spur 1) |
 | `0C29` | 0x14A0 | Handel: Bildschirm und Bedienung, bucht Bargeld/Vorräte | ⬜ |
 | `0D73` | 0x8A0 | Systemschicht: Interrupts, Karten-/Tonerkennung, Speicher, Dateien | ⬜ |
-| `0DFD` | 0x340 | Programmstart: Schrift, Masken, Bilder, Texte laden; Code-Abfrage | ✅ `000D` mit Differenztest (R4 Spur 0) |
+| `0DFD` | 0x340 | Programmstart: Schrift, Masken, Bilder, Texte laden; Code-Abfrage | 🟡 `000D`/`0239` mit Differenztest (R4 Spur 0); offen `0074`/`0132`/`0158` (Anzeige) |
 | `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | ✅ alle sieben Routinen mit Differenztest (R4 Spur 2) |
 | `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | ✅ Befehlsquelle im Kern, alle sechs Steuerungsarten (R4 Spur 3) |
 | `0EDE` | 0x23F0 | Roboterkampf: Ablauf, Bewegung, Treffer, Beute | 🔍 |
@@ -83,7 +83,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `218B` | 0x1C0 | Musik über residenten Treiber (`int 64h`) | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
 | `21A7` | 0x80 | Toneffekt auslösen, Effektquelle wählen | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
 | `21AF` | 0x4E0 | Grafik: bewegte Objekte (8 Sätze ab `DS:330C`) | 🟢 bewegte Objekte (R3 Spur 2) |
-| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3) |
+| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3); Code-Abfrage `0687` (R4 Spur 0) |
 | `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🟢 portiert (R3 Spur 2) |
 | `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | 🟡 Produktion `0003`, Schwund `026B` portiert (R3 Spur 1); Ernte offen |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
