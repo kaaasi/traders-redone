@@ -4,7 +4,8 @@ using Traders.Assets;
 using Traders.Vga;
 
 // Usage: traders [path-to-gamedata/dos] [--scale n] [--aspect] [--frames n]
-// Without scenes (R3) the host shows the first original picture, or colour bars if no original directory is found.
+// With the original files the host runs the program (start, main menu, new game, week loop of the core); without them it
+// shows colour bars.
 string? dir = null;
 var options = new HostOptions();
 for (int i = 0; i < args.Length; i++)
@@ -19,19 +20,15 @@ for (int i = 0; i < args.Length; i++)
 }
 dir ??= AssetLibrary.FindOriginalDos() ?? AssetLibrary.FindOriginalDos(Environment.CurrentDirectory);
 
-var vram = new ModeXMemory();
-byte[] dac;
 if (dir is not null)
 {
-    var picture = AssetLibrary.Load(dir).Pictures[ResourceTable.Pictures[0].Id];
-    DemoPicture.Write(vram, picture.Pixels);
-    dac = (byte[])picture.Palette.Vga6.Clone();
-}
-else
-{
-    dac = DemoPicture.ColourBars(vram);
+    using var program = new HostGame(options, new ProgramHost(dir, Traders.App.Timing.BorlandClock.Host));
+    program.Run();
+    return 0;
 }
 
+var vram = new ModeXMemory();
+var dac = DemoPicture.ColourBars(vram);
 using var game = new HostGame(options, vram, dac);
 game.Run();
 return 0;

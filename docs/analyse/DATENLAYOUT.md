@@ -262,6 +262,35 @@ Namen in `src/Traders.Core/Menus/MenuLayout.cs`; Befund [192D_0007_menues.md](..
 | `08DA` | W | `PictureResource` | Ressourcennummer des Menübilds (`186C:0002`) | G – `192D:000A` |
 | `37CC…3C8F` | far[305] | `TextPointers` | Eintrag k = Zeile k − 1 von ENGLISCH.TXT, Eintrag 0 null | G – `192D:18B6`; Differenztest |
 
+## 9. Runde 4, Spur `programm` (Programmablauf)
+
+Belege: [1777_000C_main.md](../routines/1777_000C_main.md), [1777_04E4_initialisierung.md](../routines/1777_04E4_initialisierung.md);
+Gleichschritt-Differenztest `ProgramMachineDifferentialTests`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `090E` | W s | `ProgramInitialisation.GraphicsCard` | Grafikkarte: 1 VGA, 0 EGA, 2 Tandy, 63h Tandy-Emulation, −1 erkennen | S `1777:04E7`, `0D73:0712`; P = 1; T |
+| `0910` | W s | `ProgramInitialisation.SoundDevice` | Tonart: 0 PC-Lautsprecher, 1 AdLib, −1 erkennen | S `1777:04FF`, `0D73:04CA`; P = 1; T |
+| `08FA` | B | `ProgramLoop.GameRunning` | vor jeder Wochenschleife 1 (Bedeutung offen; gelesen `192D:11B8`/`12A6`) | S `1777:017A`; T |
+| `3CCC` | B | `ProgramLoop.NewGameRequest` | Menüergebnis „neue Partie“ (1), gesetzt in `192D:12A6` | S `1777:016E`; P; T |
+| `10A3` | W | – | Musiktreiber vorhanden (`218B:0002`; `218B:013A` liefert 0, wenn 0) | S `218B:013D`; P = 1 |
+| `10A5` / `10A9` | W / W | – | Musik läuft / aktuelles Stück (`218B:0094`) | S `218B:00B4`, `0131`; P |
+
+**Teil 2 (Programmstart `0DFD:000D`, Code-Abfrage `21FD:0687`):** Belege [0DFD_000D_programmstart.md](../routines/0DFD_000D_programmstart.md),
+[186C_ressourcenlader.md](../routines/186C_ressourcenlader.md), [21FD_0687_codeabfrage.md](../routines/21FD_0687_codeabfrage.md);
+Differenztests `ProgramStartDifferentialTests`, `CodeQueryDifferentialTests`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `09C8` | W s | `ImageTable.CurrentImage` | zuletzt geladenes Bild (−1 vor dem ersten; zugleich EGA-Palettennummer für `0A96`) | S `186C:008B`; P (2, dann 6); T |
+| `09CE` | 13h·10 | `ImageTable.Start` | Bildtabelle: +0/+4 Far-Zeiger VGA-/EGA-Name, +8 Diskette, +0Bh Dateilänge, +0Fh entpackte Länge (0 = noch nicht geöffnet) | S `186C:0997`; P; T |
+| `08CE…08DA` | W[7] | `ImageTable.PreloadNumbers`, `CodeRequestNumber` | Bildnummern der sechs vorgeladenen Bilder (`0DFD:0305…033B`) und des Abfragebilds | G `0DFD:0305`, `21FD:06A9`; T |
+| `10E0` | Far[4] | `CodeQuery.Texts` | Zeiger auf die vier verschlüsselten Abfragetexte (in DGROUP, `10FF`, `110C`, `110E`, …) | G/S `21FD:081D`; P |
+| `10E8` | Far | `CodeQuery.CodeText` | dritter Zeiger: Text „CODE: X-nn“ (Zeichen +6, +8, +9) | S `21FD:0717…075C`; P; T |
+| `10F0…10FA` | B[11] | – | Ziffernblock-Tabelle, adressiert als `[SI + 10A9h]` mit SI = 47h…51h (7 8 9 – 4 5 6 + 1 2 3) | G `21FD:07CD`; P |
+| `4884` | Far | `MenuLayout.TextBuffer` (`TextFile`) | Textpuffer von `192D:18B6`; im Port Far-Adresse des Hosts (Teil 3) | S `0DFD:0074`; T |
+| `10A9` | W | – | **aktuelles Musikstück** (FFFF aus der EXE, 0 nach `218B:0094(0, 0)` bei `0DFD:02FE`); kein Teil der Ziffernblock-Tabelle | S `218B:00EE`; P |
+
 ## 10. Runde 4, Spur `spielfeld` (Steuerung `0E9E`, Spielfeld `0609`)
 
 Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs` bzw. `JoystickReader.cs`.

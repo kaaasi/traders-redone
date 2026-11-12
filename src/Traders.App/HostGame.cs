@@ -22,8 +22,9 @@ public sealed record HostOptions
 }
 
 /// <summary>
-/// Desktop host without scenes (R3): shows a mode-X page, counts timer ticks and frames from host time and turns key
-/// presses into scancode bytes for the key-state table. The connection to the phase machine follows in R4.
+/// Desktop host: counts timer ticks and frames from host time, turns key presses into scancode bytes for the key-state table
+/// and, with a <see cref="ProgramHost"/>, hands every frame with the held keys to the core's program machine (R4) and shows
+/// the page the scene drew. Without one (no original files) it shows a fixed mode-X page.
 /// </summary>
 public sealed class HostGame : Game
 {
@@ -46,6 +47,12 @@ public sealed class HostGame : Game
     public KeyStateTable Keys { get; } = new();
     public KeyboardEdges Edges { get; } = new();
     public TimerTicks Timer { get; } = new();
+
+    private readonly ProgramHost? _program;
+    private readonly List<byte> _held = [];
+
+    public HostGame(HostOptions options, ProgramHost program) : this(options, program.Driver.Vram, program.Layers.Dac.Registers) =>
+        _program = program;
 
     public HostGame(HostOptions options, ModeXMemory vram, byte[] dac)
     {
@@ -72,15 +79,27 @@ public sealed class HostGame : Game
     protected override void Update(GameTime gameTime)
     {
         var step = gameTime.ElapsedGameTime < MaxStep ? gameTime.ElapsedGameTime : MaxStep;
-        var (ticks, _) = _clock.Advance(step);
+        var (ticks, frames) = _clock.Advance(step);
         for (int i = 0; i < ticks; i++) Timer.Tick();
 
         _scancodes.Clear();
         if (IsActive) Edges.Update(Keyboard.GetState().GetPressedKeys(), _scancodes);
         else Edges.ReleaseAll(_scancodes);
         Keys.Receive(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_scancodes));
+        if (_program is not null && frames > 0)
+        {
+            // every frame passed is processed once with the keys held now (the core catches up after a short stall)
+            _held.Clear();
+            for (int sc = 0; sc < KeyStateTable.Size; sc++)
+                if (Keys.IsDown((byte)sc)) _held.Add((byte)sc);
+            _program.Frame(_clock.Frames - 1, _held);
+            if (_program.Machine.Status == Traders.Core.Phases.ProgramStatus.Ended) Exit();
+            DisplayStart = _program.Driver.DisplayStart;
+        }
 
-        Window.Title = $"Traders – frame {_clock.Frames}, tick {_clock.Ticks}, last make {Keys.LastMake:X2}";
+        Window.Title = _program is null
+            ? $"Traders – frame {_clock.Frames}, tick {_clock.Ticks}, last make {Keys.LastMake:X2}"
+            : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}";
         if (_options.MaxFrames is long max && _clock.Frames >= max) Exit();
         base.Update(gameTime);
     }

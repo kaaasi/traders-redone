@@ -64,6 +64,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Datensegment, `DS:10D2`), Gegenprobe im Review (vertauschte Reihenfolge Start/Code, fehlendes `DS:08FA` → rot); Mehrrundenprobe
   mit Mensch ≥ 4 Wochen (`AGENTS.md` §5); `check-architecture.py` grün mit Gegenprobe der neuen Regel; Windows-Start per Hand (Nutzer).
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 und 2 (sonst `spur-wartet`, „wartet auf 1/2“).
+- **Status:** Teile 1–3 fertig (Claude, PR #96, Review offen). Teil 1: `Phases/ProgramLoop.cs`, `ProgramMachine.cs`, `ProgramSteps.cs`, Gleichschritt bis `1777:02DC` und Abbruch A. Teil 2: `Startup/ProgramStart.cs`, `ImageTable.cs`, `CodeQuery.cs`, `Assets/Loading/ImageFiles.cs` (`DS:10A9` geklärt). Teil 3: `MenuTextPlaque`, Texttabelle im Programmstart, `MainMenuProgramStep`/`NewGameProgramStep`, Host `App/ProgramHost.cs` mit Menüszene und `BorlandClock`; Mehrrundenprobe mit Mensch über vier Wochen (`ProgramHumanDifferentialTests`), Menübild des Hosts pixelgleich mit dem RefEmu; Architekturregeln #81 B4, #101 R4M-2; #76 P3-3. Offen: Anzeigebytes des Programmstarts (`Traders.Vga`) im Vergleich, Ladebild, Windows-Start (Nutzer).
 
 ## 1 `menue` – Menüs `192D` und erste Szene
 

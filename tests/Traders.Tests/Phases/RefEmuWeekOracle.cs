@@ -18,6 +18,8 @@ internal sealed class RefEmuWeekOracle
     [
         (0x117E, 4),                    // tick counters DS:117E/1180 (timer handler 27C6:0000)
         (DgroupLayout.KeyState, 0x80),  // key table DS:3D47 (keyboard handler 27C6:037A)
+        (0x1158, 1),                    // last make code (keyboard handler 27C6:0043; a human presses keys during the weeks)
+        (0x115D, 1),                    // make counter (keyboard handler 27C6:0043)
     ];
 
     private readonly OriginalProgram _p;
@@ -127,7 +129,7 @@ internal sealed class RefEmuWeekOracle
     private void RunToReturn(WeekStep step)
     {
         if (!RunToNextStop() || !IsAtLoop((ushort)(step.Site + 5)))
-            throw new InvalidOperationException($"RefEmu did not return from step {step}");
+            throw new InvalidOperationException($"RefEmu did not return from step {step} (week {_p.Week}, {_p.Machine.Seconds:F1} s emulated)");
     }
 
     private void TakeOver(Dgroup core) => _p.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(core.Bytes);

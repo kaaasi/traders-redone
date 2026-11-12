@@ -28,7 +28,8 @@
   und „Vektor 8 setzen“ (schreibt nur `[CS:0412]`, das Ziel der Weitergabe) ab; alles andere geht an das alte `int 21h`. Ein
   später geladener Treiber hängt sich damit hinter den Spielhandler statt ihn zu ersetzen.
 - **`0000` / `0027`:** `int 9` auf `0043` setzen (alten Vektor in `DS:1159`) bzw. zurück. **`00AC`:** Tastentabelle `3D47…3DC6`
-  löschen und den BIOS-Tastaturpuffer leeren (Kopf = Ende in `0040:001A/1C`). **`00D2`:** `DS:115D` = 0, warten bis ein Make kommt.
+  löschen und den BIOS-Tastaturpuffer leeren: nur das niedrige Byte des Kopfzeigers `0040:001A` wird nach `0040:001C` (Ende)
+  kopiert (`27C6:00C5`, Byte statt Wort; ohne Folge für den Port, der BIOS-Puffer hat keine Entsprechung). **`00D2`:** `DS:115D` = 0, warten bis ein Make kommt.
 - **Joystick** (für `0E9E`, Befund [0E9E_000E_steuerung.md](0E9E_000E_steuerung.md)): `00E6(n, Schritt)` kalibriert über Port
   201h (Mitte, dann zwei Ecken; Schrittweiten `DS:1166…117C`, je mindestens 1), `0268(n, Ziel)` liest Achsen als vorzeichen-
   behaftete Stufen nach `Ziel[0..1]` und Knöpfe in AX (Bit 0 = Knopf 1, Bit 1 = Knopf 2; Joystick 1 Bits 10h/20h, Joystick 2
