@@ -7,6 +7,8 @@ abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](arc
 
 ## Aktuelle Runde: 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle und Go Nutzer 11.11.2026)
 
+**Stand 12.11.2026:** alle vier Spuren gemergt (1 #67, 2 #68, 3 #69, 0 #66 → `fd46c2b`); Gesamtreview (ChatGPT) offen. Offene P3: #39 (R3), #49, #74–#77, #81.
+
 **Ziel:** Kern und Ausgabe bekommen ihr Gerüst, bevor die erste Szene entsteht (R4): Phasenmaschine mit Takt und
 Zufallsereignissen je Bild (F3 = A), die Regeln der Woche ohne Bildschirm als belegte Kernroutinen, die Grafikschichten über dem
 Treiber `23CD` und ein Host, der Framebuffer zeigt und Eingaben als Scancodes liefert. Ergebnis: M3 abgeschlossen (Phasenmaschine,

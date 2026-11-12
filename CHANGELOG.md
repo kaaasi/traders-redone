@@ -1,5 +1,18 @@
 # Zwischenstände
 
+## Runde 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (11.–12.11.2026) · letzte Spur `fd46c2b`
+
+- Spur 0 `takt` (PR #66): Maschinenabzug im RefEmu (Wiederaufsetzen bitgleich), Phasenmaschine im Kern mit Tick-Takt und Zufall je
+  Bild als Kern-Ereignis (F3 = A, `AGENTS.md` §4), acht Regelschritte angebunden, zwei Mehrrundenproben über vier Wochen gegen den
+  RefEmu, Abbruchweg B; Fixlauf B1/B2/B5 (#79, #80).
+- Spur 1 `regeln` (PR #67): Wochenpreise, Obergrenzen, Schwund, Vermögen/Rang/Verlauf, Produktion, Wetter, Edelsteinkurs,
+  Warenpreise – 15 Originalroutinen mit Befund und Differenztest.
+- Spur 2 `schichten` (PR #68): Seiten `0B67`, Paletten/Blenden `21FD`, Farbregister `2295`, Befehlsliste `0A96` (17 Typen), Hilfen
+  `0A69`, bewegte Objekte `21AF`; #60 geklärt (nicht erreichbar).
+- Spur 3 `host` (PR #69): Befunde Eingabe/Zeitgeber `27C6` und Steuerung `0E9E`, `src/Traders.App` (MonoGame, ohne Szenen),
+  Ton-Analyse `docs/analyse/TON.md`.
+- Prozess: Plan (PR #63), Freigaben der Leitstelle (Referenz-Repo, Labels, Merges; PR #64). 635 Tests grün mit Originaldaten.
+
 ## Runde 2 – Altbestand übernehmen (11.11.2026) · letzte Spur `b55ce3a`, Abschluss nach Fixlauf #59 `4022a66`
 
 - Spur 0 Bestandsaufnahme (PR #33, Fable): Karte aller 45 Segmente von `T.EXE`, Spiegel gegen Port und Altbranches, RefEmu-Proben P1–P6

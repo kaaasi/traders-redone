@@ -13,7 +13,7 @@ voraus. Sonderfälle: [anhang.md](anhang.md). Vorbild ist der Ablauf in `kaaasi/
 | **Implementierer** | eine Spur auf **einem** Branch `paket/<spur>` mit **einem** PR | eigenen PR freigeben oder mergen; fremde Branches ohne Übergabe ändern |
 | **Reviewer** (anderer Agent oder frische Sitzung ohne Implementierungskontext) | unabhängiges Review mit festen SHAs, Datei in `docs/reviews/` | Code oder den geprüften PR ändern (außer Label `review-ja`/`review-nein`) |
 
-**Aktuelle Leitstelle:** Claude, je Runde eine frische Sitzung (Nutzer 10.11.2026); Stand nur in GitHub (`docs/arbeitspakete.md`,
+**Aktuelle Leitstelle:** Claude, je Runde eine frische Sitzung (Nutzer 10.11.2026); sie merged geprüfte PRs selbst (Nutzer 11.11.2026); Stand nur in GitHub (`docs/arbeitspakete.md`,
 PRs, Labels). **Spuren und Erstreviews:** Claude (geplante Läufe). **Gesamtreview am Rundenende:** ChatGPT. Einen Wechsel
 entscheidet der Nutzer; er wird hier per PR eingetragen (Datum, neue Rolle, Grund).
 
@@ -77,7 +77,7 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      Nachprüfung für diesen Punkt; die Leitstelle führt beide Belege aus und entscheidet.
   8. **Verkettung und Labels:** Der Fixlauf legt bei behobenem P0/P1 selbst die Nachprüfung als geplanten Lauf an (Kurzaufruf aus
      `review-anfrage.md`); lehnt die Freigabe `create_trigger` ab: `spur-wartet`, Prompt im Übergabekommentar. Die Leitstelle
-     wartet auf Labels bzw. Review-PRs, nicht auf Kommentare. **Wer ein Label abarbeitet, entfernt es:**
+     wartet auf Labels bzw. Review-PRs, nicht auf Kommentare. **Wer ein Label abarbeitet, entfernt es;** die Leitstelle darf Labels jederzeit setzen und entfernen (Nutzer 11.11.2026):
 
      | Label | gesetzt von, wann | entfernt von, wann |
      |---|---|---|
