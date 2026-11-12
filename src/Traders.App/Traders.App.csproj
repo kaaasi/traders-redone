@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Traders.Assets\Traders.Assets.csproj" />
     <ProjectReference Include="..\Traders.Core\Traders.Core.csproj" />
+    <ProjectReference Include="..\Traders.Presentation\Traders.Presentation.csproj" />
     <ProjectReference Include="..\Traders.Vga\Traders.Vga.csproj" />
   </ItemGroup>
 </Project>
