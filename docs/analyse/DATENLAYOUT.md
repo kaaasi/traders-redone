@@ -234,3 +234,16 @@ Ergänzungen mit Beleg aus den portierten Routinen; Namen in `DgroupLayout.cs` (
 Präzisierung zu §5 (Vermögen): Edelsteine = Steine · (Grundeinheit · Kurs / 100) + Grundeinheit · Konto / 100; Land-, Waren-,
 Raketen- und Ölprodukte werden auf 16 Bit abgeschnitten; Öl zählt nur bei `45BA` = 1
 ([0825_0813_vermoegen.md](../routines/0825_0813_vermoegen.md)).
+
+## 10. Runde 4, Spur `spielfeld` (Steuerung `0E9E`, Spielfeld `0609`)
+
+Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs` bzw. `JoystickReader.cs`.
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `37C3`, `3786`/`302E`, Merker, `3308`, `2C10` | wie §4.1 | `Bits`, `MoveDelay`/`FireDelay`, `Flag*`, `Action`, `PlayerIndex` | Verzögerungen als `long` vorzeichenbehaftet | G – Differenztest `0E9E:*` |
+| `2BE6` | W | `MouseDriver` | AX von `int 33h`/0 (`0D73:00F8`); ≠ 0 → `0D73:07E0` fragt die Maus ab | G – Differenztest `0D73:07E0` |
+| `1166…1170` / `1172…117C` | W[6] je Knüppel | `Stick1` / `Stick2` | Mitte x, Mitte y, Schritt x unter/über der Mitte, Schritt y unter/über der Mitte | G – Differenztest `27C6:0268` |
+| `2F05` | B u | `FreeFields` | freie Felder (vom Feldsetzen `0609:10D2` gezählt; die neue Partie setzt Spalten·Zeilen) | G – Differenztest `0609:10D2` |
+| `4BA8` / `2EE7` | B[4] / B[4][4] u | `OwnedFields` / `OwnedKinds` | Felder je Spieler / je Spieler und Art 0–3 | G – Differenztest `0609:10D2` |
+| `37AA` | B s | `CurrentPlayer` | Spieler am Zug (Vergleich in `0609:1072`) | G – Differenztest `0609:1072` |

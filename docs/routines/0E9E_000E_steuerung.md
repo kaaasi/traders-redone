@@ -1,4 +1,4 @@
-# 0E9E:000E / 0E9E:0035 / 0E9E:0264 / 0E9E:0312 / 0E9E:037A – Steuerungsarten, Richtungs- und Feuerbits
+# 0E9E:000E / 0E9E:0035 / 0E9E:0264 / 0E9E:0312 / 0E9E:037A / 27C6:0268 / 0D73:07E0 – Steuerungsarten, Richtungs- und Feuerbits, Joystick- und Mausabfrage
 
 - **Ladebild-Adresse:** Segment `0E9E` (Dateioffset `0x11FE0`, Länge `0x400`; die Schleife von `037A` endet erst bei `0EDE:0002`).
 - **Aufgabe:** je Spieler die gewählte Steuerung abfragen und in Bits, Einzelmerker und einen Aktionscode umsetzen. Menschen
@@ -51,14 +51,37 @@
 Eingabe: Tastentabelle `3D47` (Befund [27C6_0043_eingabe_zeitgeber.md](27C6_0043_eingabe_zeitgeber.md)), Port 201h, `int 33h`,
 LPT-Ports. Kein Zufall, keine Uhr, keine Grafik.
 
+## Geräteroutinen (eigene Worte)
+
+- **`27C6:0268(Knüppel, Ziel)`:** ruft die Zählschleife `27C6:01D5` (schreibt den Knüppel an 201h, zählt bis zu 15 536 Lesungen,
+  solange ein Achsbit des Knüppels steht: BX = x, CX = y), liest 201h noch einmal für die Knöpfe. Je Achse: Zählwert ≥ Mitte →
+  so oft der Schritt „über“ in den Abstand passt, sonst negativ mit dem Schritt „unter“ (8-Bit-Zähler, läuft über); Werte nach
+  `Ziel` (x, y als Bytes). AX Bit 0/1 = Knopf 1/2 (Port-Bits 4/5 bei Knüppel 1, 6/7 bei jedem anderen Wert, aktiv tief).
+  Kalibrierwerte `DS:1166…117C` (DATENLAYOUT §10). Schritt 0 → Endlosschleife.
+- **`0D73:07E0`:** ohne Treiber (`DS:2BE6` = 0) Ergebnis 0, kein `int 33h`. Sonst Funktion 0Bh (Bewegungszähler CX, DX), dann
+  Funktion 03h (Knöpfe BX). Waagrecht zählt, wenn |CX| ≠ 0 und |CX| ≥ |DX| (rechts 1 bei CX > 1, links 2 bei CX < −1), senkrecht,
+  wenn |DX| > |CX| (runter 8 bei DX > 1, hoch 4 bei DX < −1); linker Knopf 10h, rechter 20h (`0035` blendet 20h aus).
+  Betrag mit 16-Bit-Überlauf (−32 768 bleibt negativ).
+- **Grenzfälle `0035`:** Art per `cbw` und vorzeichenlosem Vergleich mit 5 – negative und größere Arten ergeben Bits 0. Computer
+  ist in `0035` und `037A` nur `DS:0840` = 1, in `0264` dagegen „Mensch“ nur bei 0: ein Wert 2 liest die Steuerung, zählt aber
+  die Bewegungsverzögerung wie ein Computer. Bei Art 5 wird „runter“ (Bit 7 = 1) gesetzt, nicht addiert – gleichwertig, da
+  vorher 0. Zwei Spieler mit Maus teilen sich den Bewegungszähler: der zweite liest, was seit dem ersten Aufruf dazukam.
+
 ## C#-Umsetzung
 
-Noch keine. Die Abfrage gehört als Befehlsquelle in den Kern (Phasenmaschine, R4); der Host liefert nur den Tastenzustand.
+`src/Traders.Core/Input/`: `ControlReader` (`ReadActions` = `037A`, `ReadAll` = `000E`, `ReadBits` = `0035`, `UpdateMoveFlags` =
+`0264`, `UpdateFireFlag` = `0312`, `Result` liefert `PlayerControl` als Befehl), `JoystickReader.Read` = `0268`,
+`MouseReader.ReadDirection` = `07E0`. Gerätewerte über `IControlDevices` (Joystick-Messung, `int 33h` 0Bh/03h, LPT-Status je
+Auswahlbyte), Aufrufe in Originalreihenfolge; `KeyboardOnlyDevices` für den Host ohne weitere Geräte (F3 = A). Die Zählschleife
+`01D5` und die Portzugriffe bleiben beim Host (Hardware). `[APPROX]`: Schritt 0 ergibt 0 Schritte statt Endlosschleife.
 
 ## Prüfung
 
-RefEmu-Proben `tests/Traders.Tests/App/OriginalControlProbeTests.cs` auf dem Ladebild (`LoadOnly`, direkte Aufrufe): Arten 3 und
-4 mit Einzel- und Doppeltasten je Spieler, fremde Tasten ohne Wirkung, Computer unberührt; Art 2 ohne Treiber, Tastenbyte 7Eh;
-Art 5 ohne Adapter (nur „runter“); Vorrang der Aktion; Feuerverzögerung 100 000 und Loslassen; Bewegungsverzögerung zählt,
-wird bei Menschen ohne Richtung gelöscht, negativ nicht gezählt; Computer-Bits werden übernommen und Verzögerungen gezählt.
-Nicht geprüft: Joystick (RefEmu ohne Gerät an 201h, ohne Kalibrierung hängt `0268`), Maus mit Treiber (RefEmu ohne `int 33h`).
+Differenztests `tests/Traders.Tests/Input/ControlReaderDifferentialTests.cs` (RefEmu `LoadOnly`, direkte Aufrufe, Vergleich
+ganzes DS, Zufallszustand, LPT-Schreibfolge, `int 33h`-Aufrufe): je 300–400 Zufallsfälle für `0035`, `000E`, `037A`, `0264`,
+`0312` mit allen Arten (auch −1, 6, 80h), Computerwert 0/1/2, Verzögerungen 0/1/±groß/Vorzeichengrenze, Tasten mit 1/80h,
+Joystick über das Portmodell (Achszählwerte bis über die Schleifengrenze), Maus mit Extremwerten, LPT mit Zufallsstatus;
+40 Folgeaufrufe mit wechselnden Tasten; `0268` mit Knüppel 0…3; `07E0` mit 171 Bewegungs-/Knopfpaaren und ohne Treiber.
+RefEmu-Gerätemodell: `src/Traders.RefEmu/Machine/PcMachine.Devices.cs` (201h, `int 33h`, LPT; aus = bisheriges Verhalten).
+Gegenproben: 7 Mutationen im Port, 6 rot, eine gleichwertige (Mitte `≥` statt `>`). Die älteren Proben
+`tests/Traders.Tests/App/OriginalControlProbeTests.cs` bleiben als Lesart-Belege.

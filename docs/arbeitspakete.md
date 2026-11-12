@@ -118,7 +118,8 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; je Steuerungsart Differenztest (Bits und Aktionscode gleich dem RefEmu, Joystick/Maus/LPT
   über gesetzte Gerätewerte im RefEmu, sonst `[APPROX]` mit Begründung); Feldroutinen mit Grenzfällen; Spielfeldbild pixelgenau.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 (sonst `spur-wartet`, „wartet auf 1“).
-- **Status (Spur, PR offen):** Teil 1 in Arbeit.
+- **Status (Spur, PR #95):** Teil 1 fertig (Befehlsquelle `0E9E` mit allen sechs Arten, Differenztests grün); Teil 2 begonnen
+  (`0609:10D2/10A7/1072` fertig, Cursorlogik `0609:047B` offen); Teil 3 wartet auf Spur 1.
 
 ## Zuständigkeit gemeinsamer Dateien in R4
 
