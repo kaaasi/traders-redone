@@ -260,3 +260,13 @@ Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs
 | `2F05` | B u | `FreeFields` | freie Felder (vom Feldsetzen `0609:10D2` gezählt; die neue Partie setzt Spalten·Zeilen) | G – Differenztest `0609:10D2` |
 | `4BA8` / `2EE7` | B[4] / B[4][4] u | `OwnedFields` / `OwnedKinds` | Felder je Spieler / je Spieler und Art 0–3 | G – Differenztest `0609:10D2` |
 | `37AA` | B s | `CurrentPlayer` | Spieler am Zug (Vergleich in `0609:1072`) | G – Differenztest `0609:1072` |
+| `304E` / `305A` | B[4] s | `CursorX` / `CursorY` | Cursor je Spieler | G – Differenztest `0609:047B` |
+| `43B2` | B[4] u | `Mode` | Modus im Spielfeld: 4 = Art wählen, 6 = fertig (übrige Werte vgl. `0609:064D`) | G (4, 6), W (übrige) – `0609:047B`, `0EDD` |
+| `4BCA` / `3022` / `4BD2` | W[4] s | `Direction` / `MoveTimer` / `MoveFrame` | Zugrichtung 0–3 / Zugdauer 11h bzw. 0Ch / Anfangsbild | G (Werte), W (Bedeutung) – `0609:047B` |
+| `2E94` | B[4] s | `Selection` | gewählte Art −1…4 | G – Differenztest `0609:0BEA` |
+| `45DA` | B[9·6] u | `Terrain` | Gelände je Feld; 3 überspringt Art 3 | G (Prüfung), W (Bedeutung) – `0609:0BEA` |
+| `1582` / `45BA` | B u | `NoTime` / `TimeLimit` | Züge kosten keine Zeit (1) / Zeitlimit (≠ 0) | G – Differenztest `0609:0EA1` |
+| `4520` | W[4] s | `TimeLeft` | Zeiteinheiten übrig; `1B72` addiert den Schritt | G – Differenztest `0609:1B72` |
+| `3CE6` | B u | `Finished` | von `0EDD` herabgezählt; die Spielfeldschleife `0609:03E0` läuft bis 0 | G (Zählung), W (Bedeutung) |
+| `00E0` | B[4] u | `Blink` | Blinkzähler des Cursors (13h nach `random(200)` = 0) | G – Differenztest `0609:215E` |
+| `330C` / `3324` | B / W, Sätze zu 1Ah | `Sprite` / `SpriteFrame` | Sprite sichtbar / Bild (Satz je Spieler) | G (Schreiben `21AF:045E`, `215E`), W (Bedeutung) |
