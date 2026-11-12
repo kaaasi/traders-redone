@@ -102,6 +102,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; Startzustand bitgleich für jede Kombination, Gegenprobe im Review (eine Ziehung vertauscht →
   rot); `abdeckung.py --check` grün.
 - **Abhängigkeiten:** keine.
+- **Status:** Teil 1 in Arbeit (Claude, PR `paket/partie`).
 
 ## 3 `spielfeld` – Befehlsquelle `0E9E` und Spielfeldschicht `0609`
 
