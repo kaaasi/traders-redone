@@ -164,6 +164,13 @@ public sealed class OriginalProgram
     /// </summary>
     public ushort StackArgument(int index) => Machine.Mem.Read16(Machine.Cpu.Ss, (ushort)(Machine.Cpu.Sp + 4 + 2 * index));
 
+    /// <summary>
+    /// Runs until the entry of the image routine <paramref name="imageSegment"/>:<paramref name="offset"/> and stops before its
+    /// first instruction (for example the main menu 192D:0007 after the start). False if it is not reached in time.
+    /// </summary>
+    public bool RunToRoutine(ushort imageSegment, ushort offset, double maxSeconds) =>
+        RunUntil(() => IsAt(imageSegment, offset), maxSeconds);
+
     private bool RunUntil(Func<bool> condition, double maxSeconds)
     {
         // A stop at the current position would end the run at once; step past it first.

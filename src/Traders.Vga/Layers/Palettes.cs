@@ -63,6 +63,13 @@ public sealed partial class GraphicsLayers
     /// </summary>
     public void Blend(ushort rgb12, ushort steps)
     {
+        BlendWorkPalette(rgb12, steps);
+        if (IsVga) SetAllColorRegisters(Ds.AsSpan(WorkPalette, 768));
+    }
+
+    /// <summary>The computing part of 21FD:03EB: working palette DS:54E8 from the base palette (no DAC access).</summary>
+    private void BlendWorkPalette(ushort rgb12, ushort steps)
+    {
         var (tr, tg, tb) = Components(rgb12);
         Span<byte> target = [tr, tg, tb];
         byte step = (byte)(steps << 3);
@@ -85,7 +92,6 @@ public sealed partial class GraphicsLayers
                 Ds[WorkPalette + color * 3 + k] = c;
             }
         }
-        if (IsVga) SetAllColorRegisters(Ds.AsSpan(WorkPalette, 768));
     }
 
     /// <summary>[ORIGINAL] 21FD:0329: fade in from the blend colour, steps 7…0, three retraces after each.</summary>

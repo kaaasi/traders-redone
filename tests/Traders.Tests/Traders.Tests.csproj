@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\src\Traders.App\Traders.App.csproj" />
     <ProjectReference Include="..\..\src\Traders.Assets\Traders.Assets.csproj" />
     <ProjectReference Include="..\..\src\Traders.Core\Traders.Core.csproj" />
+    <ProjectReference Include="..\..\src\Traders.Presentation\Traders.Presentation.csproj" />
     <ProjectReference Include="..\..\src\Traders.RefEmu\Traders.RefEmu.csproj" />
     <ProjectReference Include="..\..\src\Traders.Vga\Traders.Vga.csproj" />
     <ProjectReference Include="..\..\src\Traders.Audio\Traders.Audio.csproj" />
