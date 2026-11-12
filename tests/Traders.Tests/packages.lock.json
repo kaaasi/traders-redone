@@ -139,6 +139,14 @@
       "traders.core": {
         "type": "Project"
       },
+      "traders.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "Traders.Assets": "[1.0.0, )",
+          "Traders.Core": "[1.0.0, )",
+          "Traders.Vga": "[1.0.0, )"
+        }
+      },
       "traders.refemu": {
         "type": "Project",
         "dependencies": {

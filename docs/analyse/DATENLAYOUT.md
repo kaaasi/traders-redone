@@ -248,7 +248,21 @@ Präzisierung zu §5 (Vermögen): Edelsteine = Steine · (Grundeinheit · Kurs /
 Raketen- und Ölprodukte werden auf 16 Bit abgeschnitten; Öl zählt nur bei `45BA` = 1
 ([0825_0813_vermoegen.md](../routines/0825_0813_vermoegen.md)).
 
-## 8. Runde 4, Spur `programm` (Programmablauf)
+## 8. Runde 4, Spur `menue` (Menüs `192D`)
+
+Namen in `src/Traders.Core/Menus/MenuLayout.cs`; Befund [192D_0007_menues.md](../routines/192D_0007_menues.md).
+
+| DS | Breite | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `3CCC` | B | `Choice` | 1 neue Partie, 2 geladene Partie fortsetzen | G – `192D:12A6`; Differenztest |
+| `4581` | B | `AllComputers` | 1, wenn alle vier Spieler Computer sind | G – `192D:03E3`; Differenztest |
+| `5330` / `5332` | W s | `EditColumns` / `EditRows` | Spalten/Zeilen im Einstellungsmenü, übernommen nur bei neuer Partie (`00A3`) | G – `192D:0092/00A3/0D10/0D42`; Differenztest |
+| `5334` | W s | `PlaqueTop` | Oberkante der Menütafel (200 − h)/2, Diskette 1Bh | G – `192D:16AF/0FB7`; Differenztest |
+| `08FA` | B | `GameInProgress` | Partie läuft bzw. geladen (Speichern erlaubt, Fortsetzungsfrage) | G – `192D:11A0/11C9/12A9` |
+| `08DA` | W | `PictureResource` | Ressourcennummer des Menübilds (`186C:0002`) | G – `192D:000A` |
+| `37CC…3C8F` | far[305] | `TextPointers` | Eintrag k = Zeile k − 1 von ENGLISCH.TXT, Eintrag 0 null | G – `192D:18B6`; Differenztest |
+
+## 9. Runde 4, Spur `programm` (Programmablauf)
 
 Belege: [1777_000C_main.md](../routines/1777_000C_main.md), [1777_04E4_initialisierung.md](../routines/1777_04E4_initialisierung.md);
 Gleichschritt-Differenztest `ProgramMachineDifferentialTests`.

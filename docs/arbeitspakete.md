@@ -88,6 +88,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; alle Menüs pixelgenau gegen den RefEmu; Bild- und Zufallsfolge im Gleichschritt (#86);
   Optionsfelder nach jeder Menüfolge gleich dem RefEmu; `check-architecture.py` grün mit Gegenproben.
 - **Abhängigkeiten:** keine.
+- **Status (Spur, PR #93):** Teile 1–3 fertig (Menülogik im Kern; Menüszene `src/Traders.Presentation` pixelgenau gegen den RefEmu, Architekturregeln; Bild- und Zufallsfolge je Rücklauf gegen den RefEmu mit echten Tasteninterrupts, Seitenwechsel = zwei Bilder, Blenden bildweise). Review offen.
 
 ## 2 `partie` – neue Partie `0E31`
 
