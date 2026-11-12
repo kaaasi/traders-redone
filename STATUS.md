@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 11.11.2026 · Runde 2 (Altbestand) abgeschlossen ([archiv/runde-2.md](docs/archiv/runde-2.md)); nächste: Runde 3
+Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Host): alle Spuren gemergt, Gesamtreview offen
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -11,8 +11,8 @@ Stand: 11.11.2026 · Runde 2 (Altbestand) abgeschlossen ([archiv/runde-2.md](doc
 |---|---|---|---|
 | M0 | Fundament (Repo, CI, Originale, Plan) | ✅ | Hash-Prüfung der Originale in CI |
 | M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
-| M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0) |
-| M3 | Kern-Fundament | 🟡 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand fertig; Wochenschleife `1777:01F8` belegt (R2 Spur 3), VGA-Treiber `23CD` portiert (R2 Spur 2); Phasenmaschine offen (R3) |
+| M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0); Maschinenabzug zum Wiederaufsetzen an Marken (R3 Spur 0) |
+| M3 | Kern-Fundament | 🟢 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Abschluss nach Gesamtreview R3 |
 | M4 | Menü & Setup | ⬜ | |
 | M5 | Anbau | ⬜ | |
 | M6 | Produktion & Wetter | ⬜ | |
@@ -50,18 +50,18 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 |---|---:|---|---|
 | `0000` | 0x5350 | Turbo-C-Laufzeit (Startcode ruft `1777:000C`, Long-Arithmetik, Dateien, `time()`, Tonroutinen `06FE/0724/0750`) | 🔍 nur benötigte Teile werden nachgebildet |
 | `0535` | 0xD40 | Roboterkampf: Aufstellung, Kampfwerte | 🔍 |
-| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | ⬜ |
-| `0825` | 0xAA0 | Wochenbilanz (Darstellung), Vermögen/Rang (`0813`, `06CB`, `07C4`) | ⬜ |
-| `08CF` | 0x19A0 | Einkauf (Öl, Raketen, Lotto, Edelsteine), Edelsteinkurs `11D7` | ⬜ |
-| `0A69` | 0x2D0 | Grafik: Linien-, Rahmen-, Texthilfen über der Befehlsliste | 🔍 |
-| `0A96` | 0xD10 | Grafik: Befehlsliste (17 Befehlstypen, Ausführung `06A8`) | 🔍 |
-| `0B67` | 0x380 | Grafik: Bildschirmseiten, Seitenwechsel, Warten | ⬜ |
-| `0B9F` | 0x8A0 | Handel: Ablauf und Regeln (Angebote, Warenpreise `DS:4898`) | 🔍 |
+| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | 🟡 `1178` portiert (R3 Spur 1) |
+| `0825` | 0xAA0 | Wochenbilanz (Darstellung), Vermögen/Rang (`0813`, `06CB`, `07C4`) | 🟡 Vermögen/Rang/Verlauf `0813`/`06CB`/`07C4` portiert (R3 Spur 1) |
+| `08CF` | 0x19A0 | Einkauf (Öl, Raketen, Lotto, Edelsteine), Edelsteinkurs `11D7` | 🟡 Edelsteinkurs `11D7` portiert (R3 Spur 1) |
+| `0A69` | 0x2D0 | Grafik: Linien-, Rahmen-, Texthilfen über der Befehlsliste | 🟢 Hilfen portiert (R3 Spur 2) |
+| `0A96` | 0xD10 | Grafik: Befehlsliste (17 Befehlstypen, Ausführung `06A8`) | 🟢 Befehlsliste, alle 17 Typen (R3 Spur 2) |
+| `0B67` | 0x380 | Grafik: Bildschirmseiten, Seitenwechsel, Warten | 🟢 Seiten und Warten (R3 Spur 2) |
+| `0B9F` | 0x8A0 | Handel: Ablauf und Regeln (Angebote, Warenpreise `DS:4898`) | 🟡 Warenpreise `06A0`/`078A` portiert (R3 Spur 1) |
 | `0C29` | 0x14A0 | Handel: Bildschirm und Bedienung, bucht Bargeld/Vorräte | ⬜ |
 | `0D73` | 0x8A0 | Systemschicht: Interrupts, Karten-/Tonerkennung, Speicher, Dateien | ⬜ |
 | `0DFD` | 0x340 | Programmstart: Schrift, Masken, Bilder, Texte laden; Code-Abfrage | ⬜ |
 | `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | 🔍 |
-| `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | ⬜ |
+| `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | 🔍 Befund (R3 Spur 3); Port als Befehlsquelle in R4 |
 | `0EDE` | 0x23F0 | Roboterkampf: Ablauf, Bewegung, Treffer, Beute | 🔍 |
 | `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | ⬜ |
 | `11A3` | 0x1250 | Computerspieler: Wochenplanung (zwei Durchgänge) | ⬜ |
@@ -70,7 +70,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
-| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🔍 `000C`/`01F8` mit Befund und RefEmu-Test (R2 Spur 3) |
+| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟢 `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3 Spuren 0, 1); `000C` Befund |
 | `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ⬜ |
 | `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🔍 |
 | `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | 🔍 |
@@ -80,15 +80,15 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `1E7E` | 0xE50 | Roboterkampf: Kampffeld erzeugen (Raster `DS:48F4`) | ⬜ |
 | `1F63` | 0x1500 | Fat Mike und Wettbewerb nach dem Einkauf | ⬜ |
 | `20B3` | 0xD80 | Endprüfung, Abend- und Endbildschirme | ⬜ |
-| `218B` | 0x1C0 | Musik über residenten Treiber (`int 64h`) | 🔍 |
-| `21A7` | 0x80 | Toneffekt auslösen, Effektquelle wählen | ⬜ |
-| `21AF` | 0x4E0 | Grafik: bewegte Objekte (8 Sätze ab `DS:330C`) | ⬜ |
-| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 |
-| `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🔍 |
-| `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | ⬜ |
+| `218B` | 0x1C0 | Musik über residenten Treiber (`int 64h`) | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
+| `21A7` | 0x80 | Toneffekt auslösen, Effektquelle wählen | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
+| `21AF` | 0x4E0 | Grafik: bewegte Objekte (8 Sätze ab `DS:330C`) | 🟢 bewegte Objekte (R3 Spur 2) |
+| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3) |
+| `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🟢 portiert (R3 Spur 2) |
+| `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | 🟡 Produktion `0003`, Schwund `026B` portiert (R3 Spur 1); Ernte offen |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
 | `23CD` | 0x3F90 | Grafiktreiber in Assembler; portiert wird nur der VGA-Teil (Mode X), Objekte `06E9/071C`, Atlas `166A/3079` | ✅ VGA-Teil (29 Adressen mit Differenztest, Randfälle laut Gesamtreview R2 behoben, #59; offen #60) |
-| `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🔍 |
+| `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🟢 Eingabe/Zeitgeber mit Differenztests, Host-Ersatz in `Traders.App` (R3 Spur 3) |
 | `2821` | 0x2F0 | PP20-Entpacker (`PowerPacker` aus Formatwissen, ohne Differenztest) | 🟢 |
 | `2850` | 0x8A0 | PC-Lautsprecher-Effekte | – entfällt (nur VGA/AdLib) |
 | `28DA`, `28DB` | 0x10 | Segmentmarken der Laufzeit, kein Code | – |
