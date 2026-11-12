@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Host): alle Spuren gemergt, Gesamtreview offen
+Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Host) abgeschlossen ([archiv/runde-3.md](docs/archiv/runde-3.md)); nächste: Runde 4
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -12,7 +12,7 @@ Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Hos
 | M0 | Fundament (Repo, CI, Originale, Plan) | ✅ | Hash-Prüfung der Originale in CI |
 | M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
 | M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0); Maschinenabzug zum Wiederaufsetzen an Marken (R3 Spur 0) |
-| M3 | Kern-Fundament | 🟢 | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Abschluss nach Gesamtreview R3 |
+| M3 | Kern-Fundament | ✅ | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Gesamtreview R3 „Ja“ |
 | M4 | Menü & Setup | ⬜ | |
 | M5 | Anbau | ⬜ | |
 | M6 | Produktion & Wetter | ⬜ | |
@@ -70,7 +70,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
-| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟢 `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3 Spuren 0, 1); `000C` Befund |
+| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟡 `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3 Spuren 0, 1); `000C` Befund |
 | `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ⬜ |
 | `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🔍 |
 | `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | 🔍 |
@@ -88,7 +88,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | 🟡 Produktion `0003`, Schwund `026B` portiert (R3 Spur 1); Ernte offen |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
 | `23CD` | 0x3F90 | Grafiktreiber in Assembler; portiert wird nur der VGA-Teil (Mode X), Objekte `06E9/071C`, Atlas `166A/3079` | ✅ VGA-Teil (29 Adressen mit Differenztest, Randfälle laut Gesamtreview R2 behoben, #59; offen #60) |
-| `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🟢 Eingabe/Zeitgeber mit Differenztests, Host-Ersatz in `Traders.App` (R3 Spur 3) |
+| `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🟡 Eingabe/Zeitgeber mit Differenztests, Host-Ersatz in `Traders.App` (R3 Spur 3) |
 | `2821` | 0x2F0 | PP20-Entpacker (`PowerPacker` aus Formatwissen, ohne Differenztest) | 🟢 |
 | `2850` | 0x8A0 | PC-Lautsprecher-Effekte | – entfällt (nur VGA/AdLib) |
 | `28DA`, `28DB` | 0x10 | Segmentmarken der Laufzeit, kein Code | – |
