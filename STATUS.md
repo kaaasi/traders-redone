@@ -180,6 +180,13 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0B9F:06A0` | [0B9F_06A0_warenpreise.md](docs/routines/0B9F_06A0_warenpreise.md) | `src/Traders.Core/Rules/WarePrices.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `0B9F:078A` | [0B9F_06A0_warenpreise.md](docs/routines/0B9F_06A0_warenpreise.md) | `src/Traders.Core/Rules/WarePrices.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `0D73:00D3` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PageLayerTests.cs` | ✅ |
+| `0E31:0003` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:0149` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:01CD` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:023D` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:0361` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGameLand.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:0379` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGameLand.cs` | `NewGameDifferentialTests.cs` | ✅ |
+| `0E31:0465` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGameLand.cs` | `NewGameDifferentialTests.cs` | ✅ |
 | `0E9E:000E` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | – | – | 🔍 |
 | `0E9E:0035` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | – | – | 🔍 |
 | `0E9E:0264` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | – | – | 🔍 |
@@ -277,7 +284,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `0C29` | 0x14A0 | 29 | 0 | 0 | 0 |
 | `0D73` | 0x8A0 | 15 | 1 | 1 | 1 |
 | `0DFD` | 0x340 | 5 | 0 | 0 | 0 |
-| `0E31` | 0x6D0 | 7 | 0 | 0 | 0 |
+| `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 0 | 0 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
 | `111D` | 0x860 | 7 | 0 | 0 | 0 |
@@ -310,7 +317,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **137** | **123** | **123** |
+| **Summe** | **0x28DC0** | **891** | **144** | **130** | **130** |
 
 <!-- abdeckung:ende -->
 
