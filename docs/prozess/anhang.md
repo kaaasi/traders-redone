@@ -68,7 +68,9 @@ Ist das nicht erbracht, gilt der Stand als „unverifiziert“: Läufe daran sin
   `git ls-remote` belegt nur Leserecht; Schreibrecht zeigt erst der erste Push.
 - **Modell:** nach dem Anlegen mit `update_trigger` setzen, wenn es von Opus abweicht (nur für Mechanisches nach
   `zusammenarbeit.md` §5 „Modellwahl“ oder auf Wunsch des Nutzers).
-- **`spur-wartet` durchsehen:** „Fortsetzung anlegen – Leitstelle“ heißt, die Aufgabe mit dem Prompt aus der Übergabe anlegen –
+- **Nur die Leitstelle legt Aufgaben an** (Nutzer 12.11.2026): Fortsetzungen, Fixläufe, Erst- und Nachprüfungen; kein Startaufruf
+  erlaubt einem Lauf `create_trigger`.
+- **`spur-wartet` durchsehen:** „Fortsetzung anlegen – Leitstelle“ bzw. „Nachprüfung anlegen – Leitstelle“ heißt, die Aufgabe mit dem Prompt aus der Übergabe anlegen –
   vorher gegen den Kurzaufruf „Geplanter Lauf mit Teilen“ prüfen; abweichen dürfen nur Spur, Modell, Zähler und PR-Nummer.
   Draft-Status, den ein Lauf nicht aufheben konnte, hebt die Leitstelle selbst auf.
 - **Warten über Labels:** je Label eine Abfrage (`gh api 'repos/kaaasi/traders-redone/issues?labels=<label>&state=open'`; mehrere

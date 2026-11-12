@@ -5,11 +5,13 @@
 > Repo kaaasi/traders-redone. Arbeite nach `docs/vorlagen/spur-start.md`. Spur: `<name>`. Agent: `<Claude | ChatGPT | …>`.
 > Besonderheiten: `<nur falls nötig, sonst weglassen>`
 
-**Geplanter Lauf mit Teilen** (Startaufruf der Leitstelle; die Fortsetzung hängt `Fortsetzung <n> von 3, Übergabe in PR #<nr>.` an):
+**Geplanter Lauf mit Teilen** (Startaufruf der Leitstelle; eine Fortsetzung legt ebenfalls die Leitstelle an und hängt
+`Fortsetzung <n> von 3, Übergabe in PR #<nr>.` an):
 
 > Repo kaaasi/traders-redone. Arbeite nach `docs/vorlagen/spur-start.md`. Spur: `<name>`. Agent: Claude.
-> Unbeaufsichtigt, keine Rückfragen. Teile und Selbstfortsetzung nach Abschnitt „Teile und Fortsetzung“; das Anlegen
-> einer Fortsetzung per `create_trigger` ist autorisiert (höchstens 3 je Spur). Modell der Spur: `<modell>`.
+> Unbeaufsichtigt, keine Rückfragen. Teile nach Abschnitt „Teile und Fortsetzung“. Keine Aufgaben anlegen (kein `create_trigger`):
+> Fortsetzungen, Nachprüfungen und Reviews legt allein die Leitstelle an (Nutzer 12.11.2026); am Ende Label `spur-wartet` und
+> Übergabe mit fertigem Prompt. Modell der Spur: `<modell>`.
 > Zugriff zuerst prüfen: `git ls-remote https://github.com/kaaasi/traders-redone HEAD` und
 > `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` (prüft nur Lesen). Scheitert eines, `add_repo` (ggf. erst per `ToolSearch` mit
 > `select:mcp__claude-code-remote__add_repo` laden; meist nicht vorhanden) für `kaaasi/traders-redone` (access push) bzw.
@@ -20,14 +22,13 @@
 **Anlegen** (Leitstelle oder Nutzer): dem Lauf beide Repos mitgeben, `kaaasi/traders-redone` mit Schreibzugriff und
 `kaaasi/traders-referenz` mindestens lesend; der `add_repo`-Weg im Startaufruf ist nur der Rückfall.
 
-**Einzelner Folgeteil ohne Fortsetzung:** wie oben, aber statt „Teile und Selbstfortsetzung … (höchstens 3 je Spur).“ der Satz
-„Teile nach Abschnitt ‚Teile und Fortsetzung‘; nur Teil <n>, keine Fortsetzung anlegen.“
+**Einzelner Folgeteil:** wie oben mit dem Zusatz „Nur Teil <n>.“
 
 **Fixlauf** (geplanter Lauf): Startaufruf wie oben mit Auftrag „Befunde `<IDs>` aus `<review-datei>` zu PR #`<nr>` beheben, Head
 vorher `<sha>`“ – ohne Befund (nur Rebase): „PR #`<nr>` auf `main` rebasen, Head vorher `<sha>`“. Am Ende
-(`zusammenarbeit.md` §5 Punkt 8): bei behobenem P0/P1 die Nachprüfung selbst per `create_trigger` anlegen (Kurzaufruf aus
-`review-anfrage.md`, Delta alter..neuer Head, nur diese Befunde; vorher `list_triggers` auf eine ausstehende Nachprüfung dieses PRs;
-autorisiert; Modell im Übergabekommentar „Modell prüfen (Soll: …)“), sonst Label `leitstelle-delta`. Mit dem Push des neuen
+(`zusammenarbeit.md` §5 Punkt 8): bei behobenem P0/P1 Label `spur-wartet` und in der Übergabe „Nachprüfung anlegen –
+Leitstelle“ mit fertigem Kurzaufruf aus `review-anfrage.md` (Delta alter..neuer Head, nur diese Befunde; nicht selbst anlegen),
+sonst Label `leitstelle-delta`. Mit dem Push des neuen
 Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Beleg: `beleg-strittig`, beide Belege in der Übergabe.
 
 ## Ablauf für den Agenten
@@ -50,8 +51,8 @@ Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Be
 
 ## Teile und Fortsetzung (geplante Läufe)
 
-Gilt, wenn die Spur in `docs/arbeitspakete.md` eine geordnete Liste von Teilen hat und der Startaufruf die Fortsetzung erlaubt
-oder einen einzelnen Folgeteil nennt (dann ohne Schritt 5).
+Gilt, wenn die Spur in `docs/arbeitspakete.md` eine geordnete Liste von Teilen hat. **Läufe legen nie selbst Aufgaben an**
+(`create_trigger`); jede Fortsetzung legt die Leitstelle an (Nutzer 12.11.2026).
 
 1. **Stand ermitteln:** offenen PR (`paket/<spur>`) und letzten Übergabekommentar lesen; dort steht „Fortsetzungen verbraucht:
    n von 3“ (nennt der Startaufruf einen anderen Zähler, gilt der höhere). Bearbeiter ≠ `frei` ohne Übergabekommentar **nach**
@@ -64,11 +65,9 @@ oder einen einzelnen Folgeteil nennt (dann ohne Schritt 5).
    Der PR bleibt Draft, bis alle Teile fertig sind; dann den nächsten Teil im selben Lauf beginnen, solange Zeit bleibt.
 4. **Teil blockiert** (kein grünes `pruefen.sh --schnell`, Beleg fehlt, fremde Datei nötig, Frage an den Nutzer): Draft mit Übergabe, Label
    `spur-wartet`, in der Übergabe „blockiert – Entscheidung Nutzer“ und Grund. Keine Fortsetzung.
-5. **Fortsetzung anlegen** (nur wenn Teile offen sind, nichts blockiert und n < 3): vorher `list_triggers` – steht für die Spur
-   schon eine Aufgabe aus, keine weitere; `create_trigger` mit `run_once_at` etwa 10 Minuten später, Name
-   `Spur <name> – Fortsetzung <n+1>`, Prompt = Startaufruf oben mit `Fortsetzung <n+1> von 3, Übergabe in PR #<nr>.`; in der
-   Übergabe „Modell der Fortsetzung prüfen (Soll: <modell>)“ sowie Name und Zeitpunkt. Lehnt die Freigabe `create_trigger` ab:
-   `spur-wartet`, in der Übergabe „Fortsetzung anlegen – Leitstelle“ mit fertigem Prompt.
+5. **Fortsetzung anmelden** (nur wenn Teile offen sind, nichts blockiert und n < 3): Label `spur-wartet`, in der Übergabe
+   „Fortsetzung anlegen – Leitstelle“ mit fertigem Prompt (Startaufruf oben mit `Fortsetzung <n+1> von 3, Übergabe in PR #<nr>.`)
+   und „Modell der Fortsetzung: <modell>“. Selbst keine Aufgabe anlegen.
 6. **Kettenende:** Alle Teile fertig → Beschreibung vervollständigen, „Ready for review“
    (`gh api -X POST repos/kaaasi/traders-redone/pulls/<nr>/ccr/ready_for_review`; scheitert es, Fehlermeldung in der Übergabe),
    `spur-wartet`, Übergabe „Spur fertig – Review“. n = 3 und Teile offen: Draft lassen, `spur-wartet`, „Fortsetzungen erschöpft –
