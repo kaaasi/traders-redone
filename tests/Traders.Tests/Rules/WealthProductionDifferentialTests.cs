@@ -150,6 +150,30 @@ public class WealthProductionDifferentialTests
         }
     }
 
+    // [DIFFERENTIAL] 0825:07C4
+    [GameDataFact]
+    public void History_for_strongly_negative_weeks_P3_74()
+    {
+        // #74 R3R-2: the slot offset is 16-bit. Down to week -4167 every player's entry lies in the image (player 0 at
+        // DS:0000); from week -4168 player 0 wraps behind the image (DS:FFFC). The original writes there without a fault,
+        // the port's data segment ends at 0x58A0 and throws instead (unreachable in a game, the week counts up from 0).
+        // The offset repeats every 16384 weeks (e.g. week -16384 lands in the image again).
+        var r = new Inputs(0x4167);
+        foreach (short week in new short[] { -41, -1000, -4100, -4166, -4167 })
+        {
+            var d = WealthInput(r, extreme: false);
+            d.Set(L.Week, week);
+            Harness.AssertSame(d, 0x0825, 0x07C4, WealthHistoryRecord.Apply, $"week {week}");
+        }
+        foreach (short week in new short[] { -4168, -5000, -8000 })
+        {
+            var d = WealthInput(r, extreme: false);
+            d.Set(L.Week, week);
+            Assert.Null(Harness.RunOriginal(d, 0x0825, 0x07C4).Fault);
+            Assert.Throws<ArgumentOutOfRangeException>(() => WealthHistoryRecord.Apply(new Dgroup((byte[])d.Bytes.Clone())));
+        }
+    }
+
     // ------------------------------------------------------------------ 22A3:0003 production
 
     private static Dgroup ProductionInput(Inputs r, bool extreme)

@@ -113,6 +113,19 @@ Wetter (`21FD:021F`), je Spieler die Startwerte aus §2, `BaseUnit`, `GemPriceFa
 (`random(120)`), Warenpreise 3, `Week` 0, `Unknown4580` −1, `Unknown40F6` = 0,2,1,0.
 Die Zufallsreihenfolge ist für M4 zu portieren (Befund dann in `docs/routines/`).
 
+### 3.1 Neue Partie belegt (Spur `partie`, R4)
+
+Befund [0E31_0003_neue_partie.md](../routines/0E31_0003_neue_partie.md), Differenztests
+`tests/Traders.Tests/Rules/NewGameDifferentialTests.cs` (ganzes Datensegment gegen RefEmu). Präzisierungen zu §2 und §3:
+
+- `LandType` 0 → zufälliges Land `0379`, **jeder andere Wert** → reales Land `0465`; beide setzen die Bodengüte `45DA`
+  (je `Spalten·Zeilen/4 − 1` Felder Güte 0, 1, 2, Rest 3), Besitzer und Art setzt `01CD`.
+- `StationValue` (`348A`): −1 mit 2/3, 10 mit 2/9, 0…3 mit je 1/36 (`random(n)` liefert 0…n; die Angabe „½, ¼“ in Zeile 34
+  gilt nicht).
+- `Cash` = `InitialCash` vorzeichenbehaftet erweitert, `BaseUnit` = `InitialCash idiv 40`; `GemPriceFactor` Hochwort 0.
+- Hinterlassene Schleifenvariablen: `37AA` = 4, `45D0` = 4, `2EB0` = Spalten, `2F00` = Zeilen. Nicht berührt: `HqY`,
+  `Unknown4BBE`, `WealthHistory`.
+
 ## 4. Laufzeitzustand außerhalb des Spielstands (Auswahl)
 
 | DS | Breite | Name | Bedeutung | Beleg |
