@@ -108,6 +108,8 @@ public sealed class MainMenuDifferentialTests
                 .Hold(Start + 50, 1, MenuKeys.F2).Hold(Start + 51, 1, MenuKeys.F2).Hold(Start + 60, 30, MenuKeys.F6)
                 .Hold(Start + 200, 2, MenuKeys.Enter).Hold(Start + 300, 2, MenuKeys.Enter).Hold(Start + 400, 2, MenuKeys.Enter),
                 [], [], []),
+            ["fast-flips"] = _ => (new KeyScript().Hold(Start, 60, MenuKeys.KeypadPlus).Hold(Start + 10, 3, MenuKeys.F1)
+                .Hold(Start + 20, 3, MenuKeys.F2).Hold(Start + 100, 2, MenuKeys.Enter).Hold(Start + 200, 2, MenuKeys.Enter), [], [], []),
             ["custom-level-start"] = d =>
             {
                 d.Set(DgroupLayout.Level, (short)-1);

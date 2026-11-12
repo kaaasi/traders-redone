@@ -25,7 +25,7 @@ public enum MenuEventKind
     /// <summary>Fade-in: A = 21FD:0353 (fast) or 21FD:0329 (slow).</summary>
     FadeIn,
 
-    /// <summary>21FD:051F: page flip (A = 1 when the flip waited four more retraces).</summary>
+    /// <summary>21FD:051F: page flip (two retraces, see <see cref="MenuWait.Flip"/>).</summary>
     Flip,
 
     /// <summary>0A96:06A8: the command list is executed.</summary>
@@ -50,7 +50,10 @@ public sealed record MenuEvent(MenuEventKind Kind, long Frame, int A = 0, int B 
 /// <summary>Why the menu coroutine gives up the rest of the frame.</summary>
 public enum MenuWait
 {
-    /// <summary>Page flip 21FD:051F: the original waits for the vertical retrace.</summary>
+    /// <summary>
+    /// Page flip 21FD:051F: the retrace after showing the new page (0B67:0196/01B5); the flip's further retraces
+    /// (0B67:028F, keypad minus) follow as <see cref="Retrace"/>.
+    /// </summary>
     Flip,
 
     /// <summary>A key wait loop of the original polls the key table again (busy loop; the key changes in a later frame).</summary>

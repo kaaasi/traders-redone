@@ -17,7 +17,7 @@ namespace Traders.Tests.Presentation;
 /// <summary>
 /// The main menu 192D:0007 with all graphics live: the original booted to the entry of 192D:0007 (snapshot), and the port's
 /// <see cref="MenuRunner"/> with <see cref="MenuScene"/> on the graphics state of that snapshot. Keys change at the frame
-/// boundaries of <see cref="MenuHarness"/> (page flip, fades, key wait loops); save file and joystick are stubbed with the
+/// boundaries: every retrace wait (end of 0D73:00D3) and every taken back edge of a key wait loop; save file and joystick are stubbed with the
 /// same scripted results on both sides. At the entry of every flip (21FD:051F), fade-out (03B4) and fade-in (0353, 0329)
 /// and at the end, VRAM (all four planes), DAC and CRTC start are captured; the port captures before it plays the
 /// corresponding event. The sequences of captures must agree.
@@ -26,14 +26,11 @@ internal static class MenuSceneHarness
 {
     private const ushort Seg192D = 0x192D, Seg21FD = 0x21FD, Driver = 0x23CD;
 
-    /// <summary>Entry and far return (retf) of the presenting routines of 21FD with their frames.</summary>
-    private static readonly (ushort Entry, ushort Retf, int Frames, string Name)[] Presenting =
-    [
-        (0x051F, 0x058F, 1, "flip"), (0x03B4, 0x03EA, 24, "fade-out"), (0x0353, 0x037C, 16, "fade-in"),
-        (0x0329, 0x0352, 32, "slow fade-in"),
-    ];
+    /// <summary>Entries of the presenting routines of 21FD (captured before each).</summary>
+    private static readonly (ushort Entry, string Name)[] Presenting =
+        [(0x051F, "flip"), (0x03B4, "fade-out"), (0x0353, "fade-in"), (0x0329, "slow fade-in")];
 
-    private static readonly Lazy<MachineSnapshot> AtMenu = new(() =>
+    internal static readonly Lazy<MachineSnapshot> AtMenu = new(() =>
     {
         var p = OriginalProgram.Start(TestGameData.DosDir);
         Assert.True(p.RunToRoutine(Seg192D, 0x0007, 40), "192D:0007 not reached after the start.");
@@ -54,7 +51,7 @@ internal static class MenuSceneHarness
     }
 
     /// <summary>Frame state as hashed: four planes, DAC, CRTC start.</summary>
-    private static ulong Hash(byte[][] planes, byte[] dac, int start)
+    internal static ulong Hash(byte[][] planes, byte[] dac, int start)
     {
         ulong h = 1469598103934665603UL;
         void Add(ReadOnlySpan<byte> bytes)
@@ -77,7 +74,7 @@ internal static class MenuSceneHarness
         var m = p.Machine;
         ushort retIp = m.Mem.Read16(m.Cpu.Ss, m.Cpu.Sp), retCs = m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Sp + 2));
         long frame = 0;
-        int pending = 0, retraces = 0;
+        int retraces = 0;
         m.AddCodeHook(p.Segment(0x0D73), 0x00D3, _ => retraces++);
         foreach (var (at, v) in script.Set ?? []) p.WriteByte((ushort)at, v);
         var captures = new List<Capture>();
@@ -98,20 +95,9 @@ internal static class MenuSceneHarness
             if (captures.Count == keep) keptPlanes = vga.Planes.Select(x => (byte[])x.Clone()).ToArray();
             captures.Add(new Capture(kind, Hash(vga.Planes, vga.Dac, vga.StartAddress), vga.StartAddress, retraces));
         }
-        foreach (var (entry, retf, frames, name) in Presenting)
-        {
-            m.AddCodeHook(p.Segment(Seg21FD), entry, _ =>
-            {
-                Take(name);
-                pending = frames;
-                if (entry == 0x051F && p.ReadByte((ushort)(DgroupLayout.KeyState + MenuKeys.KeypadMinus)) != 0) pending += 4;
-            });
-            m.AddCodeHook(p.Segment(Seg21FD), retf, _ =>
-            {
-                for (int i = 0; i < pending; i++) NextFrame();
-                pending = 0;
-            });
-        }
+        foreach (var (entry, name) in Presenting) m.AddCodeHook(p.Segment(Seg21FD), entry, _ => Take(name));
+        // every retrace wait (end of 0D73:00D3) is a frame boundary
+        m.AddCodeHook(p.Segment(0x0D73), 0x00F7, _ => NextFrame());
         foreach (var (off, onZero) in MenuHarness.WaitEdges192D)
             m.AddCodeHook(p.Segment(Seg192D), off, mm => { if (mm.Cpu.GetFlag(Cpu286.ZF) == onZero) NextFrame(); });
         foreach (var (off, onZero) in MenuHarness.WaitEdges21FD)
@@ -166,15 +152,16 @@ internal static class MenuSceneHarness
     }
 
     /// <summary>
-    /// Port run on the snapshot's state: core data segment, graphics data segment image, VRAM, DAC and driver registers as
+    /// The port on the snapshot's state: core data segment, graphics data segment image, VRAM, DAC and driver registers as
     /// the original left them at 192D:0007; fonts and masks from FONTS.PP and MASKS.PP, the text buffer from ENGLISCH.TXT
     /// (192D:18B6 of the port at the original's buffer address).
     /// </summary>
-    public static Result RunPort(Script script, int keep, out byte[][]? kept, Action<MenuScene>? mutate = null)
+    internal static (Dgroup Core, MenuScene Scene, ModeXDriver Driver, VgaDac Dac) SetUpPort((int Offset, byte Value)[]? set,
+        IRetraceWait retraces)
     {
         var snap = OriginalProgram.Resume(TestGameData.DosDir, AtMenu.Value);
         var ds = snap.DataSegment();
-        foreach (var (at, v) in script.Set ?? []) ds[at] = v;
+        foreach (var (at, v) in set ?? []) ds[at] = v;
         var core = new Dgroup(ds[..DgroupLayout.Size]);
 
         var driver = new ModeXDriver();
@@ -200,7 +187,6 @@ internal static class MenuSceneHarness
 
         var dac = new VgaDac();
         vga.Dac.CopyTo(dac.Registers, 0);
-        var retraces = new RetraceCounter();
         var layers = new GraphicsLayers(driver, (byte[])ds.Clone(), dac, retraces) { DataSegment = snap.Dgroup };
 
         ushort bufOff = core.U16(MenuLayout.TextBuffer), bufSeg = core.U16(MenuLayout.TextBuffer + 2);
@@ -209,7 +195,14 @@ internal static class MenuSceneHarness
         MenuTexts.Build(new Dgroup((byte[])core.Bytes.Clone()), text);
         layers.OtherMemory = new FarBuffer(bufSeg, bufOff, text);
 
-        var scene = new MenuScene(layers, core, layers.OtherMemory, new Pictures());
+        return (core, new MenuScene(layers, core, layers.OtherMemory, new Pictures()), driver, dac);
+    }
+
+    /// <summary>Port run of a script, keys per frame.</summary>
+    public static Result RunPort(Script script, int keep, out byte[][]? kept, Action<MenuScene>? mutate = null)
+    {
+        var retraces = new RetraceCounter();
+        var (core, scene, driver, dac) = SetUpPort(script.Set, retraces);
         mutate?.Invoke(scene);
         var captures = new List<Capture>();
         byte[][]? keptPlanes = null;
@@ -239,8 +232,10 @@ internal static class MenuSceneHarness
         {
             if (f > 200_000) throw new InvalidOperationException("Port menu did not finish.");
             runner.Advance(new PhaseTick(f, script.Keys.At(f)));
+            scene.NextFrame();
             foreach (var e in runner.Menu.DrainEvents()) scene.Apply(e);
         }
+        scene.Finish();
         Take("end");
         Assert.True(host.LoadResults.Count == 0 && host.SaveResults.Count == 0 && host.CalibrationFailures.Count == 0,
             "port: scripted results left over");

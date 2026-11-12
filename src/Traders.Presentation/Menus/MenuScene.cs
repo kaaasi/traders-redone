@@ -43,9 +43,39 @@ public sealed class MenuScene
 
     private short Top => _state.S16(MenuLayout.PlaqueTop);
 
-    /// <summary>Plays one event.</summary>
+    /// <summary>True while a fade or flip still has retrace waits for later frames.</summary>
+    public bool Presenting => _pending is not null;
+
+    private IEnumerator<int>? _pending;
+
+    /// <summary>
+    /// Starts a new frame: a fade or flip in progress runs on up to its next retrace wait (one retrace per frame, like the
+    /// core's <see cref="MenuWait.Retrace"/>/<see cref="MenuWait.Flip"/> frames). Call once per frame before the frame's events.
+    /// </summary>
+    public void NextFrame()
+    {
+        if (_pending is null) return;
+        MirrorKeys(); // 21FD:051F reads DS:3D95/3D91 after its first retrace
+        if (!_pending.MoveNext()) _pending = null;
+    }
+
+    /// <summary>Runs a fade or flip in progress to its end (for a host that does not present frame by frame).</summary>
+    public void Finish()
+    {
+        while (_pending is not null) NextFrame();
+    }
+
+    /// <summary>Starts a frame-stepped presenting routine and runs it up to its first retrace wait.</summary>
+    private void Present(IEnumerable<int> steps)
+    {
+        _pending = steps.GetEnumerator();
+        NextFrame();
+    }
+
+    /// <summary>Plays one event (a presenting routine still in progress is finished first).</summary>
     public void Apply(MenuEvent e)
     {
+        Finish();
         switch (e.Kind)
         {
             case MenuEventKind.LoadPicture:
@@ -53,7 +83,7 @@ public sealed class MenuScene
                 break;
             case MenuEventKind.FadeOut:
                 BeforePresent?.Invoke(e);
-                _gfx.FadeOutFast((ushort)e.A); // 21FD:03B4
+                Present(_gfx.FadeOutFastSteps((ushort)e.A)); // 21FD:03B4
                 break;
             case MenuEventKind.Screen:
                 Screen(e.A, e.B, e.Ops ?? []);
@@ -66,13 +96,12 @@ public sealed class MenuScene
                 break;
             case MenuEventKind.FadeIn:
                 BeforePresent?.Invoke(e);
-                if (e.A == 0x0329) _gfx.FadeIn();
-                else _gfx.FadeInFast();
+                Present(e.A == 0x0329 ? _gfx.FadeInSteps() : _gfx.FadeInFastSteps());
                 break;
             case MenuEventKind.Flip:
                 BeforePresent?.Invoke(e);
                 MirrorKeys();
-                _gfx.FlipPages(); // 21FD:051F
+                Present(_gfx.FlipPagesSteps()); // 21FD:051F
                 break;
             case MenuEventKind.ListExecute:
                 _gfx.ExecuteList();

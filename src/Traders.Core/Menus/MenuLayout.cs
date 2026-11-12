@@ -51,6 +51,6 @@ public static class MenuKeys
     public const byte F1 = 0x3B, F2 = 0x3C, F3 = 0x3D, F4 = 0x3E, F5 = 0x3F, F6 = 0x40, F7 = 0x41, F8 = 0x42, F9 = 0x43, F10 = 0x44;
     public const byte Up = 0x48, Left = 0x4B, Right = 0x4D, Down = 0x50;
 
-    /// <summary>Keypad minus and plus: the page flip 21FD:051F waits four more retraces resp. no retrace while held.</summary>
+    /// <summary>Keypad minus and plus: the page flip 21FD:051F waits four more retraces resp. one retrace fewer (no 0B67:028F) while held.</summary>
     public const byte KeypadMinus = 0x4A, KeypadPlus = 0x4E;
 }

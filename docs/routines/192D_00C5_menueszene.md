@@ -47,13 +47,16 @@ Nur Grafik: Befehlsliste `0A96`/`0A69`, Seiten `0B67`/`21FD:051F`, Blenden `21FD
 ## C#-Umsetzung
 `src/Traders.Presentation/Menus/MenuScene.cs`: spielt die `MenuEvent`s des Kerns (`LoadPicture`, `FadeOut`, `Screen`, `Draw`,
 `DiskMessage`, `FadeIn`, `Flip`, `ListExecute`, `ListClear`) über `GraphicsLayers` ab; liest Optionen, Textzeiger und `5334` aus
-dem Kern-DS, schreibt nur in das DS-Abbild der Grafikschichten. Die Tastentabelle wird vor jedem Seitenwechsel in dieses Abbild
-gespiegelt (`3D91`/`3D95` steuern das Warten in `051F`).
+dem Kern-DS, schreibt nur in das DS-Abbild der Grafikschichten. Die Tastentabelle wird vor jedem Seitenwechsel und in jedem
+Bild eines laufenden Seitenwechsels in dieses Abbild gespiegelt (`3D91`/`3D95` steuern das Warten in `051F`).
+**Bildweise:** Blenden und Seitenwechsel laufen über die schrittweisen Formen der Schichten (`GraphicsLayers.FadeOutFastSteps`,
+`FadeInSteps`, `FadeInFastSteps`, `FlipPagesSteps` in `src/Traders.Vga/Layers/FrameSteps.cs`, je Rücklauf ein Schritt); der Host
+ruft je Bild `NextFrame()` vor den Ereignissen des Bilds, die Szene führt die laufende Routine bis zum nächsten Rücklauf weiter.
+So liegt jeder Rücklauf im Bild, in dem der Kern ihn wartet, und das sichtbare Bild (DAC, Seite) entspricht je Bild dem Original.
 
 ## [APPROX]
 - `186C:0002` (Spur `programm`): die Szene lädt das Menübild aus den Assets mit der Wirkung des VGA-Pfads (`09C8`, Palette nach
   `5017`, Atlas ab Byte 300h, `23CD:3079`, `21AF:000D`); Zwischenspeicher und Laderzustand `09CE…`, `4C00…` fehlen.
-- Blenden laufen in der Szene am Stück (alle Stufen beim Ereignis); die Verteilung auf Bilder prüft Teil 3.
 
 ## Prüfung
 `tests/Traders.Tests/Presentation/MenuSceneDifferentialTests.cs` (`[DIFFERENTIAL]` je Routine, Harness `MenuSceneHarness`):
@@ -62,4 +65,8 @@ Grafikzustand des Schnappschusses. Vor jedem `21FD:051F`, `03B4`, `0353`, `0329`
 CRTC-Start und Zahl der Rücklaufwartungen gleich. Szenarien: Hauptmenü, Spieler, alle Stufen und Einzeloptionen, alle
 Einstellungen, Diskette (Laden/Speichern mit Erfolg und Fehlschlag), Info, Steuerung mit zwei Kalibrierläufen, Fortsetzen,
 Keypad-Minus. Gegenproben lokal (je eine Änderung → rot): Schattenfarbe in `17F9`, x von `0F6E`, Lücke für `'` in `16AF`,
-y in `120C`, Aufforderungen in `1B90` vertauscht, Tastenspiegel vor dem Seitenwechsel entfernt (Rücklaufzahl).
+y in `120C`, Aufforderungen in `1B90` vertauscht, Tastenspiegel vor dem Seitenwechsel entfernt (Rücklaufzahl). Bildgrenzen des
+Originals dort: Ende jedes `0D73:00D3` und jede genommene Rückkante einer Tastenwarteschleife. Bild für Bild mit echten
+Tasteninterrupts: `MenuFrameDifferentialTests` (siehe [192D_0007_menues.md](192D_0007_menues.md) „Prüfung“). Schrittformen der
+Schichten: `tests/Traders.Tests/Vga/FrameStepsTests.cs` (je Rücklauf DS, DAC, CRTC-Start gleich dem Original bei `21FD:03B4`,
+`0353`, `0329`, `051F`; ausgeschöpft gleich den Routinen am Stück).

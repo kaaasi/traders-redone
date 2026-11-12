@@ -617,16 +617,17 @@ public sealed class MainMenu
     }
 
     /// <summary>
-    /// 21FD:051F: page flip, one retrace; with keypad minus held four more (21FD:0185(4)).
+    /// [ORIGINAL] 21FD:051F – page flip: the new page is shown with a retrace wait (0B67:0196/01B5), then one more retrace
+    /// (0B67:028F) unless keypad plus is held (DS:3D95), and four more with keypad minus held (DS:3D91, 21FD:0185(4));
+    /// each key is read just before its wait. Each retrace is one frame.
     /// </summary>
-    // [APPROX] With keypad plus held the original skips the retrace wait and runs the loop as often as the CPU allows; the
-    // port still takes one frame per flip (the number of passes per frame is not determined by the original).
     private IEnumerable<MenuWait> Flip()
     {
-        bool slow = Key(MenuKeys.KeypadMinus);
-        Emit(MenuEventKind.Flip, slow ? 1 : 0);
+        Emit(MenuEventKind.Flip);
         yield return MenuWait.Flip;
-        if (!slow) yield break;
+        // DS:3D95 is read after the show-page retrace, DS:3D91 after the retrace of 0B67:028F (keys of the frame then)
+        if (!Key(MenuKeys.KeypadPlus)) yield return MenuWait.Retrace;
+        if (!Key(MenuKeys.KeypadMinus)) yield break;
         for (int i = 0; i < 4; i++) yield return MenuWait.Retrace;
     }
 

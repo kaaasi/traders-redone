@@ -14,7 +14,7 @@ namespace Traders.Tests.Menus;
 ///
 /// Graphics, sound, resources, save file and joystick are the scene's resp. the host's business, so in the original their far
 /// routines return at once (stubs: 0A96, 0A69, 21A7, 186C, 2336, 27C6:00E6 and the palette, fade, flip and font routines of
-/// 21FD). Frames: the original's frame boundaries are the page flip 21FD:051F (one frame, five with keypad minus held), the
+/// 21FD). Frames: the original's frame boundaries are the page flip 21FD:051F (two retraces: 0B67:0196/01B5 and 0B67:028F; one with keypad plus, four more with keypad minus held), the
 /// fades (21FD:03B4 24, 0353 16, 0329 32 retraces) and every taken back edge of a key wait loop; at each boundary the key table
 /// gets the keys of the next frame. The port yields at exactly these points (<see cref="MainMenu"/>), so frame numbers,
 /// random() per frame and the order of the layer calls must agree.
@@ -47,7 +47,7 @@ internal sealed class MenuHarness
     /// <summary>21FD routines stubbed with their retrace waits as frames (0 = no frame).</summary>
     private static readonly Dictionary<ushort, int> Stubs21FD = new()
     {
-        [0x026C] = 0, [0x0329] = 32, [0x0353] = 16, [0x03B4] = 24, [0x051F] = 1, [0x05DB] = 0,
+        [0x026C] = 0, [0x0329] = 32, [0x0353] = 16, [0x03B4] = 24, [0x051F] = 2, [0x05DB] = 0,
     };
 
     private readonly OriginalProgram _program = OriginalProgram.LoadOnly(TestGameData.DosDir);
@@ -96,12 +96,21 @@ internal sealed class MenuHarness
         if (seg == Seg21FD && Stubs21FD.TryGetValue(off, out int n))
         {
             frames = n;
-            if (off == 0x051F && Held(MenuKeys.KeypadMinus)) frames += 4;
+
         }
         if (seg == 0x2336) c.Ax = (ushort)(Dequeue(off == 0x0539 ? LoadResults : SaveResults) ? 1 : 0);
         if (seg == 0x27C6) c.Ax = (ushort)(Dequeue(CalibrationFailures) ? 1 : 0);
         c.IP = ip;
         c.Cs = cs;
+        if (seg == Seg21FD && off == 0x051F)
+        {
+            // show-page retrace, then 3D95 (keypad plus) decides on 028F, then 3D91 (keypad minus) on four more
+            NextFrame();
+            if (!Held(MenuKeys.KeypadPlus)) NextFrame();
+            if (Held(MenuKeys.KeypadMinus))
+                for (int i = 0; i < 4; i++) NextFrame();
+            return;
+        }
         for (int i = 0; i < frames; i++) NextFrame();
     }
 
@@ -221,6 +230,9 @@ internal sealed class ScriptedMenuHost : IMenuHost
 internal sealed class KeyScript
 {
     private readonly List<(long From, long To, byte Key)> _holds = [];
+
+    /// <summary>The holds as added: key held in the frames [From, To).</summary>
+    public IReadOnlyList<(long From, long To, byte Key)> Holds => _holds;
 
     public KeyScript Hold(long from, long frames, byte key)
     {
