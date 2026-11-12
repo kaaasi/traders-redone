@@ -60,13 +60,13 @@ public class ProgramStartDifferentialTests
     ];
 
     /// <summary>Lengths of the picture files as the host reads them (Traders.Assets).</summary>
-    private static ImageFileLengths Files(int number)
+    internal static ImageFileLengths Files(int number)
     {
         var (file, unpacked) = ImageFiles.Lengths(number, name => File.ReadAllBytes(TestGameData.Dos(name)));
         return new ImageFileLengths(file, unpacked);
     }
 
-    private static MachineOptions Options(DateTime start) => new() { HostDirectory = Dir, RecordSoundDriver = true, StartTime = start };
+    internal static MachineOptions Options(DateTime start) => new() { HostDirectory = Dir, RecordSoundDriver = true, StartTime = start };
 
     /// <summary>Return address of the call of Borland time() in random(0) 21FD:01BA; DX:AX holds the clock value there.</summary>
     private const ushort TimeReturn = 0x01CE;
@@ -79,7 +79,7 @@ public class ProgramStartDifferentialTests
     /// returned at the code request (the host's clock input), the far address of the text buffer DS:4884 (the host's heap)
     /// and the arguments of the random() calls inside the plaque 192D:16AF (for the counter-check without new seed).
     /// </summary>
-    private static (int Clock, List<short> PlaqueDraws, uint TextBuffer) OriginalInputs(DateTime start, Action<OriginalProgram> keys)
+    internal static (int Clock, List<short> PlaqueDraws, uint TextBuffer) OriginalInputs(DateTime start, Action<OriginalProgram> keys)
     {
         var p = OriginalProgram.Start(Dir, Options(start));
         keys(p);
@@ -102,7 +102,7 @@ public class ProgramStartDifferentialTests
         new(File.ReadAllBytes(TestGameData.Dos("ENGLISCH.TXT")), (ushort)buffer, (ushort)(buffer >> 16));
 
     /// <summary>The plaque of lane menue, checking the arguments of the code request.</summary>
-    private sealed class CheckedPlaque : ITextPlaque
+    internal sealed class CheckedPlaque : ITextPlaque
     {
         private readonly MenuTextPlaque _plaque = new();
 
@@ -141,9 +141,9 @@ public class ProgramStartDifferentialTests
         return new Run(core, p, oracle, programStart, machine);
     }
 
-    private static readonly DateTime ReferenceStart = new(1991, 6, 1, 12, 0, 0);
+    internal static readonly DateTime ReferenceStart = new(1991, 6, 1, 12, 0, 0);
 
-    private static void NoExtraKeys(OriginalProgram p) { }
+    internal static void NoExtraKeys(OriginalProgram p) { }
 
     /// <summary>
     /// Keys typed at the code request: whenever the original starts waiting for a key (21FD:07A5, also after a rejected

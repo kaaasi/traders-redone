@@ -128,6 +128,15 @@ internal sealed class RefEmuProgramOracle
     public IProgramStepHandler PortHandler(Dgroup core, IProgramStepHandler port,
         IReadOnlyList<(int Offset, int Length, string Owner)> hostOwned) => new PortStepHandler(this, core, port, hostOwned);
 
+    /// <summary>
+    /// Like <see cref="PortHandler"/> for a ported step that runs over several frames (the main menu): at Begin the RefEmu is
+    /// run to the call site and compared, the core then runs <paramref name="port"/> frame by frame; when it finishes, the
+    /// RefEmu runs the routine to its return (keys there come from hooks of the test) and the data segment is compared
+    /// outside <paramref name="hostOwned"/>, which is then taken over.
+    /// </summary>
+    public IProgramStepHandler FramedPortHandler(Dgroup core, IProgramStepHandler port,
+        IReadOnlyList<(int Offset, int Length, string Owner)> hostOwned) => new FramedPortStepHandler(this, core, port, hostOwned);
+
     /// <summary>Handler that only runs the RefEmu to the call site and compares there; the step never finishes (end of a test).</summary>
     public IProgramStepHandler StopAtCallSite(Dgroup core) => new StopHandler(this, core);
 
@@ -195,6 +204,35 @@ internal sealed class RefEmuProgramOracle
         }
 
         public StepOutcome Tick(ProgramStepContext context) => throw new InvalidOperationException("ported steps finish at once");
+    }
+
+    private sealed class FramedPortStepHandler(RefEmuProgramOracle o, Dgroup core, IProgramStepHandler port,
+        IReadOnlyList<(int Offset, int Length, string Owner)> hostOwned) : IProgramStepHandler
+    {
+        public StepOutcome Begin(ProgramStepContext context)
+        {
+            o.RunToCallSite(context.Step);
+            o.Compare(core, $"at {context.Step}");
+            o.TakeOver(core);
+            return Finish(context, port.Begin(context));
+        }
+
+        public StepOutcome Tick(ProgramStepContext context) => Finish(context, port.Tick(context));
+
+        private StepOutcome Finish(ProgramStepContext context, StepOutcome outcome)
+        {
+            if (!outcome.Done) return outcome;
+            var step = context.Step;
+            core.Set(DgroupLayout.RandomSeed, context.Random.Seed); // the machine stores it after the handler; compare first
+            o.RunToReturn(step);
+            int known = o.Differences.Count;
+            o.Compare(core, $"after {step} (port)", hostOwned);
+            byte al = (byte)o._p.Machine.Cpu.Ax;
+            if (step.After != ProgramResultCheck.None && outcome.Result != al) o.Differences.Add($"after {step} (port): result core {outcome.Result} RefEmu {al}");
+            if (o.Differences.Count != known) throw new InvalidOperationException(o.Differences[^1]);
+            o.TakeOver(core, hostOwned);
+            return outcome;
+        }
     }
 
     private sealed class StopHandler(RefEmuProgramOracle o, Dgroup core) : IProgramStepHandler

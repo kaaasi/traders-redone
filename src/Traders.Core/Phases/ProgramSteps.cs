@@ -1,3 +1,6 @@
+using Traders.Core.Menus;
+using Traders.Core.Rules;
+using Traders.Core.Startup;
 using Traders.Core.State;
 
 namespace Traders.Core.Phases;
@@ -57,16 +60,81 @@ public sealed class PendingSoundStep : IProgramStepHandler
     public StepOutcome Tick(ProgramStepContext context) => throw new InvalidOperationException("sound stubs finish at once");
 }
 
-/// <summary>Handlers of the program steps the core has so far.</summary>
+/// <summary>
+/// Program step 8, the main menu 192D:0007 of lane menue (<see cref="MainMenu"/>) as a step of the program machine:
+/// <see cref="Begin"/> runs it in the start frame up to its first wait, every <see cref="Tick"/> one frame further; the
+/// outcome's AL is the result of 192D:0007 (0 quit, 1 play). The machine writes the key table DS:3D47 from the held keys of
+/// the frame and keeps DS:10D2 in sync. The menu picture load (event <see cref="MenuEventKind.LoadPicture"/>, 186C:0002) is
+/// entered in the picture table of the core (<see cref="ImageTable"/>); the events go on to the scene (<see cref="DrainEvents"/>).
+/// </summary>
+// [ORIGINAL] 1777:000C (site 0163) – call of 192D:0007; 192D:000A – 186C:0002([08DA])
+public sealed class MainMenuProgramStep(IMenuHost host, Func<int, ImageFileLengths> files) : IProgramStepHandler
+{
+    private readonly List<MenuEvent> _events = [];
+    private IEnumerator<MenuWait>? _run;
+
+    /// <summary>The menu of the current (or last) call; null before the first.</summary>
+    public MainMenu? Menu { get; private set; }
+
+    /// <summary>Number of calls of the menu so far (the program enters it again after exit A).</summary>
+    public int Calls { get; private set; }
+
+    /// <summary>Menu events since the last <see cref="DrainEvents"/>, oldest first (for the scene).</summary>
+    public IReadOnlyList<MenuEvent> Events => _events;
+
+    public List<MenuEvent> DrainEvents()
+    {
+        var list = new List<MenuEvent>(_events);
+        _events.Clear();
+        return list;
+    }
+
+    public StepOutcome Begin(ProgramStepContext context)
+    {
+        Menu = new MainMenu(context.State, context.Random, host);
+        _run = Menu.Run().GetEnumerator();
+        Calls++;
+        return Tick(context);
+    }
+
+    public StepOutcome Tick(ProgramStepContext context)
+    {
+        if (_run is null || Menu is null) throw new InvalidOperationException("Not started.");
+        Menu.Frame = context.Frame;
+        bool more = _run.MoveNext();
+        foreach (var e in Menu.DrainEvents())
+        {
+            if (e.Kind == MenuEventKind.LoadPicture) ImageTable.RecordLoad(context.State, e.A, files);
+            _events.Add(e);
+        }
+        return more ? StepOutcome.Running : StepOutcome.Finished(Menu.Result ?? 0);
+    }
+}
+
+/// <summary>Program step 9, the new game 0E31:0003 of lane partie (<see cref="NewGame.Start"/>); main ignores its result.</summary>
+// [ORIGINAL] 1777:000C (site 0175) – call of 0E31:0003 only when DS:3CCC = 1 (guard of the machine)
+public sealed class NewGameProgramStep : IProgramStepHandler
+{
+    public static NewGameProgramStep Instance { get; } = new();
+
+    public StepOutcome Begin(ProgramStepContext context)
+    {
+        NewGame.Start(context.State, context.Random);
+        return StepOutcome.Finished(0);
+    }
+
+    public StepOutcome Tick(ProgramStepContext context) => throw new InvalidOperationException("the new game finishes at once");
+}
+
+/// <summary>Handlers of the program steps the core has.</summary>
 public static class ProgramSteps
 {
     /// <summary>Program steps with a sound call (handled by <see cref="PendingSoundStep"/> until R10).</summary>
     public static IReadOnlyList<int> SoundSteps { get; } = [3, 4, 5, 6, 7];
 
     /// <summary>
-    /// Initialisation and the sound stubs. The host adds the program start (2, <see cref="Startup.ProgramStart"/>, which needs
-    /// the file lengths and the text plaque of lane menue); main menu (8) and new game (9) stay pending until lanes menue and
-    /// partie are merged.
+    /// Initialisation and the sound stubs only (tests of single steps). The whole program is <see cref="All"/>: the program
+    /// start needs the host's file lengths and text file, the main menu the host's save file and joystick.
     /// </summary>
     public static Dictionary<int, IProgramStepHandler> Defaults(short soundDevice = ProgramInitialisation.AdLib)
     {
@@ -75,11 +143,21 @@ public static class ProgramSteps
         return d;
     }
 
+    /// <summary>All nine call steps of main: initialisation, program start, sound stubs, main menu and new game.</summary>
+    public static Dictionary<int, IProgramStepHandler> All(short soundDevice, ProgramStart start, MainMenuProgramStep menu)
+    {
+        var d = Defaults(soundDevice);
+        d[2] = start;
+        d[ProgramLoop.MainMenu] = menu;
+        d[ProgramLoop.NewGame] = NewGameProgramStep.Instance;
+        return d;
+    }
+
     /// <summary>
     /// Initial data segment of the program as the host prepares it: the initialised data of T.EXE (<see cref="Dgroup.FromExe"/>).
     /// What the C runtime startup writes before main (heap, environment, file table) is the host's.
     /// </summary>
     // [APPROX] Turbo C startup 0000:00E3 (DS:005A..008E, 1286..12B7, 1452..1579 and others) not modelled;
-// the bytes are listed in docs/routines/1777_04E4_initialisierung.md.
+    // the bytes are listed in docs/routines/1777_04E4_initialisierung.md.
     public static Dgroup InitialState(ReadOnlySpan<byte> exe) => Dgroup.FromExe(exe);
 }
