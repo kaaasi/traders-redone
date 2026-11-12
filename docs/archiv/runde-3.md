@@ -1,0 +1,140 @@
+# Runde 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (Plan Leitstelle und Go Nutzer 11.11.2026)
+
+
+**Ziel:** Kern und Ausgabe bekommen ihr Gerüst, bevor die erste Szene entsteht (R4): Phasenmaschine mit Takt und
+Zufallsereignissen je Bild (F3 = A), die Regeln der Woche ohne Bildschirm als belegte Kernroutinen, die Grafikschichten über dem
+Treiber `23CD` und ein Host, der Framebuffer zeigt und Eingaben als Scancodes liefert. Ergebnis: M3 abgeschlossen (Phasenmaschine,
+Wochenregeln mit Mehrrundenprobe), Grundlage für M4 (Menüs, R4).
+
+**Leitstelle R3:** Claude (Sitzung vom 11.11.2026). **Modell:** alle Spuren und Erstreviews Claude Opus (Spielkern, Disassembly,
+RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `main` `aba13bf`. Namen der Läufe: `Traders R3 <spur>`.
+
+**Gemeinsame Vorgaben für alle vier Spuren:**
+
+- Branch `paket/<spur>` von aktuellem `main`, ein Draft-PR, Teile als Aufgabenliste (`spur-start.md` „Teile und Fortsetzung“).
+- Je portierter Originalroutine Befund in `docs/routines/` (Sammelbefund mit mehreren Adressen erlaubt), `[ORIGINAL]`-Marker und
+  `[DIFFERENTIAL]`-Test gegen den RefEmu mit Grenzfällen und Zufallszustand danach; Erwartungswerte nie aus dem Port.
+- Regeln und Phasen arbeiten auf `Dgroup` (Byteabbild) mit Offsets aus `DgroupLayout.cs` (nur additiv, im PR begründet);
+  `GameState`/`GameStateMapper.cs` nur, wenn ein Feld modelliert werden muss – dann `partial` ergänzen (wer zuerst braucht) und
+  den Mapper nur additiv erweitern (R3P-4). Neue
+  DGROUP-Adressen mit Beleg in `docs/analyse/DATENLAYOUT.md` (je Spur eigener Unterabschnitt, kein Umschreiben fremder Zeilen).
+- Kein eigener Zufall, keine Host-Uhr im Kern (`AGENTS.md` §4); Wartezeiten und Bildtakt sind explizite Eingaben.
+- `STATUS.md`: nur der erzeugte Block per `tools/abdeckung.py --write` (bei Konflikt nach Rebase erneut ausführen, R2P-1).
+
+## 0 `takt` – Phasenmaschine, Takt, Zufall je Bild, Maschinenabzug
+
+- **Teile:** (1) **Maschinenabzug im RefEmu** (offen aus R2, BESTAND §3.1 Punkt 3): Zustand der Maschine an einer Marke
+  `21FD:0977(n)` sichern und wiederaufsetzen (CPU, Speicher, Zeitgeber, Tastatur, VGA, Ton-TSR); Nachweis: Lauf mit Wiederaufsetzen
+  = durchgehender Lauf, bitgleich in Datensegment, Zufallszustand `DS:10D2`, Zeit und Bild an der nächsten Marke. Abzüge entstehen
+  zur Testlaufzeit in einem Zwischenordner und nie im Repo (abgeleitet aus `T.EXE`, `AGENTS.md` §2.1).
+  (2) **Phasenmaschine und Takt im Kern** (`src/Traders.Core/Phases/`): Schrittfolge der Woche nach
+  `docs/routines/1777_01F8_wochenschleife.md` (30 Zeilen einschließlich der sieben Marken; Schrittnummern in diesem Plan nach
+  `BESTAND.md` §1.4, 24 Schritte ohne Marken; beide Abbruchwege) als Daten, Takt als explizite
+  Tick-Eingabe, Spielerhandlungen als Befehle, Zufallsverbrauch je Bild als Kern-Ereignis, das die Szene genau einmal je Bild auslöst
+  (F3 = A); noch nicht portierte Schritte als ausdrücklich „ausstehend“ markierte Schritte, kein stilles Überspringen. Dazu die
+  Präzisierung von `AGENTS.md` §4 (Zeile „Szenen und Rendering lesen nur“) und, wo prüfbar, eine Regel in `tools/check-architecture.py`.
+  (3) **Anbindung und Mehrrundenprobe** (nach Merge von 1 `regeln`): die bildschirmlosen Schritte nach `BESTAND.md` §1.4 – 1 `1777:02DC`, 2 `0825:07C4`,
+  5 und 16 `0609:1178`, 10 `21FD:021F`, 11 `22A3:0003`, 12 `22A3:026B`, 21 `08CF:11D7` – rufen die Routinen aus Spur 1; Test über vier Wochen mit vier Computerspielern: an jedem dieser Schritte Datensegment aus dem RefEmu
+  übernehmen, Schritt im Port ausführen, Ergebnis gegen den RefEmu beim Rücksprung vergleichen (Datensegment, `DS:10D2`), dazu
+  Markenfolge und Wochenzähler; Abbruchweg B (Rückgabe aus `20B3:0005`) per gesetztem Zustand prüfen. P3 #52 mitnehmen.
+- **Dateigrenzen:** `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.RefEmu/**` (nur Maschinenabzug,
+  additiv), `tests/Traders.Tests/RefEmu/**` (nur neue Dateien), `docs/routines/1777_*` außer `1777_02DC*`, `docs/analyse/REFEMU.md`,
+  `AGENTS.md` §4 (eine Zeile), `tools/check-architecture.py` (ohne die Regel für `Traders.App`, s. 3). Gemeinsame Datei `src/Traders.RefEmu/OriginalProgram.cs` gehört in R3
+  dieser Spur.
+- **Abnahme:** alle drei Läufe von `tools/pruefen.sh` grün; Wiederaufsetzen bitgleich (Test, Gegenprobe: ein ausgelassenes
+  Zustandsteil macht ihn rot); Mehrrundenprobe ≥ 4 Wochen nach `AGENTS.md` §5, Gegenprobe im Review (vertauschter Schritt, falscher
+  Rundungsweg → rot); `--schnell` wird um höchstens 3 Minuten länger, sonst eigenes Filtermerkmal außerhalb von `--schnell` und im
+  PR nennen; `check-architecture.py` grün.
+- **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 (sonst `spur-wartet`, „wartet auf 1“).
+- **Status:** Teile 1–3 fertig (Maschinenabzug `SnapshotTests`; Phasenmaschine `src/Traders.Core/Phases/`, `[DIFFERENTIAL] 1777:01F8`; Regelschritte `WeekRuleSteps`, Mehrrundenprobe 4 Wochen und Abbruchweg B im Gleichschritt mit dem RefEmu); Review `docs/reviews/2026-11-11-r3-takt.md` (ja), Fixlauf B1/B2/B5: zweite Mehrrundenprobe mit gemischten Feldarten, Rückschreibeweg von `DS:10D2` in der Probe, `[APPROX]` an `PhaseTick`; Delta-Prüfung der Leitstelle offen (PR #66 `paket/takt`, `main` `f03d27e` eingemergt).
+
+## 1 `regeln` – Wochenregeln ohne Bildschirm
+
+- **Teile** (je Routine Befund, Port in `src/Traders.Core/Rules/`, Differenztest mit gesetztem Zustand über `LoadOnly`/`Call` wie
+  Proben P2/P3, Grenzfälle einschließlich 16-Bit-Überlauf über `Int16Math`):
+  (1) ohne Zufall: Wochenpreise `1777:02DC` (BESTAND B1: keine Uhr), Obergrenzen `0609:1178`, Schwund `22A3:026B` – mit P3 #39 R1
+  (Überlauf ab 4096, Zähler `DS:37AA`/`DS:45D0` als Seiteneffekt);
+  (2) Vermögen/Rang/Verlauf `0825:0813`, `0825:06CB`, `0825:07C4`, Produktion `22A3:0003` (Raster `DS:48F4`, BESTAND B5);
+  (3) mit Zufall: Wetter `21FD:021F`, Edelsteinkurs `08CF:11D7`, Warenpreise `0B9F:06A0`/`078A` (Zufallszustand vorher/nachher und
+  Zahl der Ziehungen im Test).
+- **Nicht in 1:** neue Partie `0E31:0003` (→ R4 mit Menü und Spielstart; abweichend von der Vorschau, um die Spur in drei Teilen zu
+  halten), Endbedingung `20B3:0005` (→ R10), Anbindung an die Phasenmaschine (→ 0 Teil 3).
+- **Dateigrenzen:** `src/Traders.Core/Rules/**`, `tests/Traders.Tests/Rules/**`, `docs/routines/{1777_02DC,0609_1178,22A3_*,0825_*,21FD_021F,08CF_11D7,0B9F_*}*`,
+  eigener Unterabschnitt in `docs/analyse/DATENLAYOUT.md`.
+- **Abnahme:** alle drei Läufe grün; `abdeckung.py --check` grün; je Differenztest Gegenprobe im Erstreview; die Mehrrundenprobe
+  dieser Regeln liefert 0 Teil 3 (`AGENTS.md` §5), Spur 1 nennt dafür im PR die Eingangs- und Ausgabefelder je Routine.
+- **Abhängigkeiten:** keine.
+- **Status (Spur 1, 11.11.2026):** Teile 1–3 fertig in PR #67, Review offen. Portiert mit Differenztest: `1777:02DC`,
+  `0609:1178`, `22A3:026B`, `0825:0813` (+ `086F`, `088D`, `08EB`, `096D`), `0825:06CB`, `0825:07C4`, `22A3:0003`
+  (+ `22A3:0750`), `21FD:021F`, `08CF:11D7`, `0B9F:06A0`, `0B9F:078A`. `0B9F:06A0`/`078A` ziehen keinen Zufall. Eingangs- und
+  Ausgabefelder je Routine für 0 Teil 3: Abschnitt „C#-Umsetzung“ der Befunde.
+
+## 2 `schichten` – Grafikschichten über dem Treiber
+
+- **Teile:** (1) Seiten und Warten `0B67`, Paletten und Blenden `21FD:026C…04DA` (Basis-, geladene, Arbeitspalette, Blendfarbe
+  `DS:10D8`), Seitenwechsel `21FD:051F` (sichtbare/verdeckte Seite `DS:082E/0830`), Farbregister `2295:006D/00C5`; Wartezeiten als Schrittzahl bzw. Tick-Eingabe,
+  keine eigene Uhr. (2) Befehlsliste `0A96` (17 Befehlstypen, Ausführung `06A8`, Liste `DS:15BA…`) und Hilfen `0A69`.
+  (3) Bewegte Objekte `21AF` (8 Sätze ab `DS:330C`) über `23CD:06E9/071C`; P3 #60 klären (erreicht das Spiel den Fall?).
+- **Grenze zum Kern:** Die Schichten ändern keinen Spielzustand. Zieht eine Routine Zufall (z. B. Warteschleife `21FD:0004` im
+  Fat-Mike-Modus, BESTAND §1.4), wird nur die Darstellung portiert und die Ziehung im Befund als Kern-Ereignis für 0 notiert.
+- **Dateigrenzen:** `src/Traders.Vga/**`, `tests/Traders.Tests/Vga/**`, `docs/routines/{0B67,0A96,0A69,21AF,2295}_*`,
+  `docs/routines/21FD_*` nur für Adressen aus `026C…04DA` (Paletten) und `051F`, `docs/analyse/GRAFIK.md`. Kein Eingriff in `src/Traders.RefEmu/`.
+- **Abnahme:** alle drei Läufe grün; VRAM- und Palettenvergleich gegen den `VgaAdapter` des RefEmu nach `Call` der Originalroutine
+  (`Frame()`), Gegenprobe je Test im Review; Befehlsliste mit allen 17 Typen mindestens einmal.
+- **Abhängigkeiten:** keine.
+- **Status:** Teile 1–3 fertig, PR #68 zum Review (Claude, 11.11.2026); P3 #60 statisch nicht erreichbar (GRAFIK.md §8).
+
+## 3 `host` – App-Host mit Eingabe, Ton-Analyse
+
+- **Teile:** (1) Eingabe und Zeitgeber des Originals analysieren: `27C6` (Tastatur- und Zeitgeber-Interrupt, Tastenzustand
+  `DS:3D47–3DC6`, Tickzähler `DS:117E/1180`, Zeitgeberfrequenz), `0E9E` (Steuerungsarten), Befunde in `docs/routines/`; Host-Ersatz
+  als `[APPROX]`, wo kein Differenztest möglich ist, mit Begründung. (2) `src/Traders.App` (MonoGame DesktopGL, Paket wie
+  `Traders.Viewer`): Fenster mit Skalierung 320 × 200, fester Tick-Takt nach Teil 1, Tastatur → Scancode-Ereignisse (Make/Break) im
+  Format des Tastenzustands, Anzeige eines Framebuffers aus `Traders.Vga`; noch ohne Szenen (R4). Test ohne Fenster: Abbildung
+  Taste → Scancode und Tick-Zählung bei unterschiedlicher Bildrate. (3) Ton-Analyse: `FXDRIVER.EXE` (Schnittstelle `int 64h`),
+  `218B`, `21A7:0054` (drei Wege nach `DS:0910`, nur der Treiberweg wird portiert) → `docs/analyse/TON.md`; P3 #39 R2 (`2850`).
+- **Dateigrenzen:** `src/Traders.App/**`, `tests/Traders.Tests/App/**`, `docs/routines/{27C6,0E9E}_*`, `docs/analyse/TON.md`;
+  gemeinsame Datei `TradersRedone.slnx` (eine Zeile, neues Projekt) gehört in R3 dieser Spur, ebenso
+  `tests/Traders.Tests/Traders.Tests.csproj` (eine `ProjectReference`), `tests/Traders.Tests/packages.lock.json` und in
+  `tools/check-architecture.py` die Regel für `Traders.App` (keine Abhängigkeit auf `Traders.RefEmu`, R3P-3). Lockdatei des neuen Projekts
+  mitcommitten; fehlt ein Paket im Offline-Spiegel, im PR melden (Leitstelle stößt `werkzeuge.yml` an).
+- **Abnahme:** alle drei Läufe grün; `check-architecture.py` grün mit der neuen Regel (App hängt nicht vom RefEmu ab, Kern nicht von App; Gegenprobe im Review); Befunde mit
+  RefEmu-Probe (z. B. Tickzähler nach *n* emulierten Sekunden, Tastenzustand nach `Press`); Windows-Start nur per Hand (Nutzer).
+- **Abhängigkeiten:** keine. Die Anbindung an die Phasenmaschine folgt in R4.
+- **Status:** alle drei Teile fertig, Review offen (PR #69). Teil 1 Befunde `27C6`/`0E9E` mit RefEmu-Proben; Teil 2
+  `src/Traders.App` mit Differenztests `27C6:0043/00AC/037A/03E4`; Teil 3 `docs/analyse/TON.md`, P3 #39 R2 geklärt (Nachtrag in
+  BESTAND §1.2 durch die Leitstelle). Port von `0E9E` in den Kern offen für R4.
+
+## Zuständigkeit gemeinsamer Dateien in R3
+
+`OriginalProgram.cs`: 0. `TradersRedone.slnx`, `tests/Traders.Tests/Traders.Tests.csproj`, `tests/Traders.Tests/packages.lock.json`: 3.
+`tools/check-architecture.py`: 0, die Regel für `Traders.App`: 3. `AGENTS.md` §4 (eine Zeile): 0. `DgroupLayout.cs`, `GameState.cs`
+(`partial`), `GameStateMapper.cs`: nur additiv (0, 1), bei Konflikt rebased die später gemergte Spur. `docs/analyse/DATENLAYOUT.md`: je Spur eigener Unterabschnitt. `STATUS.md`:
+nur der erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/prozess/**`: Leitstelle.
+`Directory.Build.props`, `global.json`: niemand.
+
+## Integrationsfolge
+
+0 (Teile 1–2), 1, 2, 3 parallel; dateigetrennt bis auf die Zeilen oben. Merge 1 → 2 → 3, 0 nach seinem Teil 3 zuletzt (braucht 1).
+Konflikte nur dann über `integration/runde-3`.
+
+## Offene Fragen an den Nutzer
+
+- **G1 Go – erteilt (Nutzer 11.11.2026)** nach dem Plan-Review (#65): vier Spuren wie oben, alle Opus, Läufe startet die Leitstelle.
+- **G2 Zugriff – erteilt (Nutzer 11.11.2026):** Jede Leitstelle darf `kaaasi/traders-referenz` mit `push` einbinden
+  (`leitstelle-start.md` Schritt 0); Leitstellen dürfen Labels selbst setzen und entfernen.
+- Übrige P3 aus R2: #36 mit diesem PR behoben; #39 R1 → 1, R2 → 3, R3 offen (nur Präzisierung, Leitstelle bei Gelegenheit);
+  #49 offen (nächster Lauf an `experiments/bestand/`); #52 → 0; #60 → 2.
+
+## Abschluss (12.11.2026)
+
+- Alle Spuren gemergt: 1 `regeln` #67, 2 `schichten` #68, 3 `host` #69, 0 `takt` #66 (Fixlauf B1/B2/B5); Plan #63, Freigaben #64,
+  Status #82. `main` nach der letzten Spur `fd46c2b`, 635 Tests grün mit Originaldaten.
+- Erstreviews: `reviews/2026-11-11-r3-{regeln,schichten,host,takt}.md` (alle „Ja“; takt mit P2 B1, behoben #79).
+- Gesamtreview Codex: Teil 1 [reviews/2026-11-12-r3-gesamt.md](../reviews/2026-11-12-r3-gesamt.md) ohne SDK (nur Codelesen),
+  Teil 2 [reviews/2026-11-12-r3-gesamt-teil2.md](../reviews/2026-11-12-r3-gesamt-teil2.md) „Ja“: keine neuen Fehler, Gegenproben
+  R3T-B1/B2 rot; Testlücke als #86.
+- Offen als P3: #39 (R3), #49, #74–#76, #81, #86.
+- Erfahrungen: Spuren kollidieren nur im erzeugten Block von `STATUS.md` → Abgleichlauf je PR in Merge-Reihenfolge (Merge von
+  `main`, `abdeckung.py --write`, Delta-Prüfung der Leitstelle); gleichzeitige Opus-Läufe erreichen das Nutzungslimit → Starts
+  zeitversetzt; Codex-Umgebung braucht das SDK dauerhaft im `PATH` der Agentensitzung.

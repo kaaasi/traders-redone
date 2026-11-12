@@ -12,6 +12,7 @@
 - Spur 3 `host` (PR #69): Befunde Eingabe/Zeitgeber `27C6` und Steuerung `0E9E`, `src/Traders.App` (MonoGame, ohne Szenen),
   Ton-Analyse `docs/analyse/TON.md`.
 - Prozess: Plan (PR #63), Freigaben der Leitstelle (Referenz-Repo, Labels, Merges; PR #64). 635 Tests grün mit Originaldaten.
+- Gesamtreview (Codex, zwei Teile) „Ja“: keine neuen Fehler; Testlücke Bildschirmhandler mit Zufallsfolge → #86 (R4). M3 abgeschlossen.
 
 ## Runde 2 – Altbestand übernehmen (11.11.2026) · letzte Spur `b55ce3a`, Abschluss nach Fixlauf #59 `4022a66`
 
