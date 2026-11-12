@@ -234,3 +234,17 @@ Ergänzungen mit Beleg aus den portierten Routinen; Namen in `DgroupLayout.cs` (
 Präzisierung zu §5 (Vermögen): Edelsteine = Steine · (Grundeinheit · Kurs / 100) + Grundeinheit · Konto / 100; Land-, Waren-,
 Raketen- und Ölprodukte werden auf 16 Bit abgeschnitten; Öl zählt nur bei `45BA` = 1
 ([0825_0813_vermoegen.md](../routines/0825_0813_vermoegen.md)).
+
+## 8. Runde 4, Spur `programm` (Programmablauf)
+
+Belege: [1777_000C_main.md](../routines/1777_000C_main.md), [1777_04E4_initialisierung.md](../routines/1777_04E4_initialisierung.md);
+Gleichschritt-Differenztest `ProgramMachineDifferentialTests`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `090E` | W s | `ProgramInitialisation.GraphicsCard` | Grafikkarte: 1 VGA, 0 EGA, 2 Tandy, 63h Tandy-Emulation, −1 erkennen | S `1777:04E7`, `0D73:0712`; P = 1; T |
+| `0910` | W s | `ProgramInitialisation.SoundDevice` | Tonart: 0 PC-Lautsprecher, 1 AdLib, −1 erkennen | S `1777:04FF`, `0D73:04CA`; P = 1; T |
+| `08FA` | B | `ProgramLoop.GameRunning` | vor jeder Wochenschleife 1 (Bedeutung offen; gelesen `192D:11B8`/`12A6`) | S `1777:017A`; T |
+| `3CCC` | B | `ProgramLoop.NewGameRequest` | Menüergebnis „neue Partie“ (1), gesetzt in `192D:12A6` | S `1777:016E`; P; T |
+| `10A3` | W | – | Musiktreiber vorhanden (`218B:0002`; `218B:013A` liefert 0, wenn 0) | S `218B:013D`; P = 1 |
+| `10A5` / `10A9` | W / W | – | Musik läuft / aktuelles Stück (`218B:0094`) | S `218B:00B4`, `0131`; P |

@@ -116,7 +116,7 @@ public sealed class PhaseMachine
     /// </summary>
     public void Advance(PhaseTick tick)
     {
-        if (tick.HeldScancodes is { } keys) WriteKeyTable(keys);
+        if (tick.HeldScancodes is { } keys) WriteKeyTable(_state, keys);
         while (LastFrame < tick.Frame && Status != PhaseStatus.Finished)
         {
             _currentFrame = LastFrame + 1;
@@ -130,11 +130,12 @@ public sealed class PhaseMachine
 
     // [APPROX] Key table DS:3D47 + scancode: 1 = held, 0 = released. The keyboard handler 27C6:037A is not ported yet (lane host);
     // the loop itself only tests DS:3D55 against zero.
-    private void WriteKeyTable(IReadOnlyCollection<byte> held)
+    // Also used by the program machine (ProgramMachine.Advance), which passes frames to a nested phase machine without keys.
+    internal static void WriteKeyTable(Dgroup state, IReadOnlyCollection<byte> held)
     {
-        for (int sc = 0; sc < KeyTableLength; sc++) _state.Set(DgroupLayout.KeyState + sc, (byte)0);
+        for (int sc = 0; sc < KeyTableLength; sc++) state.Set(DgroupLayout.KeyState + sc, (byte)0);
         foreach (byte sc in held)
-            if (sc < KeyTableLength) _state.Set(DgroupLayout.KeyState + sc, (byte)1);
+            if (sc < KeyTableLength) state.Set(DgroupLayout.KeyState + sc, (byte)1);
     }
 
     private const int KeyTableLength = 0x80;
