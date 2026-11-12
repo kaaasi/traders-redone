@@ -64,6 +64,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Datensegment, `DS:10D2`), Gegenprobe im Review (vertauschte Reihenfolge Start/Code, fehlendes `DS:08FA` → rot); Mehrrundenprobe
   mit Mensch ≥ 4 Wochen (`AGENTS.md` §5); `check-architecture.py` grün mit Gegenprobe der neuen Regel; Windows-Start per Hand (Nutzer).
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 und 2 (sonst `spur-wartet`, „wartet auf 1/2“).
+- **Status:** Teil 1 fertig (Claude, PR #96, Draft): `Phases/ProgramLoop.cs`, `ProgramMachine.cs`, `ProgramSteps.cs`, Befund `1777_04E4_initialisierung.md`, Gleichschritt bis `1777:02DC` der Woche 0 und Abbruch A; Teil 2 offen, Teil 3 wartet auf 1/2.
 
 ## 1 `menue` – Menüs `192D` und erste Szene
 
