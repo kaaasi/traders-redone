@@ -188,6 +188,34 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | – | – | 🔍 |
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `MultiWeekDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
+| `192D:0007` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0058` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:00C5` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0234` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0376` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:03E3` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:040E` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0495` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0592` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:05DD` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0698` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0A05` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0AB4` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0C08` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0D10` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0F96` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:10F8` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:1263` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:12A6` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:131B` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MenuBackdrop.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:138F` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MenuBackdrop.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:14B4` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MenuBackdrop.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:14FB` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MenuBackdrop.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:16AF` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:18B6` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MenuTexts.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:197F` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:1A04` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:1B90` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
 | `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:022B` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
@@ -199,6 +227,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:0185` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `RandomDifferentialTests.cs` | ✅ |
 | `21FD:021F` | [21FD_021F_wetter.md](docs/routines/21FD_021F_wetter.md) | `src/Traders.Core/Rules/WeatherRule.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
+| `21FD:0245` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
 | `21FD:026C` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:02C9` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:0329` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
@@ -290,7 +319,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `1777` | 0x540 | 4 | 3 | 2 | 2 |
 | `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
 | `186C` | 0xC10 | 19 | 0 | 0 | 0 |
-| `192D` | 0x1D60 | 74 | 0 | 0 | 0 |
+| `192D` | 0x1D60 | 74 | 28 | 28 | 28 |
 | `1B03` | 0x1650 | 44 | 0 | 0 | 0 |
 | `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
 | `1DEF` | 0x8F0 | 14 | 0 | 0 | 0 |
@@ -300,7 +329,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
 | `21A7` | 0x80 | 3 | 0 | 0 | 0 |
 | `21AF` | 0x4E0 | 7 | 8 | 8 | 8 |
-| `21FD` | 0x980 | 28 | 13 | 12 | 12 |
+| `21FD` | 0x980 | 28 | 14 | 13 | 13 |
 | `2295` | 0xE0 | 4 | 4 | 4 | 4 |
 | `22A3` | 0x930 | 15 | 3 | 3 | 3 |
 | `2336` | 0x970 | 4 | 2 | 2 | 2 |
@@ -310,7 +339,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **137** | **123** | **123** |
+| **Summe** | **0x28DC0** | **891** | **166** | **152** | **152** |
 
 <!-- abdeckung:ende -->
 

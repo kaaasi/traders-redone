@@ -87,6 +87,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; alle Menüs pixelgenau gegen den RefEmu; Bild- und Zufallsfolge im Gleichschritt (#86);
   Optionsfelder nach jeder Menüfolge gleich dem RefEmu; `check-architecture.py` grün mit Gegenproben.
 - **Abhängigkeiten:** keine.
+- **Status (Spur, PR #93):** Teil 1 fertig (Menülogik im Kern, Differenztests grün); Teile 2–3 offen.
 
 ## 2 `partie` – neue Partie `0E31`
 
