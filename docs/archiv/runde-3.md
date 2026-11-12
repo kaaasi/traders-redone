@@ -131,6 +131,8 @@ Konflikte nur dann über `integration/runde-3`.
 - Alle Spuren gemergt: 1 `regeln` #67, 2 `schichten` #68, 3 `host` #69, 0 `takt` #66 (Fixlauf B1/B2/B5); Plan #63, Freigaben #64,
   Status #82. `main` nach der letzten Spur `fd46c2b`, 635 Tests grün mit Originaldaten.
 - Erstreviews: `reviews/2026-11-11-r3-{regeln,schichten,host,takt}.md` (alle „Ja“; takt mit P2 B1, behoben #79).
+- Weitere Reviews der Runde: Plan `reviews/2026-11-11-r3-plan.md`, Freigabe `reviews/2026-11-11-r3-freigabe-referenz.md`,
+  Status `reviews/2026-11-12-r3-status.md`, Abschluss `reviews/2026-11-12-r3-abschluss.md` (P3 #89, behoben mit dem Plan-PR R4).
 - Gesamtreview Codex: Teil 1 [reviews/2026-11-12-r3-gesamt.md](../reviews/2026-11-12-r3-gesamt.md) ohne SDK (nur Codelesen),
   Teil 2 [reviews/2026-11-12-r3-gesamt-teil2.md](../reviews/2026-11-12-r3-gesamt-teil2.md) „Ja“: keine neuen Fehler, Gegenproben
   R3T-B1/B2 rot; Testlücke als #86.
