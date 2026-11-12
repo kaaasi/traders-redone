@@ -290,3 +290,29 @@ Differenztests `ProgramStartDifferentialTests`, `CodeQueryDifferentialTests`.
 | `10F0…10FA` | B[11] | – | Ziffernblock-Tabelle, adressiert als `[SI + 10A9h]` mit SI = 47h…51h (7 8 9 – 4 5 6 + 1 2 3) | G `21FD:07CD`; P |
 | `4884` | Far | `MenuLayout.TextBuffer` (`TextFile`) | Textpuffer von `192D:18B6`; im Port Far-Adresse des Hosts (Teil 3) | S `0DFD:0074`; T |
 | `10A9` | W | – | **aktuelles Musikstück** (FFFF aus der EXE, 0 nach `218B:0094(0, 0)` bei `0DFD:02FE`); kein Teil der Ziffernblock-Tabelle | S `218B:00EE`; P |
+
+## 10. Runde 4, Spur `spielfeld` (Steuerung `0E9E`, Spielfeld `0609`)
+
+Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs` bzw. `JoystickReader.cs`.
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `37C3`, `3786`/`302E`, Merker, `3308`, `2C10` | wie §4.1 | `Bits`, `MoveDelay`/`FireDelay`, `Flag*`, `Action`, `PlayerIndex` | Verzögerungen als `long` vorzeichenbehaftet | G – Differenztest `0E9E:*` |
+| `2BE6` | W | `MouseDriver` | AX von `int 33h`/0 (`0D73:00F8`); ≠ 0 → `0D73:07E0` fragt die Maus ab | G – Differenztest `0D73:07E0` |
+| `1166…1170` / `1172…117C` | W[6] je Knüppel | `Stick1` / `Stick2` | Mitte x, Mitte y, Schritt x unter/über der Mitte, Schritt y unter/über der Mitte | G – Differenztest `27C6:0268` |
+| `2F05` | B u | `FreeFields` | freie Felder (vom Feldsetzen `0609:10D2` gezählt; die neue Partie setzt Spalten·Zeilen) | G – Differenztest `0609:10D2` |
+| `4BA8` / `2EE7` | B[4] / B[4][4] u | `OwnedFields` / `OwnedKinds` | Felder je Spieler / je Spieler und Art 0–3 | G – Differenztest `0609:10D2` |
+| `37AA` | B s | `CurrentPlayer` | Spieler am Zug (Vergleich in `0609:1072`) | G – Differenztest `0609:1072` |
+| `304E` / `305A` | B[4] s | `CursorX` / `CursorY` | Cursor je Spieler | G – Differenztest `0609:047B` |
+| `43B2` | B[4] u | `Mode` | Modus im Spielfeld: 4 = Art wählen, 6 = fertig (übrige Werte vgl. `0609:064D`) | G (4, 6), W (übrige) – `0609:047B`, `0EDD` |
+| `4BCA` / `3022` / `4BD2` | W[4] s | `Direction` / `MoveTimer` / `MoveFrame` | Zugrichtung 0–3 / Zugdauer 11h bzw. 0Ch / Anfangsbild | G (Werte), W (Bedeutung) – `0609:047B` |
+| `2E94` | B[4] s | `Selection` | gewählte Art −1…4 | G – Differenztest `0609:0BEA` |
+| `45DA` | B[9·6] u | `Terrain` | Gelände je Feld; 3 überspringt Art 3 | G (Prüfung), W (Bedeutung) – `0609:0BEA` |
+| `1582` / `45BA` | B u | `NoTime` / `TimeLimit` | Züge kosten keine Zeit (1) / Zeitlimit (≠ 0) | G – Differenztest `0609:0EA1` |
+| `4520` | W[4] s | `TimeLeft` | Zeiteinheiten übrig; `1B72` addiert den Schritt | G – Differenztest `0609:1B72` |
+| `3CE6` | B u | `Finished` | von `0EDD` herabgezählt; die Spielfeldschleife `0609:03E0` läuft bis 0 | G (Zählung), W (Bedeutung) |
+| `00E0` | B[4] u | `Blink` | Blinkzähler des Cursors (13h nach `random(200)` = 0) | G – Differenztest `0609:215E` |
+| `330C` / `3324` | B / W, Sätze zu 1Ah | `Sprite` / `SpriteFrame` | Sprite sichtbar / Bild (Satz je Spieler) | G (Schreiben `21AF:045E`, `215E`), W (Bedeutung) |
+| `3D42` | B[4] u | `RankTable` | Rang je Spieler (Abzeichen im Wappen, `0609:1854`) | G – Differenztest `0609:1854` |
+| `00D8` | W[4] s | `RankOffsetY` | y-Versatz des Rangabzeichens im Wappen | G – Differenztest `0609:1879` |
+| `43FA` | B[4] u | `Marker` | 1 = Merker neben dem Rangsymbol (`0609:1A61`) | G (Prüfung), W (Bedeutung) – Differenztest `0609:1A61` |

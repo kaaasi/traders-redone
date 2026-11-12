@@ -121,6 +121,10 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; je Steuerungsart Differenztest (Bits und Aktionscode gleich dem RefEmu, Joystick/Maus/LPT
   über gesetzte Gerätewerte im RefEmu, sonst `[APPROX]` mit Begründung); Feldroutinen mit Grenzfällen; Spielfeldbild pixelgenau.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 (sonst `spur-wartet`, „wartet auf 1“).
+- **Status (Spur, PR #95):** Teil 1 fertig (Befehlsquelle `0E9E` mit allen sechs Arten, Differenztests grün); Teil 2 fertig
+  (`0609:10D2/10A7/1072`, Cursorlogik `0609:047B` mit `0B8E/0BEA/0F0D/0F70/0EA1/0EDD/21BA/1B72/215E`); Teil 3 fertig (Szene `src/Traders.Presentation/Field/FieldScene.cs`:
+  `0609:1ED9/1256/1F04/1879/1854/1A61` und die Ereignisse `DrawCommand`/`DrawRank`, pixelgenau gegen den RefEmu am Wochenzustand
+  `0825:0072`); offen: `0609:0C73` (`DrawSelection`), Spielfeldschleife `0609:03E0`. Alle Teile fertig, Review offen.
 
 ## Zuständigkeit gemeinsamer Dateien in R4
 

@@ -21,6 +21,12 @@ public sealed class MachineOptions
     /// <summary>Provide a silent AdLib (OPL2) at 388h so the game's card detection succeeds.</summary>
     public bool AdLib { get; init; } = true;
 
+    /// <summary>
+    /// Game devices (joystick, mouse, parallel adapter) for tests of the control reader; all off by default. They are inputs of
+    /// the run like the other options and are not part of a machine snapshot. One instance per machine.
+    /// </summary>
+    public GameDevices Devices { get; init; } = new();
+
     public ushort PspSegment { get; init; } = 0x0FF0;
     public ushort MemoryTop { get; init; } = 0xA000;
 }
@@ -111,6 +117,7 @@ public sealed partial class PcMachine : IIoBus
     public byte In8(ushort port)
     {
         if (VgaAdapter.Handles(port)) return Vga.In(port);
+        if (TryDeviceIn(port, out byte device)) return device;
         switch (port)
         {
             case 0x20:
@@ -133,6 +140,7 @@ public sealed partial class PcMachine : IIoBus
     public void Out8(ushort port, byte value)
     {
         if (VgaAdapter.Handles(port)) { Vga.Out(port, value); return; }
+        if (TryDeviceOut(port, value)) return;
         switch (port)
         {
             case 0x20:
@@ -346,6 +354,7 @@ public sealed partial class PcMachine : IIoBus
             case 0x24: Cpu.Ax = (ushort)((Cpu.Ax & 0xFF00) | 3); return; // fail
             case 0x28: return;
             case 0x2F: Cpu.Ax &= 0xFF00; return;
+            case 0x33 when Devices.Mouse: MouseDriver(); return;
             case 0x33: Cpu.Ax = 0; return; // no mouse driver
             case 0x64: SoundDriver(); return;
             default:
