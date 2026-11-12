@@ -129,7 +129,22 @@ Befehlszähler, Datensegment zu Beginn von Woche 1), Zeiten wie die unabhängige
 - `RunToWeekStart(w, max)` hält vor dem ersten Befehl der Wochenpreise von Woche *w*, `RunToMarker(w, n, max)` vor der
   Markenroutine mit Argument *n* – dort liegt der Zustand zwischen zwei Phasen im Datensegment (`DataSegment()`). Ein erneuter
   Aufruf läuft von der Haltestelle weiter.
-- Ein Maschinenabzug zum Wiederaufsetzen an einer Marke fehlt noch (BESTAND.md §3.1 Punkt 3); jeder Lauf beginnt beim Start.
+- **Maschinenabzug** (R3 Spur `takt` Teil 1, BESTAND.md §3.1 Punkt 3): `OriginalProgram.Snapshot()` sichert an einer Haltestelle
+  die ganze Maschine (`Machine/MachineSnapshot.cs`), `OriginalProgram.Resume(dir, abzug)` setzt in einer neuen Maschine mit
+  denselben Optionen wieder auf. Teile (`SnapshotParts`): CPU (Register, Flags, Halt, Befehlszähler, Interrupt-Schatten),
+  Speicher (1 MB + HMA, A20 – darin auch FXDRIVER und BIOS-Datenbereich), PIC, PIT, Tastatur-Controller, VGA (Ebenen, Register,
+  Latches, DAC), AdLib, DOS (offene Dateien, Speicherblöcke, PSP, DTA, Suche), geschriebene Dateien, Uhr der Maschine
+  (Leerlauf-Versatz, nächster Timer-IRQ, Eingabeskript, Ende). Nicht enthalten: Ereignisprotokoll, Code-Haken, Spuren
+  (Beobachter; nach `Resume` neu anhängen – den FXDRIVER-Haken setzt `Resume` selbst, wenn `int 64h` außerhalb der Stubs zeigt)
+  und der Host-Ordner (Eingabe). `WriteTo`/`ReadFrom` schreiben gzip; Abzüge enthalten aus `T.EXE` abgeleiteten Speicher und
+  gehören nur in Zwischenordner, nie ins Repo (`AGENTS.md` §2.1).
+  Belegt durch `SnapshotTests`: Abzug an Marke 0 von Woche 0, über Datei zurückgelesen, Lauf ab dem Abzug = durchgehender Lauf
+  nach 300 000 Befehlen und an Marke 1 (Datensegment, `DS:10D2` = `FBBDAB8D` wie P1, Befehlszähler, Zeit, Bild-Hash, CS:IP und
+  alle Teile des Abzugs bitgleich). Gegenprobe: ohne CPU, Speicher, PIT, VGA oder Uhr weicht der Lauf ab; PIC, Tastatur, AdLib,
+  DOS und Dateien sind zwischen Marke 0 und 1 vom Neuzustand nicht unterscheidbar – für sie hält eine Feldinventur
+  (`Snapshot_covers_every_field_of_the_machine`) den Abzug vollständig: ein neues Feld in einer Maschinenklasse macht sie rot.
+  Mit FXDRIVER ebenso bitgleich an Marke 1; gemessen: alle 36 `int 64h`-Aufrufe bis Woche 0 liegen vor Marke 0, zwischen
+  Marke 0 und 6 ruft das Spiel den Treiber nicht auf.
 - Experiment: `bash experiments/refemu/spiellauf.sh <ordner> [sekunden]` schreibt Bilder, Ereignisprotokoll, Grafiktreiber-
   und OPL-Spur eines Laufs mit FXDRIVER (nur lokal, nicht committen).
 
@@ -149,6 +164,10 @@ var (ax, dx) = m.CallFar((ushort)(m.LoadSegment + 0x21FD), 0x01BA, [6]);
 // Zustand nach Marke 3 der Woche 0 (Standardpartie, vier Computerspieler)
 var p = OriginalProgram.StartGame("gamedata/dos");
 if (p.RunToMarker(week: 0, marker: 3, maxSeconds: 120)) { var ds = p.DataSegment(); uint rnd = p.RandomState; }
+// Abzug an der Marke, später ohne Neustart weiter
+var abzug = p.Snapshot();
+var q = OriginalProgram.Resume("gamedata/dos", abzug);
+q.RunToMarker(week: 0, marker: 4, maxSeconds: 60);
 ```
 
 Segmentangaben der Analyse (Ladebild-Segmente) + `LoadSegment` (Vorgabe `0x1000`) = Segment im Emulator.

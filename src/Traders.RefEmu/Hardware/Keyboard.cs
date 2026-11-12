@@ -20,6 +20,29 @@ public sealed class Keyboard
 
     public int QueuedCount => _queue.Count + (_full ? 1 : 0);
 
+    internal void SaveState(BinaryWriter w)
+    {
+        w.Write(_queue.Count);
+        foreach (var b in _queue) w.Write(b);
+        w.Write(_data);
+        w.Write(_full);
+        w.Write(_nextAllowed);
+        w.Write(SystemControl);
+        w.Write(Spacing);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        _queue.Clear();
+        int n = r.ReadInt32();
+        for (int i = 0; i < n; i++) _queue.Enqueue(r.ReadByte());
+        _data = r.ReadByte();
+        _full = r.ReadBoolean();
+        _nextAllowed = r.ReadInt64();
+        SystemControl = r.ReadByte();
+        Spacing = r.ReadInt64();
+    }
+
     public void Enqueue(byte scancode) => _queue.Enqueue(scancode);
 
     /// <summary>Make and break code of a key (set 1 scancode).</summary>

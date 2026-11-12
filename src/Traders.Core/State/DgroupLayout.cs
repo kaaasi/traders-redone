@@ -61,6 +61,7 @@ public static class DgroupLayout
     public const int BaseUnit = 0x3CF0;        // dword       initial cash / 40
     public const int GemPriceFactor = 0x4436;  // dword       40..160 (random(120)+40 at start)
     public const int ActivePlayer = 0x37AA;    // sbyte       current player / player loop variable (not saved)
+    public const int KeyState = 0x3D47;        // byte[128]   key state per scancode, set by the keyboard handler 27C6 (not saved)
 
     // ---- per player --------------------------------------------------------------------
     public const int HqX = 0x40FE;             // sbyte[4]    -1 = no HQ yet

@@ -47,8 +47,8 @@
 | 30 | `02CE` | `1F63:0B03` | Wettbewerb/Auswertung nach dem Einkauf |
 | – | `02D3` | `inc word [DS:4B9A]` | Wochenzähler +1, danach `jmp 01FB` |
 
-Argumente werden als Byte (`mov al,n` / `push ax`, Aufrufe 3, 6, 21) bzw. Wort (`mov ax,n` / `push ax`, Marken) übergeben und
-mit `pop cx` abgeräumt. Dieselbe Folge erzeugt `tools/callgraph.py` als `phases.dot` (lokale Ausgabe).
+Argumente werden als Byte (`mov al,n` / `push ax`, Aufrufe 3, 6, 21) bzw. Wort (`mov ax,n` / `push ax`, Marken 1–6; Marke 0
+mit `xor ax,ax` / `push ax` bei `022D`) übergeben und mit `pop cx` abgeräumt. Dieselbe Folge erzeugt `tools/callgraph.py` als `phases.dot` (lokale Ausgabe).
 
 ## Zustand
 | DS-Offset | Breite | Vorzeichen | Bedeutung | gelesen/geschrieben |
@@ -73,16 +73,37 @@ Tastaturhandler), kein Ton. Alle Wirkungen liegen in den 30 Aufrufen. Die Marke 
   Programm (siehe Befund `main`).
 
 ## C#-Umsetzung
-Kein Port in Runde 2. Ziel ist die Phasenmaschine des Kerns in R3 (`AGENTS.md` §4); die Marken 0–6 sind dort die
-Vergleichspunkte für Mehrrundenproben.
+R3 Spur `takt` Teil 2: `src/Traders.Core/Phases/WeekLoop.cs` (die 30 Aufrufe als Daten mit Schrittnummer nach `BESTAND.md`
+§1.4, Argument, Bildschirm/Zufall laut §1.4 und Ausstiegsprüfung) und `PhaseMachine.cs` (Ablauf auf `Dgroup`).
+Teil 3: `WeekRuleSteps.cs` bindet die bildschirmlosen Schritte an die Regeln aus Spur `regeln` (`Traders.Core.Rules`):
+Aufruf 1 `1777:02DC`, 2 `0825:07C4`, 5 und 20 `0609:1178`, 12 `21FD:021F`, 13 `22A3:0003`, 14 `22A3:026B`, 27 `08CF:11D7`
+(Planschritte 1, 2, 5/16, 10, 11, 12, 21). Zufallsregeln ziehen aus dem `OriginalRandom` des Aufrufers, den die Maschine aus
+`DS:10D2` lädt und danach zurückschreibt; die übrigen 22 Aufrufe bleiben ausstehend.
+
+- **Takt:** einzige Zeiteingabe ist `Advance(PhaseTick)` mit der Bildnummer des Hosts; jedes Bild wird genau einmal und der Reihe
+  nach verarbeitet (Nachholen im Kern, alte Nummern ohne Wirkung). Ein laufender Bildschirmschritt bekommt je Bild einen `Tick`;
+  seine Zufallsziehungen in diesem Bild stehen im Ereignis `Frame` (F3 = A). `[APPROX]`: ein Takt = ein 70-Hz-Bild; das genaue
+  Verhältnis der Warteschleifen zum Bildwechsel wird mit den Szenen belegt.
+- **Befehle:** `Submit(IPlayerCommand)`, übergeben an den laufenden Schritt mit dem nächsten Bild.
+- **Ausstehende Schritte:** Aufrufe ohne Handler blockieren die Maschine (`Blocked`, Ereignis `StepPending`); nichts wird
+  übersprungen. Marken sind leer und werden vom Kern selbst durchlaufen (`MarkerPassed`).
+- **Ausstiege:** A nach Aufruf 3, wenn `DS:3D55` ≠ 0 (Rückgabe 0); B nach Aufruf 19 genau bei `AL` = 1 (`cmp al,1`/`jnz`,
+  Rückgabe 1). Wochenzähler nach Aufruf 30 mit 16-Bit-Überlauf (`inc word`).
+- **Tastentabelle:** `PhaseTick.HeldScancodes` setzt `DS:3D47`+Scancode auf 1/0 (`[APPROX]`, Tastaturhandler `27C6:037A` ist
+  Spur `host`).
+- **Zufallszustand:** der Kern lädt `OriginalRandom` vor jedem Handleraufruf aus `DS:10D2` und schreibt ihn nur zurück, wenn
+  gezogen wurde.
 
 ## Prüfung
 - **Statisch (S):** Disassemblierung `1777:01F8`–`02DB` (`tools/segmap.py` bzw. `tools/callgraph.py`), alle Ziele sind
   verlagerte Far-Aufrufe.
-- **Probelauf (P):** `bash experiments/phasen/phasentrace.sh <aus> 400` auf `main` `657805b`, Lauf A (Vorgaben, vier
-  Computerspieler, nur Eingabetaste): Woche 0 und Woche 1 jeweils `1777:02DC` → Marken 0, 1, 2, 3, 4, 5, 6 in dieser Folge,
-  danach `1777:02DC` mit `DS:4B9A` um 1 erhöht; Woche 2 bis Marke 4 im Zeitfenster. Emulierte Zeiten der Marken in Woche 0:
-  25,3 / 56,2 / 69,0 / 77,4 / 77,4 / 147,3 / 161,6 s (Lauf bitgleich wiederholbar, `BESTAND.md` P1).
+- **Probelauf (P):** `bash experiments/phasen/phasentrace.sh <aus> 400`, Lauf A (Vorgaben, vier Computerspieler, nur
+  Eingabetaste): Woche 0 und Woche 1 jeweils `1777:02DC` → Marken 0, 1, 2, 3, 4, 5, 6 in dieser Folge, danach `1777:02DC` mit
+  `DS:4B9A` um 1 erhöht. Emulierte Zeiten der Marken in Woche 0 auf `paket/takt` nach Merge von `main` `c6d240f` (RefEmu seit
+  Spur ① unverändert): 25,31 / 46,11 / 58,66 / 66,96 / 66,97 / 165,43 / 188,71 s, Woche 1 Marke 0 bei 222,35 s, Woche 2 im
+  Fenster nur bis Marke 0 (397,69 s); gleiche Werte wie im Review r2-phasen B1 für den damaligen Head. Auf `657805b` (vor ①)
+  lagen sie bei 25,3 / 56,2 / 69,0 / 77,4 / 77,4 / 147,3 / 161,6 s; die Folge ist auf beiden Ständen gleich (Lauf bitgleich
+  wiederholbar, `BESTAND.md` P1).
 - **RefEmu-Test (T):** `tests/Traders.Tests/Phases/WeekLoopTests.cs` (Spur `phasen` Teil 3) prüft gegen die Tabelle oben
   (`WeekLoopSequence.cs`, statisch gelesen, nicht aus dem Lauf): Vorgabepartie bis zum Beginn von Woche 2 – je Woche die 30
   Aufrufstellen mit ihren Zielen, Marken 0–6 an ihren Stellen, `DS:4B9A` 0 → 1 → 2 genau bei `02D3`. Abbruchweg A:
@@ -90,4 +111,33 @@ Vergleichspunkte für Mehrrundenproben.
   `AL` = 0 und `DS:4B9A` = 0, danach erneut Hauptmenü `192D:0007`. Gegenproben: Marke in der Tabelle verändert bzw. Taste
   weggelassen → beide Tests rot; vertauschte, fehlende und zusätzliche Marken, vertauschte Aufrufe und falscher Zähler ohne
   Originaldaten in `WeekLoopSequenceTests.cs`.
-- **Nicht ausgeführt:** Abbruchweg B (Partieende) im RefEmu.
+- **Differenztest (D):** `tests/Traders.Tests/Phases/PhaseMachineDifferentialTests.cs` (`[DIFFERENTIAL] 1777:01F8`): Kern und
+  RefEmu im Gleichschritt (`RefEmuWeekOracle`) – jeder Aufruf läuft im RefEmu, Datensegment und `AL` gehen an den Kern; Folge,
+  Marken, Ausstiegsprüfung und Wochenzähler rechnet der Kern. An jeder Aufrufstelle ist das Datensegment beider gleich (außer
+  Tickzählern `DS:117E`/`1180` und Tastentabelle `DS:3D47`, die Interrupt-Handler schreiben). Woche 0 von Aufruf 2 bis
+  Aufruf 1 der Woche 1 sowie Abbruchweg A (Rücktaste während der Bilanz). Gegenproben (lokal): Zähler +2 statt +1 bzw.
+  Ausstieg A abgeschaltet → beide rot. Ohne Originaldaten: `PhaseMachineTests.cs` (Tabelle gegen `WeekLoopSequence`,
+  ausstehende Schritte, Bild genau einmal, Zufall je Bild, Befehle, Ausstiege A/B mit `AL` = 0/1/2, 16-Bit-Überlauf).
+- **Abbruchweg B (D, Teil 3):** `Exit_B_in_lockstep_with_the_original` – Zielvermögen `DS:08F4` vor Woche 0 auf 0 gesetzt;
+  die Endprüfung `20B3:0005` vergleicht bei `0026` das Vermögen `DS:2F06` des Spielers mit dem Ziel, zeigt die Endbilder und
+  wartet zuletzt in `27C6:00D2` auf eine beliebige Taste (`DS:115D`; der Test drückt ab der Aufrufstelle alle 10 s die
+  Eingabetaste). Kern und Original: Aufrufe 2–19, Marken 0–3, `AL` = 1, Rückkehr nach `main`; den Wochenzähler erhöht
+  `20B3:0071` selbst, der Kern hat ihn aus dem RefEmu und zählt nicht nach. Gegenprobe (lokal): Ziel unverändert → rot
+  (Maschine nicht beendet).
+- **Mehrrundenprobe (D, Teil 3):** `MultiWeekDifferentialTests.cs` – Vorgabepartie, Wochen 0–3 und Aufruf 1 der Woche 4: an
+  jedem gebundenen Regelschritt (`WeekRuleSteps`) übernimmt der Kern das Datensegment des RefEmu an der Aufrufstelle, rechnet den
+  Port und wird beim Rücksprung mit dem RefEmu verglichen (ganzes Datensegment außer den Interrupt-Bytes oben, dazu der
+  Zufallszustand des Ports gegen `DS:10D2`); danach rechnet der Kern mit seinem eigenen Ergebnis weiter. `DS:10D2` schreibt
+  die Maschine nach dem Schritt zurück, der Vergleich an der nächsten Aufrufstelle prüft diesen Rückschreibeweg gegen den
+  RefEmu (Gegenprobe: Rückschreiben entfernt → rot in Woche 0 bei Aufruf 13). Bildschirmschritte rechnet der RefEmu. Dazu Folge der 30 Aufrufe und Marken je Woche, Wochenzähler
+  1–4, Zahl der Ziehungen von Wetter und Edelsteinkurs. Gegenprobe (lokal): Aufrufe 13 und 14 vertauscht → rot in Woche 0
+  bei Aufruf 13 (`DS:2EB0`). Laufzeit im Release-Lauf von `tools/pruefen.sh` rund 90 s (Abbruchweg B
+  rund 35 s; eine Woche ≈ 200 s emuliert, ≈ 600 Mio. Befehle); `--schnell` wird dadurch rund 45 s länger (parallel).
+- **Mehrrundenprobe mit gemischten Feldarten (D, Fix B1):** `Four_weeks_with_mixed_field_kinds_match_the_original` – wie oben,
+  aber an der Aufrufstelle von `22A3:0003` setzt der Test je Woche im RefEmu einen Zustand mit gemischten Feldarten (freie
+  Felder an die Spieler, bis Spieler p mindestens 3 + p Produktionsfelder hat; Arten 0, 1, 2 reihum; `DS:2EE7` passend), den
+  der Kern mit dem Datensegment übernimmt. Die Vorgabepartie hat je Spieler nur eine Feldart (Anteil 100, Faktor 100); ein
+  gesetzter Zustand vor Woche 0 hält nicht, weil Aufruf 8 (Computerspieler) das Feld in Woche 0 neu aufbaut und später
+  umgruppiert. Geprüft: in jeder Woche produziert ein Feld bei einem Anteil `DS:342C` zwischen 0 und 100, der kein Vielfaches
+  von 4 ist. Gegenproben (lokal): Faktor aufgerundet bzw. `+ 26` statt `+ 25` → rot in Woche 0 bei Aufruf 13 (`DS:48F9`).
+  Laufzeit rund 55 s.

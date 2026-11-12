@@ -22,5 +22,14 @@ for path in (root / 'src/Traders.Core').rglob('*.cs'):
     source = re.sub(r'/\*.*?\*/|//[^\n]*', '', path.read_text(), flags=re.S)
     if re.search(r'\b(?:DateTime\.(?:Now|UtcNow|Today)|Random\.Shared|new\s+(?:System\.)?Random\s*\(|File\.|Directory\.|Console\.|Thread\.Sleep|Task\.Delay|Environment\.TickCount|Stopwatch|Guid\.NewGuid)', source):
         errors.append(f'{path.relative_to(root)}: Host-/Zufallszugriff im Core')
+# Random numbers only in the core (AGENTS.md §4, F3 = A): scenes, output and host never draw or seed random() themselves;
+# per-frame draws are core events of the phase machine. Traders.App gets its own rule with lane host (R3).
+for path in (root / 'src').rglob('*.cs'):
+    rel = path.relative_to(root)
+    if 'obj' in path.parts or 'bin' in path.parts or rel.parts[1] in ('Traders.Core', 'Traders.App'):
+        continue
+    source = re.sub(r'/\*.*?\*/|//[^\n]*', '', path.read_text(), flags=re.S)
+    if re.search(r'\bOriginalRandom\b|\bRandomSeed\b', source):
+        errors.append(f'{rel}: Zufall außerhalb des Kerns (OriginalRandom/RandomSeed)')
 print('\n'.join(errors) if errors else 'Architekturgrenzen geprüft')
 sys.exit(bool(errors))

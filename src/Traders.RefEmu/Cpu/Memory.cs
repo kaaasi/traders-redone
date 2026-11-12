@@ -31,6 +31,19 @@ public sealed class Memory
         _devEnd = end;
     }
 
+    /// <summary>Snapshot: RAM (1 MB + HMA) and the A20 gate; the device window belongs to its device.</summary>
+    internal void SaveState(BinaryWriter w)
+    {
+        w.Write(A20);
+        w.Write(Ram);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        A20 = r.ReadBoolean();
+        r.ReadExactly(Ram);
+    }
+
     private uint Wrap(uint a) => A20 ? (a < Size ? a : a % Size) : a & 0xFFFFF;
 
     public byte Read8(uint linear)

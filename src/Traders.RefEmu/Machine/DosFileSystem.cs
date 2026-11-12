@@ -16,6 +16,34 @@ public sealed class DosFileSystem
     /// <summary>Files written by the program during the run.</summary>
     public IReadOnlyDictionary<string, byte[]> WrittenFiles => _overlay;
 
+    /// <summary>Snapshot of the in-memory overlay (written and deleted files); the host directory is an input of the run.</summary>
+    internal void SaveState(BinaryWriter w)
+    {
+        w.Write(_overlay.Count);
+        foreach (var (name, data) in _overlay.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            w.Write(name);
+            w.Write(data.Length);
+            w.Write(data);
+        }
+        w.Write(_deleted.Count);
+        foreach (var name in _deleted.Order(StringComparer.OrdinalIgnoreCase)) w.Write(name);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        _overlay.Clear();
+        int n = r.ReadInt32();
+        for (int i = 0; i < n; i++)
+        {
+            string name = r.ReadString();
+            _overlay[name] = r.ReadBytes(r.ReadInt32());
+        }
+        _deleted.Clear();
+        n = r.ReadInt32();
+        for (int i = 0; i < n; i++) _deleted.Add(r.ReadString());
+    }
+
     public static string Normalize(string dosPath)
     {
         string p = dosPath.Replace('/', '\\');

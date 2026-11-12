@@ -52,6 +52,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Rundungsweg → rot); `--schnell` wird um höchstens 3 Minuten länger, sonst eigenes Filtermerkmal außerhalb von `--schnell` und im
   PR nennen; `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 (sonst `spur-wartet`, „wartet auf 1“).
+- **Status:** Teile 1–3 fertig (Maschinenabzug `SnapshotTests`; Phasenmaschine `src/Traders.Core/Phases/`, `[DIFFERENTIAL] 1777:01F8`; Regelschritte `WeekRuleSteps`, Mehrrundenprobe 4 Wochen und Abbruchweg B im Gleichschritt mit dem RefEmu); Review `docs/reviews/2026-11-11-r3-takt.md` (ja), Fixlauf B1/B2/B5: zweite Mehrrundenprobe mit gemischten Feldarten, Rückschreibeweg von `DS:10D2` in der Probe, `[APPROX]` an `PhaseTick`; Delta-Prüfung der Leitstelle offen (PR #66 `paket/takt`, `main` `f03d27e` eingemergt).
 
 ## 1 `regeln` – Wochenregeln ohne Bildschirm
 

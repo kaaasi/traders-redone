@@ -17,6 +17,26 @@ public sealed class AdLibStub
     /// <summary>Called for every register write (register, value).</summary>
     public Action<int, byte>? RegisterWritten { get; set; }
 
+    internal void SaveState(BinaryWriter w)
+    {
+        w.Write(Registers);
+        w.Write(_index);
+        w.Write(_timer1Start);
+        w.Write(_timer2Start);
+        w.Write(_flags);
+        w.Write(WriteCount);
+    }
+
+    internal void LoadState(BinaryReader r)
+    {
+        r.ReadExactly(Registers);
+        _index = r.ReadInt32();
+        _timer1Start = r.ReadInt64();
+        _timer2Start = r.ReadInt64();
+        _flags = r.ReadByte();
+        WriteCount = r.ReadInt64();
+    }
+
     public byte ReadStatus(long now)
     {
         // timer 1 ticks every 80 µs, timer 2 every 320 µs (PIT clocks: 1.193182 per µs)
