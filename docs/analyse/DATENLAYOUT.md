@@ -261,3 +261,17 @@ Gleichschritt-Differenztest `ProgramMachineDifferentialTests`.
 | `3CCC` | B | `ProgramLoop.NewGameRequest` | Menüergebnis „neue Partie“ (1), gesetzt in `192D:12A6` | S `1777:016E`; P; T |
 | `10A3` | W | – | Musiktreiber vorhanden (`218B:0002`; `218B:013A` liefert 0, wenn 0) | S `218B:013D`; P = 1 |
 | `10A5` / `10A9` | W / W | – | Musik läuft / aktuelles Stück (`218B:0094`) | S `218B:00B4`, `0131`; P |
+
+**Teil 2 (Programmstart `0DFD:000D`, Code-Abfrage `21FD:0687`):** Belege [0DFD_000D_programmstart.md](../routines/0DFD_000D_programmstart.md),
+[186C_ressourcenlader.md](../routines/186C_ressourcenlader.md), [21FD_0687_codeabfrage.md](../routines/21FD_0687_codeabfrage.md);
+Differenztests `ProgramStartDifferentialTests`, `CodeQueryDifferentialTests`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `09C8` | W s | `ImageTable.CurrentImage` | zuletzt geladenes Bild (−1 vor dem ersten; zugleich EGA-Palettennummer für `0A96`) | S `186C:008B`; P (2, dann 6); T |
+| `09CE` | 13h·10 | `ImageTable.Start` | Bildtabelle: +0/+4 Far-Zeiger VGA-/EGA-Name, +8 Diskette, +0Bh Dateilänge, +0Fh entpackte Länge (0 = noch nicht geöffnet) | S `186C:0997`; P; T |
+| `08CE…08DA` | W[7] | `ImageTable.PreloadNumbers`, `CodeRequestNumber` | Bildnummern der sechs vorgeladenen Bilder (`0DFD:0305…033B`) und des Abfragebilds | G `0DFD:0305`, `21FD:06A9`; T |
+| `10E0` | Far[4] | `CodeQuery.Texts` | Zeiger auf die vier verschlüsselten Abfragetexte (in DGROUP, `10FF`, `110C`, `110E`, …) | G/S `21FD:081D`; P |
+| `10E8` | Far | `CodeQuery.CodeText` | dritter Zeiger: Text „CODE: X-nn“ (Zeichen +6, +8, +9) | S `21FD:0717…075C`; P; T |
+| `10F0…10FA` | B[11] | – | Ziffernblock-Tabelle, adressiert als `[SI + 10A9h]` mit SI = 47h…51h (7 8 9 – 4 5 6 + 1 2 3) | G `21FD:07CD`; P |
+| `10A9` | W | – | **aktuelles Musikstück** (FFFF aus der EXE, 0 nach `218B:0094(0, 0)` bei `0DFD:02FE`); kein Teil der Ziffernblock-Tabelle | S `218B:00EE`; P |

@@ -64,8 +64,9 @@ public static class ProgramSteps
     public static IReadOnlyList<int> SoundSteps { get; } = [3, 4, 5, 6, 7];
 
     /// <summary>
-    /// Initialisation and the sound stubs. Program start (2), main menu (8) and new game (9) stay pending until their parts
-    /// and lanes are merged (lane programm part 2, lanes menue and partie); the host adds them to this dictionary.
+    /// Initialisation and the sound stubs. The host adds the program start (2, <see cref="Startup.ProgramStart"/>, which needs
+    /// the file lengths and the text plaque of lane menue); main menu (8) and new game (9) stay pending until lanes menue and
+    /// partie are merged.
     /// </summary>
     public static Dictionary<int, IProgramStepHandler> Defaults(short soundDevice = ProgramInitialisation.AdLib)
     {

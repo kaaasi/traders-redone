@@ -180,6 +180,11 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0B9F:06A0` | [0B9F_06A0_warenpreise.md](docs/routines/0B9F_06A0_warenpreise.md) | `src/Traders.Core/Rules/WarePrices.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `0B9F:078A` | [0B9F_06A0_warenpreise.md](docs/routines/0B9F_06A0_warenpreise.md) | `src/Traders.Core/Rules/WarePrices.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `0D73:00D3` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PageLayerTests.cs` | ✅ |
+| `0DFD:000D` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `0DFD:0074` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
+| `0DFD:0132` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
+| `0DFD:0158` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
+| `0DFD:0239` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `0E31:0003` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
 | `0E31:0149` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
 | `0E31:01CD` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `NewGameDifferentialTests.cs` | ✅ |
@@ -196,6 +201,13 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `MultiWeekDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `1777:04E4` | [1777_04E4_initialisierung.md](docs/routines/1777_04E4_initialisierung.md) | `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramMachineDifferentialTests.cs` | ✅ |
+| `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `186C:01A9` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
+| `186C:021E` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
+| `186C:02C6` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
+| `186C:0997` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `186C:0AB1` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
+| `186C:0B0A` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:022B` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
@@ -216,7 +228,9 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:04DA` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Vga/Layers/Pages.cs` | `PageLayerTests.cs` | ✅ |
-| `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | – | – | 🔍 |
+| `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `21FD:081D` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
+| `21FD:08D3` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
 | `2295:0001` | [2295_0001_zahl.md](docs/routines/2295_0001_zahl.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `2295:0062` | [2295_0001_zahl.md](docs/routines/2295_0001_zahl.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `2295:006D` | [2295_006D_farbregister.md](docs/routines/2295_006D_farbregister.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
@@ -284,7 +298,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `0B9F` | 0x8A0 | 16 | 2 | 2 | 2 |
 | `0C29` | 0x14A0 | 29 | 0 | 0 | 0 |
 | `0D73` | 0x8A0 | 15 | 1 | 1 | 1 |
-| `0DFD` | 0x340 | 5 | 0 | 0 | 0 |
+| `0DFD` | 0x340 | 5 | 5 | 2 | 2 |
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 0 | 0 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
@@ -297,7 +311,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `16D6` | 0xA10 | 12 | 0 | 0 | 0 |
 | `1777` | 0x540 | 4 | 4 | 4 | 4 |
 | `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
-| `186C` | 0xC10 | 19 | 0 | 0 | 0 |
+| `186C` | 0xC10 | 19 | 7 | 2 | 2 |
 | `192D` | 0x1D60 | 74 | 0 | 0 | 0 |
 | `1B03` | 0x1650 | 44 | 0 | 0 | 0 |
 | `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
@@ -308,7 +322,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
 | `21A7` | 0x80 | 3 | 0 | 0 | 0 |
 | `21AF` | 0x4E0 | 7 | 8 | 8 | 8 |
-| `21FD` | 0x980 | 28 | 13 | 12 | 12 |
+| `21FD` | 0x980 | 28 | 15 | 15 | 15 |
 | `2295` | 0xE0 | 4 | 4 | 4 | 4 |
 | `22A3` | 0x930 | 15 | 3 | 3 | 3 |
 | `2336` | 0x970 | 4 | 2 | 2 | 2 |
@@ -318,7 +332,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **145** | **132** | **132** |
+| **Summe** | **0x28DC0** | **891** | **159** | **139** | **139** |
 
 <!-- abdeckung:ende -->
 

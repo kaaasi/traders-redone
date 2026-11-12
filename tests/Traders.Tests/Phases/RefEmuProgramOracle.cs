@@ -178,8 +178,11 @@ internal sealed class RefEmuProgramOracle
             o.RunToCallSite(step);
             o.Compare(core, $"at {step}");
             o.TakeOver(core);
+            uint seed = context.Random.Seed;
             var outcome = port.Begin(context);
             if (!outcome.Done) throw new InvalidOperationException($"ported step {step} did not finish at once");
+            // the machine stores a changed seed after the handler returns; the comparison below comes first
+            if (context.Random.Seed != seed) core.Set(DgroupLayout.RandomSeed, context.Random.Seed);
             o.RunToReturn(step);
             int known = o.Differences.Count;
             o.Compare(core, $"after {step} (port)", hostOwned);
