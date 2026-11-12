@@ -63,6 +63,7 @@ Testergebnisse und werden als blockiert dokumentiert; Proxy, Sandbox und Freigab
   in eine eigene Datei (`partial`).
 - `src/Traders.Vga`, `src/Traders.Audio` – persistenter Framebuffer mit Original-Operationen, Ton.
 - `src/Traders.RefEmu` – 286-Interpreter, DOS/BIOS/VGA-Stubs, `OriginalProgram` für Differenztests.
+- `src/Traders.Presentation` – Szenen (ab R4): lesen den Kern, zeichnen über `Traders.Vga`; nur der Host referenziert sie.
 - `src/Traders.App` – Host (MonoGame DesktopGL): Fenster, Takt, Eingabe als Scancodes; hängt nicht vom RefEmu ab.
 - `src/Traders.Viewer`, `src/Traders.Tools` – Asset-Viewer, Export; `tests/Traders.Tests` – xUnit.
 

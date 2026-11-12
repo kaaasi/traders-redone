@@ -9,24 +9,30 @@ public enum MenuEventKind
     /// <summary>21A7:0054(A, B): sound call (not ported yet, R10).</summary>
     Sound,
 
+    /// <summary>21FD:03B4(A): fade-out to the 12-bit colour A (420h) before a screen is built.</summary>
+    FadeOut,
+
     /// <summary>
-    /// A menu screen is built (192D:16AF or 0FB7): A = routine of the screen, B = plaque height, C = text pointer DS offset;
-    /// <see cref="MenuEvent.Ops"/> = the random backdrop (wall and plaques) in draw order. The fade-out 21FD:03B4(420h) is part
-    /// of it.
+    /// A menu screen is built (192D:00C5, 042F, 0A26, 0FB7, 1263, 12A6, 19A4, 1B90): A = routine of the screen, B = its
+    /// argument (joystick for 1B90); <see cref="MenuEvent.Ops"/> = the random backdrop (wall and plaques) in draw order. The
+    /// scene draws the whole routine after its fade-out (21FD:03B4) and before its fade-in.
     /// </summary>
     Screen,
 
-    /// <summary>A part of a screen is drawn or redrawn: A = drawing routine in 192D, B = its argument (player, delta …).</summary>
+    /// <summary>A part of a screen is redrawn: A = drawing routine in 192D, B = its argument (player, prompt line …).</summary>
     Draw,
-
-    /// <summary>21FD:026C: the loaded palette becomes the base palette.</summary>
-    Palette,
 
     /// <summary>Fade-in: A = 21FD:0353 (fast) or 21FD:0329 (slow).</summary>
     FadeIn,
 
     /// <summary>21FD:051F: page flip (A = 1 when the flip waited four more retraces).</summary>
     Flip,
+
+    /// <summary>0A96:06A8: the command list is executed.</summary>
+    ListExecute,
+
+    /// <summary>0A96:001B: the command list is emptied.</summary>
+    ListClear,
 
     /// <summary>192D:120C: message of the disk menu (A = DS offset of the text pointer).</summary>
     DiskMessage,

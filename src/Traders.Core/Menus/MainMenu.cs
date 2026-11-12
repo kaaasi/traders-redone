@@ -111,11 +111,8 @@ public sealed class MainMenu
     /// <summary>[ORIGINAL] 192D:00C5 – main menu screen: plaque, menu lines, the four player labels (loop DS:37AA), fade-in.</summary>
     private IEnumerable<MenuWait> DrawMainMenu()
     {
-        foreach (var w in Panel(0x00C5, 0xBB, 0x64, 0x3994, 3)) yield return w;
-        Emit(MenuEventKind.Draw, 0x00C5);
-        for (sbyte p = 0; p < 4; p++) Emit(MenuEventKind.Draw, 0x03AB, p); // loop variable is the global DS:37AA
-        _d.Set(DgroupLayout.ActivePlayer, (sbyte)4);
-        Emit(MenuEventKind.Palette);
+        foreach (var w in Panel(0x00C5, 0xBB)) yield return w;
+        _d.Set(DgroupLayout.ActivePlayer, (sbyte)4); // loop variable of the label loop is the global DS:37AA
         foreach (var w in FadeIn(slow: false)) yield return w;
     }
 
@@ -123,9 +120,12 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> MainLoop(Action<byte> result)
     {
         byte exit = 0;
+        Emit(MenuEventKind.ListClear);
         while (exit == 0)
         {
             foreach (var w in Flip()) yield return w;
+            Emit(MenuEventKind.ListExecute);
+            Emit(MenuEventKind.ListClear);
             foreach (var w in Pause()) yield return w;
             for (int p = 0; p < 4; p++)
             {
@@ -164,6 +164,7 @@ public sealed class MainMenu
                 exit = 1;
                 foreach (var w in Release(MenuKeys.Enter)) yield return w;
             }
+            Emit(MenuEventKind.ListExecute);
             Random(1); // 192D:0345, also in the last pass
         }
         Sound(0, 1);
@@ -185,9 +186,7 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> LevelMenu()
     {
         Sound(0, 2);
-        foreach (var w in Panel(0x042F, 0xA2, 0x1E, 0x39C8, 0x28)) yield return w;
-        if (_d.S16(DgroupLayout.Level) == -1) Emit(MenuEventKind.Draw, 0x0653);
-        foreach (int routine in LevelItems) Emit(MenuEventKind.Draw, routine);
+        foreach (var w in Panel(0x042F, 0xA2)) yield return w;
         foreach (var w in FadeIn(slow: false)) yield return w;
         foreach (var w in LevelLoop()) yield return w;
         foreach (var w in DrawMainMenu()) yield return w;
@@ -200,9 +199,12 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> LevelLoop()
     {
         bool done = false;
+        Emit(MenuEventKind.ListClear);
         while (!done)
         {
             foreach (var w in Flip()) yield return w;
+            Emit(MenuEventKind.ListExecute);
+            Emit(MenuEventKind.ListClear);
             foreach (var w in Pause()) yield return w;
             if (_d.S16(DgroupLayout.Level) == -1)
             {
@@ -224,6 +226,7 @@ public sealed class MainMenu
                 done = true;
                 foreach (var w in Release(MenuKeys.Enter)) yield return w;
             }
+            Emit(MenuEventKind.ListExecute);
             Random(1); // 192D:0571
         }
         Sound(0, 1);
@@ -281,8 +284,7 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> SettingsMenu()
     {
         Sound(0, 2);
-        foreach (var w in Panel(0x0A26, 0x8E, 0x1E, 0x3A10, 3)) yield return w;
-        Emit(MenuEventKind.Draw, 0x0A26);
+        foreach (var w in Panel(0x0A26, 0x8E)) yield return w;
         foreach (var w in FadeIn(slow: false)) yield return w;
         foreach (var w in SettingsLoop()) yield return w;
         foreach (var w in DrawMainMenu()) yield return w;
@@ -292,9 +294,12 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> SettingsLoop()
     {
         bool done = false;
+        Emit(MenuEventKind.ListClear);
         while (!done)
         {
             foreach (var w in Flip()) yield return w;
+            Emit(MenuEventKind.ListExecute);
+            Emit(MenuEventKind.ListClear);
             foreach (var w in Pause()) yield return w;
             for (int k = 0; k < 6; k++)
             {
@@ -315,7 +320,7 @@ public sealed class MainMenu
             {
                 // 0D74: sound = (sound == 0) ? 1 : 0
                 _d.Set(DgroupLayout.Sound, (short)(_d.S16(DgroupLayout.Sound) == 0 ? 1 : 0));
-                Emit(MenuEventKind.Draw, 0x0D74);
+                Emit(MenuEventKind.Draw, 0x0F6E); // 0D74 redraws the sound line with 0F6E
                 Sound(0, 2);
                 foreach (var w in Release(MenuKeys.S)) yield return w;
             }
@@ -324,6 +329,7 @@ public sealed class MainMenu
                 done = true;
                 foreach (var w in Release(MenuKeys.Enter)) yield return w;
             }
+            Emit(MenuEventKind.ListExecute); // 192D:0BE8
         }
         Sound(0, 1);
     }
@@ -402,7 +408,7 @@ public sealed class MainMenu
         var ops = MenuBackdrop.Wall(Random);
         ops.AddRange(MenuBackdrop.Plaque(Random, 0x3C, top, 0xC8, 0x57));
         ops.AddRange(MenuBackdrop.Plaque(Random, 0x3C, Int16Math.S(top + top + 0x57), 0xC8, 0x20));
-        Emit(MenuEventKind.Screen, 0x0FB7, 0x57, 0x3A74, ops: ops);
+        Emit(MenuEventKind.Screen, 0x0FB7, ops: ops);
         foreach (var w in FadeIn(slow: false)) yield return w;
         foreach (var w in DiskLoop()) yield return w;
         foreach (var w in DrawMainMenu()) yield return w;
@@ -412,9 +418,12 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> DiskLoop()
     {
         bool done = false;
+        Emit(MenuEventKind.ListClear);
         while (!done)
         {
             foreach (var w in Flip()) yield return w;
+            Emit(MenuEventKind.ListExecute);
+            Emit(MenuEventKind.ListClear);
             foreach (var w in Pause()) yield return w;
             if (Key(MenuKeys.L))
             {
@@ -444,6 +453,7 @@ public sealed class MainMenu
                 done = true;
                 foreach (var w in Release(MenuKeys.Enter)) yield return w;
             }
+            Emit(MenuEventKind.ListExecute); // 192D:115A
         }
         Sound(0, 1);
     }
@@ -453,7 +463,7 @@ public sealed class MainMenu
     /// <summary>[ORIGINAL] 192D:1263 – info screen until RETURN is pressed and released, then the main menu screen.</summary>
     private IEnumerable<MenuWait> InfoScreen()
     {
-        foreach (var w in Panel(0x1263, 0x8C, 0x1E, 0x3BF4, 0x12)) yield return w;
+        foreach (var w in Panel(0x1263, 0x8C)) yield return w;
         foreach (var w in FadeIn(slow: false)) yield return w;
         while (!Key(MenuKeys.Enter)) yield return MenuWait.Poll;
         while (Key(MenuKeys.Enter)) yield return MenuWait.Poll;
@@ -471,7 +481,7 @@ public sealed class MainMenu
             _d.Set(MenuLayout.Choice, (byte)1);
             yield break;
         }
-        foreach (var w in Panel(0x12A6, 0x64, 0x1E, 0x3AB0, 3)) yield return w;
+        foreach (var w in Panel(0x12A6, 0x64)) yield return w;
         foreach (var w in FadeIn(slow: true)) yield return w;
         while (true)
         {
@@ -500,10 +510,8 @@ public sealed class MainMenu
         while (true)
         {
             // 19A4
-            foreach (var w in Panel(0x19A4, 0x64, 0x1E, 0x3C20, 0x0A)) yield return w;
-            for (sbyte p = 0; p < 4; p++) Emit(MenuEventKind.Draw, 0x1B06, p); // loop variable DS:37AA
-            _d.Set(DgroupLayout.ActivePlayer, (sbyte)4);
-            Emit(MenuEventKind.Palette);
+            foreach (var w in Panel(0x19A4, 0x64)) yield return w;
+            _d.Set(DgroupLayout.ActivePlayer, (sbyte)4); // label loop variable DS:37AA
             foreach (var w in FadeIn(slow: false)) yield return w;
             foreach (var w in ControlsLoop()) yield return w;
             bool ok = false;
@@ -516,9 +524,12 @@ public sealed class MainMenu
     private IEnumerable<MenuWait> ControlsLoop()
     {
         bool done = false;
+        Emit(MenuEventKind.ListClear);
         while (!done)
         {
             foreach (var w in Flip()) yield return w;
+            Emit(MenuEventKind.ListExecute);
+            Emit(MenuEventKind.ListClear);
             foreach (var w in Pause()) yield return w;
             for (int p = 0; p < 4; p++)
             {
@@ -538,6 +549,7 @@ public sealed class MainMenu
                 done = true;
                 foreach (var w in Release(MenuKeys.Enter)) yield return w;
             }
+            Emit(MenuEventKind.ListExecute);
             Random(1); // 192D:1AAD
         }
         Sound(0, 1);
@@ -554,9 +566,7 @@ public sealed class MainMenu
             if (_d.U8(DgroupLayout.IsComputer + p) == 1) continue;
             int stick = _d.U8(DgroupLayout.ControlDevice + p) switch { 0 => 1, 1 => 2, _ => 0 };
             if (stick == 0) continue;
-            foreach (var w in Panel(0x1B90, 0x64, 0x1E, 0x3C54, 0x28)) yield return w;
-            Emit(MenuEventKind.Draw, 0x1B90, stick);
-            Emit(MenuEventKind.Palette);
+            foreach (var w in Panel(0x1B90, 0x64, stick)) yield return w;
             foreach (var w in FadeIn(slow: false)) yield return w;
             for (int step = 0; step < 3; step++)
             {
@@ -579,21 +589,22 @@ public sealed class MainMenu
 
     /// <summary>
     /// [ORIGINAL] 192D:16AF(h, step, texts, extra) – plaque top DS:5334 = (200 − h) / 2, fade-out to 420h, the wall (131B),
-    /// the plaque 14FB(37h, top, D2h, h), then the texts (drawing only).
+    /// the plaque 14FB(37h, top, D2h, h); the texts and the rest of the screen routine are drawn by the scene.
     /// </summary>
-    private IEnumerable<MenuWait> Panel(int screen, short height, int step, int texts, int extra)
+    private IEnumerable<MenuWait> Panel(int screen, short height, int argument = 0)
     {
         short top = Int16Math.Div(Int16Math.S(0xC8 - height), 2);
         _d.Set(MenuLayout.PlaqueTop, top);
         foreach (var w in FadeOut()) yield return w;
         var ops = MenuBackdrop.Wall(Random);
         ops.AddRange(MenuBackdrop.Plaque(Random, 0x37, top, 0xD2, height));
-        Emit(MenuEventKind.Screen, screen, height, texts, ops); // step and extra spacing are fixed per screen (scene)
+        Emit(MenuEventKind.Screen, screen, argument, ops: ops);
     }
 
     /// <summary>21FD:03B4(420h): fade-out with its retrace waits.</summary>
     private IEnumerable<MenuWait> FadeOut()
     {
+        Emit(MenuEventKind.FadeOut, 0x420);
         for (int i = 0; i < FadeOutRetraces; i++) yield return MenuWait.Retrace;
     }
 

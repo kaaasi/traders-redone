@@ -28,7 +28,7 @@ internal sealed class MenuHarness
 
     // Back edges of the key wait loops: (offset, branch taken when ZF is set). From 192D.asm: every jz/jnz back to the
     // "cmp byte [key],0" just before it, plus the dialog loop 12A6 (unconditional jmp at 1309).
-    private static readonly (ushort Off, bool TakenOnZero)[] WaitEdges192D =
+    internal static readonly (ushort Off, bool TakenOnZero)[] WaitEdges192D =
     [
         (0x0270, false), (0x028A, false), (0x02A4, false), (0x02BE, false), (0x02D3, false), (0x02E8, false), (0x02FD, false),
         (0x0312, false), (0x0326, false), (0x033A, false),
@@ -42,7 +42,7 @@ internal sealed class MenuHarness
     ];
 
     /// <summary>Pause 21FD:0245: wait for release, press, release.</summary>
-    private static readonly (ushort Off, bool TakenOnZero)[] WaitEdges21FD = [(0x0256, false), (0x025F, true), (0x0268, false)];
+    internal static readonly (ushort Off, bool TakenOnZero)[] WaitEdges21FD = [(0x0256, false), (0x025F, true), (0x0268, false)];
 
     /// <summary>21FD routines stubbed with their retrace waits as frames (0 = no frame).</summary>
     private static readonly Dictionary<ushort, int> Stubs21FD = new()
