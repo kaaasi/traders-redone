@@ -284,3 +284,6 @@ Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs
 | `3CE6` | B u | `Finished` | von `0EDD` herabgezählt; die Spielfeldschleife `0609:03E0` läuft bis 0 | G (Zählung), W (Bedeutung) |
 | `00E0` | B[4] u | `Blink` | Blinkzähler des Cursors (13h nach `random(200)` = 0) | G – Differenztest `0609:215E` |
 | `330C` / `3324` | B / W, Sätze zu 1Ah | `Sprite` / `SpriteFrame` | Sprite sichtbar / Bild (Satz je Spieler) | G (Schreiben `21AF:045E`, `215E`), W (Bedeutung) |
+| `3D42` | B[4] u | `RankTable` | Rang je Spieler (Abzeichen im Wappen, `0609:1854`) | G – Differenztest `0609:1854` |
+| `00D8` | W[4] s | `RankOffsetY` | y-Versatz des Rangabzeichens im Wappen | G – Differenztest `0609:1879` |
+| `43FA` | B[4] u | `Marker` | 1 = Merker neben dem Rangsymbol (`0609:1A61`) | G (Prüfung), W (Bedeutung) – Differenztest `0609:1A61` |

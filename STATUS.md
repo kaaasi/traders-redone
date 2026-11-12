@@ -133,7 +133,13 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0609:10A7` | [0609_10D2_feldart.md](docs/routines/0609_10D2_feldart.md) | `src/Traders.Core/Field/FieldGrid.cs` | `FieldGridDifferentialTests.cs` | ✅ |
 | `0609:10D2` | [0609_10D2_feldart.md](docs/routines/0609_10D2_feldart.md) | `src/Traders.Core/Field/FieldGrid.cs` | `FieldGridDifferentialTests.cs` | ✅ |
 | `0609:1178` | [0609_1178_obergrenzen.md](docs/routines/0609_1178_obergrenzen.md) | `src/Traders.Core/Rules/ProductionLimits.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
+| `0609:1256` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1854` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1879` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1A61` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | – | `FieldSceneDifferentialTests.cs` | 🔍 |
 | `0609:1B72` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
+| `0609:1ED9` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1F04` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:215E` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:21BA` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0825:06CB` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
@@ -346,7 +352,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 |---|---:|---:|---:|---:|---:|
 | `0000` | 0x5350 | 76 | 1 | 1 | 1 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
-| `0609` | 0x21C0 | 56 | 14 | 14 | 14 |
+| `0609` | 0x21C0 | 56 | 20 | 19 | 19 |
 | `0825` | 0xAA0 | 16 | 7 | 7 | 7 |
 | `08CF` | 0x19A0 | 42 | 1 | 1 | 1 |
 | `0A69` | 0x2D0 | 9 | 10 | 10 | 10 |
@@ -389,7 +395,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **216** | **207** | **207** |
+| **Summe** | **0x28DC0** | **891** | **222** | **212** | **212** |
 
 <!-- abdeckung:ende -->
 
