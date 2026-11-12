@@ -39,16 +39,16 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Menü, Rückgabe 1 Programmende; Menü und neue Partie als ausdrücklich „ausstehende“ Schritte, bis 1 und 2 gemergt sind.
   Kommandozeile, Systemschicht `0D73` und Abbau ersetzt der Host (`[APPROX]` mit Begründung). (2) **Start und Code-Abfrage:**
   `0DFD:000D` (Ladefolge: Schrift, Masken, Ladebild, sechs vorgeladene Bilder, Texte; welche Zustandsfelder entstehen) und
-  `21FD:0687` mit `081D`, `08D3`, `0863` (Neusaat `random(0)` aus explizitem Uhrwert, Ziffernformel, jede Eingabe angenommen;
-  Befund [21FD_0687_codeabfrage.md](routines/21FD_0687_codeabfrage.md) ergänzen); Differenztest: gleicher Uhrwert → gleicher
-  Zufallszustand und gleiche erwartete Ziffern. (3) **Anbindung** (nach Merge von 1 und 2): `Traders.App` treibt die
-  Programmphasen mit `PhaseMachine.Advance`, zeigt Code-Abfrage und Menüszene aus `Traders.Presentation`, Tasten als Befehle;
+  `21FD:0687` mit `081D`, `08D3` (Neusaat `random(0)` aus explizitem Uhrwert, Ziehung und Ziffernformel; F1 = B: ohne
+  Anzeige und Eingabe, `0863` nur im Befund; Befund [21FD_0687_codeabfrage.md](routines/21FD_0687_codeabfrage.md) ergänzen);
+  Differenztest: gleicher Uhrwert → gleicher Zufallszustand und gleiches Datensegment wie das Original nach beliebiger Eingabe. (3) **Anbindung** (nach Merge von 1 und 2): `Traders.App` treibt die
+  Programmphasen mit `PhaseMachine.Advance`, zeigt Ladebild und Menüszene aus `Traders.Presentation`, Tasten als Befehle;
   **Mehrrundenprobe mit Mensch** (#81 B3): Start → Menü mit einem menschlichen und drei Computerspielern → neue Partie → vier Wochen,
   Bildschirmschritte weiter aus dem RefEmu übernommen, Vergleich wie R3; Architekturregel gegen Rohoffsets wie `d.U32(0x10D2)`
   außerhalb von Core/RefEmu (#81 B4); P3 #76 P3-3 (`27C6:00AC`).
 - **Dateigrenzen:** `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.Core/Startup/**` (neu),
   `tests/Traders.Tests/Startup/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**`,
-  `src/Traders.Presentation/Startup/**` (Code-Abfrage, Ladebild; ab Teil 3), `docs/routines/{1777_000C,1777_04E4,0DFD,21FD_0687}*`,
+  `src/Traders.Presentation/Startup/**` (Ladebild; ab Teil 3), `docs/routines/{1777_000C,1777_04E4,0DFD,21FD_0687}*`,
   `docs/routines/27C6_*` (nur #76 P3-3), `tools/check-architecture.py` (ohne die Regeln für `Traders.Presentation`, s. 1).
 - **Abnahme:** alle drei Läufe grün; Programmablauf im Gleichschritt mit dem RefEmu bis `1777:02DC` der Woche 0 (Markenfolge,
   Datensegment, `DS:10D2`), Gegenprobe im Review (vertauschte Reihenfolge Start/Code, fehlendes `DS:08FA` → rot); Mehrrundenprobe
@@ -120,12 +120,14 @@ Teil 3). Konflikte nur dann über `integration/runde-4`.
 ## Offene Fragen an den Nutzer
 
 - **G1 Go** für vier Spuren wie oben, alle Opus, zeitversetzte Starts durch die Leitstelle.
-- **F1 Code-Abfrage** „INSERT COIN!“ (nimmt jede Eingabe an): A originalgetreu zeigen (Vorschlag; Überspringen später als
-  abschaltbare Erweiterung) · B im Port überspringen, Zufallsneusaat bleibt.
-- **F2 Diskettenmenü:** A Menü originalgetreu, Spielstand als Datei über eine Host-Schnittstelle, Diskettenwechsel-Meldungen
-  entfallen als `[APPROX]` (Vorschlag) · B Menüpunkt vorerst ausblenden.
-- **F3 Steuerungsarten:** A alle sechs Arten im Kern mit Differenztest, der Host liefert vorerst nur Tastatur (Arten 3/4),
-  Joystick/Maus/LPT folgen bei Bedarf (Vorschlag) · B nur Tastatur auch im Kern.
+- **F1 Code-Abfrage – B (Nutzer 12.11.2026):** Der Port zeigt „INSERT COIN!“ nicht; die Zufallsneusaat `random(0)` aus dem
+  Uhrwert und alle übrigen Zustandsänderungen von `21FD:0687` bleiben (Differenztest), Bild und Tasteneingabe entfallen als
+  `[APPROX]` mit Begründung (Original nimmt jede Eingabe an).
+- **F2 Diskettenmenü – A (Nutzer 12.11.2026):** Menü originalgetreu, Spielstand als Datei über eine Host-Schnittstelle,
+  Diskettenwechsel-Meldungen entfallen als `[APPROX]`.
+- **F3 Steuerungsarten – A (Nutzer 12.11.2026):** alle sechs Arten im Kern mit Differenztest, der Host liefert vorerst nur
+  Tastatur (Arten 3/4); Joystick/Maus/LPT folgen bei Bedarf.
+- **G2 Zugriff – bestätigt (Nutzer 12.11.2026):** Jede Leitstelle, auch künftige, bindet `kaaasi/traders-referenz` mit `push` ein.
 - Übrige P3: #39 R3 und #89 mit diesem PR behoben; #74 → 2; #75 → 1; #76 P3-1 → 1, P3-3 → 0, P3-2 (`TON.md`) mit dem Ton (R10);
   #81 → 0; #86 → 1; #49 offen (nächster Lauf an `experiments/bestand/`).
 
