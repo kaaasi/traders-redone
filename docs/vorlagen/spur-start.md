@@ -22,7 +22,7 @@
 **Anlegen** (Leitstelle oder Nutzer): dem Lauf beide Repos mitgeben, `kaaasi/traders-redone` mit Schreibzugriff und
 `kaaasi/traders-referenz` mindestens lesend; der `add_repo`-Weg im Startaufruf ist nur der Rückfall.
 
-**Einzelner Folgeteil:** wie oben mit dem Zusatz „Nur Teil <n>.“
+**Einzelner Folgeteil:** wie oben mit dem Zusatz „Nur Teil <n>; danach Schritt 5 bzw. 6 ohne weiteren Teil.“
 
 **Fixlauf** (geplanter Lauf): Startaufruf wie oben mit Auftrag „Befunde `<IDs>` aus `<review-datei>` zu PR #`<nr>` beheben, Head
 vorher `<sha>`“ – ohne Befund (nur Rebase): „PR #`<nr>` auf `main` rebasen, Head vorher `<sha>`“. Am Ende
