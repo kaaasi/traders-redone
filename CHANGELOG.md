@@ -1,5 +1,16 @@
 # Zwischenstände
 
+## Runde 4 – Programmablauf, Menüs, neue Partie, Spielfeldschicht (12.11.2026) · letzte Spur `9efc2d2`
+
+- Spur 2 `partie` (PR #92): neue Partie `0E31` (sieben Routinen, Ziehungsfolge) mit Differenztests; #74.
+- Spur 1 `menue` (PR #93): Menülogik `192D` im Kern (sieben Zufallsquellen), neues Projekt `Traders.Presentation` mit
+  Menüszene pixelgenau, Bild- und Zufallsfolge je Rücklauf im Gleichschritt mit dem RefEmu (#86); Architekturregeln mit Rückrichtung.
+- Spur 3 `spielfeld` (PR #95): Befehlsquelle `0E9E` mit sechs Steuerungsarten (Gerätemodell im RefEmu), Feldart `0609:10D2`,
+  Cursor `0609:047B`, Spielfeld-Szene pixelgenau.
+- Spur 0 `programm` (PR #96): Programmphasen `1777:000C`, Start `0DFD:000D`, Lader `186C`, Code-Abfrage `21FD:0687` (F1 = B),
+  Host mit Menüszene, Mehrrundenprobe mit Mensch über vier Wochen (#81).
+- Prozess: Plan (PR #90), Aufgaben legt allein die Leitstelle an (PR #94). 751 Tests grün mit Originaldaten.
+
 ## Runde 3 – Phasenmaschine, Wochenregeln, Grafikschichten, Host (11.–12.11.2026) · letzte Spur `fd46c2b`
 
 - Spur 0 `takt` (PR #66): Maschinenabzug im RefEmu (Wiederaufsetzen bitgleich), Phasenmaschine im Kern mit Tick-Takt und Zufall je

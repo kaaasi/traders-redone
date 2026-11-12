@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Host) abgeschlossen ([archiv/runde-3.md](docs/archiv/runde-3.md)); nächste: Runde 4
+Stand: 12.11.2026 · Runde 4 (Programmablauf, Menüs, neue Partie, Spielfeldschicht): alle Spuren gemergt, Gesamtreview offen; vorher Runde 3 ([archiv/runde-3.md](docs/archiv/runde-3.md))
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -13,8 +13,8 @@ Stand: 12.11.2026 · Runde 3 (Phasenmaschine, Wochenregeln, Grafikschichten, Hos
 | M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
 | M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0); Maschinenabzug zum Wiederaufsetzen an Marken (R3 Spur 0) |
 | M3 | Kern-Fundament | ✅ | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Gesamtreview R3 „Ja“ |
-| M4 | Menü & Setup | ⬜ | |
-| M5 | Anbau | ⬜ | |
+| M4 | Menü & Setup | 🟢 | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene; Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview offen |
+| M5 | Anbau | 🟡 | Vorarbeit R4: Befehlsquelle `0E9E` (sechs Steuerungsarten), Feldart `0609:10D2`, Cursor `0609:047B`, Spielfeld-Szene `1256/1879/1ED9` |
 | M6 | Produktion & Wetter | ⬜ | |
 | M7 | Fat Mike / Schnecken | ⬜ | |
 | M8 | Auktion / Handel | ⬜ | |
@@ -50,7 +50,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 |---|---:|---|---|
 | `0000` | 0x5350 | Turbo-C-Laufzeit (Startcode ruft `1777:000C`, Long-Arithmetik, Dateien, `time()`, Tonroutinen `06FE/0724/0750`) | 🔍 nur benötigte Teile werden nachgebildet |
 | `0535` | 0xD40 | Roboterkampf: Aufstellung, Kampfwerte | 🔍 |
-| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | 🟡 `1178` portiert (R3 Spur 1) |
+| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | 🟡 `1178` (R3); Feldart `10D2`, Cursor `047B`, Spielfeld-Szene `1256/1879/1ED9/1F04/1854/1A61` (R4 Spur 3); offen `0C73`, `03E0`, Phase `0004` |
 | `0825` | 0xAA0 | Wochenbilanz (Darstellung), Vermögen/Rang (`0813`, `06CB`, `07C4`) | 🟡 Vermögen/Rang/Verlauf `0813`/`06CB`/`07C4` portiert (R3 Spur 1) |
 | `08CF` | 0x19A0 | Einkauf (Öl, Raketen, Lotto, Edelsteine), Edelsteinkurs `11D7` | 🟡 Edelsteinkurs `11D7` portiert (R3 Spur 1) |
 | `0A69` | 0x2D0 | Grafik: Linien-, Rahmen-, Texthilfen über der Befehlsliste | 🟢 Hilfen portiert (R3 Spur 2) |
@@ -59,9 +59,9 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `0B9F` | 0x8A0 | Handel: Ablauf und Regeln (Angebote, Warenpreise `DS:4898`) | 🟡 Warenpreise `06A0`/`078A` portiert (R3 Spur 1) |
 | `0C29` | 0x14A0 | Handel: Bildschirm und Bedienung, bucht Bargeld/Vorräte | ⬜ |
 | `0D73` | 0x8A0 | Systemschicht: Interrupts, Karten-/Tonerkennung, Speicher, Dateien | ⬜ |
-| `0DFD` | 0x340 | Programmstart: Schrift, Masken, Bilder, Texte laden; Code-Abfrage | ⬜ |
-| `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | 🔍 |
-| `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | 🔍 Befund (R3 Spur 3); Port als Befehlsquelle in R4 |
+| `0DFD` | 0x340 | Programmstart: Schrift, Masken, Bilder, Texte laden; Code-Abfrage | ✅ `000D` mit Differenztest (R4 Spur 0) |
+| `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | ✅ alle sieben Routinen mit Differenztest (R4 Spur 2) |
+| `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | ✅ Befehlsquelle im Kern, alle sechs Steuerungsarten (R4 Spur 3) |
 | `0EDE` | 0x23F0 | Roboterkampf: Ablauf, Bewegung, Treffer, Beute | 🔍 |
 | `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | ⬜ |
 | `11A3` | 0x1250 | Computerspieler: Wochenplanung (zwei Durchgänge) | ⬜ |
@@ -70,10 +70,10 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
-| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟡 `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3 Spuren 0, 1); `000C` Befund |
+| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟡 `000C` als Programmphasen mit Gleichschritt, `04E4` (R4 Spur 0); `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3) |
 | `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ⬜ |
-| `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🔍 |
-| `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | 🔍 |
+| `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🟡 Bildtabelle `0002`/`0997` im Kern (R4 Spur 0) |
+| `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | ✅ Menülogik im Kern, Menüszene in `Traders.Presentation` (R4 Spur 1) |
 | `1B03` | 0x1650 | Stationswahl, Raketenflug, Piraten, Stationsertrag | ⬜ |
 | `1C68` | 0x1870 | Roboterphase: Steuerung und Roboterkauf-Bildschirm | 🔍 |
 | `1DEF` | 0x8F0 | Zufällige Zusatzphase nach dem Handel (Regel offen) | ⬜ |
