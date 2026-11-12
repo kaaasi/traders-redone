@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Traders.Presentation</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Traders.Assets\Traders.Assets.csproj" />
+    <ProjectReference Include="..\Traders.Core\Traders.Core.csproj" />
+    <ProjectReference Include="..\Traders.Vga\Traders.Vga.csproj" />
+  </ItemGroup>
+</Project>
