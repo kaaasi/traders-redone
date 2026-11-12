@@ -64,7 +64,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Datensegment, `DS:10D2`), Gegenprobe im Review (vertauschte Reihenfolge Start/Code, fehlendes `DS:08FA` → rot); Mehrrundenprobe
   mit Mensch ≥ 4 Wochen (`AGENTS.md` §5); `check-architecture.py` grün mit Gegenprobe der neuen Regel; Windows-Start per Hand (Nutzer).
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1 und 2 (sonst `spur-wartet`, „wartet auf 1/2“).
-- **Status:** Teile 1–3 fertig (Claude, PR #96, Review offen). Teil 1: `Phases/ProgramLoop.cs`, `ProgramMachine.cs`, `ProgramSteps.cs`, Gleichschritt bis `1777:02DC` und Abbruch A. Teil 2: `Startup/ProgramStart.cs`, `ImageTable.cs`, `CodeQuery.cs`, `Assets/Loading/ImageFiles.cs` (`DS:10A9` geklärt). Teil 3: `MenuTextPlaque`, Texttabelle im Programmstart, `MainMenuProgramStep`/`NewGameProgramStep`, Host `App/ProgramHost.cs` mit Menüszene und `BorlandClock`; Mehrrundenprobe mit Mensch über vier Wochen (`ProgramHumanDifferentialTests`), Menübild des Hosts pixelgleich mit dem RefEmu; Architekturregeln #81 B4, #101 R4M-2; #76 P3-3. Offen: Anzeigebytes des Programmstarts (`Traders.Vga`) im Vergleich, Ladebild, Windows-Start (Nutzer).
+- **Status:** Teile 1–3 fertig (Claude, PR #96, gemergt 12.11.2026, Review `reviews/2026-11-12-r4-programm.md` „Ja“). Teil 1: `Phases/ProgramLoop.cs`, `ProgramMachine.cs`, `ProgramSteps.cs`, Gleichschritt bis `1777:02DC` und Abbruch A. Teil 2: `Startup/ProgramStart.cs`, `ImageTable.cs`, `CodeQuery.cs`, `Assets/Loading/ImageFiles.cs` (`DS:10A9` geklärt). Teil 3: `MenuTextPlaque`, Texttabelle im Programmstart, `MainMenuProgramStep`/`NewGameProgramStep`, Host `App/ProgramHost.cs` mit Menüszene und `BorlandClock`; Mehrrundenprobe mit Mensch über vier Wochen (`ProgramHumanDifferentialTests`), Menübild des Hosts pixelgleich mit dem RefEmu; Architekturregeln #81 B4, #101 R4M-2; #76 P3-3. Offen: Anzeigebytes des Programmstarts (`Traders.Vga`) im Vergleich, Ladebild, Windows-Start (Nutzer).
 
 ## 1 `menue` – Menüs `192D` und erste Szene
 
@@ -88,7 +88,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; alle Menüs pixelgenau gegen den RefEmu; Bild- und Zufallsfolge im Gleichschritt (#86);
   Optionsfelder nach jeder Menüfolge gleich dem RefEmu; `check-architecture.py` grün mit Gegenproben.
 - **Abhängigkeiten:** keine.
-- **Status (Spur, PR #93):** Teile 1–3 fertig (Menülogik im Kern; Menüszene `src/Traders.Presentation` pixelgenau gegen den RefEmu, Architekturregeln; Bild- und Zufallsfolge je Rücklauf gegen den RefEmu mit echten Tasteninterrupts, Seitenwechsel = zwei Bilder, Blenden bildweise). Review offen.
+- **Status (Spur, PR #93):** Teile 1–3 fertig (Menülogik im Kern; Menüszene `src/Traders.Presentation` pixelgenau gegen den RefEmu, Architekturregeln; Bild- und Zufallsfolge je Rücklauf gegen den RefEmu mit echten Tasteninterrupts, Seitenwechsel = zwei Bilder, Blenden bildweise). Gemergt 12.11.2026, Review `reviews/2026-11-12-r4-menue.md` „Ja“.
 
 ## 2 `partie` – neue Partie `0E31`
 
@@ -104,7 +104,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; Startzustand bitgleich für jede Kombination, Gegenprobe im Review (eine Ziehung vertauscht →
   rot); `abdeckung.py --check` grün.
 - **Abhängigkeiten:** keine.
-- **Status:** Teile 1–3 fertig (Claude, PR #92, Review offen): Befund `0E31_0003_neue_partie.md`, Port `Rules/NewGame*.cs`, Differenztests aller sieben Routinen; #74 R3R-1 Test, R3R-2 als `[APPROX]` mit Test.
+- **Status:** Teile 1–3 fertig (Claude, PR #92, gemergt 12.11.2026, Review `reviews/2026-11-12-r4-partie.md` „Ja“): Befund `0E31_0003_neue_partie.md`, Port `Rules/NewGame*.cs`, Differenztests aller sieben Routinen; #74 R3R-1 Test, R3R-2 als `[APPROX]` mit Test.
 
 ## 3 `spielfeld` – Befehlsquelle `0E9E` und Spielfeldschicht `0609`
 
@@ -124,7 +124,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Status (Spur, PR #95):** Teil 1 fertig (Befehlsquelle `0E9E` mit allen sechs Arten, Differenztests grün); Teil 2 fertig
   (`0609:10D2/10A7/1072`, Cursorlogik `0609:047B` mit `0B8E/0BEA/0F0D/0F70/0EA1/0EDD/21BA/1B72/215E`); Teil 3 fertig (Szene `src/Traders.Presentation/Field/FieldScene.cs`:
   `0609:1ED9/1256/1F04/1879/1854/1A61` und die Ereignisse `DrawCommand`/`DrawRank`, pixelgenau gegen den RefEmu am Wochenzustand
-  `0825:0072`); offen: `0609:0C73` (`DrawSelection`), Spielfeldschleife `0609:03E0`. Alle Teile fertig, Review offen.
+  `0825:0072`); offen: `0609:0C73` (`DrawSelection`), Spielfeldschleife `0609:03E0`, Computerzug `135D:000E` (→ R5, #103). Gemergt 12.11.2026, Review `reviews/2026-11-12-r4-spielfeld.md` „Ja“.
 
 ## Zuständigkeit gemeinsamer Dateien in R4
 
