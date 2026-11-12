@@ -1,5 +1,6 @@
 using Traders.Assets.Loading;
 using Traders.Core;
+using Traders.Core.Menus;
 using Traders.Core.Phases;
 using Traders.Core.Startup;
 using Traders.Core.State;
@@ -23,7 +24,8 @@ public class ProgramStartDifferentialTests
 
     /// <summary>
     /// Bytes 0DFD:000D writes that the core leaves to the output layers (Traders.Vga), the host (heap, C runtime, files),
-    /// the input (int 9), the music (R10) and lane menue (text pointers 192D:18B6, until part 3).
+    /// the input (int 9) and the music (R10). The text table DS:37CC (192D:18B6) with its buffer pointer DS:4884 and the
+    /// plaque top DS:5334 (192D:16AF) are the core's and are compared.
     /// </summary>
     public static readonly (int Offset, int Length, string Owner)[] OutputOwned =
     [
@@ -41,7 +43,6 @@ public class ProgramStartDifferentialTests
         (0x2BF0, 0x1E, "0DFD:0158 font records with heap pointers (Vga fonts)"),
         (0x330C, 0xD0, "21AF:000D object records with pointers (Vga objects)"),
         (0x34A4, 2, "21FD:05DB line height (Vga)"),
-        (0x37CC, 0x4C4, "192D:18B6 text pointers (lane menue, compared in part 3)"),
         (0x3CA8, 2, "21FD:05DB text advance (Vga)"),
         (0x3CAA, 4, "0DFD:0074 heap buffer (texts)"),
         (0x3DCB, 0x300, "21FD:026C/02C9 base palette (Vga palettes)"),
@@ -50,12 +51,10 @@ public class ProgramStartDifferentialTests
         (0x4516, 4, "21FD:051F current draw page (Vga pages)"),
         (0x45BC, 4, "0DFD:0132 atlas pointer copy"),
         (0x45D6, 4, "0DFD:0074 heap buffer (atlas)"),
-        (0x4884, 4, "0DFD:0074 heap buffer"),
         (0x4BC6, 4, "0DFD:0074 heap buffer (masks)"),
         (0x4C00, 0x113, "186C cache table with heap pointers (host)"),
         (0x5017, 0x300, "186C:0002 loaded palette (Vga palettes)"),
         (0x5318, 0x18, "186C:021E heap block"),
-        (0x5334, 1, "192D:16AF text window (output of the code request)"),
         (0x54E8, 0x300, "21FD:03EB working palette (Vga palettes)"),
         (0x5894, 8, "C runtime tzset: time zone names (time())"),
     ];
@@ -77,10 +76,10 @@ public class ProgramStartDifferentialTests
 
     /// <summary>
     /// Inputs of the core taken from a separate run of the original with the same options: the value Borland time()
-    /// returned at the code request (the host's clock input) and the arguments of the random() calls inside the plaque
-    /// 192D:16AF (lane menue; replayed by <see cref="RecordedPlaque"/> until that lane is merged).
+    /// returned at the code request (the host's clock input), the far address of the text buffer DS:4884 (the host's heap)
+    /// and the arguments of the random() calls inside the plaque 192D:16AF (for the counter-check without new seed).
     /// </summary>
-    private static (int Clock, List<short> PlaqueDraws) OriginalInputs(DateTime start, Action<OriginalProgram> keys)
+    private static (int Clock, List<short> PlaqueDraws, uint TextBuffer) OriginalInputs(DateTime start, Action<OriginalProgram> keys)
     {
         var p = OriginalProgram.Start(Dir, Options(start));
         keys(p);
@@ -95,18 +94,24 @@ public class ProgramStartDifferentialTests
         p.Machine.Run(2_000_000_000, m => m.Cpu.Cs == seg && m.Cpu.IP == PlaqueReturn);
         Assert.True(clock.HasValue && p.Machine.Cpu.Cs == seg && p.Machine.Cpu.IP == PlaqueReturn && draws.Count > 0,
             "code request of the original not reached");
-        return (clock!.Value, draws);
+        return (clock!.Value, draws, p.ReadDword((ushort)MenuLayout.TextBuffer));
     }
 
-    /// <summary>Stand-in for the plaque of lane menue: replays the random() calls the original made inside 192D:16AF.</summary>
-    private sealed class RecordedPlaque(IReadOnlyList<short> draws) : ITextPlaque
+    /// <summary>The text file as the host gives it, at the buffer address the original's heap chose.</summary>
+    internal static TextFile Texts(uint buffer) =>
+        new(File.ReadAllBytes(TestGameData.Dos("ENGLISCH.TXT")), (ushort)buffer, (ushort)(buffer >> 16));
+
+    /// <summary>The plaque of lane menue, checking the arguments of the code request.</summary>
+    private sealed class CheckedPlaque : ITextPlaque
     {
+        private readonly MenuTextPlaque _plaque = new();
+
         public int Shown { get; private set; }
 
         public void Show(Dgroup d, OriginalRandom random, short height, short step, int texts, short extra)
         {
             Assert.Equal((CodeQuery.PlaqueHeight, CodeQuery.PlaqueStep, CodeQuery.Texts, CodeQuery.PlaqueExtra), (height, step, texts, extra));
-            foreach (short n in draws) random.Next(n);
+            _plaque.Show(d, random, height, step, texts, extra);
             Shown++;
         }
     }
@@ -116,13 +121,13 @@ public class ProgramStartDifferentialTests
     /// <summary>Lockstep from the first call of main to the call site of program step 3; step 1 and 2 are the core's.</summary>
     private static Run Lockstep(DateTime start, Action<OriginalProgram> keys)
     {
-        var (clock, draws) = OriginalInputs(start, keys);
+        var (clock, _, buffer) = OriginalInputs(start, keys);
         var p = OriginalProgram.Start(Dir, Options(start));
         keys(p);
         var oracle = new RefEmuProgramOracle(p);
         oracle.RunToCallSite(ProgramLoop.Step(1));
         var core = new Dgroup(p.DataSegment().AsSpan(0, DgroupLayout.Size).ToArray());
-        var programStart = new ProgramStart(Files, new RecordedPlaque(draws));
+        var programStart = new ProgramStart(Files, new CheckedPlaque(), Texts(buffer));
         var defaults = ProgramSteps.Defaults(ProgramInitialisation.AdLib);
         var handlers = new Dictionary<int, IProgramStepHandler>
         {
@@ -168,11 +173,13 @@ public class ProgramStartDifferentialTests
     /// <summary>
     /// Program start with the reference clock and different answers at the code request: the data segment after 0DFD:000D
     /// is the original's outside the output-owned bytes (picture table DS:09C8/09CE, seed DS:10D2, decoded texts and code
-    /// DS:10FF..1124 included), whatever is typed; the seed equals the RefEmu's.
+    /// DS:10FF..1124, text table DS:37CC with DS:4884 and plaque top DS:5334 included), whatever is typed; the seed equals
+    /// the RefEmu's and the text buffer the original's heap buffer.
     /// </summary>
     // [DIFFERENTIAL] 21FD:0687 – code request (state part) inside the program start, any input
     // [DIFFERENTIAL] 0DFD:0239 – the six preloaded pictures (their table entries; the order is checked in StartupTests)
     // [DIFFERENTIAL] 186C:0002 – picture table after seven loads; [DIFFERENTIAL] 186C:0997 – lengths of the first load
+    // [DIFFERENTIAL] 192D:16AF – plaque of the code request (DS:5334 and its random draws) through MenuTextPlaque
     [GameDataTheory]
     [MemberData(nameof(Inputs))]
     public void Program_start_leaves_the_data_segment_of_the_original_for_any_input(string input)
@@ -188,6 +195,11 @@ public class ProgramStartDifferentialTests
         int text = r.Program.ReadWord(CodeQuery.CodeText);
         string shown = new(Enumerable.Range(0, 10).Select(i => (char)r.Program.ReadByte((ushort)(text + i))).ToArray());
         Assert.Equal("CODE: " + r.Start.Code!.Code.PadRight(4), shown);
+        // the text buffer after 192D:18B6 equals the original's heap buffer over the whole file
+        ushort off = r.Core.U16(MenuLayout.TextBuffer), seg = r.Core.U16(MenuLayout.TextBuffer + 2);
+        int length = File.ReadAllBytes(TestGameData.Dos("ENGLISCH.TXT")).Length;
+        for (int i = 0; i < length; i++)
+            Assert.True(r.Program.Machine.Mem.Read8(seg, (ushort)(off + i)) == r.Start.TextBuffer![i], $"text buffer byte {i:X4}");
     }
 
     /// <summary>

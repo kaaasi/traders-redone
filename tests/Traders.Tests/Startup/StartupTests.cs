@@ -91,7 +91,8 @@ public class StartupTests
         short[] numbers = [4, 5, 0, 1, 3, 2]; // DS:08CE..08D8
         for (int i = 0; i < 6; i++) d.Set(0x08CE + 2 * i, numbers[i]);
         var order = new List<int>();
-        var start = new ProgramStart(n => { order.Add(n); return Lengths(n); }, new CountingPlaque());
+        var start = new ProgramStart(n => { order.Add(n); return Lengths(n); }, new CountingPlaque(),
+            new TextFile("A\r\nB\tC\r\n"u8.ToArray(), 0x0010, 0x2000));
         var machine = new ProgramMachine(d, new OriginalRandom(new RecordedClock([1])),
             new Dictionary<int, IProgramStepHandler> { [1] = new ProgramInitialisation(1), [2] = start }, new Dictionary<int, IWeekStepHandler>());
 
@@ -102,5 +103,26 @@ public class StartupTests
         Assert.NotNull(start.Code);
         Assert.Equal(3, machine.NextStep);
         Assert.Equal(ProgramStatus.Blocked, machine.Status);
+        // the text table of 192D:18B6 at the host's buffer: entry 1 = buffer start, entry 2 behind the first LF
+        Assert.Equal((ushort)0x0010, d.U16(0x4884));
+        Assert.Equal((ushort)0x2000, d.U16(0x4886));
+        Assert.Equal((ushort)0x0010, d.U16(0x37CC + 4));
+        Assert.Equal((ushort)0x0013, d.U16(0x37CC + 8));
+        Assert.Equal("A\0\0B C\0\0"u8.ToArray(), start.TextBuffer![..8]);
+    }
+
+    [Fact]
+    public void Plaque_of_the_code_request_sets_the_plaque_top_and_draws_wall_then_plaque()
+    {
+        var d = new Dgroup(new byte[DgroupLayout.Size]);
+        var plaque = new MenuTextPlaque();
+        var random = new OriginalRandom(new RecordedClock([]));
+
+        plaque.Show(d, random, CodeQuery.PlaqueHeight, CodeQuery.PlaqueStep, CodeQuery.Texts, CodeQuery.PlaqueExtra);
+
+        Assert.Equal(60, d.S16(0x5334)); // (200 − 50h) / 2
+        Assert.True(random.Calls > 20);
+        var fill = Assert.Single(plaque.Ops, o => o.Kind == Traders.Core.Menus.BackdropOpKind.FilledRect);
+        Assert.Equal(((ushort)0x37, (ushort)60, (ushort)0xD2, (ushort)0x50), (fill.A, fill.B, fill.C, fill.D));
     }
 }
