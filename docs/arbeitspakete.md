@@ -102,7 +102,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 - **Abnahme:** alle drei Läufe grün; Startzustand bitgleich für jede Kombination, Gegenprobe im Review (eine Ziehung vertauscht →
   rot); `abdeckung.py --check` grün.
 - **Abhängigkeiten:** keine.
-- **Status:** Teil 1 in Arbeit (Claude, PR `paket/partie`).
+- **Status:** Teile 1–3 fertig (Claude, PR #92, Review offen): Befund `0E31_0003_neue_partie.md`, Port `Rules/NewGame*.cs`, Differenztests aller sieben Routinen; #74 R3R-1 Test, R3R-2 als `[APPROX]` mit Test.
 
 ## 3 `spielfeld` – Befehlsquelle `0E9E` und Spielfeldschicht `0609`
 
