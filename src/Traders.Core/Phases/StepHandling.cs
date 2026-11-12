@@ -72,4 +72,6 @@ public sealed class StepContext
 /// Input of one call of <see cref="PhaseMachine.Advance"/>: the frame number the host has reached (70 Hz, counted from 0)
 /// and, if known, the scancodes held now. The host derives the frame from its clock; the core never reads a clock.
 /// </summary>
+// [APPROX] One tick = one 70 Hz frame; how the original's wait loops relate to the frame change is to be confirmed with the
+// scenes (docs/routines/1777_01F8_wochenschleife.md).
 public readonly record struct PhaseTick(long Frame, IReadOnlyCollection<byte>? HeldScancodes = null);

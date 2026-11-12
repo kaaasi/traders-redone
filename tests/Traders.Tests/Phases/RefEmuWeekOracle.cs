@@ -63,12 +63,19 @@ internal sealed class RefEmuWeekOracle
     public bool IsAtLoop(ushort site) => _p.Machine.Cpu.Cs == _loopSegment && _p.Machine.Cpu.IP == site;
 
     /// <summary>Compares the core data segment with the RefEmu (outside <see cref="InterruptOwned"/>); records the first byte that differs.</summary>
-    public void Compare(Dgroup core, string where)
+    public void Compare(Dgroup core, string where) => Compare(core, where, skipRandomState: false);
+
+    /// <summary>
+    /// As <see cref="Compare(Dgroup, string)"/>; with <paramref name="skipRandomState"/> the random state DS:10D2 is left out
+    /// (inside a handler, before the machine has stored the seed back).
+    /// </summary>
+    private void Compare(Dgroup core, string where, bool skipRandomState)
     {
         var emu = _p.DataSegment();
         for (int i = 0; i < DgroupLayout.Size; i++)
         {
             if (core.Bytes[i] == emu[i] || IsInterruptOwned(i)) continue;
+            if (skipRandomState && i >= DgroupLayout.RandomSeed && i < DgroupLayout.RandomSeed + 4) continue;
             Differences.Add($"{where}: DS:{i:X4} core {core.Bytes[i]:X2} RefEmu {emu[i]:X2}");
             return;
         }
@@ -86,11 +93,16 @@ internal sealed class RefEmuWeekOracle
     /// <summary>
     /// Handler for a ported call step: RefEmu to the call site (compare), the RefEmu data segment is taken over by the core,
     /// <paramref name="port"/> runs on it, the RefEmu runs on to the return, and the core result is compared with the RefEmu
-    /// there (whole data segment outside <see cref="InterruptOwned"/>, which includes the random state DS:10D2). Afterwards
-    /// the core continues from the RefEmu data segment. A difference after the port ends the run at once (exception with
-    /// the first differing byte).
+    /// there (whole data segment outside <see cref="InterruptOwned"/> and DS:10D2, plus the generator state of the port
+    /// against DS:10D2 of the RefEmu). The core keeps its own result; only the interrupt-owned bytes are taken from the
+    /// RefEmu. DS:10D2 is not written here: the machine stores the seed back after the handler, and the comparison at the
+    /// next call site (which includes DS:10D2) checks that write-back against the RefEmu. A difference after the port ends
+    /// the run at once (exception with the first differing byte).
     /// </summary>
-    public IWeekStepHandler PortHandler(Dgroup core, IWeekStepHandler port) => new PortStepHandler(this, core, port);
+    /// <remarks><paramref name="atCallSite"/> runs at the call site after the comparison and before the take-over (for example
+    /// to set a state in the RefEmu that both sides then start the step from).</remarks>
+    public IWeekStepHandler PortHandler(Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite = null) =>
+        new PortStepHandler(this, core, port, atCallSite);
 
     /// <summary>Ported steps compared at their return, in order (week, call number, random draws of the port).</summary>
     public List<(int Week, int Step, long Draws)> PortedSteps { get; } = [];
@@ -120,6 +132,12 @@ internal sealed class RefEmuWeekOracle
 
     private void TakeOver(Dgroup core) => _p.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(core.Bytes);
 
+    private void TakeOverInterruptOwned(Dgroup core)
+    {
+        var emu = _p.DataSegment();
+        foreach (var (offset, length) in InterruptOwned) emu.AsSpan(offset, length).CopyTo(core.Bytes.AsSpan(offset));
+    }
+
     private sealed class StepHandler(RefEmuWeekOracle o, Dgroup core, Action<OriginalProgram>? atCallSite) : IWeekStepHandler
     {
         public StepOutcome Begin(StepContext context)
@@ -136,7 +154,8 @@ internal sealed class RefEmuWeekOracle
         public StepOutcome Tick(StepContext context) => throw new InvalidOperationException("oracle steps finish at once");
     }
 
-    private sealed class PortStepHandler(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port) : IWeekStepHandler
+    private sealed class PortStepHandler(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite)
+        : IWeekStepHandler
     {
         public StepOutcome Begin(StepContext context)
         {
@@ -144,22 +163,23 @@ internal sealed class RefEmuWeekOracle
             o.RunToCallSite(step);
             int week = o._p.Week; // after the counter step of the previous week
             o.Compare(core, $"week {week} at {step}");
+            atCallSite?.Invoke(o._p);
+            // equal after the comparison (else the run fails; atCallSite leaves DS:10D2 alone); the generator keeps the seed the
+            // machine loaded from DS:10D2
             o.TakeOver(core);
-            // the machine seeded the generator from DS:10D2 before this call; the RefEmu state just taken over replaces it
-            context.Random.Seed = core.U32(DgroupLayout.RandomSeed);
             long draws = context.Random.Calls;
             var outcome = port.Begin(context);
             if (!outcome.Done) throw new InvalidOperationException($"ported step {step} did not finish at once");
-            // the machine stores the seed back after this handler; the comparison needs it now
-            core.Set(DgroupLayout.RandomSeed, context.Random.Seed);
             o.RunToReturn(step);
             o.PortedSteps.Add((week, step.Number, context.Random.Calls - draws));
             int known = o.Differences.Count;
-            o.Compare(core, $"week {week} after {step} (port)");
+            o.Compare(core, $"week {week} after {step} (port)", skipRandomState: true);
+            uint emuSeed = BitConverter.ToUInt32(o._p.DataSegment(), DgroupLayout.RandomSeed);
+            if (context.Random.Seed != emuSeed)
+                o.Differences.Add($"week {week} after {step} (port): random state core {context.Random.Seed:X8} RefEmu {emuSeed:X8}");
             // a wrong port fails at once instead of after the remaining weeks
             if (o.Differences.Count != known) throw new InvalidOperationException(o.Differences[^1]);
-            o.TakeOver(core);
-            context.Random.Seed = core.U32(DgroupLayout.RandomSeed);
+            o.TakeOverInterruptOwned(core);
             return StepOutcome.Finished((byte)o._p.Machine.Cpu.Ax);
         }
 
