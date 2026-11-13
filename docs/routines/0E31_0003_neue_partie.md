@@ -50,7 +50,7 @@ Danach `DS:2EB0` = Spalten, `DS:2F00` = Zeilen.
 2. Alle Felder Güte 3.
 3. **Keime** für `q` = 0…2 (unbedingt): ziehen `x`, `y` wie in `0379` bis Güte 3; Keim `(sx[q], sy[q])` = `(x, y)`, Güte `q`,
    `c[q]−−`, `SI−−`.
-4. `r` = 1. Solange `SI > 0` (geprüft erst nach jeder Runde): sechs Durchgänge, je `q` = 0…2 mit `c[q] > 0`:
+4. `r` = 1. Solange `SI > 0` (geprüft vor jeder Runde, kopfgesteuert: `058F jmp 06D2`): sechs Durchgänge, je `q` = 0…2 mit `c[q] > 0`:
    - `random(1)` = 0 → `dx = r`, `dy = random(r)`; sonst `dx = random(r)`, `dy = r`;
    - `random(1)` = 0 → `dx = −dx`; `random(1)` = 0 → `dy = −dy`;
    - `x = sx[q] + dx` → `DS:2EB0`, `y = sy[q] + dy` → `DS:2F00` (Byte-Addition);

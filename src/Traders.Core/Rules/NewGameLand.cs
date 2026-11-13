@@ -62,7 +62,7 @@ public static class NewGameLand
 
         // 0E31:058B: growth around the seeds
         byte radius = 1;
-        while (remaining > 0) // checked only after six passes
+        while (remaining > 0) // checked before every round: 0E31:058F jumps to the test at 06D2
         {
             for (int pass = 0; pass <= 5; pass++)
                 for (int q = 0; q <= 2; q++)
