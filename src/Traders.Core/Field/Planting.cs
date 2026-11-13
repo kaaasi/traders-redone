@@ -323,17 +323,19 @@ public static class Planting
 
     /// <summary>
     /// 0609:13C5(x, y, w, h), core part: per 20h-wide column of the border (i = 0 … w/20h − 1, signed) one random(1) for the
-    /// upper and one for the lower edge. random(1) is always 0, so the drawing does not depend on the draws (R5P-3).
+    /// upper and one for the lower edge. random(1) yields 0 or 1 and picks the piece of the edge, so the results go with the
+    /// drawing request: <see cref="FieldEventKind.DrawBorder"/>(x, y, w, h, top 0, bottom 0, top 1, bottom 1, …).
     /// </summary>
     // [ORIGINAL] 0609:13C5 – core part (random draws); the drawing part is the scene's
     public static void Border(short x, short y, short w, short h, OriginalRandom random, IFieldOutput output)
     {
-        Emit(output, FieldEventKind.DrawBorder, x, y, w, h);
+        var args = new List<short> { x, y, w, h };
         for (short i = 0; Int16Math.S(Int16Math.Div(w, 0x20) - 1) >= i; i++)
         {
-            random.Next(1);
-            random.Next(1);
+            args.Add(random.Next(1));
+            args.Add(random.Next(1));
         }
+        output.Emit(new FieldEvent(FieldEventKind.DrawBorder, [.. args]));
     }
 
     /// <summary>0609:1EA3: emblem and panel of every player still playing, then shown on both pages.</summary>

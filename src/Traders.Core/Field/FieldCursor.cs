@@ -49,17 +49,17 @@ public enum FieldEventKind
     DrawBackground,
     /// <summary>0609:1256(x, y, w, h) – frame.</summary>
     DrawFrame,
-    /// <summary>0609:13C5(x, y, w, h) – border of the field (its random(1) draws are done by the core).</summary>
+    /// <summary>0609:13C5(x, y, w, h, draws…) – border of the field; the core's random(1) results follow, top and bottom per column.</summary>
     DrawBorder,
     /// <summary>0609:1C83(x, y) – one field (nothing outside the field).</summary>
     DrawField,
     /// <summary>0609:1CB1(x, y) – a field and its four neighbours.</summary>
     DrawFieldAndNeighbours,
-    /// <summary>0609:1A03 – panel of the player at turn (time bar frame and marker).</summary>
+    /// <summary>0609:1A03 – terrain picture under the cursor of the player at turn and the purchase marker.</summary>
     DrawPanel,
     /// <summary>0609:1A97 – clears the purchase marker of the player at turn.</summary>
     DrawPurchaseUsed,
-    /// <summary>0609:1AC0 – emblem of the player at turn.</summary>
+    /// <summary>0609:1AC0 – time bar of the player at turn.</summary>
     DrawPlayer,
     /// <summary>0609:0204 – status lines (weather and limits, or the free-field notice).</summary>
     DrawStatus,

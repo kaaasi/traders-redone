@@ -146,7 +146,9 @@ public class PlantingDifferentialTests
         public List<string> Calls { get; } = [];
         public int ControlReads { get; private set; }
         public void ComputerTurn(Dgroup d, short x, short y) => Calls.Add($"ComputerTurn({x}, {y})");
-        public void Emit(FieldEvent e) => Calls.Add(e.ToString());
+        // DrawBorder carries the random(1) results after the four arguments of 13C5; the call itself has four
+        public void Emit(FieldEvent e) =>
+            Calls.Add((e.Kind == FieldEventKind.DrawBorder ? e with { Args = e.Args[..4] } : e).ToString());
         public bool CanPlaceHq(Dgroup d) => h.Helper(d, 0x074D) != 0;
         public bool HasOwnNeighbour(Dgroup d, short x, short y) => h.Helper(d, 0x100F, (ushort)x, (ushort)y) == 1;
         public void ComputerPlacedHq(Dgroup d) => Calls.Add("ComputerPlacedHq()");
