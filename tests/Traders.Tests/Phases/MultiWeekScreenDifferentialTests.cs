@@ -89,11 +89,12 @@ public class MultiWeekScreenDifferentialTests
             _ when ported.Handlers.ContainsKey(s.Number) => oracle.PortHandler(core, ported.Handlers[s.Number]),
             _ => oracle.Handler(core),
         });
+        handlers[2] = new StopAtWeek(handlers[2], Weeks); // the probe ends at call 2 of week 4 (a frame can run on into week 4)
         var random = new OriginalRandom(new RecordedClock([]));
         var machine = new PhaseMachine(core, random, handlers, nextStep: 2);
         var events = new List<PhaseEvent>();
         RefEmuWeekOracle.FramedStep[] framed = [report, planting];
-        for (int f = 0; f < 200_000 && !(machine.Week == Weeks && machine.NextStep == 2); f++)
+        for (int f = 0; f < 200_000 && !(machine.Week == Weeks && machine.NextStep == 2 && machine.Status == PhaseStatus.Waiting); f++)
         {
             IReadOnlyCollection<byte>? held = null;
             foreach (var step in framed.Where(s => s.AtRetrace))
@@ -102,18 +103,23 @@ public class MultiWeekScreenDifferentialTests
                 held = step.Held();
             }
             machine.Advance(new PhaseTick(machine.LastFrame + 1, held));
-            events.AddRange(machine.DrainEvents());
+            var drained = machine.DrainEvents();
+            events.AddRange(drained);
+            if (Environment.GetEnvironmentVariable("TRADERS_PROGRESS") is { Length: > 0 } progress) // diagnostics of long runs
+                foreach (var e in drained.Where(e => e.Kind == PhaseEventKind.StepStarted))
+                    File.AppendAllText(progress, $"{e} emulated {p.Machine.Seconds:F1} s\n");
         }
         _out.WriteLine($"frames {machine.LastFrame + 1}; report {string.Join(", ", report.Runs)}; planting {string.Join(", ", planting.Runs)}; guard ported in {guardWeeks} weeks; catastrophes {core.U8(DgroupLayout.Catastrophes)}");
         _out.WriteLine(string.Join("; ", human.Take(40)));
 
         Assert.Empty(oracle.Differences);
-        Assert.Equal(PhaseStatus.Ready, machine.Status);
+        Assert.Equal(PhaseStatus.Waiting, machine.Status);
+        Assert.Equal(2, machine.NextStep);
         Assert.Equal(Weeks, machine.Week);
         Assert.Equal(Weeks, p.Week);
 
         var expected = Enumerable.Range(2, 29).Concat(Enumerable.Range(0, Weeks - 1).SelectMany(_ => Enumerable.Range(1, 30))).Append(1).ToList();
-        Assert.Equal(expected, events.Where(e => e.Kind is PhaseEventKind.StepStarted or PhaseEventKind.MarkerPassed).Select(e => e.Step));
+        Assert.Equal(expected.Append(2), events.Where(e => e.Kind is PhaseEventKind.StepStarted or PhaseEventKind.MarkerPassed).Select(e => e.Step));
         Assert.Equal(expected.Append(2), oracle.Passed.Select(site => WeekLoop.Steps.FirstOrDefault(s => s.Site == site)?.Number).OfType<int>());
         Assert.Equal(Enumerable.Range(1, Weeks), events.Where(e => e.Kind == PhaseEventKind.WeekAdvanced).Select(e => e.Value));
 
