@@ -147,7 +147,7 @@ public sealed partial class FieldScene
     // its own flips is not drawn, as in the core's frames (Planting.StatusFrames).
     private IEnumerable<int> StatusSteps()
     {
-        if (_state.U8(NoTime) == 1)
+        if (_state.U8(Planting.NoTime) == 1)
             foreach (int s in RetraceSteps(50, 0)) yield return s;
         Status();
         foreach (int s in ListOnBothPagesSteps()) yield return s;

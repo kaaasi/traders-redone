@@ -104,7 +104,6 @@ public sealed partial class FieldScene
     private const int NeedOf = 0x08E7, MadeOf = 0x08E4;   // sbyte[], goods of a kind
     private const int LandPrice = 0x3746;                 // word
     private const int TimeLimit = 0x45BA, TimeLeft = 0x4520; // byte; word[4]
-    private const int NoTime = 0x1582;                    // byte, 1 = second round
     private const int TextNone = 0x37F0, TextWeather = 0x37E8, TextLimit = 0x37EC; // far pointers
 
     private short S8(int offset) => _state.S8(W(offset));
@@ -370,7 +369,7 @@ public sealed partial class FieldScene
     public void Status()
     {
         _gfx.ClearList();
-        if (_state.U8(NoTime) == 1)
+        if (_state.U8(Planting.NoTime) == 1)
         {
             Interior(0x10, 6, 0x120, 0x2C);
             return;

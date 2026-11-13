@@ -1,4 +1,4 @@
-# 111D:0009 – Katastrophen und Wochenereignisse (nur Wächter `111D:000D–001B`)
+# 111D:0009 – Katastrophen und Wochenereignisse (nur der Wächter am Anfang der Routine)
 
 - **Ladebild-Adresse:** `111D:0009` (Dateioffset `0x147D9`, Segment `111D` bei `0x147D0`)
 - **Aufgabe:** Aufruf 4 der Wochenschleife `1777:01F8` (`1777:021A`). Portiert ist **nur der Wächter** (R5P-6): in den ersten

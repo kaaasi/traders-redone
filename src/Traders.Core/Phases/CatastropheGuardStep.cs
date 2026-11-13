@@ -29,7 +29,7 @@ public sealed class CatastropheGuardStep(IWeekStepHandler? rest = null) : IParti
 
     private IWeekStepHandler? _running;
 
-    /// <summary>[ORIGINAL] 111D:000D – the guard: true if 111D:0009 returns at once (week ≤ 2 or DS:2F30 = 0).</summary>
+    /// <summary>111D:000D–001B – the guard: true if 111D:0009 returns at once (week ≤ 2 or DS:2F30 = 0).</summary>
     // [ORIGINAL] 111D:0009 – guard only (111D:000D–001B, return 111D:010F); the rest is pending (R5P-6)
     public static bool ReturnsAtOnce(Dgroup state) =>
         state.S16(DgroupLayout.Week) <= LastQuietWeek || state.U8(DgroupLayout.Catastrophes) == 0;

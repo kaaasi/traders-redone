@@ -262,6 +262,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0E9E:0264` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0E9E:0312` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0E9E:037A` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
+| `111D:0009` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Phases/CatastropheGuardStep.cs` | `CatastropheGuardDifferentialTests.cs` | ✅ |
 | `11A3:0000` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:007D` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:0180` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
@@ -292,10 +293,10 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `135D:0A59` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:0AB3` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingGameStateDifferentialTests.cs` | ✅ |
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
-| `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `MultiWeekDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
+| `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `1777:04E4` | [1777_04E4_initialisierung.md](docs/routines/1777_04E4_initialisierung.md) | `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramMachineDifferentialTests.cs` | ✅ |
-| `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Field/PlantingStep.cs`, `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Field/PlantingStep.cs`, `src/Traders.Core/Phases/WeekSteps.cs`, `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `186C:01A9` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:021E` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:02C6` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
@@ -471,7 +472,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 5 | 5 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
-| `111D` | 0x860 | 7 | 0 | 0 | 0 |
+| `111D` | 0x860 | 7 | 1 | 1 | 1 |
 | `11A3` | 0x1250 | 15 | 15 | 15 | 15 |
 | `12C8` | 0x950 | 12 | 0 | 0 | 0 |
 | `135D` | 0xC00 | 14 | 14 | 14 | 14 |
@@ -501,7 +502,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **317** | **304** | **304** |
+| **Summe** | **0x28DC0** | **891** | **318** | **305** | **305** |
 
 <!-- abdeckung:ende -->
 
