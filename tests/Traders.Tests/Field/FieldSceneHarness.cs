@@ -73,37 +73,10 @@ internal static class FieldSceneHarness
         foreach (var (at, v) in c.Set) ds[at] = v;
         var core = new Dgroup(ds[..DgroupLayout.Size]);
         var mem = snap.Machine.Mem;
-        ushort DriverWord(ushort off) => mem.Read16(snap.Segment(Driver), off);
-
-        var driver = new ModeXDriver();
-        var vga = snap.Machine.Vga;
-        for (int i = 0; i < 4; i++) vga.Planes[i].CopyTo(driver.Vram.Planes[i], 0);
-        driver.SetDisplayStart((ushort)vga.StartAddress, 0xA000);
-        driver.SetDrawPage(DriverWord(0x0000), DriverWord(0x0002));
-        driver.Color = DriverWord(0x0588);
-        driver.LinePattern = DriverWord(0x04F4);
-        driver.Vram.MapMask = (byte)(vga.Seq[2] & 0x0F);
-        driver.Vram.ReadMap = (byte)(vga.Gc[4] & 0x03);
-        // atlas (far pointer CS:0582, set by 23CD:058A) and masks (CS:057E) as the original holds them
-        driver.Atlas = new PlanarAtlas(mem.ReadBlock(DriverWord(0x0584), DriverWord(0x0582), PlanarAtlas.Length));
-        driver.Masks = mem.ReadBlock(DriverWord(0x0580), DriverWord(0x057E), driver.Masks.Length);
-        // fonts as the start (0DFD) sets them up from FONTS.PP; the original's table (driver CS:057A) must agree
-        driver.Font = DriverWord(0x0586);
-        var fontData = PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Fonts)));
-        driver.Fonts =
-        [
-            new FontDescriptor(fontData, 0x5A0, 5, 6, 0x20), new FontDescriptor(fontData, 0, 12, 14, 0x20),
-            new FontDescriptor(fontData, 0x7F8, 5, 5, 0x2F),
-        ];
-        for (int i = 0; i < driver.Fonts.Count; i++)
-        {
-            ushort FontWord(int k) => mem.Read16(DriverWord(0x057C), (ushort)(DriverWord(0x057A) + i * 10 + k));
-            var f = driver.Fonts[i];
-            Assert.True(FontWord(4) == f.Height && FontWord(6) == f.Advance && FontWord(8) == f.FirstChar, $"font {i} differs from the original's table");
-        }
+        var driver = DriverFrom(snap);
 
         var dac = new VgaDac();
-        vga.Dac.CopyTo(dac.Registers, 0);
+        snap.Machine.Vga.Dac.CopyTo(dac.Registers, 0);
         var layers = new GraphicsLayers(driver, (byte[])ds.Clone(), dac, new RetraceCounter())
             { DataSegment = snap.Dgroup, OtherMemory = new MachineMemory(mem) };
         var scene = new FieldScene(layers, core);
@@ -112,6 +85,50 @@ internal static class FieldSceneHarness
         var list = List(layers.Ds);
         layers.ExecuteList();
         return (driver.Vram.Planes.Select(x => (byte[])x.Clone()).ToArray(), core.Bytes, list);
+    }
+
+    /// <summary>
+    /// A driver with the original's state: VRAM, display start, draw page, colour, line pattern, map mask and read map, the
+    /// atlas (far pointer CS:0582, set by 23CD:058A) and masks (CS:057E) from its memory, and the fonts from FONTS.PP as the
+    /// start (0DFD) sets them up (checked against the original's table at driver CS:057A).
+    /// </summary>
+    internal static ModeXDriver DriverFrom(OriginalProgram snap)
+    {
+        var driver = new ModeXDriver();
+        SyncDriver(snap, driver);
+        driver.Font = DriverWord(snap, 0x0586);
+        var fontData = PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Fonts)));
+        driver.Fonts =
+        [
+            new FontDescriptor(fontData, 0x5A0, 5, 6, 0x20), new FontDescriptor(fontData, 0, 12, 14, 0x20),
+            new FontDescriptor(fontData, 0x7F8, 5, 5, 0x2F),
+        ];
+        var mem = snap.Machine.Mem;
+        for (int i = 0; i < driver.Fonts.Count; i++)
+        {
+            ushort FontWord(int k) => mem.Read16(DriverWord(snap, 0x057C), (ushort)(DriverWord(snap, 0x057A) + i * 10 + k));
+            var f = driver.Fonts[i];
+            Assert.True(FontWord(4) == f.Height && FontWord(6) == f.Advance && FontWord(8) == f.FirstChar, $"font {i} differs from the original's table");
+        }
+        return driver;
+    }
+
+    private static ushort DriverWord(OriginalProgram p, ushort off) => p.Machine.Mem.Read16(p.Segment(Driver), off);
+
+    /// <summary>The driver's state taken over from the original (VRAM, registers, atlas, masks); the fonts stay.</summary>
+    internal static void SyncDriver(OriginalProgram snap, ModeXDriver driver)
+    {
+        var mem = snap.Machine.Mem;
+        var vga = snap.Machine.Vga;
+        for (int i = 0; i < 4; i++) vga.Planes[i].CopyTo(driver.Vram.Planes[i], 0);
+        driver.SetDisplayStart((ushort)vga.StartAddress, 0xA000);
+        driver.SetDrawPage(DriverWord(snap, 0x0000), DriverWord(snap, 0x0002));
+        driver.Color = DriverWord(snap, 0x0588);
+        driver.LinePattern = DriverWord(snap, 0x04F4);
+        driver.Vram.MapMask = (byte)(vga.Seq[2] & 0x0F);
+        driver.Vram.ReadMap = (byte)(vga.Gc[4] & 0x03);
+        driver.Atlas = new PlanarAtlas(mem.ReadBlock(DriverWord(snap, 0x0584), DriverWord(snap, 0x0582), PlanarAtlas.Length));
+        driver.Masks = mem.ReadBlock(DriverWord(snap, 0x0580), DriverWord(snap, 0x057E), driver.Masks.Length);
     }
 
     /// <summary>
@@ -174,7 +191,7 @@ internal static class FieldSceneHarness
     }
 
     /// <summary>Texts outside the data segment (far pointers into the loaded text file) read from the snapshot's memory.</summary>
-    private sealed class MachineMemory(Traders.RefEmu.Cpu.Memory mem) : IFarMemory
+    internal sealed class MachineMemory(Traders.RefEmu.Cpu.Memory mem) : IFarMemory
     {
         public byte Read(ushort segment, ushort offset) => mem.Read8(segment, offset);
 

@@ -1,4 +1,4 @@
-# 0609:0C73 / 0609:0D02 / 0609:0DF9 / 0609:1540 / 0609:18E5 / 0609:1912 / 0609:193C / 0609:1978 / 0609:1A03 / 0609:1A97 / 0609:1AC0 / 0609:1C83 / 0609:1CB1 / 0609:1CF4 / 0609:1E6B – Zeichenteil der Anbauphase (mit dem Zeichenteil von `13C5` und `0204`)
+# 0609:0C73 / 0609:0D02 / 0609:0DF9 / 0609:1540 / 0609:18E5 / 0609:1912 / 0609:193C / 0609:1978 / 0609:1A03 / 0609:1A97 / 0609:1AC0 / 0609:1C83 / 0609:1CB1 / 0609:1CF4 / 0609:1E6B / 21FD:0665 – Zeichenteil und Ausgabe der Anbauphase (mit dem Zeichenteil von `13C5`, `0204` ganz, Ausgabe `21FD:0185`/`037D`/`060D`/`0665`, `23CD:06E9`/`071C`)
 
 - **Ladebild-Adresse:** Segment `0609` (Dateioffset `0x9690`); `0C73` bei `0xA303`, `1540` bei `0xABD0`, `1CF4` bei `0xB384`.
 - **Aufgabe:** Zeichenroutinen der Anbauphase `0609:0004` (Befund [0609_0004_anbau.md](0609_0004_anbau.md)): Feldkacheln mit
@@ -61,6 +61,30 @@ Geschrieben wird nur die Befehlsliste (`15BA`/`15BE`/`15C0`…, Ausgabe).
 Grafik: Listeneinträge in der beschriebenen Reihenfolge. Zufall nur in `13C5` (Kern, `Planting.Border`). Keine Uhr, keine
 Eingabe, kein Ton, kein Warten (außer der getippten Notiz in `0204` bei `1582` = 1).
 
+## Ausgabe (Teil 2, Bildfolge)
+
+Die übrigen Ereignisse des Kerns (`FieldEventKind`) gehen an die Grafikschichten `Traders.Vga.Layers`; was auf Rückläufe
+wartet, läuft Bild für Bild bis zum nächsten Warten `0D73:00D3` – im Gleichschritt mit den `FieldWait.Retrace`-Bildern des Kerns
+(Bildfolge im Befund `0004`):
+
+| Ereignis | Original | Schichten / Szene |
+|---|---|---|
+| `LoadImage(n)` | `186C:0002(n)` | wie `MenuScene.LoadPicture` (`[APPROX]` nur die Wirkung, Spur programm) |
+| `InitObjects`, `ResetObjectRestore`, `ObjectBuffers`, `ObjectImage`, `ShowObject` | `21AF:000D`, `04CD`, `022B`, `00CA`, `0412` | Objektschicht (Zeiger, Wiederherstellsätze) |
+| `FadeOut(rgb)` | `21FD:037D`: 8 × (`03EB` mit Rücklauf in `2295:00C5`, `0185(4)`), `04DA`, `21AF:04CD` | `Blend`, DAC erst nach dem Rücklauf sichtbar |
+| `BasePalette`, `PaletteColour(i, rgb)`, `FadeIn` | `21FD:026C` (Argument ungenutzt: `5017` → `3DCB`), `02C9`, `0329` | `CopyLoadedToBase`, `SetBaseColor`, `FadeInSteps` |
+| `ClearList`, `RunList`, `ShowPage` | `0A96:001B`, `06A8`, `0C3F([082E])` | Liste, `CopyGamePage` |
+| `FlipPages`, `ListOnBothPages` | `21FD:051F`; `060D` = `06A8`, `051F`, `06A8` | `FlipPagesSteps` |
+| `RestoreObjects`, `DrawObjects` | `23CD:071C([082E])`, `06E9([082E])` | Objektschicht nach dem Spiegel |
+| `Delay(lo, hi)` | `21FD:0185(n)`: n Rückläufe (n als long, n ≤ 0 keiner) | Schritte |
+| `LastFrame` | `21FD:0665`: `051F`, `071C([082E])`, `06A8`, `06E9([082E])` (Disassemblierung `21FD:0665`–`0686`) | Schritte |
+| `DrawStatus` | `0204` ganz (Zeichenteil oben, dann `060D`; bei `1582` = 1 zuvor `0185(50)`) | `Status`, dann `060D` |
+
+**Spiegel `DS:330C` (#103 P3-4):** vor `071C`/`06E9` übernimmt die Szene die Kernfelder der acht Objektsätze (+0, +2, +14h,
++16h, +18h) in das Datensegmentabbild der Schichten; Zeiger und Wiederherstellsätze bleiben dort. Die Tastentabelle (`3D95`/`3D91`,
+von `051F` nach dem ersten Rücklauf gelesen) spiegelt die Szene zu Beginn jedes Bildes aus den Tasten des Bildes. Der Kern wird
+nie geschrieben.
+
 **Korrektur zu Teil 1:** `random(1)` liefert 0 oder 1 (`21FD:01BA`: `(Zustand >> 8) mod (n + 1)`), nicht immer 0. Die Ziehungen
 in `13C5` wählen das Randstück; der Kern gibt die Ergebnisse deshalb mit dem Ereignis `DrawBorder(x, y, w, h, r0, r′0, r1, …)`
 an die Szene.
@@ -71,8 +95,10 @@ an die Szene.
 `FieldAndNeighbours` = `1CB1`, `Border` = Zeichenteil `13C5` (Ziehungen als Argument), `Panel` = `1A03`, `PurchaseMarker` =
 `1A61`, `PurchaseUsed` = `1A97`, `TimeBar` = `1AC0`, `SelectionPanel` = `18E5`, `GoodIcon` = `1912`, `SelectionIcon` = `193C`,
 `RocketIcons` = `1978`, `StockBar` = `0DF9`, `GoodsBars` = `0D02`, `SelectionDisplay` = `0C73`, `Status` = Zeichenteil `0204`
-(ohne `060D`). `Apply` spielt die Zeichenereignisse des Kerns (`FieldEventKind.Draw*`) ab; Seiten, Paletten, Objekte und
-Listenausführung gehören der Ausgabe (Teil 3). Kernteil `13C5`: `Planting.Border` (Ziehungen im Ereignis).
+(ohne `060D`). `Apply` spielt die Zeichenereignisse des Kerns (`FieldEventKind.Draw*`) ab. Kernteil `13C5`: `Planting.Border`
+(Ziehungen im Ereignis). `src/Traders.Presentation/Field/FieldScene.Output.cs`: die Ausgabeereignisse (Tabelle oben),
+`NextFrame(Tasten)` je Bild vor dem Kern, `Finish`; `StatusSteps` = `0204` ganz, `FadeOutSteps` = `037D`, `LastFrameSteps` =
+`0665`, `ListOnBothPagesSteps` = `060D`, `RetraceSteps` = `0185`, `MirrorObjects`/`MirrorKeys`.
 
 - `[APPROX]` `0204` bei `1582` = 1 (zweite Runde `0080`, Spur R9): die getippte Notiz wird nicht gezeichnet (wie ihre Bilder im Kern).
 - Division durch `2F26` = 0 oder −32768/−1 in `0DF9` löst im Original INT 0 aus; der Port wirft.
@@ -93,3 +119,12 @@ nicht gezeichneten Notiz); `1BE5` ganz (Original gegen `Planting.Board` mit Szen
 Schleifenvariablen gleich). Gegenproben (je rot, lokal): rechter Nachbar mit `>=`, Balkenfarben 0Dh/0Eh vertauscht, zweite
 Raketenreihe ab i = 4, eine Diagonale des Verkaufskreuzes fehlt, Randziehung oben ignoriert, Gelände 2 mit x + y, Schatten
 x + 1 statt − 1, Zeitgrenze `≠ 0` statt `= 1`.
+
+**Bild für Bild** (`tests/Traders.Tests/Field/PlantingFrameDifferentialTests.cs`, `PlantingFrameHarness`): in allen sechs
+Abläufen (Woche 0 vier Computer; Woche 0 Mensch mit HQ, Kauf, Pflanzung, Ende am HQ; Zeitablauf; ohne Geld/Vorrat; Woche 1 Mensch;
+alles belegt) spielt die Szene alle Ereignisse; an jedem Rücklauf des Originals außerhalb der Warteschleife `21FD:0004` sind
+die vier VRAM-Ebenen, der DAC und der CRTC-Start gleich, die Szene wartet ihren k-ten Rücklauf im Bild des k-ten Rücklaufs, am
+Ende noch einmal (1229–7289 verglichene Bilder je Ablauf). Die Warteschleife (Spur `bilanz`, nicht gemergt) läuft im Orakel; ihre
+Bilder werden nicht verglichen, an ihrer Rückkehr übernimmt der Port die Ausgabe des Originals (VRAM, DAC, Treiberregister,
+Atlas, Masken, Datensegmentabbild der Schichten). Gegenproben (`Picture_comparison_detects_a_broken_output`, rot): Seitenwechsel
+durch zwei Rückläufe ersetzt, Objekte nicht gezeichnet, Ausblenden ohne Schritte, falsches Bild geladen.

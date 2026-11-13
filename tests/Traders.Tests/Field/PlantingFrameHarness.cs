@@ -1,14 +1,19 @@
+using Traders.Assets;
 using Traders.Core;
 using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Menus;
 using Traders.Core.Phases;
 using Traders.Core.State;
+using Traders.Presentation.Field;
+using Traders.Presentation.Menus;
 using Traders.RefEmu;
 using Traders.RefEmu.Machine;
 using Traders.Tests.Input;
 using Traders.Tests.Phases;
 using Traders.Tests.Startup;
+using Traders.Vga;
+using Traders.Vga.Layers;
 using P = Traders.Core.Field.Planting;
 
 namespace Traders.Tests.Field;
@@ -22,10 +27,17 @@ namespace Traders.Tests.Field;
 /// its k-th frame; there the data segment (outside <see cref="Owned"/>), DS:10D2 and the number of random() calls are compared.
 /// At its return the whole data segment is compared again.
 ///
+/// The picture is compared too (Teil 2, #103 P3-3): the port's <see cref="FieldScene"/> plays every event of the core through
+/// the graphics layers frame by frame (<see cref="FieldScene.NextFrame"/> before each frame); it must make its k-th retrace
+/// wait in the port frame of the k-th retrace, and there the four VRAM planes, the DAC and the CRTC start equal the
+/// original's at the entry of its retrace wait; at the return once more.
+///
 /// Not yet ported and answered from the RefEmu (gleichschritt oracle, docs/arbeitspakete.md §0): the helpers and computer hooks
 /// of lane anbau-ki (0609:074D, 0609:100F, 135D:000E, 135D:0AB3, 135D:0935) run in a second RefEmu on the port's data
 /// segment; the wait loop 21FD:0004 of lane bilanz is taken from the original run itself: the port waits as many frames as the
-/// original does inside 21FD:0004 and takes over its data segment at each of those retraces and at its return.
+/// original does inside 21FD:0004 and takes over its data segment at each of those retraces and at its return. Its picture is
+/// not compared; at its return the port's output (VRAM, DAC, driver registers, atlas, masks and the layers' data segment
+/// image) is taken over from the original as well.
 /// </summary>
 internal static class PlantingFrameHarness
 {
@@ -86,9 +98,115 @@ internal static class PlantingFrameHarness
     }
 
     /// <summary>Result of a run (diagnostics and coverage of the scenarios).</summary>
-    public sealed record Result(int Retraces, int OracleRetraces, int Passes, long RandomCalls, byte[] DataSegment, List<string> Events);
+    public sealed record Result(int Retraces, int OracleRetraces, int Passes, long RandomCalls, byte[] DataSegment, List<string> Events,
+        int PicturesCompared, int DistinctPictures);
 
-    public static Result Run(Script script)
+    /// <summary>Counter-tests of the picture comparison: a mutation of the port's output.</summary>
+    public enum Mutation { None, SkipFlip, SkipObjects, FadeOutNoRetrace, WrongPicture }
+
+    /// <summary>Retrace wait of the port's layers: notes the port frame of every wait.</summary>
+    private sealed class FrameRetraces : IRetraceWait
+    {
+        public long CurrentFrame { get; set; }
+
+        public List<long> Frames { get; } = [];
+
+        public void WaitForRetrace() => Frames.Add(CurrentFrame);
+    }
+
+    /// <summary>Picture resources of the planting phase (186C:0002) from the original files.</summary>
+    private sealed class Pictures : IPictureSource
+    {
+        public byte[] Decrunched(int resource) =>
+            PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Pictures[resource].Vga)));
+    }
+
+    /// <summary>The port's output: scene, layers, driver, DAC and its retrace waits.</summary>
+    private sealed class PortOutput
+    {
+        public required FieldScene Scene { get; init; }
+        public required GraphicsLayers Layers { get; init; }
+        public required ModeXDriver Driver { get; init; }
+        public required VgaDac Dac { get; init; }
+        public required FrameRetraces Retraces { get; init; }
+        public Mutation Mutation { get; init; }
+
+        /// <summary>The output state taken over from the original (set-up, and the return of the wait loop oracle).</summary>
+        public void TakeOver(OriginalProgram o)
+        {
+            FieldSceneHarness.SyncDriver(o, Driver);
+            o.Machine.Vga.Dac.CopyTo(Dac.Registers, 0);
+            var ds = o.DataSegment();
+            Array.Copy(ds, Layers.Ds, Math.Min(ds.Length, Layers.Ds.Length));
+        }
+
+        public void Apply(FieldEvent e)
+        {
+            switch (Mutation)
+            {
+                case Mutation.SkipFlip when e.Kind == FieldEventKind.FlipPages:
+                    Scene.Apply(new FieldEvent(FieldEventKind.Delay, 2, 0)); // the flip's two retraces without the flip
+                    return;
+                case Mutation.SkipObjects when e.Kind == FieldEventKind.DrawObjects:
+                    return;
+                case Mutation.WrongPicture when e.Kind == FieldEventKind.LoadImage:
+                    Scene.Apply(new FieldEvent(FieldEventKind.LoadImage, (short)(e.Args[0] + 1)));
+                    return;
+                case Mutation.FadeOutNoRetrace when e.Kind == FieldEventKind.FadeOut:
+                    Layers.FadeOut((ushort)e.Args[0]);
+                    for (int i = 0; i < 8; i++) Scene.Apply(new FieldEvent(FieldEventKind.Delay, 5, 0));
+                    return;
+            }
+            Scene.Apply(e);
+        }
+    }
+
+    private static PortOutput SetUpOutput(OriginalProgram o, Dgroup core, Mutation mutation)
+    {
+        var retraces = new FrameRetraces();
+        var driver = FieldSceneHarness.DriverFrom(o);
+        var dac = new VgaDac();
+        o.Machine.Vga.Dac.CopyTo(dac.Registers, 0);
+        // texts behind far pointers (DS:37E8 …) from a copy of the original's memory
+        var memory = o.Machine.Mem.ReadBlock(0, 0, 0x100000);
+        var layers = new GraphicsLayers(driver, o.DataSegment(), dac, retraces)
+            { DataSegment = o.Dgroup, OtherMemory = new LinearMemory(memory) };
+        var scene = new FieldScene(layers, core) { Pictures = new Pictures() };
+        return new PortOutput { Scene = scene, Layers = layers, Driver = driver, Dac = dac, Retraces = retraces, Mutation = mutation };
+    }
+
+    /// <summary>Real-mode memory as a flat copy (texts outside DS).</summary>
+    private sealed class LinearMemory(byte[] memory) : IFarMemory
+    {
+        public byte Read(ushort segment, ushort offset) => memory[((segment << 4) + offset) & 0xFFFFF];
+
+        public void Write(ushort segment, ushort offset, byte value) => memory[((segment << 4) + offset) & 0xFFFFF] = value;
+    }
+
+    /// <summary>Picture state: VRAM planes, DAC, CRTC start (first difference named).</summary>
+    private static void ComparePicture(OriginalProgram o, PortOutput port, string where)
+    {
+        var vga = o.Machine.Vga;
+        Assert.True(vga.StartAddress == port.Driver.DisplayStart,
+            $"{where}: display start original {vga.StartAddress:X4}, port {port.Driver.DisplayStart:X4}");
+        for (int pl = 0; pl < 4; pl++)
+        {
+            var a = vga.Planes[pl].AsSpan();
+            var b = port.Driver.Vram.Planes[pl].AsSpan();
+            int k = a.CommonPrefixLength(b);
+            if (k < a.Length)
+                Assert.Fail($"{where}: plane {pl} offset {k:X4} (page {k / 0x4000}, x {(k % 0x4000) % 80 * 4 + pl}, y {k % 0x4000 / 80}) " +
+                            $"original {a[k]:X2} port {b[k]:X2}");
+        }
+        int d = vga.Dac.AsSpan().CommonPrefixLength(port.Dac.Registers);
+        if (d < port.Dac.Registers.Length)
+            Assert.Fail($"{where}: DAC colour {d / 3} component {d % 3} original {vga.Dac[d]:X2} port {port.Dac.Registers[d]:X2}");
+    }
+
+    private static ulong PictureHash(OriginalProgram o) =>
+        Traders.Tests.Presentation.MenuSceneHarness.Hash(o.Machine.Vga.Planes, o.Machine.Vga.Dac, o.Machine.Vga.StartAddress);
+
+    public static Result Run(Script script, Mutation mutation = Mutation.None)
     {
         var o = OriginalProgram.Resume(TestGameData.DosDir, AtPlanting[script.Week].Value);
         var m = o.Machine;
@@ -115,33 +233,57 @@ internal static class PlantingFrameHarness
         var run = new OriginalRun(o, retCs, retIp);
         var core = new Dgroup(o.DataSegment()[..DgroupLayout.Size]);
         var random = new OriginalRandom(new RecordedClock([]), core.U32(DgroupLayout.RandomSeed));
-        var host = new OracleHost(run);
+        var output = SetUpOutput(o, core, mutation);
+        var host = new OracleHost(run, output);
         var step = new PlantingStep(host, ProgramStartDifferentialTests.Files);
         var machine = new PhaseMachine(core, random, new Dictionary<int, IWeekStepHandler> { [8] = step }, nextStep: 8);
 
         long frame = 0;
-        machine.Advance(new PhaseTick(frame, run.Held()));
-        int retraces = 0;
+        var held = run.Held();
+        output.Scene.NextFrame(held);
+        machine.Advance(new PhaseTick(frame, held));
+        int retraces = 0, sceneWaits = 0, pictures = 0;
+        var distinct = new HashSet<ulong>();
         while (machine.Status == PhaseStatus.Waiting)
         {
             Assert.True(frame < MaxFrames, $"planting did not end within {MaxFrames} frames: modes {core.U8(P.Mode)} {core.U8(P.Mode + 1)} {core.U8(P.Mode + 2)} {core.U8(P.Mode + 3)}, time {core.S16(FieldCursor.TimeLeft)}, cursor {core.S8(FieldCursor.CursorX)},{core.S8(FieldCursor.CursorY)}, players {core.U8(P.Players)}, keys {string.Join(",", run.Held())}; {string.Join("; ", host.Events.TakeLast(30))}");
             if (!run.Positioned)
                 Assert.True(run.RunToRetraceOrReturn(), $"port waits frame {frame}, the original returned (retrace {retraces})");
             run.Positioned = false;
-            run.Compare(core, random.Calls + host.OracleDraws, $"retrace {retraces} (port frame {frame})");
+            string where = $"retrace {retraces} (port frame {frame})";
+            run.Compare(core, random.Calls + host.OracleDraws, where);
+            if (host.InWaitLoop)
+                Assert.True(output.Retraces.Frames.Count == sceneWaits, $"{where}: the scene waited during the wait loop oracle");
+            else
+            {
+                sceneWaits++;
+                Assert.True(output.Retraces.Frames.Count == sceneWaits && output.Retraces.Frames[^1] == frame,
+                    $"{where}: the core waits its retrace {sceneWaits - 1}, the scene made {output.Retraces.Frames.Count} waits (last in frame {(output.Retraces.Frames.Count > 0 ? output.Retraces.Frames[^1] : -1)})");
+                ComparePicture(o, output, where);
+                pictures++;
+                distinct.Add(PictureHash(o));
+            }
             retraces++;
             run.RunToRetraceEnd();
             run.CheckControls();
             frame++;
-            machine.Advance(new PhaseTick(frame, run.Held()));
+            output.Retraces.CurrentFrame = frame;
+            held = run.Held();
+            output.Scene.NextFrame(held);
+            machine.Advance(new PhaseTick(frame, held));
         }
         Assert.Equal(0, step.Polls);
         Assert.False(run.RunToRetraceOrReturn(), $"the port returned after {retraces} retraces, the original waits another");
         run.CheckControls();
         Assert.True(machine.Status == PhaseStatus.Blocked && machine.NextStep == 9, $"phase machine {machine.Status} at {machine.NextStep}");
         run.Compare(core, random.Calls + host.OracleDraws, $"return of 0609:0004 after {retraces} retraces");
+        Assert.False(output.Scene.Presenting, "the scene still presents after the return");
+        Assert.Equal(sceneWaits, output.Retraces.Frames.Count);
+        ComparePicture(o, output, $"return of 0609:0004 after {retraces} retraces");
+        pictures++;
         Assert.Equal(retraces, step.Retraces);
-        return new Result(retraces, host.OracleRetraces, host.Passes, random.Calls + host.OracleDraws, core.Bytes, host.Events);
+        return new Result(retraces, host.OracleRetraces, host.Passes, random.Calls + host.OracleDraws, core.Bytes, host.Events,
+            pictures, distinct.Count);
     }
 
     /// <summary>The original side: run to retraces and the return, compare, controls read.</summary>
@@ -274,8 +416,11 @@ internal static class PlantingFrameHarness
     }
 
     /// <summary>The port's host: core controls and pause; oracles for lanes anbau-ki and bilanz.</summary>
-    private sealed class OracleHost(OriginalRun run) : IPlantingHost
+    private sealed class OracleHost(OriginalRun run, PortOutput output) : IPlantingHost
     {
+        /// <summary>True while the port waits a frame of the wait loop oracle.</summary>
+        public bool InWaitLoop { get; private set; }
+
         private readonly OriginalProgram _helper = OriginalProgram.LoadOnly(TestGameData.DosDir);
 
         public List<string> Events { get; } = [];
@@ -288,6 +433,7 @@ internal static class PlantingFrameHarness
 
         public void Emit(FieldEvent e)
         {
+            output.Apply(e);
             if (e.Kind == FieldEventKind.FlipPages) Passes++;
             if (e.Kind is FieldEventKind.Sound or FieldEventKind.DrawField or FieldEventKind.DrawFieldAndNeighbours
                 or FieldEventKind.DrawRank or FieldEventKind.DrawSelection or FieldEventKind.DrawPurchaseUsed)
@@ -344,6 +490,7 @@ internal static class PlantingFrameHarness
         public IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode)
         {
             Events.Add($"WaitLoop({mode})");
+            Assert.False(output.Scene.Presenting, "the scene still presents at the entry of 21FD:0004");
             var o = run.Program;
             run.RunToWithoutRetrace(o.Segment(Seg21FD), 0x0004, "21FD:0004");
             Assert.Equal(mode, (short)o.StackArgument(0));
@@ -358,9 +505,12 @@ internal static class PlantingFrameHarness
                 drawsBefore = run.RandomCalls;
                 run.Positioned = true;
                 OracleRetraces++;
+                InWaitLoop = true;
                 yield return FieldWait.Retrace;
+                InWaitLoop = false;
             }
             Take(d, random, drawsBefore);
+            output.TakeOver(o);
         }
 
         private void Take(Dgroup d, OriginalRandom random, long drawsBefore)

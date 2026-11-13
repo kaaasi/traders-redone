@@ -8,12 +8,13 @@ namespace Traders.Presentation.Field;
 /// <summary>
 /// Drawing side of the field layer 0609 (findings docs/routines/0609_1256_rahmen.md and 0609_0C73_anbauszene.md):
 /// background, frame, the player's emblem with rank, the planting phase's field, panels and status lines, and the drawing
-/// requests of the core's cursor step and planting phase (<see cref="FieldEvent"/>). Every routine only
-/// appends entries to the command list 0A96 of the graphics layers; it changes no game state. Values the original reads
+/// requests of the core's cursor step and planting phase (<see cref="FieldEvent"/>). Every drawing routine only
+/// appends entries to the command list 0A96 of the graphics layers; the output requests (pictures, pages, palettes,
+/// objects, waits) are played frame by frame in FieldScene.Output.cs. No game state is changed. Values the original reads
 /// from the data segment (player at turn DS:37AA, rank DS:3D42, emblem offsets DS:00D8, flag DS:43FA) are read from the
 /// core's data segment.
 /// </summary>
-public sealed class FieldScene
+public sealed partial class FieldScene
 {
     private const int CurrentPlayer = 0x37AA; // byte, signed
     private const int RankTable = 0x3D42;         // byte[4], unsigned
@@ -382,13 +383,16 @@ public sealed class FieldScene
     }
 
     /// <summary>
-    /// Plays a drawing request of the core (cursor step, planting phase): the drawing routines of segment 0609 above with
-    /// the event's arguments, and <see cref="FieldEventKind.DrawCommand"/> as the 0A96:0030 call of 0609:1B72. Requests of
-    /// the output layers (pages, palettes, objects, list execution, waits) and sound are not the scene's.
+    /// Plays a request of the core (cursor step, planting phase): the drawing routines of segment 0609 above with the
+    /// event's arguments, <see cref="FieldEventKind.DrawCommand"/> as the 0A96:0030 call of 0609:1B72, and the requests of
+    /// the output layers (pictures, pages, palettes, objects, list execution, waits; FieldScene.Output.cs). A presenting
+    /// routine still in progress is finished first. Sound is not the scene's.
     /// </summary>
     public void Apply(FieldEvent e)
     {
+        Finish();
         var a = e.Args;
+        if (ApplyOutput(e)) return;
         switch (e.Kind)
         {
             case FieldEventKind.DrawCommand: _gfx.AddBlit(W(a[0]), W(a[1]), W(a[2]), W(a[3]), W(a[4]), W(a[5])); break;
@@ -402,7 +406,6 @@ public sealed class FieldScene
             case FieldEventKind.DrawPanel: Panel(); break;
             case FieldEventKind.DrawPurchaseUsed: PurchaseUsed(); break;
             case FieldEventKind.DrawPlayer: TimeBar(); break;
-            case FieldEventKind.DrawStatus: Status(); break;
         }
     }
 }

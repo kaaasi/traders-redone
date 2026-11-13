@@ -9,7 +9,8 @@ namespace Traders.Tests.Field;
 /// <summary>
 /// The planting phase 0609:0004 as call 8 of the phase machine in lockstep with the original in a running game
 /// (<see cref="PlantingFrameHarness"/>): every retrace of the original is a frame of the port, data segment, DS:10D2 and
-/// the number of random() calls are equal at each of them and at the return.
+/// the number of random() calls are equal at each of them and at the return; outside the wait loop oracle the scene's picture
+/// (VRAM planes, DAC, CRTC start) equals the original's at each retrace and at the return.
 /// </summary>
 public class PlantingFrameDifferentialTests
 {
@@ -20,7 +21,9 @@ public class PlantingFrameDifferentialTests
     private Result Check(Script script)
     {
         var r = Run(script);
-        _out.WriteLine($"retraces {r.Retraces} (wait loop {r.OracleRetraces}), passes {r.Passes}, random {r.RandomCalls}");
+        _out.WriteLine($"retraces {r.Retraces} (wait loop {r.OracleRetraces}), passes {r.Passes}, random {r.RandomCalls}, " +
+            $"pictures compared {r.PicturesCompared} ({r.DistinctPictures} distinct)");
+        Assert.Equal(r.Retraces - r.OracleRetraces + 1, r.PicturesCompared);
         _out.WriteLine(string.Join("; ", r.Events.GroupBy(e => e[..e.IndexOf('(')]).Select(g => $"{g.Key} {g.Count()}")));
         _out.WriteLine(string.Join("; ", r.Events.Where(e => !e.StartsWith("ComputerTurn") && !e.StartsWith("Sound(2,")).Skip(54).Take(200)));
         return r;
@@ -29,6 +32,9 @@ public class PlantingFrameDifferentialTests
     // [DIFFERENTIAL] 0609:0004 – whole phase frame by frame in week 0, four computers
     // [DIFFERENTIAL] 0609:0204 – status lines and their flip (frames only)
     // [DIFFERENTIAL] 21FD:060D – execute the list, flip the pages, execute again (the panels' flip)
+    // [DIFFERENTIAL] 21FD:0665 – last frame of the field (flip, restore, list, objects), picture compared at the return
+    // [DIFFERENTIAL] 21FD:037D – fade-out frame by frame (picture at each of its 40 retraces)
+    // [DIFFERENTIAL] 21FD:0185 – retrace waits of the passes (scene waits in the core's frames)
     [GameDataFact]
     public void Planting_with_four_computers_runs_in_lockstep_in_week_0()
     {
@@ -118,5 +124,24 @@ public class PlantingFrameDifferentialTests
             o.WriteByte(FieldGrid.FreeFields, 0);
         }));
         Assert.DoesNotContain(r.Events, e => e.StartsWith("ComputerBoughtField"));
+    }
+
+    /// <summary>
+    /// Counter-tests of the picture comparison (four computers, week 0): a flip replaced by two plain retraces, the objects
+    /// not drawn, the fade-out with its DAC writes before the retraces, the next picture loaded instead – each must fail on the picture
+    /// (planes, DAC, display start or the scene's retrace waits), not on the data segment.
+    /// </summary>
+    [GameDataTheory]
+    [InlineData(nameof(Mutation.SkipFlip))]
+    [InlineData(nameof(Mutation.SkipObjects))]
+    [InlineData(nameof(Mutation.FadeOutNoRetrace))]
+    [InlineData(nameof(Mutation.WrongPicture))]
+    public void Picture_comparison_detects_a_broken_output(string mutation)
+    {
+        var e = Record.Exception(() => Run(new Script(0, [], [], []), Enum.Parse<Mutation>(mutation)));
+        Assert.NotNull(e);
+        string first = e.Message.Split('\n')[0];
+        _out.WriteLine(first);
+        Assert.Matches("plane|DAC|display start|the scene", first);
     }
 }

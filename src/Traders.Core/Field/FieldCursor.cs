@@ -61,7 +61,7 @@ public enum FieldEventKind
     DrawPurchaseUsed,
     /// <summary>0609:1AC0 – time bar of the player at turn.</summary>
     DrawPlayer,
-    /// <summary>0609:0204 – status lines (weather and limits, or the free-field notice).</summary>
+    /// <summary>0609:0204 as a whole – status lines (weather and limits, or the free-field notice), then 21FD:060D; the core yields its frames.</summary>
     DrawStatus,
     /// <summary>21FD:051F – flip the pages.</summary>
     FlipPages,
