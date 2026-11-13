@@ -199,8 +199,16 @@ plus interne `Choose*`/`Score*`/`Action*`), `src/Traders.Core/Field/PlantingAiHe
 
 ## Prüfung
 
-`tests/Traders.Tests/Ai/PlantingDifferentialTests.cs` (RefEmu `LoadOnly`, direkte `Call(135D:*)`): für jeden Einsprung
-(`000E` je Modus 2–5 und außerhalb, `0935`, `0AB3`) und beide Helfer ganzes DS und `AL`/`3308` gleich; Fälle über volle und
-leere Felder, alle vier Stufen (`2E8E`), Raketen 0/≠0, Vorrats- und Zeitgrenzen, HQ vorhanden/fehlend, Spalten/Zeilen am Rand.
-Gegenproben (Review): Feldbewertung verändert, Reihenfolge der Feldprüfung bzw. Cursorziel (`04F5`) vertauscht → rot
-(`tools/abdeckung.py --check` grün). Teil 3: Grenzfälle und Wochenzustände aus echten Partien (RefEmu bis Aufruf 8, Wochen 0–3).
+- `tests/Traders.Tests/Ai/PlantingDifferentialTests.cs` (RefEmu `LoadOnly`, direkte `Call(135D:*)`, ganzes DS inkl. `3308` und
+  `10D2`): `000E` 4000 Zufallszustände mit Modus 0–7 (alle Zweige 2–5 und „sonst“, Bewegungsverzögerung 0/positiv, Cursor auch
+  außerhalb), `0935` 3000 (Raketen-/Pflanzzweig, Merker `4580`/`4BC2`/`2EEA`, Güte 0–3), `0AB3` 2000 (HQ am Rand). Felder voll,
+  leer und gemischt, Stufen `2E8E` 0–3, Raketen 0/≠0, Vorrat gegen `48A2`, Zeitlimit 0/1 mit Restzeit auch negativ.
+- `PlantingAiHelpersDifferentialTests.cs`: `0609:074D`/`100F` je 800 Fälle (AL und DS).
+- `PlantingGameStateDifferentialTests.cs` (Teil 3): Standardpartie mit vier Computerspielern im RefEmu, Wochen 0–3; an jedem
+  Einsprung `000E` (je Woche/Spieler/Modus die ersten 4), `0935`, `0AB3` (alle) DS und Argumente aufgezeichnet und danach
+  Original und Port auf diesem Zustand verglichen. Erreicht: Modus 2 (Woche 0), 3 und 4 (jede Woche), 5 (Woche 2, Spieler 3),
+  jeder Spieler in jeder Woche; `0935` jede Woche, `0AB3` Woche 0. Laufzeit ≈ 7 min (Emulation von vier Wochen).
+- Eigene Gegenproben (lokal, nicht im Repo): `04F5` rechts/links vertauscht, Grundwert in `06A1` ·2 statt ·3, Gleichstand in
+  `00AC` mit größerem statt kleinerem Abstand, Zeitprüfung in `02BD` mit 2 statt 1 → jeweils rot. Weitere Gegenproben im Review.
+- Annahme (nicht nachgebildet): HQ-Koordinaten außerhalb des Rasters (Quadrant ∉ 0–3 in `00AC` würde lokale Variablen des
+  Originals überschreiben) und Spalten/Zeilen = 0 (Division durch 0 im Original) kommen im Spiel nicht vor.

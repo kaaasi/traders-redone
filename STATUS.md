@@ -234,7 +234,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `11A3:0EB8` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:0F2E` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:104B` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
-| `135D:000E` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `135D:000E` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingGameStateDifferentialTests.cs` | ✅ |
 | `135D:00AC` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:0240` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:0263` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
@@ -245,9 +245,9 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `135D:05AF` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:06A1` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:0851` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
-| `135D:0935` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `135D:0935` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingGameStateDifferentialTests.cs` | ✅ |
 | `135D:0A59` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
-| `135D:0AB3` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `135D:0AB3` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingGameStateDifferentialTests.cs` | ✅ |
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `MultiWeekDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
