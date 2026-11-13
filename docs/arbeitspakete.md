@@ -133,7 +133,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   Bildzähler), Bild pixelgenau; Gegenprobe im Review (Rangfolge vertauscht, Ziehung in `21FD:0004` ausgelassen → rot; je neue
   Architekturregel eine Verletzung → rot).
 - **Abhängigkeiten:** keine; Teil 1 zuerst.
-- **Status:** alle Teile fertig (PR #124, Review offen): Leseregel, `WaitLoop` (`21FD:0004`), `Report`/`ReportStep` (Aufruf 3), Szene `ReportScene` pixelgenau (Woche 0 und 1), #101 R4M-1. Für Spur 0: `ReportScene` spielt die `WeekEvent`s der Bilanz ab; Ereignisse der Warteschleife in Modus 1/4 (`ShowPlayerObject`, `Indicator`) zeichnet sie nicht.
+- **Status:** alle Teile fertig (PR #124, Review „Ja“, Fixlauf R5B-1…3 und Rebase): Leseregel, `WaitLoop` (`21FD:0004`), `Report`/`ReportStep` (Aufruf 3), Szene `ReportScene` pixelgenau (Woche 0 und 1), #101 R4M-1. Für Spur 0: `ReportScene` spielt die `WeekEvent`s der Bilanz ab; Ereignisse der Warteschleife in Modus 1/4 (`ShowPlayerObject`, `Indicator`) zeichnet sie nicht.
 
 ## Zuständigkeit gemeinsamer Dateien in R5
 

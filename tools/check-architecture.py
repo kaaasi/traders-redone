@@ -120,11 +120,46 @@ def _locals(text, known_types):
     return found
 
 
+_STEP_HANDLERS = {'IWeekStepHandler', 'IProgramStepHandler'}
+
+
+def _step_handlers(texts):
+    """Classes that implement a step handler interface of the phase machines, directly or through a base class (R5B-3)."""
+    bases = {}
+    for text in texts:
+        for m in re.finditer(r'\b(?:class|struct|record(?:\s+(?:class|struct))?)\s+(\w+)([^{;]*)\{', text):
+            head = re.sub(r'\([^()]*(?:\([^()]*\)[^()]*)*\)', '', m.group(2))  # primary constructor parameters
+            bases[m.group(1)] = set(re.findall(r'\b([A-Z]\w*)\b', head.split(':', 1)[1])) if ':' in head else set()
+    handlers, changed = set(), True
+    while changed:
+        changed = False
+        for cls, names in bases.items():
+            if cls not in handlers and names & (_STEP_HANDLERS | handlers):
+                handlers.add(cls)
+                changed = True
+    return handlers
+
+
+def core_members(sources):
+    """Fields and properties of the core declared with a core type: name -> set of types (for chains st.Report!.Run())."""
+    texts = [strip_code(t) for t in sources]
+    classes = {name for text in texts for *_, name in _types(text)}
+    members = {}
+    for text in texts:
+        for m in re.finditer(r'\b(?:public|internal|protected|private)\s+(?:(?:static|readonly|required|virtual|override|'
+                             r'sealed|new)\s+)*([A-Z]\w*)(?:<[^<>]*>)?\??\s+(\w+)\s*(?=[;={]|=>)', text):
+            if m.group(1) in classes:
+                members.setdefault(m.group(2), set()).add(m.group(1))
+    return members
+
+
 def core_writers(sources):
     """Core members that change the game state (#101 R4M-2, #103 P3-1, #105 P3-1), decided from the bodies: a method writes
     if it stores into a data segment (Set, raw bytes) or calls a writing member - qualified (Class.Method), unqualified in
     the same class, through a variable of a core type, or as a constructor (new X(...)). Return type and parameters do not
-    matter (Wealth.Wares returns int and writes DS:45D0). Returns {'Class.Method': is_static}; 'X.X' marks a constructor."""
+    matter (Wealth.Wares returns int and writes DS:45D0). Every method of a step handler (IWeekStepHandler,
+    IProgramStepHandler, also through a base class) counts as writing: it drives the core (R5B-3, ReportStep.Tick).
+    Returns {'Class.Method': is_static}; 'X.X' marks a constructor."""
     members = []  # (cls, name, static, body)
     texts = [strip_code(t) for t in sources]
     for text in texts:
@@ -132,9 +167,10 @@ def core_writers(sources):
     classes = {c for c, *_ in members if c}
     for text in texts:
         classes.update(name for *_, name in _types(text))
+    handlers = _step_handlers(texts)
     writers = {}
     for cls, name, static, body in members:
-        if cls and _DIRECT_WRITE.search(body):
+        if cls and (_DIRECT_WRITE.search(body) or cls in handlers):
             writers[f'{cls}.{name}'] = static
     changed = True
     while changed:
@@ -159,10 +195,12 @@ def core_writers(sources):
 _FORBIDDEN_CALLS = re.compile(r'\b(?:FieldCursor\s*\.\s*\w+|FieldGrid\s*\.\s*Set|ControlReader\s*\.\s*\w+)\s*\(')
 
 
-def scene_violations(source, writers):
+def scene_violations(source, writers, members=None):
     """Scenes only read the game state (AGENTS.md §4): no writes to a Dgroup (Set, raw Bytes), no phase machine, no static
     core call that writes the state (KeyTable.Write, Wealth.Wares, ...), no instance of a writing core class
-    (new MainMenu(...).Run()) and no writing call through a variable of a core type."""
+    (new MainMenu(...).Run()), no writing call through a variable of a core type, through a field or property of the core
+    (st.Report!.Run(), `members` from core_members) or as a method group (Func<Dgroup, int> f = Wealth.Wares; R5B-3)."""
+    members = members or {}
     source = strip_code(source)
     found = []
     if re.search(r'\.Set\s*\(|\.Bytes\b|\bPhaseMachine\b|\bProgramMachine\b|\bMenuRunner\b|\bIWeekStepHandler\b|\bIProgramStepHandler\b', source):
@@ -172,15 +210,20 @@ def scene_violations(source, writers):
     writing_classes = {w.split('.')[0] for w in writers}
     for w, static in sorted(writers.items()):
         cls, method = w.split('.')
-        if static and re.search(rf'\b{cls}\s*\.\s*{method}\s*\(', source):
+        # call or method group (no '(' needed)
+        if static and re.search(rf'\b{cls}\s*\.\s*{method}\b', source):
             found.append(f'Szene ruft schreibende Kernroutine {w}')
     for cls in sorted(writing_classes):
         if re.search(rf'\bnew\s+(?:\w+\s*\.\s*)*{cls}\s*\(', source):
             found.append(f'Szene erzeugt schreibende Kerninstanz {cls}')
     variables = _locals(source, writing_classes)
-    for var, method in re.findall(r'\b(\w+)\s*\.\s*(\w+)\s*\(', source):
+    for var, method in re.findall(r'\b(\w+)\s*[!?]*\s*\.\s*(\w+)\b', source):
         if var in variables and f'{variables[var]}.{method}' in writers and not writers[f'{variables[var]}.{method}']:
             found.append(f'Szene ruft schreibende Kernroutine {variables[var]}.{method} über {var}')
+    for member, method in re.findall(r'\.\s*(\w+)\s*[!?]*\s*\.\s*(\w+)\b', source):
+        for cls in sorted(members.get(member, ())):
+            if f'{cls}.{method}' in writers and not writers[f'{cls}.{method}']:
+                found.append(f'Szene ruft schreibende Kernroutine {cls}.{method} über die Kette .{member}')
     return found
 
 
@@ -222,11 +265,20 @@ _core = ['public static class KeyTable { public static void Write(Dgroup state, 
          ' public IEnumerable<int> Run() { yield return Step(); } private int Step() { _d.Bytes[4] = 1; return 0; } }',
          'public static class Wealth { public static int Wares(Dgroup d) { int s = 0; for (int i = 0; i < 4; i++) { d.Set(Loop, (short)i); s += d.S16(i); } return s; }'
          ' public static int Total(Dgroup d) => Wares(d) + 1; public static int Cash(Dgroup d) => d.S32(5); }',
-         'public static class Ranking { public static void Order(Dgroup d) { var m = new MainMenu(d); foreach (var x in m.Run()) { } } }',
+         'public static class Ranking { public static void Order(Dgroup d) { var m = new MainMenu(d); foreach (var x in m.Run()) { } }'
+         ' public static void Apply(Dgroup d) { d.Set(8, (byte)0); } }',
          'public static class FieldCursor { public static bool IsVisible(Dgroup d) => d.U8(6) != 0; }',
          'public static class FieldGrid { public static void Set(Dgroup d, int x, byte v) { d.Set(x, v); } public static byte Get(Dgroup d, int x) => d.U8(x); }',
-         'public static class ControlReader { public static int Peek(Dgroup d) => d.U8(7); }']
+         'public static class ControlReader { public static int Peek(Dgroup d) => d.U8(7); }',
+         # R5B-3: a step handler drives the core even if its body only moves an enumerator (also through a base class);
+         # its Report property makes a chain to a writing core class
+         'public interface IWeekStepHandler { StepOutcome Tick(StepContext c); }',
+         'public sealed class Report { public bool Aborted { get; } public IEnumerable<int> Run() { Ranking.Apply(_d); yield return 0; } }',
+         'public class ReportStep(int arg = 1) : IWeekStepHandler { private IEnumerator<int>? _run;'
+         ' public Report? Report { get; private set; } public StepOutcome Tick(StepContext c) { _run!.MoveNext(); return default; } }',
+         'public sealed class LaterStep : ReportStep { public new StepOutcome Tick(StepContext c) => default; }']
 _writers = core_writers(_core)
+_members = core_members(_core)
 for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers), CATCH),
                     (scene_violations('MainMenu.ApplyLevel(_state);', _writers), CATCH),
                     (scene_violations('int w = Wealth.Wares(_state);', _writers), CATCH),
@@ -239,6 +291,15 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
                     (scene_violations('int k = ControlReader.Peek(_state);', _writers), CATCH),
                     (scene_violations('var x = MainMenu.Peek(_state); int c = Wealth.Cash(_state); byte g = FieldGrid.Get(_state, 1);'
                                       ' string s = "KeyTable.Write(_state, k);"; // KeyTable.Write(_state, k);', _writers), CLEAN),
+                    # R5B-3 counter-checks (one per rule) and the reading forms they must leave alone
+                    (scene_violations('ReportStep st = _st; foreach (var x in st.Report!.Run()) { }', _writers, _members), CATCH),
+                    (scene_violations('ReportStep st = _st; st.Tick(default!);', _writers, _members), CATCH),
+                    (scene_violations('LaterStep st = _st; st.Tick(default!);', _writers, _members), CATCH),
+                    (scene_violations('Func<Dgroup, int> f = Wealth.Wares; f(_state);', _writers, _members), CATCH),
+                    (scene_violations('Action<Dgroup> a = Ranking.Apply;', _writers, _members), CATCH),
+                    (scene_violations('Func<IEnumerable<int>> r = _st.Report!.Run;', _writers, _members), CATCH),
+                    (scene_violations('ReportStep st = _st; bool a = st.Report!.Aborted; Func<Dgroup, int> c = Wealth.Cash;',
+                                      _writers, _members), CLEAN),
                     (raw_offset_violations('uint seed = d.U32(0x10D2);'), CATCH),
                     (raw_offset_violations('void F(Dgroup d) { short v = d.S16(2298); }'), CATCH),
                     (raw_offset_violations('const int Req = 0x3CCC; void F(Dgroup d) { byte v = d.U8(Req); }'), CATCH),
@@ -247,11 +308,12 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
     if (mode == CATCH and not probe) or (mode == CLEAN and probe):
         errors.append(f'Selbstprüfung check-architecture.py: {"Befund erwartet" if mode else "kein Befund erwartet"}, {len(probe)} gefunden')
 
-writers = core_writers(p.read_text() for p in (root / 'src/Traders.Core').rglob('*.cs') if 'obj' not in p.parts and 'bin' not in p.parts)
+core_sources = [p.read_text() for p in (root / 'src/Traders.Core').rglob('*.cs') if 'obj' not in p.parts and 'bin' not in p.parts]
+writers, members = core_writers(core_sources), core_members(core_sources)
 for path in (root / 'src/Traders.Presentation').rglob('*.cs'):
     if 'obj' in path.parts or 'bin' in path.parts:
         continue
-    for v in scene_violations(path.read_text(), writers):
+    for v in scene_violations(path.read_text(), writers, members):
         errors.append(f'{path.relative_to(root)}: {v}')
 for path in (root / 'src').rglob('*.cs'):
     rel = path.relative_to(root)

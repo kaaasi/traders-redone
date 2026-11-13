@@ -41,11 +41,13 @@ public sealed class ReportDifferentialTests
             new KeyScript().Hold(5, 30, MenuKeys.KeypadPlus).Hold(12, 4, MenuKeys.KeypadMinus)),
         ["week loop abort"] = new(1, [false, true, true, true], 4, null, new KeyScript().Hold(70, 2, Abort)),
         ["end of game no wait"] = new(0, [false, false, true, true], 5, null, new KeyScript(), Gems: false, Oil: false),
-        // scale 02D7: richest wealth below 120·10 (no rounding), up to 120·100 (tens), above (hundreds), negative
+        // scale 02D7: richest wealth below 120·10 (no rounding), up to 120·100 (tens), above (hundreds), negative; "exactly 10"
+        // and "exactly 100" end on the bounds of the two jng (raw 10 stays 10, raw 92 is rounded to 100 and stays), R5B-1
         ["scale small"] = new(0, [true, true, true, true], 6, 300, new KeyScript(), Gems: false, Oil: false),
         ["scale tens"] = new(0, [true, true, true, true], 7, 5_000, new KeyScript(), Gems: false, Oil: false),
         ["scale hundreds"] = new(0, [true, true, true, true], 8, 2_000_000, new KeyScript()),
-        ["scale exactly 10"] = new(0, [true, true, true, true], 9, 1_079, new KeyScript(), Gems: false, Oil: false),
+        ["scale exactly 10"] = new(0, [true, true, true, true], 9, 1_100, new KeyScript(), Gems: false, Oil: false),
+        ["scale exactly 100"] = new(0, [true, true, true, true], 12, 11_000, new KeyScript(), Gems: false, Oil: false),
         ["scale huge"] = new(0, [true, true, true, true], 10, 0x7FFF0000, new KeyScript()),
         ["all negative"] = new(0, [true, true, true, true], 11, -40_000, new KeyScript()),
     };
@@ -113,7 +115,10 @@ public sealed class ReportDifferentialTests
         Assert.Equal(s.Keys.Holds.Any(k => k.Key == Abort), report.Aborted);
     }
 
-    /// <summary>The scale scenarios reach the three branches of 0825:02D7 (checked on the original's run only).</summary>
+    /// <summary>
+    /// The scale scenarios reach the three branches of 0825:02D7 and both bounds of its jng (DS:1584 = 10 and 100 exactly;
+    /// checked on the original's run only).
+    /// </summary>
     [GameDataFact]
     public void Scale_scenarios_reach_their_branches_in_the_original()
     {
@@ -130,5 +135,7 @@ public sealed class ReportDifferentialTests
         Assert.True(tens is > 10 and <= 110 && tens % 10 == 0, $"tens {tens}");
         short hundreds = Scale("scale hundreds");
         Assert.True(hundreds > 100 && hundreds % 100 == 0, $"hundreds {hundreds}");
+        Assert.Equal((short)10, Scale("scale exactly 10"));
+        Assert.Equal((short)100, Scale("scale exactly 100"));
     }
 }

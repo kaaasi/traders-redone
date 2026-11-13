@@ -32,10 +32,13 @@ public sealed class WeekReportSceneDifferentialTests
 
     private static (int, byte)[] Dword(int at, int v) => [.. Word(at, v), .. Word(at + 2, v >> 16)];
 
-    /// <summary>Week index 45 (ring buffer wrapped, week axis shifted) with a history that rises, falls below zero and clips.</summary>
-    private static (int, byte)[] LongHistory()
+    /// <summary>
+    /// Week index <paramref name="week"/> (45: ring buffer wrapped, week axis shifted) with a history that rises, falls below
+    /// zero and clips. Week 41 puts a tens line at i = 26h, where 0825:047D draws no number (upper bound i ≤ 25h, R5B-2).
+    /// </summary>
+    private static (int, byte)[] LongHistory(int week = 45)
     {
-        var set = new List<(int, byte)>(Word(DgroupLayout.Week, 45));
+        var set = new List<(int, byte)>(Word(DgroupLayout.Week, week));
         for (int p = 0; p < DgroupLayout.PlayerCount; p++)
             for (int i = 0; i < 40; i++)
                 set.AddRange(Dword(DgroupLayout.WealthHistory + p * 0xA0 + i * 4, (i * 37 + p * 911) % 900 * 40 - 4000 * p));
@@ -56,6 +59,7 @@ public sealed class WeekReportSceneDifferentialTests
         ["week 1 humans keypad"] = new(1, new KeyScript().Hold(5, 30, MenuKeys.KeypadPlus).Hold(12, 4, MenuKeys.KeypadMinus)
             .Hold(150, 2, Fire).Hold(260, 2, Fire), Humans()),
         ["long history"] = new(1, new KeyScript(), LongHistory()),
+        ["long history week 41"] = new(1, new KeyScript(), LongHistory(41)),
         // 0825:0364 draws the target line only when DS:1584·120 reaches the target (unsigned)
         ["target line"] = new(0, new KeyScript(), Dword(DgroupLayout.Target, 500)),
         ["no target line"] = new(0, new KeyScript(), Dword(DgroupLayout.Target, 2_000_000_000)),
