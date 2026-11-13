@@ -39,7 +39,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
   Zustandsmodell im Kern (`Core/Startup`), Datei-, Entpack- und Atlasteil über die vorhandenen `Traders.Assets`/`Traders.Vga`
   (additiv, R4P-2); und
   `21FD:0687` mit `081D`, `08D3` (Neusaat `random(0)` aus explizitem Uhrwert, Ziehung und Ziffernformel; F1 = B: ohne
-  Anzeige und Eingabe, `0863` nur im Befund; Befund [21FD_0687_codeabfrage.md](routines/21FD_0687_codeabfrage.md) ergänzen);
+  Anzeige und Eingabe, `0863` nur im Befund; Befund [21FD_0687_codeabfrage.md](../routines/21FD_0687_codeabfrage.md) ergänzen);
   Differenztest: gleicher Uhrwert → gleicher Zufallszustand und gleiches Datensegment wie das Original nach beliebiger Eingabe,
   bis zum Merge von 1 ohne den Textzeigerblock `DS:37CC…3C8F` (`192D:18B6` gehört 1); der Vergleich über das ganze Datensegment
   folgt in Teil 3. (3) **Anbindung** (nach Merge von 1 und 2): `Traders.App` treibt die
@@ -102,7 +102,7 @@ RefEmu, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `ma
 ## 3 `spielfeld` – Befehlsquelle `0E9E` und Spielfeldschicht `0609`
 
 - **Teile:** (1) **Befehlsquelle im Kern:** `0E9E:000E/0035/0264/0312/037A` (Befund
-  [0E9E_000E_steuerung.md](routines/0E9E_000E_steuerung.md)) – Tastenzustand bzw. Gerätewerte als Eingabe, Bits `DS:37C3+i`,
+  [0E9E_000E_steuerung.md](../routines/0E9E_000E_steuerung.md)) – Tastenzustand bzw. Gerätewerte als Eingabe, Bits `DS:37C3+i`,
   Einzelmerker und Aktionscode als Ergebnis; alle sechs Steuerungsarten im Kern, der Host liefert vorerst nur Tastatur (s. F3).
   (2) **Spielfeld im Kern:** Feldart setzen `0609:10D2` (schreibt `DS:4442+`, `2EB1+`, zählt `4BA8+`, `2EE7+`) und, was es ruft,
   dazu die Cursorlogik. (3) **Spielfeld als Szene** (nach Merge von 1): die Zeichenroutinen `0609:1256`, `1879`, `1ED9` (nur
