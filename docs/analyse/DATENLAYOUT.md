@@ -69,7 +69,7 @@ danach BSS (beim Start null). C#-Gegenstück: `src/Traders.Core/State/` (`Dgroup
 | 31 | `08FE` | W | s | – | `FieldRows` | init. 6 | Spielfeldzeilen 3–6 | G (`192D:0D42`, Kopie `5332`) |
 | 32 | `2F1A` | B | u | [i], i 0–11 | `StationVisited` | 0 | Station angeflogen/markiert | W – `22A3:010F` |
 | 33 | `44F4` | W | s | [i·2] | `StationKind` | Zufall | Stationsart 0–2 (6×0, 4×1, 2×2) | G – Verteilung `0E31:023D` |
-| 34 | `348A` | W | s | [i·2] | `StationValue` | Zufall | −1 (½), 10 (¼) oder 0–3 | G (Erzeugung), Bedeutung W |
+| 34 | `348A` | W | s | [i·2] | `StationValue` | Zufall | −1 (½), 10 (¼) oder 0–3; Verteilung belegt s. §3.1 | G (Erzeugung), Bedeutung W |
 | 35 | `0900` | W | s | – | `PiratePresence` | init. 1 | 0 NONE … 3 HIGH | G – `192D:0742/0935` |
 | 36 | `40E6` | B | s | – | `Weather` | Zufall | Wetter 0–5 (`random(2)`, +3 bei `random(4)==0`) | G – `21FD:021F`, Texte 245–262 |
 | 37 | `2F05` | B | s | – | `FieldTotal` | Spalten·Zeilen | Feldanzahl | G – `0E31:01D5` |
