@@ -87,7 +87,8 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 - **Abnahme:** alle drei Läufe grün; jeder Einsprung und beide Helfer bitgleich mit dem RefEmu; Gegenprobe im Review (Bewertung
   eines Feldes verändert, Reihenfolge der Feldprüfung bzw. Cursorziel vertauscht → rot); `abdeckung.py --check` grün.
 - **Abhängigkeiten:** keine (Spur 0 bindet ein).
-- **Status:** –
+- **Status:** PR #125 (Draft, Claude). Teil 1 ✅ (Befund `135D_000E_computerzug.md`, Helfer `0609_074D`/`0609_100F`,
+  transitive Rufe geklärt – nur `074D`/`100F` offen, beide diese Spur; `08B7` toter Code; Vertrag für Spur 0). Teil 2/3 offen.
 
 ## 2 `planung` – Wochenplanung der Computerspieler `11A3`
 
