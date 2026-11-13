@@ -104,7 +104,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 - **Abnahme:** alle drei Läufe grün; beide Durchgänge bitgleich mit dem RefEmu; Gegenprobe im Review (Durchgang vertauscht, eine
   Ziehung vertauscht → rot); `abdeckung.py --check` grün, Sammelmarker belegt (z. B. `192D`-Einsprünge nicht mehr 🔍).
 - **Abhängigkeiten:** keine.
-- **Status:** in Arbeit (Claude, Draft-PR `paket/planung`, Base `b80c07d`), Teil 1 begonnen.
+- **Status:** Teile 1–3 fertig (Claude, PR #123, Base `b80c07d`); Review offen. Restlücke #109: Sammelmarker in anderer Form (`// 1177`, „then 0609:1A61“) zählen weiter nicht – Marker in Listenform bringen (Dateien anderer Spuren).
 
 ## 3 `bilanz` – Wochenbilanz `0825:000A` und Leseregel der Szenen
 
