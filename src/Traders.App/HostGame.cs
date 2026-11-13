@@ -88,11 +88,13 @@ public sealed class HostGame : Game
         Keys.Receive(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_scancodes));
         if (_program is not null && frames > 0)
         {
-            // every frame passed is processed once with the keys held now (the core catches up after a short stall)
+            // every frame passed is processed once with the keys held now: after a short stall (at most MaxStep) the host
+            // catches up frame by frame, core and scene in step, before it presents the last one
             _held.Clear();
             for (int sc = 0; sc < KeyStateTable.Size; sc++)
                 if (Keys.IsDown((byte)sc)) _held.Add((byte)sc);
-            _program.Frame(_clock.Frames - 1, _held);
+            for (long f = _program.LastFrame + 1; f < _clock.Frames && _program.Machine.Status != Traders.Core.Phases.ProgramStatus.Ended; f++)
+                _program.Frame(f, _held);
             if (_program.Machine.Status == Traders.Core.Phases.ProgramStatus.Ended) Exit();
             DisplayStart = _program.Driver.DisplayStart;
         }

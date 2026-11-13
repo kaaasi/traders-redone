@@ -89,15 +89,21 @@ public sealed class ProgramHost
     /// <summary>Last frame processed (−1 before the first).</summary>
     public long LastFrame => Machine.LastFrame;
 
-    /// <summary>One display frame: the core processes it with the keys held now, then the scene draws the menu events of it.</summary>
+    /// <summary>
+    /// Display frames up to <paramref name="frame"/>: every frame after <see cref="LastFrame"/> is processed on its own, the
+    /// core first (with the keys held now), then the scene steps its fade or flip and draws the menu events of that frame.
+    /// A host that skipped frames (short stall) thus gets the same core state and picture as one that presented each frame.
+    /// </summary>
     public void Frame(long frame, IReadOnlyCollection<byte> held)
     {
-        if (frame <= Machine.LastFrame) return;
-        Machine.Advance(new PhaseTick(frame, held));
-        Machine.DrainEvents();
-        Machine.DrainWeekEvents();
-        Scene.NextFrame();
-        foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
+        while (Machine.LastFrame < frame && Machine.Status != ProgramStatus.Ended)
+        {
+            Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
+            Machine.DrainEvents();
+            Machine.DrainWeekEvents();
+            Scene.NextFrame();
+            foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
+        }
     }
 
     private byte[] Load(string name) => File.ReadAllBytes(Path.Combine(_dir, name));
