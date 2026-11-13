@@ -316,3 +316,20 @@ Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs
 | `3D42` | B[4] u | `RankTable` | Rang je Spieler (Abzeichen im Wappen, `0609:1854`) | G – Differenztest `0609:1854` |
 | `00D8` | W[4] s | `RankOffsetY` | y-Versatz des Rangabzeichens im Wappen | G – Differenztest `0609:1879` |
 | `43FA` | B[4] u | `Marker` | 1 = Merker neben dem Rangsymbol (`0609:1A61`) | G (Prüfung), W (Bedeutung) – Differenztest `0609:1A61` |
+
+## 11. Runde 5, Spur `anbau` (Anbauphase `0609:0004`)
+
+Befund [0609_0004_anbau.md](../routines/0609_0004_anbau.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `43B2` | B[4] u | `Planting.Mode` | Modus im Anbau: 2 HQ bauen, 3 Cursor, 4 Art wählen, 5 freies Feld (zweite Runde `0080`), 6 fertig | G – `0609:0004`, `064D` |
+| `43FA` | B[4] u | `Planting.Purchase` | 1 = darf in dieser Runde ein freies Nachbarfeld nehmen (gesetzt, wenn `4BC2` = 0 und `2F05` > 0); präzisiert §10 `Marker` | G – `0609:0004`, `07D6`; W |
+| `3CAF` / `3CB3` | B[4] s | `Planting.SoldX` / `SoldY` | zum Verkauf markiertes Feld (−1 = keins); `0FA9` gibt es frei und zahlt `3746` | G – `096A`, `07D6`, `0FA9` |
+| `48A2` | B s | `Planting.PlantCost` | Vorrat der Ware (Art + 1) mod 3, den das Bepflanzen eines Feldes der Art 0–2 kostet (klärt BESTAND B3 teilweise) | G – `0609:096A` |
+| `4BAC` | W[4] s | `Rockets` | eine Rakete je Raketenbasis (Art 3) | G – `096A` |
+| `1582` | B u | `Planting.NoTime` | 0 in `0004`, 1 in der zweiten Runde `0080` (keine Wartezeit, Cursor sofort sichtbar, Züge ohne Zeit) | G – `00D6`, `032A` |
+| `3CE6` | B u | `Planting.Players` | Spieler noch im Feld; `032A` zählt, `0EDD` zählt herunter, `03E0` läuft bis 0 | G – `032A`, `03E0` |
+| `330C + 1Ah·p` +0/+2/+14h/+16h/+18h | B/W | `Planting.Objects`, `ObjectLayer`, `ObjectX`, `ObjectY`, `ObjectFrame` | Cursorobjekt je Spieler: aktiv, Ebene 0Ah, Position, Bild; **Besitzer Kern** (#103 P3-4), Zeiger +4…+13h und `33E4`… gehören der Objektschicht | G – `032A`, `1F2D`, `1FCC`, `1FE0` |
+| `08CE` | W | `Planting.PictureNumber` | Bildnummer des Anbaubilds (`186C:0002`) | G – `00D6` |
+| `2EB0` / `2F00` | B s | `LoopX` / `LoopY` | nach `1BE5` Spalten bzw. Zeilen (Schleifenende), in `069F` Cursor für `074D` | G – `1BE5`, `069F` |

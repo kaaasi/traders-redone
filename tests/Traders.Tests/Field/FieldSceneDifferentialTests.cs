@@ -19,8 +19,19 @@ public class FieldSceneDifferentialTests
 
     private static (int, byte)[] Player(int p) => [(FieldGrid.CurrentPlayer, (byte)p)];
 
+    /// <summary>
+    /// Core bytes of the object records (all eight; DS:37AA is often 4 after a player loop, #103 P3-2/P3-4) get patterns ≠ 0 first, so a scene
+    /// that writes them (for example by hiding the cursor) changes the compared data segment.
+    /// </summary>
+    private static readonly (int, byte)[] OwnedPatterns =
+    [
+        .. Enumerable.Range(0, 8).SelectMany(p => new[] { 0, 2, 0x14, 0x16, 0x18 }
+            .Select(o => (Planting.Objects + Planting.ObjectSize * p + o, (byte)(0xA5 + p + o)))),
+    ];
+
     private static void AssertReadOnly(H.Case c)
     {
+        c = c with { Set = [.. OwnedPatterns, .. c.Set] };
         var (_, core) = H.AssertSame(c);
         var before = OriginalProgram.Resume(TestGameData.DosDir, H.AtWeek.Value).DataSegment()[..DgroupLayout.Size];
         foreach (var (at, v) in c.Set) before[at] = v;

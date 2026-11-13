@@ -122,24 +122,42 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
 | `0000:5101` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `0609:0004` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:00D6` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:0160` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:032A` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:03E0` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:047B` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
+| `0609:064D` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:069F` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:07D6` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:096A` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:0AEF` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:0B8E` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:0BEA` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:0EA1` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:0EDD` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:0F0D` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:0F70` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
+| `0609:0FA9` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:1072` | [0609_10D2_feldart.md](docs/routines/0609_10D2_feldart.md) | `src/Traders.Core/Field/FieldGrid.cs` | `FieldGridDifferentialTests.cs` | ✅ |
 | `0609:10A7` | [0609_10D2_feldart.md](docs/routines/0609_10D2_feldart.md) | `src/Traders.Core/Field/FieldGrid.cs` | `FieldGridDifferentialTests.cs` | ✅ |
 | `0609:10D2` | [0609_10D2_feldart.md](docs/routines/0609_10D2_feldart.md) | `src/Traders.Core/Field/FieldGrid.cs` | `FieldGridDifferentialTests.cs` | ✅ |
 | `0609:1178` | [0609_1178_obergrenzen.md](docs/routines/0609_1178_obergrenzen.md) | `src/Traders.Core/Rules/ProductionLimits.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
+| `0609:11E7` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:1256` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:13C5` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:1854` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:1879` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:1A61` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | – | `FieldSceneDifferentialTests.cs` | 🔍 |
 | `0609:1B72` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
+| `0609:1BE5` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:1EA3` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:1ED9` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:1F04` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1F2D` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:1FCC` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:1FE0` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:215E` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:21BA` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0825:06CB` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
@@ -283,10 +301,10 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `192D:1A04` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs`, `MenuFrameDifferentialTests.cs` | ✅ |
 | `192D:1B06` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:1B90` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Presentation/Menus/MenuScene.cs` | `MainMenuDifferentialTests.cs`, `MenuSceneDifferentialTests.cs` | ✅ |
-| `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Vga/Layers/Objects.cs` | `PlantingDifferentialTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:022B` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
-| `21AF:0412` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
+| `21AF:0412` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Vga/Layers/Objects.cs` | `PlantingDifferentialTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `21AF:045E` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Core/Field/FieldCursor.cs`, `src/Traders.Vga/Layers/Objects.cs` | `FieldCursorDifferentialTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `21AF:0472` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `21AF:04A2` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
@@ -367,7 +385,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 |---|---:|---:|---:|---:|---:|
 | `0000` | 0x5350 | 76 | 1 | 1 | 1 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
-| `0609` | 0x21C0 | 56 | 20 | 19 | 19 |
+| `0609` | 0x21C0 | 56 | 38 | 37 | 37 |
 | `0825` | 0xAA0 | 16 | 7 | 7 | 7 |
 | `08CF` | 0x19A0 | 42 | 1 | 1 | 1 |
 | `0A69` | 0x2D0 | 9 | 10 | 10 | 10 |
@@ -410,7 +428,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **237** | **221** | **221** |
+| **Summe** | **0x28DC0** | **891** | **255** | **239** | **239** |
 
 <!-- abdeckung:ende -->
 
