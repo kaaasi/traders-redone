@@ -236,8 +236,9 @@ public class NewGameDifferentialTests
     }
 
     /// <summary>
-    /// Counter-check: one draw swapped (stations before land) must change the start state, i.e. the comparison is
-    /// sensitive to the order of the draws (Abnahme "eine Ziehung vertauscht -> rot").
+    /// Counter-check: <see cref="NewGame.Start"/> gives the original land, while the same draws with the stations before the
+    /// land give another one; so a swap of the two in <see cref="NewGame.Start"/> turns this test red (Abnahme "eine Ziehung
+    /// vertauscht -> rot", #99 R4P-R3).
     /// </summary>
     [GameDataFact]
     public void Swapped_draw_order_is_detected()
@@ -245,6 +246,9 @@ public class NewGameDifferentialTests
         var r = new Inputs(0x5A5A);
         var d = Input(r, 2, 1, 8, 6);
         var original = Harness.RunOriginal(d, 0x0E31, 0x0003);
+        var started = new Dgroup((byte[])d.Bytes.Clone());
+        NewGame.Start(started, new Traders.Core.OriginalRandom(new Traders.Core.RecordedClock([]), started.U32(L.RandomSeed)));
+        Assert.Equal(original.DataSegment[L.FieldQuality..(L.FieldQuality + 54)], started.Bytes[L.FieldQuality..(L.FieldQuality + 54)]);
         var swapped = new Dgroup((byte[])d.Bytes.Clone());
         var random = new Traders.Core.OriginalRandom(new Traders.Core.RecordedClock([]), swapped.U32(L.RandomSeed));
         NewGame.CreateStations(swapped, random);

@@ -257,6 +257,11 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `192D:05DD` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
 | `192D:0653` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:0698` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:06C2` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0698` |
+| `192D:06E2` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0698` |
+| `192D:0702` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0698` |
+| `192D:0722` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0698` |
+| `192D:0742` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0698` |
 | `192D:076C` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:07AC` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:07FC` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
@@ -269,7 +274,13 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `192D:0A26` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:0AB4` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
 | `192D:0C08` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0C34` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0C08` |
+| `192D:0C75` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0C08` |
+| `192D:0C9E` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0C08` |
+| `192D:0CC7` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0C08` |
+| `192D:0CE7` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0C08` |
 | `192D:0D10` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
+| `192D:0D42` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ über `192D:0D10` |
 | `192D:0DC0` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:0E11` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:0E64` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
@@ -405,7 +416,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `1777` | 0x540 | 4 | 4 | 4 | 4 |
 | `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
 | `186C` | 0xC10 | 19 | 7 | 2 | 2 |
-| `192D` | 0x1D60 | 74 | 55 | 55 | 55 |
+| `192D` | 0x1D60 | 74 | 66 | 66 | 66 |
 | `1B03` | 0x1650 | 44 | 0 | 0 | 0 |
 | `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
 | `1DEF` | 0x8F0 | 14 | 0 | 0 | 0 |
@@ -425,7 +436,7 @@ Status: ✅ portiert mit Differenztest (`[DIFFERENTIAL]`) · 🟢 portiert, Diff
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **252** | **236** | **236** |
+| **Summe** | **0x28DC0** | **891** | **263** | **247** | **247** |
 
 <!-- abdeckung:ende -->
 
