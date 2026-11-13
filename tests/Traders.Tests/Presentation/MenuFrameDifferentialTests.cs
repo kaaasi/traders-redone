@@ -8,7 +8,9 @@ namespace Traders.Tests.Presentation;
 /// [DIFFERENTIAL] 192D:0234 (frame and random sequence of the main menu, #86) – the main menu with human key input (real
 /// keyboard interrupts with dwell and hold times) against the original retrace by retrace (<see cref="MenuFrameHarness"/>):
 /// VRAM, DAC, CRTC start, DS:10D2 and the number of random() calls at every retrace equal; the scene's retrace waits in the
-/// frames the core waits; menu outputs and AL equal at the end.
+/// frames the core waits; menu outputs and AL equal at the end. The port's layers start from the original's data segment at
+/// the menu entry, so the host's own set-up of pages and layers is not covered here but by
+/// <see cref="App.HostMenuPictureDifferentialTests"/> (finding R4W-1).
 /// </summary>
 // [DIFFERENTIAL] 192D:0495 (frames of the level loop)
 // [DIFFERENTIAL] 192D:1A04 (frames of the control loop)

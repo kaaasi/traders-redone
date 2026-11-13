@@ -235,8 +235,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0D73:00D3` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PageLayerTests.cs` | ✅ |
 | `0D73:07E0` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/MouseReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0DFD:000D` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
-| `0DFD:0074` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
-| `0DFD:0132` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
+| `0DFD:0074` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.App/ProgramHost.cs` | `HostMenuPictureDifferentialTests.cs` | ✅ |
+| `0DFD:0132` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.App/ProgramHost.cs` | `HostMenuPictureDifferentialTests.cs` | ✅ |
 | `0DFD:0158` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
 | `0DFD:0239` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `0E31:0003` | [0E31_0003_neue_partie.md](docs/routines/0E31_0003_neue_partie.md) | `src/Traders.Core/Rules/NewGame.cs` | `ProgramHumanDifferentialTests.cs`, `NewGameDifferentialTests.cs` | ✅ |
@@ -437,7 +437,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0B9F` | 0x8A0 | 16 | 2 | 2 | 2 |
 | `0C29` | 0x14A0 | 29 | 0 | 0 | 0 |
 | `0D73` | 0x8A0 | 15 | 2 | 2 | 2 |
-| `0DFD` | 0x340 | 5 | 5 | 2 | 2 |
+| `0DFD` | 0x340 | 5 | 5 | 4 | 4 |
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 5 | 5 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
@@ -471,7 +471,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **287** | **272** | **272** |
+| **Summe** | **0x28DC0** | **891** | **287** | **274** | **274** |
 
 <!-- abdeckung:ende -->
 
