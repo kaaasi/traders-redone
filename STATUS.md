@@ -137,19 +137,21 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0609:1178` | [0609_1178_obergrenzen.md](docs/routines/0609_1178_obergrenzen.md) | `src/Traders.Core/Rules/ProductionLimits.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `0609:1256` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:1854` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
-| `0609:1879` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
+| `0609:1879` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `FieldSceneDifferentialTests.cs`, `WeekReportSceneDifferentialTests.cs` | ✅ |
 | `0609:1A61` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | – | `FieldSceneDifferentialTests.cs` | 🔍 |
 | `0609:1B72` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:1ED9` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:1F04` | [0609_1256_rahmen.md](docs/routines/0609_1256_rahmen.md) | `src/Traders.Presentation/Field/FieldScene.cs` | `FieldSceneDifferentialTests.cs` | ✅ |
 | `0609:215E` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
 | `0609:21BA` | [0609_047B_cursor.md](docs/routines/0609_047B_cursor.md) | `src/Traders.Core/Field/FieldCursor.cs` | `FieldCursorDifferentialTests.cs` | ✅ |
-| `0825:000A` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `ReportDifferentialTests.cs`, `ReportMultiWeekTests.cs` | ✅ |
-| `0825:0072` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `ReportDifferentialTests.cs` | ✅ |
-| `0825:0178` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `ReportDifferentialTests.cs` | ✅ |
+| `0825:000A` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs`, `ReportMultiWeekTests.cs` | ✅ |
+| `0825:0072` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs` | ✅ |
+| `0825:0178` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs` | ✅ |
 | `0825:02D7` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `ReportDifferentialTests.cs` | ✅ |
-| `0825:0560` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | – | `ReportDifferentialTests.cs` | 🔍 |
-| `0825:0686` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Week/WaitLoop.cs` | `WaitLoopDifferentialTests.cs` | ✅ |
+| `0825:0364` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs` | ✅ |
+| `0825:047D` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs` | ✅ |
+| `0825:0560` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs` | ✅ |
+| `0825:0686` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
 | `0825:06CB` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:07C4` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:0813` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
@@ -157,7 +159,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0825:088D` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:08EB` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:096D` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
-| `0825:09C9` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs` | `ReportDifferentialTests.cs` | ✅ |
+| `0825:09C9` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs` | ✅ |
 | `08CF:11D7` | [08CF_11D7_edelsteinkurs.md](docs/routines/08CF_11D7_edelsteinkurs.md) | `src/Traders.Core/Rules/GemPrice.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `0A69:000B` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:002C` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
@@ -353,10 +355,11 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:0353` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:037D` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:03B4` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
-| `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
+| `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Presentation/Week/ReportScene.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:04DA` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
-| `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
+| `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs` | ✅ |
+| `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Week/WaitLoop.cs` | `WaitLoopDifferentialTests.cs` | ✅ |
 | `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `21FD:081D` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
@@ -421,7 +424,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0000` | 0x5350 | 76 | 1 | 1 | 1 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
 | `0609` | 0x21C0 | 56 | 22 | 21 | 21 |
-| `0825` | 0xAA0 | 16 | 14 | 13 | 13 |
+| `0825` | 0xAA0 | 16 | 16 | 16 | 16 |
 | `08CF` | 0x19A0 | 42 | 1 | 1 | 1 |
 | `0A69` | 0x2D0 | 9 | 10 | 10 | 10 |
 | `0A96` | 0xD10 | 24 | 27 | 27 | 27 |
@@ -453,7 +456,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
 | `21A7` | 0x80 | 3 | 0 | 0 | 0 |
 | `21AF` | 0x4E0 | 7 | 8 | 8 | 8 |
-| `21FD` | 0x980 | 28 | 19 | 19 | 19 |
+| `21FD` | 0x980 | 28 | 20 | 20 | 20 |
 | `2295` | 0xE0 | 4 | 4 | 4 | 4 |
 | `22A3` | 0x930 | 15 | 3 | 3 | 3 |
 | `2336` | 0x970 | 4 | 2 | 2 | 2 |
@@ -463,7 +466,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **279** | **264** | **264** |
+| **Summe** | **0x28DC0** | **891** | **282** | **268** | **268** |
 
 <!-- abdeckung:ende -->
 

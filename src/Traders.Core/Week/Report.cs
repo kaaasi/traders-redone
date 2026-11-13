@@ -20,6 +20,18 @@ public static class ReportLayout
 
     /// <summary>Divisor of the richest player's wealth in 0825:02D7.</summary>
     public const int ScaleDivisor = 0x78;
+
+    /// <summary>word[4] – colour of each player's numbers and graph line (initialised data, read by 0825:0178 and 0560).</summary>
+    public const int PlayerColors = 0x00C8;
+
+    /// <summary>word[4] – y offset of the rank badge in each player's emblem (initialised data, read by 0609:1879).</summary>
+    public const int EmblemBadgeOffsets = 0x00D8;
+
+    /// <summary>Far text pointer of the report's title (text 0Ah of the table DS:37CC, drawn by 0825:0072).</summary>
+    public const int TitleText = MenuLayout.TextPointers + 4 * 0x0A;
+
+    /// <summary>Far text pointers of the five row labels (texts 0Bh…0Fh) and of the total row (text 10h), 0825:0178.</summary>
+    public const int RowTexts = MenuLayout.TextPointers + 4 * 0x0B, TotalText = MenuLayout.TextPointers + 4 * 0x10;
 }
 
 /// <summary>
@@ -97,7 +109,9 @@ public sealed class Report
         Scale(_d);
         Emit(WeekEventKind.Draw, 0x0364);
         Emit(WeekEventKind.Draw, 0x047D);
-        DrawLoop(0x0560);
+        Emit(WeekEventKind.Draw, 0x0560);
+        // 0825:0560 runs its player loop only from week index 0 on (di = 0 > DS:4B9A ends it at once).
+        if (_d.S16(DgroupLayout.Week) >= 0) _d.Set(DgroupLayout.ActivePlayer, (sbyte)DgroupLayout.PlayerCount);
         Emit(WeekEventKind.CopyPage);
         Emit(WeekEventKind.LoadPalette, ReportLayout.Palette);
         Emit(WeekEventKind.FadeIn);
@@ -133,7 +147,7 @@ public sealed class Report
     }
 
     /// <summary>
-    /// [ORIGINAL] 0825:0072 resp. 0825:0560 – drawing routines whose loop over the players runs in DS:37AA (left at 4).
+    /// [ORIGINAL] 0825:0072 – drawing routine whose loop over the players runs in DS:37AA (left at 4).
     /// </summary>
     private void DrawLoop(int routine)
     {
