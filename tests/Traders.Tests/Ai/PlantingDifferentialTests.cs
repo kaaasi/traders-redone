@@ -18,6 +18,7 @@ public class PlantingDifferentialTests
     private const int Cur = 0x37AA, Cols = 0x08FC, Rows = 0x08FE, Owner = 0x4442, Kind = 0x2EB1, Quality = 0x45DA;
     private const int Mode = 0x43B2, MoveDelay = 0x3786, HqX = 0x40FE, HqY = 0x4102;
     private const int Rockets = 0x4BAC, TimeLeft = 0x4520, TimeLimit = 0x45BA, FreeFields = 0x2F05, IsComp = 0x0840;
+    private const int OwnedFields = 0x4BA8;
     private const int WantKind = 0x40F6, CandCount = 0x48EC, CandIndex = 0x3C90, Marker43FA = 0x43FA, Sel = 0x2E94;
     private const int CandX = 0x4654, CandY = 0x472C, CandKind = 0x2F31, Stock = 0x3CF4, LimitHigh = 0x48A2;
     private const int Marker4580 = 0x4580, FatMike = 0x4BC2, T2EEA = 0x2EEA, ComputerIq = 0x2E8E, KindWare2 = 0x08E7;
@@ -55,6 +56,7 @@ public class PlantingDifferentialTests
             W(WantKind + 2 * pl, r.Next(0, 3));
             W(CandIndex + 2 * pl, r.Next(0, 6));
             B(Marker43FA + pl, r.Next(2));
+            B(OwnedFields + pl, r.Next(0, 8));
             B(Sel + pl, r.Next(-1, 5));
             B(FatMike + pl, r.Next(2));
             W(MoveDelay + 4 * pl, r.Next(3) == 0 ? r.Next(1, 5) : 0);

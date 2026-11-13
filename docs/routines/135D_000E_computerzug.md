@@ -10,10 +10,11 @@ internen Routinen `00AC`, `0240`, `0263`, `0284`, `02BD`, `0480`, `04F5`, `05AF`
   die zu bauende Art umschalten oder die Taste (0Ah) „ausführen". Dazu bewertet und merkt er sich ein Zielfeld und eine
   Pflanzart. Alles arbeitet auf dem Datensegment.
 - **Aufgerufen von / Phase:** `000E` aus `0609:047B` (Cursorschritt, Befund [0609_047B_cursor.md](0609_047B_cursor.md)) **vor**
-  der Auswertung der Aktion, je Computerspieler einmal pro Bild. `0935` aus `0609:096A` (Aktion 0Ah, Modus 4: Art bestätigen),
-  `0AB3` aus `0609:069F` (Aktion 0Ah, Modus 2: Feld-/Art-Vorwahl). Im Port dockt Spur 0 über den vorhandenen Rückruf
-  `IFieldOutput.ComputerTurn(Dgroup, x, y)` (`Field/FieldCursor.cs`) an `000E` an; `0935`/`0AB3` ruft Spur 0 an den Stellen
-  `0609:096A`/`069F` (Vertrag siehe unten).
+  der Auswertung der Aktion, je Computerspieler einmal pro Bild. `0935` einzig aus `0609:0961` im Modus-3-Handler `0609:07D6`
+  (Feld gekauft), `0AB3` einzig aus `0609:0746` am Ende des HQ-Baus `0609:069F` (Modus 2); beide nur für Computerspieler
+  (`0840[p]` = 1). Genaue Bedingungen und Reihenfolge im Vertrag unten. Im Port dockt Spur 0 über den vorhandenen Rückruf
+  `IFieldOutput.ComputerTurn(Dgroup, x, y)` (`Field/FieldCursor.cs`) an `000E` an; `0935`/`0AB3` ruft Spur 0 an diesen beiden
+  Stellen.
 
 ## Transitiv gerufene Routinen (Teil 1, Stand main `b80c07d`)
 
@@ -71,8 +72,9 @@ der y-Term insgesamt ·2). Ergebnis 0…3 im Raster.
 - Ist `DS:43FA[p]` = 1: `05AF` (baut Auswahl, siehe unten). Hat `05AF` etwas gefunden (`DS:4BBE[p]` = 0): Kandidat
   `x = DS:410A[2p]`, `y = DS:4112[2p]`; Abstand `0263`. Reicht bei Zeitlimit (`DS:45BA` ≠ 0) die Restzeit `DS:4520[2p]` ≥ Abstand,
   so x → `40CE[2p]`, y → `40D6[2p]`, fertig.
-- Sonst Schleife `si` = 0…(Kandidatenzahl−1, Abbruch bei 0xFF) über die Liste `DS:4654[p·54 + si]` (x), `DS:472C[p·54 + si]` (y),
-  `DS:2F31[p·54 + si]` (Art): x/y in `2EB0`/`2F00`, Abstand `0263`. Nur weiter, wenn Abstand ≤ bisher bester (Start 100).
+- Sonst Schleife `si` = 0…(Kandidatenzahl−1) über die Liste `DS:4654[p·54 + si]` (x), `DS:472C[p·54 + si]` (y),
+  `DS:2F31[p·54 + si]` (Art): x/y in `2EB0`/`2F00`; verbrauchte Einträge (x = 0xFF, `036F`) werden übersprungen, die Schleife
+  läuft weiter. Abstand `0263`. Nur weiter, wenn Abstand ≤ bisher bester (Start 100).
   - Art 3 (Rakete): nur wenn `DS:4BAC[p]` (Raketen) ≠ 0.
   - Art ≠ 3: nur wenn Vorrat `DS:3CF4[p·8 + 2·Tab8E7[Art]]` ≥ Obergrenze `DS:48A2` (Ware je Art über Tabelle `DS:08E7[Art]`).
   - Bei Zeitlimit = 1 zusätzlich Restzeit `4520[2p]` ≥ Abstand.
@@ -118,20 +120,22 @@ sonst 1. HQ-Prüfung über Feldart `2EB1[43F6·6 + 43F8]` (hoch) bzw. `2EB2[…]
 Kandidatenart `cl = 2F31[p·54 + 3C90[2p]]`. Ist die aktuelle Auswahl `DS:2E94[p]` < `cl` → 3 (runter = Auswahl eins hoch).
 Sonst Kandidat als verbraucht markieren (`4654[p·54 + 3C90[2p]]` = 0xFF) und 0Ah (ausführen).
 
-### `0935` – Kandidat eintragen (aus `0609:096A`, Aktion 0Ah Modus 4)
+### `0935` – Kandidat eintragen (aus `0609:0961` in `07D6`, Modus 3 nach dem Feldkauf)
 
 Index `si = DS:48EC[2p]` (Kandidatenzahl). Wunschart `cl = DS:40F6[2p]` (Low). Feld `2EB0 = 410A[2p]`, `2F00 = 4112[2p]`.
-- Soll statt der Wunschart eine Rakete (Art 3) gebaut werden? Nur wenn **keiner** der Fälle gilt: `37AA` = `DS:4580`,
-  `DS:4BC2[p]` = 1, `DS:2EEA[p·4]` < 2. Zusätzlich darf die Güte des Feldes nicht 3 sein. Dann `cl` = 3. (Der Zwischenwert
-  `0x4BAC` im Original ist konstant ≠ 0 und wählt immer den Rakete-Prüfzweig.)
-- Güteprüfung der Wunschart: ist `QualityTable[cl·4 + Güte]` = 0 → nichts eintragen. Sonst `cl` = Wunschart.
+- Soll statt der Wunschart eine Rakete (Art 3) gebaut werden? Ja, wenn **einer** der Fälle gilt (`0979`–`099E`, jeder springt
+  nach `09A0`): `37AA` = `DS:4580`, `DS:4BC2[p]` = 1 oder `DS:2EEA[p·4]` < 2 – und die Güte des Feldes nicht 3 ist. Dann
+  `cl` = 3. (Der Zwischenwert `0x4BAC` bei `09A0` ist eine Konstante ≠ 0 und wählt immer den Raketen-Prüfzweig.)
+- Sonst (kein Fall oder Güte 3) Güteprüfung der Wunschart: ist `QualityTable[cl·4 + Güte]` = 0 → nichts eintragen. Sonst
+  `cl` = Wunschart.
 - Ist die aktuelle Feldart `2EB1[cell]` bereits `cl` → nichts eintragen.
 - Sonst: `cl` → `2F31[p·54 + si]`, `2EB0` → `4654[p·54 + si]`, `2F00` → `472C[p·54 + si]`, `DS:48EC[2p]` += 1.
 
-### `0AB3` – Wunschart bestimmen (aus `0609:069F`, Aktion 0Ah Modus 2)
+### `0AB3` – Wunschart bestimmen (aus `0609:0746` am Ende von `069F`, HQ-Bau Modus 2)
 
 Vier Byte-Summen (je Art 0…2 + eine ungenutzte) auf 0. Über das 3×3-Feld um das HQ (x = `40FE[p]`−1…+1, y = `4102[p]`−1…+1),
-nur Felder im Raster (`10A7`): für Art j = 0…2 die Summe `+= QualityTable[j·4 + Güte des Feldes]`. Danach die Art mit der
+nur Felder im Raster (`10A7`) **und frei** (`4442` = 0xFF, `0B24`): für Art j = 0…2 die Summe
+`+= QualityTable[j·4 + Güte des Feldes]`. Danach die Art mit der
 höchsten Summe wählen (Start: die bisherige Wunschart `DS:40F6[2p]`); Gewinner → `DS:40F6[2p]`.
 
 ## Zustand (geschrieben/gelesen)
@@ -148,7 +152,7 @@ höchsten Summe wählen (Start: die bisherige Wunschart `DS:40F6[2p]`); Gewinner
 | `4BBE` | B[4] u | 1 = `05AF` fand nichts | **G** `05AF` |
 | `3C90` | W[4] s | gewählter Kandidatenindex | **G** `02BD` (0 bzw. `si`) |
 | `4654` / `472C` / `2F31` | B[4·54] | Kandidatenliste x/y/Art (Stride 54) | L `02BD`/`0A59`, **G** `0935`, **G**(0xFF) `0A59` |
-| `48EC` | W[4] s | Kandidatenzahl | L `0A59`? nein; **G** `0935` (+1) |
+| `48EC` | W[4] s | Kandidatenzahl | L `02BD` (Schleifenende), L/**G** `0935` (+1) |
 | `40F6` | W[4] s | Wunschart | L `06A1`/`0935`, **G** `0AB3` |
 | `40FE` / `4102` | B[4] s | HQ-Spalte/-Zeile (0xFF = kein HQ) | L `00AC`/`02BD`/`0480`/`0AB3` |
 | `2EB0` / `2F00` | B s | globale Schleife x/y (hinterlassen = Spalten/Zeilen) | L/G alle Schleifen |
@@ -187,8 +191,16 @@ Stride 54), `48EC` (`AiCandCount`), `3C90` (`AiCandIndex`), `4BBE` (`AiNoneFound
 
 - `000E(x, y)` → Rückruf `IFieldOutput.ComputerTurn(Dgroup d, short x, short y)` (`Field/FieldCursor.cs`), aufgerufen von
   `0609:047B` vor der Aktionsauswertung. Port: `PlantingAi.ComputerTurn(d, x, y)`.
-- `0935` → `PlantingAi.CommitCandidate(d)` an Stelle `0609:096A` (Aktion 0Ah, Modus 4).
-- `0AB3` → `PlantingAi.ChooseWantKind(d)` an Stelle `0609:069F` (Aktion 0Ah, Modus 2).
+- `0935` → `PlantingAi.CommitCandidate(d)` an Stelle `0609:0961` im Modus-3-Handler `0609:07D6` (Feld kaufen). Zweig: Feld
+  (`304E[p]`, `305A[p]`) nicht eigen, `0609:100F` = 1 (eigener Nachbar), Feld frei (`4442` = 0xFF), `43FA[p]` = 1. Dort in
+  dieser Reihenfolge `0609:10D2(x, y, p, Art)`, Ton `21A7:0054(0, 0Ah)`, `0609:1CB1(x, y)`, `43FA[p]` = 0, `0609:1A97`, dann
+  **nur bei `0840[p]` = 1** `0935`. Nicht aus `096A` (Modus 4); dort gibt es keinen Aufruf.
+- `0AB3` → `PlantingAi.ChooseWantKind(d)` an Stelle `0609:0746`, am Ende des HQ-Baus `0609:069F` (Modus 2). Nur wenn
+  `0609:074D` = 1 (HQ gebaut): nach `10D2(x, y, p, 4)`, `40FE[p]`/`4102[p]` = x/y, `0609:1C83(x, y)`, Ton
+  `21A7:0054(0, 7)` und `43B2[p]` = 3, **nur bei `0840[p]` = 1**.
+- Beleg der Aufrufstellen: Review R5A-1 (RefEmu-Probe Standardpartie, Rücksprungadressen `0609:0966` bzw. `0609:074B`, Modus
+  beim Aufruf jeweils 3) und Bytesuche im gesamten `T.EXE` (`9A 35 09 5D 13` nur bei Dateioffset `0x9FF1` = `0609:0961`,
+  `9A B3 0A 5D 13` nur bei `0x9DD6` = `0609:0746`; kein Nahaufruf in `135D`).
 - Alle drei schreiben nur ins Datensegment, ziehen keinen Zufall, geben nichts zurück (bzw. `000E` setzt `3308[p]`).
 
 ## C#-Umsetzung
@@ -202,7 +214,8 @@ plus interne `Choose*`/`Score*`/`Action*`), `src/Traders.Core/Field/PlantingAiHe
 - `tests/Traders.Tests/Ai/PlantingDifferentialTests.cs` (RefEmu `LoadOnly`, direkte `Call(135D:*)`, ganzes DS inkl. `3308` und
   `10D2`): `000E` 4000 Zufallszustände mit Modus 0–7 (alle Zweige 2–5 und „sonst“, Bewegungsverzögerung 0/positiv, Cursor auch
   außerhalb), `0935` 3000 (Raketen-/Pflanzzweig, Merker `4580`/`4BC2`/`2EEA`, Güte 0–3), `0AB3` 2000 (HQ am Rand). Felder voll,
-  leer und gemischt, Stufen `2E8E` 0–3, Raketen 0/≠0, Vorrat gegen `48A2`, Zeitlimit 0/1 mit Restzeit auch negativ.
+  leer und gemischt, Felder je Spieler `4BA8` 0–7 (beide Zweige von `06A1`), Stufen `2E8E` 0–3, Raketen 0/≠0, Vorrat gegen
+  `48A2`, Zeitlimit 0/1 mit Restzeit auch negativ.
 - `PlantingAiHelpersDifferentialTests.cs`: `0609:074D`/`100F` je 800 Fälle (AL und DS).
 - `PlantingGameStateDifferentialTests.cs` (Teil 3): Standardpartie mit vier Computerspielern im RefEmu, Wochen 0–3; an jedem
   Einsprung `000E` (je Woche/Spieler/Modus die ersten 4), `0935`, `0AB3` (alle) DS und Argumente aufgezeichnet und danach

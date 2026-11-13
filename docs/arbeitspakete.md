@@ -90,7 +90,8 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 - **Status:** PR #125 (Draft, Claude). Teil 1 ✅ (Befund `135D_000E_computerzug.md`, Helfer `0609_074D`/`0609_100F`,
   transitive Rufe geklärt – nur `074D`/`100F` offen, beide diese Spur; `08B7` toter Code; Vertrag für Spur 0). Teil 2 ✅
   (`Ai/Planting.cs`, `Field/PlantingAiHelpers.cs`, Differenztests `tests/Traders.Tests/Ai/`, alle Einsprünge bitgleich). Teil 3 ✅ (`PlantingGameStateDifferentialTests`, Wochen 0–3 der
-  Standardpartie, Modi 2–5). Spur fertig – Review.
+  Standardpartie, Modi 2–5). Erstreview R5 nein (R5A-1 P1, R5A-2 P2, R5A-3/-4 P3); Fixlauf 13.11.2026: Aufrufstellen
+  `0609:0961`/`0746` in Befund und Vertrag, Raketenbedingung, `4BA8` im Zufallstest, Befund präzisiert – Nachprüfung offen.
 
 ## 2 `planung` – Wochenplanung der Computerspieler `11A3`
 

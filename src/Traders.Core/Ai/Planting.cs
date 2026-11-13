@@ -9,7 +9,7 @@ namespace Traders.Core.Ai;
 /// (R5P-5); it only reads and writes DGROUP and calls the field helpers 0609:074D/100F/10A7/1072.
 ///
 /// Public entry points match the original's three call sites: <see cref="ComputerTurn"/> = 135D:000E (from 0609:047B),
-/// <see cref="CommitCandidate"/> = 135D:0935 (from 0609:096A), <see cref="ChooseWantKind"/> = 135D:0AB3 (from 0609:069F).
+/// <see cref="CommitCandidate"/> = 135D:0935 (from 0609:0961 in 07D6), <see cref="ChooseWantKind"/> = 135D:0AB3 (from 0609:0746, end of 069F).
 /// All 16-bit arithmetic goes through <see cref="Int16Math"/>; byte intermediates wrap as sbyte/byte like the original.
 /// </summary>
 public static class PlantingAi
@@ -329,7 +329,7 @@ public static class PlantingAi
         return 0;
     }
 
-    // ---- 135D:0935 – append a candidate (from 0609:096A, action 0Ah mode 4) ---------------------------------------
+    // ---- 135D:0935 – append a candidate (from 0609:0961 in 07D6, mode 3 after buying a field) -----------------------
 
     /// <summary>135D:0935 – decides the crop for the picked field and appends it to the player's candidate list.</summary>
     // [ORIGINAL] 135D:0935
@@ -366,7 +366,7 @@ public static class PlantingAi
         d.Set(Int16Math.U(CandCount + 2 * p), Int16Math.S(si + 1));
     }
 
-    // ---- 135D:0AB3 – choose the wanted crop kind (from 0609:069F, action 0Ah mode 2) ------------------------------
+    // ---- 135D:0AB3 – choose the wanted crop kind (from 0609:0746, end of HQ build 069F) -----------------------------
 
     /// <summary>135D:0AB3 – recomputes the wanted kind DS:40F6[p] from the 3x3 field around the HQ (best quality sum).</summary>
     // [ORIGINAL] 135D:0AB3

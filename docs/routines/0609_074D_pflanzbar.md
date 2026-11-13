@@ -4,7 +4,7 @@
 - **Aufgabe:** prüft, ob am Feld der **globalen** Schleifenkoordinaten `DS:2EB0` (x) / `DS:2F00` (y) ein HQ gebaut werden darf
   (gültige HQ-Platzierung): nur auf Sondergelände (Güte = 3), nur solange frei, und nicht unmittelbar links/rechts neben einem
   HQ. Kein Zufall, keine Grafik, keine Eingabe, kein Zustand geschrieben (reine Prüfung).
-- **Aufgerufen von / Phase:** `135D:00AC` (Feldwahl Modus 2) und `0609:06BC` (menschlicher HQ-Bau). Diese Spur portiert
+- **Aufgerufen von / Phase:** `135D:00AC` (Feldwahl Modus 2) und `0609:06BC` (HQ-Bau `069F`, für alle Spieler, Computer eingeschlossen). Diese Spur portiert
   die Routine (R5P-2), weil `135D` sie braucht; `0609:06BC` ruft sie.
 - **Parameter / Rückgabe:** keine Parameter (liest `DS:2EB0`/`DS:2F00`); `AL` = 1 (bepflanzbar) oder 0, `AH` unbestimmt.
   Feldindex `x·6 + y` (16-Bit-`imul`, keine Bereichsprüfung).
