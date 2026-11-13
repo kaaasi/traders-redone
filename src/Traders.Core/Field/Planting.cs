@@ -25,11 +25,24 @@ public interface IPlantingHost : IFieldOutput
     /// <summary>0E9E:037A – reads the controls and writes the actions DS:3308 (ControlReader.ReadActions).</summary>
     void ReadControls(Dgroup d);
 
-    /// <summary>21FD:0245 – pause key check (waits while paused; no game state).</summary>
-    void PauseCheck(Dgroup d);
+    /// <summary>
+    /// 21FD:0245 – pause key check; the frames it waits (<see cref="Planting.Pause"/> is the original's, a test host may
+    /// record the call instead).
+    /// </summary>
+    IEnumerable<FieldWait> PauseCheck(Dgroup d);
 
-    /// <summary>21FD:0004(mode) – wait loop of lane bilanz (frames, random draws).</summary>
-    void WaitLoop(Dgroup d, OriginalRandom random, short mode);
+    /// <summary>21FD:0004(mode) – wait loop of lane bilanz, frame by frame (retraces, random draws).</summary>
+    IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode);
+}
+
+/// <summary>What the planting phase waits for before it continues: a retrace (one frame) or a poll of the key table.</summary>
+public enum FieldWait
+{
+    /// <summary>A retrace wait 0D73:00D3 (in a page flip, a fade or 21FD:0185): the phase continues in the next frame.</summary>
+    Retrace,
+
+    /// <summary>A busy key loop (pause 21FD:0245) reads the key table again; the key changes in a later frame.</summary>
+    Poll,
 }
 
 /// <summary>
@@ -93,26 +106,131 @@ public static class Planting
 
     /// <summary>
     /// 0609:00D6 up to the field loop: picture, objects, palette, ranks, start positions, the board with its border draws,
-    /// status and panels, cursor objects, the wait loop when DS:1582 = 0, an empty list.
+    /// status and panels, cursor objects, the wait loop when DS:1582 = 0, an empty list. The frames are drained (see
+    /// <see cref="SetupFrames"/>).
+    /// </summary>
+    public static void Setup(Dgroup d, OriginalRandom random, IPlantingHost host) => Drain(SetupFrames(d, random, host));
+
+    /// <summary>
+    /// 0609:00D6 up to the field loop, frame by frame: the fade-out 21FD:037D, the fade-in 21FD:0329, the flip of
+    /// 21FD:060D and the wait loop yield their retraces (<see cref="Fade"/>, <see cref="Flip"/>).
     /// </summary>
     // [ORIGINAL] 0609:00D6
-    public static void Setup(Dgroup d, OriginalRandom random, IPlantingHost host)
+    public static IEnumerable<FieldWait> SetupFrames(Dgroup d, OriginalRandom random, IPlantingHost host)
     {
         Emit(host, FieldEventKind.LoadImage, d.S16(PictureNumber));
         CursorObjects(d, host);
         Emit(host, FieldEventKind.FadeOut, 0x666);
+        foreach (var w in Fade(d, FadeOutRetraces)) yield return w;
         Emit(host, FieldEventKind.BasePalette, 0xA8);
         WeatherColours(d, host);
         Ranking.Apply(d);
         ForPlayers(d, p => d.Set(At(SoldX + p), (sbyte)-1));
         StartPositions(d);
-        Board(d, random, host);
+        foreach (var w in BoardFrames(d, random, host)) yield return w;
         Emit(host, FieldEventKind.FadeIn);
-        Emit(host, FieldEventKind.DrawStatus);
-        Panels(d, host);
+        foreach (var w in Fade(d, FadeInRetraces)) yield return w;
+        foreach (var w in StatusFrames(d, host)) yield return w;
+        foreach (var w in PanelsFrames(d, host)) yield return w;
         PlaceCursors(d, host);
-        if (d.U8(NoTime) == 0) host.WaitLoop(d, random, 1);
+        if (d.U8(NoTime) == 0)
+            foreach (var w in host.WaitLoop(d, random, 1)) yield return w;
         Emit(host, FieldEventKind.ClearList);
+    }
+
+    /// <summary>
+    /// The whole planting phase 0609:0004 frame by frame: preparation, set-up 0609:00D6, the passes of the field loop
+    /// 0609:03E0 while players are on the field, the last frame 21FD:0665 and the settlement 0609:0FA9. Every yielded wait is
+    /// one frame of the phase machine.
+    /// </summary>
+    // [ORIGINAL] 0609:0004
+    public static IEnumerable<FieldWait> Run(Dgroup d, OriginalRandom random, IPlantingHost host)
+    {
+        Prepare(d, host);
+        foreach (var w in SetupFrames(d, random, host)) yield return w;
+        while (Running(d))
+            foreach (var w in PassFrames(d, random, host)) yield return w;
+        Emit(host, FieldEventKind.LastFrame);
+        foreach (var w in Flip(d)) yield return w;
+        Settle(d);
+    }
+
+    // Retrace waits per stage of the fades 21FD:037D (0185(4)) and 21FD:0329 (0185(3)), without the one in 2295:00C5.
+    private const int FadeOutRetraces = 4, FadeInRetraces = 3;
+
+    /// <summary>Display mode DS:090E (1 VGA; 2 and 63h Tandy).</summary>
+    public const int CardMode = 0x090E;
+
+    /// <summary>Key table entries read by the frame routines: keypad plus 4Eh, keypad minus 4Ah, P 19h.</summary>
+    private const int KeypadPlus = DgroupLayout.KeyState + 0x4E, KeypadMinus = DgroupLayout.KeyState + 0x4A,
+        PauseKey = DgroupLayout.KeyState + 0x19;
+
+    /// <summary>
+    /// The retraces of a fade 21FD:037D/0329/0353/03B4: eight stages, each with the retrace of 2295:00C5 (only in mode 1, from
+    /// 21FD:03EB) and then 21FD:0185(<paramref name="perStage"/>).
+    /// </summary>
+    // [ORIGINAL] 21FD:037D – eight stages 03EB + 0185(4); 21FD:0329 – eight stages 03EB + 0185(3)
+    // [ORIGINAL] 21FD:03EB – 2295:00C5 (one retrace) only when DS:090E = 1
+    public static IEnumerable<FieldWait> Fade(Dgroup d, int perStage)
+    {
+        int stage = (d.S16(CardMode) == 1 ? 1 : 0) + perStage;
+        for (int i = 0; i < 8 * stage; i++) yield return FieldWait.Retrace;
+    }
+
+    /// <summary>
+    /// 21FD:051F – page flip: the new page is shown with a retrace (0B67:0238 → 0196/01B5), then one more (0B67:028F) unless
+    /// keypad plus is held (DS:3D95), and 21FD:0185(4) with keypad minus held (DS:3D91); each key is read after the retrace
+    /// before it.
+    /// </summary>
+    // [ORIGINAL] 21FD:051F
+    public static IEnumerable<FieldWait> Flip(Dgroup d)
+    {
+        yield return FieldWait.Retrace;
+        if (d.U8(KeypadPlus) == 0) yield return FieldWait.Retrace;
+        if (d.U8(KeypadMinus) == 0) yield break;
+        for (int i = 0; i < 4; i++) yield return FieldWait.Retrace;
+    }
+
+    /// <summary>
+    /// 0609:0204, its frames: the status lines are drawn (event <see cref="FieldEventKind.DrawStatus"/>), then 21FD:060D flips
+    /// the pages. In the second round (DS:1582 = 1) the free-field notice is typed first (0A69:0288, one flip and
+    /// 21FD:0185(2) per character) and followed by 21FD:0185(50).
+    /// </summary>
+    // [ORIGINAL] 0609:0204 – frames only (21FD:0185(50) and 21FD:060D); the drawing is the scene's
+    public static IEnumerable<FieldWait> StatusFrames(Dgroup d, IFieldOutput output)
+    {
+        Emit(output, FieldEventKind.DrawStatus);
+        if (d.U8(NoTime) == 1)
+        {
+            // [APPROX] Second round only (0609:0080 from 1F63:0B03, lane R9): the typed notice 0A69:0288 waits per character
+            // (text from DS:37E0, not modelled here); only the pause of 50 retraces is yielded.
+            foreach (var w in Retraces(50, 0)) yield return w;
+        }
+        foreach (var w in Flip(d)) yield return w;
+    }
+
+    /// <summary>21FD:0185(n) – n retraces, n a long (low, high); none when n ≤ 0 (signed compare of the high word).</summary>
+    // [ORIGINAL] 21FD:0185
+    public static IEnumerable<FieldWait> Retraces(short low, short high)
+    {
+        if (high < 0) yield break;
+        long n = ((long)high << 16) | (ushort)low;
+        for (long i = 0; i < n; i++) yield return FieldWait.Retrace;
+    }
+
+    /// <summary>21FD:0245 – with P held (DS:3D60): wait for its release, the next press and that release (busy loops).</summary>
+    // [ORIGINAL] 21FD:0245
+    public static IEnumerable<FieldWait> Pause(Dgroup d)
+    {
+        if (d.U8(PauseKey) == 0) yield break;
+        while (d.U8(PauseKey) != 0) yield return FieldWait.Poll;
+        while (d.U8(PauseKey) == 0) yield return FieldWait.Poll;
+        while (d.U8(PauseKey) != 0) yield return FieldWait.Poll;
+    }
+
+    private static void Drain(IEnumerable<FieldWait> frames)
+    {
+        foreach (var _ in frames) { }
     }
 
     /// <summary>0609:1F2D: per player object layer +2 = 0Ah, restore records, save buffers and the nine cursor frames.</summary>
@@ -176,8 +294,12 @@ public static class Planting
     /// 0609:1BE5: background, frame, the field border 0609:13C5 with its random draws, then every field with the loop
     /// variables DS:2F00 (row, outer) and DS:2EB0 (column, inner), then the page is shown.
     /// </summary>
+    public static void Board(Dgroup d, OriginalRandom random, IFieldOutput output) => Drain(BoardFrames(d, random, output));
+
+    /// <summary>0609:1BE5 frame by frame: 0A96:0C3F flips the pages (21FD:051F) only in modes 2 and 63h.</summary>
     // [ORIGINAL] 0609:1BE5
-    public static void Board(Dgroup d, OriginalRandom random, IFieldOutput output)
+    // [ORIGINAL] 0A96:0C3F – 21FD:051F when DS:090E = 2 or 63h, then the page copy (output)
+    public static IEnumerable<FieldWait> BoardFrames(Dgroup d, OriginalRandom random, IFieldOutput output)
     {
         Emit(output, FieldEventKind.ClearList);
         Emit(output, FieldEventKind.DrawBackground);
@@ -195,6 +317,8 @@ public static class Planting
                 Emit(output, FieldEventKind.RunList);
             }
         Emit(output, FieldEventKind.ShowPage);
+        if (d.S16(CardMode) is 2 or 0x63)
+            foreach (var w in Flip(d)) yield return w;
     }
 
     /// <summary>
@@ -213,8 +337,12 @@ public static class Planting
     }
 
     /// <summary>0609:1EA3: emblem and panel of every player still playing, then shown on both pages.</summary>
+    public static void Panels(Dgroup d, IFieldOutput output) => Drain(PanelsFrames(d, output));
+
+    /// <summary>0609:1EA3 frame by frame: 21FD:060D executes the list, flips the pages (<see cref="Flip"/>) and executes it again.</summary>
     // [ORIGINAL] 0609:1EA3
-    public static void Panels(Dgroup d, IFieldOutput output)
+    // [ORIGINAL] 21FD:060D – 0A96:06A8, 21FD:051F, 0A96:06A8
+    public static IEnumerable<FieldWait> PanelsFrames(Dgroup d, IFieldOutput output)
     {
         Emit(output, FieldEventKind.ClearList);
         ForPlayers(d, p =>
@@ -224,6 +352,7 @@ public static class Planting
             Emit(output, FieldEventKind.DrawPanel);
         });
         Emit(output, FieldEventKind.ListOnBothPages);
+        foreach (var w in Flip(d)) yield return w;
     }
 
     /// <summary>
@@ -260,22 +389,27 @@ public static class Planting
         d.Set(At(Objects + Obj(p)), (byte)1);
     }
 
+    /// <summary>One pass of the field loop 0609:03E0 with its frames drained (see <see cref="PassFrames"/>).</summary>
+    public static void Pass(Dgroup d, OriginalRandom random, IPlantingHost host) => Drain(PassFrames(d, random, host));
+
     /// <summary>
-    /// One pass of the field loop 0609:03E0 (the loop runs while DS:3CE6 ≠ 0): flip, restore, list, the delay of
-    /// 5 − DS:2E8E retraces, controls, pause, then every player still playing moves (0609:1FE0) or takes a cursor step
-    /// (0609:047B) and its action (0609:064D); list and objects.
+    /// One pass of the field loop 0609:03E0 (the loop runs while DS:3CE6 ≠ 0), frame by frame: flip (<see cref="Flip"/>),
+    /// restore, list, the delay of 5 − DS:2E8E retraces, controls, pause, then every player still playing moves (0609:1FE0) or
+    /// takes a cursor step (0609:047B) and its action (0609:064D); list and objects.
     /// </summary>
     // [ORIGINAL] 0609:03E0
-    public static void Pass(Dgroup d, OriginalRandom random, IPlantingHost host)
+    public static IEnumerable<FieldWait> PassFrames(Dgroup d, OriginalRandom random, IPlantingHost host)
     {
         Emit(host, FieldEventKind.FlipPages);
+        foreach (var w in Flip(d)) yield return w;
         Emit(host, FieldEventKind.RestoreObjects);
         Emit(host, FieldEventKind.RunList);
         Emit(host, FieldEventKind.ClearList);
-        int delay = 5 - d.S16(DgroupLayout.ComputerIq);
-        Emit(host, FieldEventKind.Delay, Int16Math.S(delay), Int16Math.S(delay >> 16));
+        short low = Int16Math.S(5 - d.S16(DgroupLayout.ComputerIq)), high = (short)(low < 0 ? -1 : 0); // 16-bit sub, cwd
+        Emit(host, FieldEventKind.Delay, low, high);
+        foreach (var w in Retraces(low, high)) yield return w;
         host.ReadControls(d);
-        host.PauseCheck(d);
+        foreach (var w in host.PauseCheck(d)) yield return w;
         ForPlayers(d, p =>
         {
             if (d.U8(At(Mode + p)) == 6) return;

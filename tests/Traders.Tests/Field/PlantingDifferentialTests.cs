@@ -160,8 +160,17 @@ public class PlantingDifferentialTests
             for (int i = 0; i < 4; i++) d.Set(C.Action + i, a[i]);
         }
 
-        public void PauseCheck(Dgroup d) => Calls.Add("PauseCheck()");
-        public void WaitLoop(Dgroup d, OriginalRandom random, short mode) => Calls.Add($"WaitLoop({mode})");
+        public IEnumerable<FieldWait> PauseCheck(Dgroup d)
+        {
+            Calls.Add("PauseCheck()");
+            return [];
+        }
+
+        public IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode)
+        {
+            Calls.Add($"WaitLoop({mode})");
+            return [];
+        }
     }
 
     private static readonly sbyte[] Kinds = [-2, 0, 1, 2, 3, 4, 4, -2];
@@ -218,7 +227,8 @@ public class PlantingDifferentialTests
         }
         B(P.PlantCost, r.Next(5) == 0 ? r.Next(-128, 128) : r.Next(6, 31));
         W(L.LandPrice, r.Next(5) == 0 ? r.Next(65536) : r.Next(100, 551));
-        W(L.ComputerIq, r.Next(6) == 0 ? r.Next(65536) : r.Next(4));
+        // 8000h…8005h: 5 − IQ overflows to a negative word (cwd gives the high word −1)
+        W(L.ComputerIq, r.Next(6) == 0 ? r.Next(65536) : r.Next(12) == 0 ? 0x8000 + r.Next(6) : r.Next(4));
         B(L.Weather, r.Next(3) == 0 ? new[] { 3, 5 }[r.Next(2)] : r.Next(-2, 8));
         B(F.FreeFields, r.Next(4) == 0 ? r.Next(-128, 1) : r.Next(0, 54));
         W(P.PictureNumber, r.Next(10));

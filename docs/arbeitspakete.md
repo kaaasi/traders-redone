@@ -68,7 +68,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   Review (ein Kauf doppelt gebucht, ein Bild doppelt verarbeitet, Ziehung in `13C5` ausgelassen → rot); Szene pixelgenau;
   Mehrrundenprobe ≥ 4 Wochen (`AGENTS.md` §5); `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1, 2 und 3 (sonst `spur-wartet`, „wartet auf 1/2/3“).
-- **Status:** Teil 1 in Arbeit (Claude, PR #122): Kern `Field/Planting.cs` mit Befund `routines/0609_0004_anbau.md` und Differenztests (`0004`, `00D6`, `03E0` Durchgang für Durchgang, `064D`–`0AEF`, `1FE0`, `0FA9`, Aufbau); `DS:330C`-Besitzer festgelegt, #103 P3-2 behoben. Offen in Teil 1: Abbildung der Durchgänge auf Bilder der Phasenmaschine (Schritt-Handler mit Warteschleife und Bildzähler), Gleichschritt mit dem RefEmu im Spiel (Woche 0 und später, Mensch und Computer, Grenzfälle).
+- **Status:** Teil 1 fertig (Claude, PR #122, Fortsetzung 1): Kern `Field/Planting.cs` mit Befund `routines/0609_0004_anbau.md` und Differenztests je Routine; Bildfolge (`Planting.Run`, Wartestellen je Rücklauf belegt) und Schritt-Handler `Field/PlantingStep.cs` für Aufruf 8; Gleichschritt mit dem RefEmu im Spiel je Rücklauf (`Field/PlantingFrameDifferentialTests.cs`: Woche 0 vier Computer, Woche 0 Mensch mit HQ/Kauf/Pflanzung/Ende, Zeitablauf, ohne Geld/Vorrat, Woche 1 Mensch, Woche 1 alles belegt), Orakel für `074D`/`100F`/`135D` (Spur 1) und `21FD:0004` (Spur 3) bis zu deren Merge. `DS:330C`-Besitzer festgelegt, #103 P3-2 behoben. Offen: Teil 2 (Szene), Teil 3 (Einbindung, nach 1/2/3).
 
 ## 1 `anbau-ki` – Computerzug im Anbau `135D`
 
