@@ -17,6 +17,9 @@ namespace Traders.Tests.App;
 /// the page indices DS:082E/0830 of the host's layers are the original's. Unlike <see cref="Presentation.MenuFrameHarness"/>,
 /// which sets up the scene from the original's data segment at the menu entry, this runs the host's own set-up
 /// (<see cref="ProgramHost"/>), so the display part of the program start (pages 0DFD:0074, flip 0DFD:0132) is covered.
+/// The keys are pressed at the same retrace, but the check resolves the press time only to a window of two retraces: the
+/// menu polls the keys once per pass, i.e. once per flip of two retraces, so moving the host's press one retrace later
+/// still passes, while one earlier or two later fails (review R4W-1-R2).
 /// </summary>
 // [DIFFERENTIAL] 0DFD:0074 (page numbers DS:40DE and 0B67:0238 in the host's layers)
 // [DIFFERENTIAL] 0DFD:0132 (first page flip of the program start in the host's layers)
