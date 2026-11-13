@@ -352,3 +352,24 @@ Konstanten in `src/Traders.Core/Ai/Planting.cs`. `135D` zieht keinen Zufall.
 | `43F6` / `43F8` | W s | `AiRefX` / `AiRefY` | Zielbezug (Cursor-x/y aus `135D:000E`) | G – `135D:000E` |
 | `40F6` | W[4] s | `AiWantKind` (vorher `Unknown40F6`) | Wunschart der KI (von `0AB3` bestimmt) | G – `135D:0AB3`, L – `06A1`/`0935` |
 | `08E7` | B[?] s | `KindWare2` | Art → Ware-Index (Vorratsprüfung `02BD`) | L – `135D:02BD` |
+
+## 13. Runde 5, Spur `bilanz` (Warteschleife `21FD:0004`, Wochenbilanz `0825`)
+
+Namen der Konstanten in `src/Traders.Core/Week/WaitLoop.cs` (`WaitLoopLayout`).
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `08C6` | B[8] u | `PlayerBits` | Bitmasken 01h…80h; Eintrag p ist das Bit von Spieler p in der Maske von `21FD:0004` | G – Differenztest `21FD:0004` |
+| `3D55` | B u | `AbortKey` | Tastentabelle `3D47` + 0Eh (Rücktaste); ≠ 0 beendet `21FD:0004` sofort (Abbruchweg A) | G – Differenztest `21FD:0004` |
+| `3D60` | B u | – | Tastentabelle `3D47` + 19h (P); `21FD:0245` wartet nur, solange P gedrückt ist (Pause), kein Zeitgeber-Merker | G – Differenztest `21FD:0004` (Szenario Pause) |
+| `54B0` | B s | `IndicatorCountdown` | Abwärtszähler der Anzeige in `1F63:113E`: > 0 zählt herab (bei 0 aus), sonst `random(200)` = 0 → an und 8 | G – Differenztest `21FD:0004` (Modus 4) |
+| `3308` | B[4] s | `Action` (§10) | in `21FD:0004` für Computer überschrieben: 0Ah, wenn Zähler = 20·p, sonst FFh | G – Differenztest `21FD:0004` |
+
+Gelesen von der Szene der Wochenbilanz (`ReportLayout` in `src/Traders.Core/Week/Report.cs`, nur Lesen):
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `00C8` | W[4] | `PlayerColors` | Farbe je Spieler für Tabellenzahlen und Verlauf (`0825:0178`, `0560`); vorbelegt | G – Bildvergleich `0825:000A` |
+| `00D8` | W[4] | `EmblemBadgeOffsets` | y-Versatz des Rangabzeichens im Wappen je Spieler (`0609:1879`); vorbelegt | G – Bildvergleich `0825:000A` (Woche 1) |
+| `37F4` | far ptr | `TitleText` | Text 0Ah der Tabelle `37CC`: Überschrift der Bilanz (`0825:0072`) | G – Bildvergleich `0825:000A` |
+| `37F8…380F` | far ptr[6] | `RowTexts`, `TotalText` | Texte 0Bh…0Fh (Zeilen Bargeld bis Übriges) und 10h (Gesamt), `0825:0178` | G – Bildvergleich `0825:000A` |

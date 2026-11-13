@@ -212,37 +212,88 @@ public sealed class MainMenuDifferentialTests
         var file = File.ReadAllBytes(TestGameData.Dos("ENGLISCH.TXT"));
         foreach (ushort baseOffset in new ushort[] { 0x0000, 0x0010, 0xF800 })
         {
-            var input = h.Initial();
-            input.Set(MenuLayout.TextBuffer, baseOffset);
-            input.Set(MenuLayout.TextBuffer + 2, MenuHarness.TextSegment);
-            // fill the pointer table with garbage: entries the scan does not reach must keep it
-            for (int i = 0; i < 4 * (MenuLayout.TextPointerCount + 1); i++) input.Set(MenuLayout.TextPointers + i, (byte)(i * 7 + 3));
             var buffer = new byte[0x2000];
             new Random(baseOffset).NextBytes(buffer);
             file.CopyTo(buffer, 0);
-            var image = new byte[0x10000];
-            for (int i = 0; i < buffer.Length; i++) image[(baseOffset + i) & 0xFFFF] = buffer[i];
-            h.WriteTextBuffer(image);
-            var original = h.RunOriginal(input, 0x18B6, _ => []);
-            var originalBuffer = h.ReadTextBuffer(0x10000);
-
-            var port = new Dgroup((byte[])input.Bytes.Clone());
-            var portBuffer = (byte[])buffer.Clone();
-            MenuTexts.Build(port, portBuffer);
-            MenuHarness.AssertSameDs(original.DataSegment, port, $"base {baseOffset:X4}");
-            // offsets wrap within the segment in the original: compare the buffer through the same 16-bit addressing
-            for (int i = 0; i < MenuTexts.ScanLimit; i++)
-                Assert.True(originalBuffer[(baseOffset + i) & 0xFFFF] == portBuffer[i], $"base {baseOffset:X4}: buffer byte {i:X4}");
+            var port = CompareTextTable(h, baseOffset, buffer, $"base {baseOffset:X4}");
             // the entries are the lines of the file (TextTable from the assets): entry k = line k − 1
             var table = Traders.Assets.TextTable.Parse(file);
             for (int k = 1; k <= table.Count && k < MenuLayout.TextPointerCount; k++)
             {
-                int start = MenuTexts.RelativeOffset(port, k)!.Value;
+                int start = MenuTexts.RelativeOffset(port.State, k)!.Value;
                 var line = table.RawLines[k - 1].Select(b => b == 9 ? (byte)0x20 : b).ToArray();
-                Assert.Equal(line, portBuffer.AsSpan(start, line.Length).ToArray());
-                Assert.Equal(0, portBuffer[start + line.Length]);
+                Assert.Equal(line, port.Buffer.AsSpan(start, line.Length).ToArray());
+                Assert.Equal(0, port.Buffer[start + line.Length]);
             }
-            Assert.Null(MenuTexts.RelativeOffset(port, 0));
+            Assert.Null(MenuTexts.RelativeOffset(port.State, 0));
         }
+    }
+
+    /// <summary>
+    /// [DIFFERENTIAL] 192D:18B6 (#101 R4M-1) – buffers the text file does not cover: long lines with TAB and CR, so the scan
+    /// ends at 1194h bytes before the entry limit (the TAB at 1194h and everything after it stays), and short lines, so it
+    /// ends at entry 130h before 1194h bytes (TAB and CR after that stay).
+    /// </summary>
+    [GameDataFact]
+    public void Text_table_192D_18B6_tab_cr_and_both_limits_match_original()
+    {
+        var (h, _) = Setup();
+        var random = new Random(18);
+        byte Letter() => (byte)random.Next(0x21, 0x7F);
+
+        // long lines: an LF every 40 bytes at most, TAB and CR spread in, a TAB exactly at the byte limit
+        var longLines = new byte[0x2000];
+        for (int i = 0; i < longLines.Length; i++)
+            longLines[i] = (i % 40) switch { 39 => 0x0A, 7 or 23 => 0x09, 38 => 0x0D, _ => Letter() };
+        const int limit = 0x1194; // from 192D:18B6, not from the port
+        longLines[limit - 1] = 0x09;
+        longLines[limit] = 0x09;
+        longLines[limit + 1] = 0x0D;
+        Assert.True(longLines.AsSpan(0, limit).Count((byte)0x0A) + 1 < MenuLayout.TextPointerCount,
+            "long lines must end the scan at the byte limit");
+        var port = CompareTextTable(h, 0x0100, longLines, "long lines");
+        Assert.Equal(0x20, port.Buffer[7]);
+        Assert.Equal(0, port.Buffer[38]);
+        Assert.Equal(0x20, port.Buffer[limit - 1]);
+        Assert.Equal(0x09, port.Buffer[limit]);
+        Assert.Equal(0x0D, port.Buffer[limit + 1]);
+
+        // short lines: "a\tb\r\n" (5 bytes) reaches entry 130h after 5·12Fh < 1194h bytes
+        var shortLines = new byte[0x2000];
+        for (int i = 0; i < shortLines.Length; i++) shortLines[i] = (i % 5) switch { 1 => 0x09, 3 => 0x0D, 4 => 0x0A, _ => Letter() };
+        port = CompareTextTable(h, 0xFF00, shortLines, "short lines");
+        int end = 5 * (MenuLayout.TextPointerCount - 1);
+        Assert.True(end < limit, "short lines must end the scan at the entry limit");
+        Assert.Equal(0x20, port.Buffer[end - 4]);
+        Assert.Equal(0x09, port.Buffer[end + 1]);
+        Assert.Equal(0x0D, port.Buffer[end + 3]);
+    }
+
+    /// <summary>
+    /// Runs 192D:18B6 on <paramref name="buffer"/> at DS:4884 = <paramref name="baseOffset"/> in the original and
+    /// <see cref="MenuTexts.Build"/> in the port: data segment (pointer table, garbage beyond the scan kept) and the buffer
+    /// through the same 16-bit addressing must agree. Returns the port's state and buffer.
+    /// </summary>
+    private static (Dgroup State, byte[] Buffer) CompareTextTable(MenuHarness h, ushort baseOffset, byte[] buffer, string label)
+    {
+        var input = h.Initial();
+        input.Set(MenuLayout.TextBuffer, baseOffset);
+        input.Set(MenuLayout.TextBuffer + 2, MenuHarness.TextSegment);
+        // fill the pointer table with garbage: entries the scan does not reach must keep it
+        for (int i = 0; i < 4 * (MenuLayout.TextPointerCount + 1); i++) input.Set(MenuLayout.TextPointers + i, (byte)(i * 7 + 3));
+        var image = new byte[0x10000];
+        for (int i = 0; i < buffer.Length; i++) image[(baseOffset + i) & 0xFFFF] = buffer[i];
+        h.WriteTextBuffer(image);
+        var original = h.RunOriginal(input, 0x18B6, _ => []);
+        var originalBuffer = h.ReadTextBuffer(0x10000);
+
+        var port = new Dgroup((byte[])input.Bytes.Clone());
+        var portBuffer = (byte[])buffer.Clone();
+        MenuTexts.Build(port, portBuffer);
+        MenuHarness.AssertSameDs(original.DataSegment, port, label);
+        // offsets wrap within the segment in the original: compare the buffer through the same 16-bit addressing
+        for (int i = 0; i < buffer.Length; i++)
+            Assert.True(originalBuffer[(baseOffset + i) & 0xFFFF] == portBuffer[i], $"{label}: buffer byte {i:X4}");
+        return (port, portBuffer);
     }
 }

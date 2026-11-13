@@ -13,7 +13,6 @@ namespace Traders.Presentation.Field;
 /// </summary>
 public sealed class FieldScene
 {
-    private const int CurrentPlayer = 0x37AA; // byte, signed
     private const int RankTable = 0x3D42;         // byte[4], unsigned
     private const int RankOffsetY = 0x00D8;   // word[4], y offset of the rank badge in the emblem
     private const int Marker = 0x43FA;        // byte[4], 1 = marker next to the rank icon
@@ -34,7 +33,7 @@ public sealed class FieldScene
     private static ushort W(int v) => unchecked((ushort)v);
 
     /// <summary>Player at turn, sign-extended as the original's cbw.</summary>
-    private int Player => _state.S8(CurrentPlayer);
+    private int Player => _state.S8(DgroupLayout.ActivePlayer);
 
     /// <summary>[ORIGINAL] 0609:1ED9: the whole screen 140h × C8h tiled with the atlas tile (120h, 58h), 20h × 16h.</summary>
     public void Background() => _gfx.AddTiles(0x120, 0x58, 0x20, 0x16, 0, 0, 0x140, 0xC8);
