@@ -48,7 +48,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   `0A96`, kein Zustand), pixelgenau gegen den RefEmu je Bild über eine Anbaurunde mit Mensch; Szenentests vergleichen auch die
   Befehlsliste (#103 P3-3). (3) **Einbindung** (nach Merge von 1, 2, 3): Handler für Aufrufe 3 (Spur 3), 6 und 21 (Spur 2) und
   8 in `WeekRuleSteps`/`PhaseMachine`; **Mehrrundenprobe** über ≥ 4 Wochen mit einem Menschen und drei Computerspielern, in der
-  die Aufrufe 3, 6, 8, 21 im Port laufen (Vergleich Datensegment und `DS:10D2` je Aufrufstelle wie R3/R4); Host nach F1;
+  die Aufrufe 3, 6, 8, 21 im Port laufen (Vergleich Datensegment und `DS:10D2` je Aufrufstelle wie R3/R4); Host nach F1 = A (Bilanz und Anbau spielbar, Halt mit Hinweis an Aufruf 9);
   P3 #113.
 - **Dateigrenzen:** `src/Traders.Core/Field/**`, `tests/Traders.Tests/Field/**`, `src/Traders.Presentation/Field/**`,
   `tests/Traders.Tests/Presentation/Field*`, `docs/routines/0609_*` außer `0609_1178*`, `src/Traders.Core/Phases/**` und
@@ -133,9 +133,9 @@ Teil 3). Konflikte nur dann über `integration/runde-5`.
 ## Offene Fragen an den Nutzer
 
 - **G1 Go** für vier Spuren wie oben, alle Opus, zeitversetzte Starts durch die Leitstelle; vorher Plan-Review als geplanter Lauf.
-- **F1 Host in R5:** **A (Vorschlag)** `Traders.App` zeigt nach dem Menü Wochenbilanz und Anbau spielbar (Tastatur) und hält am
-  ersten noch ausstehenden Schritt (Aufruf 9, Wochenereignisse) mit einem Hinweis an – früher Handtest unter Windows möglich.
-  **B** Host bleibt beim Stand R4, die Schritte laufen nur in Tests, bis eine ganze Woche portiert ist.
+- **F1 Host in R5 – A (Nutzer 13.11.2026):** `Traders.App` zeigt nach dem Menü Wochenbilanz und Anbau spielbar (Tastatur) und
+  hält am ersten noch ausstehenden Schritt (Aufruf 9, Wochenereignisse) mit einem Hinweis an (Spur 0 Teil 3); Windows-Handtest
+  durch den Nutzer.
 - Übrige P3: #99 R1/R3 → 2, R2 mit diesem PR; #101 → 3; #103 P3-1 → 3, P3-2/3/4 → 0, P3-5 mit diesem PR; #105 → 3; #109 → 2;
   #113 → 0; #116 schon auf `main` behoben (`../routines/`), mit diesem PR geschlossen; #75 offen (nächster Lauf an
   `src/Traders.Vga/`), #76 P3-2 mit dem Ton (R10), #49 offen (nächster Lauf an `experiments/bestand/`).
