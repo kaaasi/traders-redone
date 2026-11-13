@@ -104,7 +104,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 - **Abnahme:** alle drei Läufe grün; beide Durchgänge bitgleich mit dem RefEmu; Gegenprobe im Review (Durchgang vertauscht, eine
   Ziehung vertauscht → rot); `abdeckung.py --check` grün, Sammelmarker belegt (z. B. `192D`-Einsprünge nicht mehr 🔍).
 - **Abhängigkeiten:** keine.
-- **Status:** –
+- **Status:** in Arbeit (Claude, Draft-PR `paket/planung`, Base `b80c07d`), Teil 1 begonnen.
 
 ## 3 `bilanz` – Wochenbilanz `0825:000A` und Leseregel der Szenen
 
