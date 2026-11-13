@@ -317,7 +317,26 @@ Ergänzt §4.1; Namen der Konstanten in `src/Traders.Core/Input/ControlReader.cs
 | `00D8` | W[4] s | `RankOffsetY` | y-Versatz des Rangabzeichens im Wappen | G – Differenztest `0609:1879` |
 | `43FA` | B[4] u | `Marker` | 1 = Merker neben dem Rangsymbol (`0609:1A61`) | G (Prüfung), W (Bedeutung) – Differenztest `0609:1A61` |
 
-## 11. Runde 5, Spur `anbau` (Anbauphase `0609:0004`)
+## 11. Runde 5, Spur `planung` (Wochenplanung `11A3`)
+
+Namen in `src/Traders.Core/Ai/WeekPlanningLayout.cs` (alle vorläufig); Formeln und Leser im Befund
+[11A3_0000_wochenplanung.md](../routines/11A3_0000_wochenplanung.md); Beleg jeweils G – `11A3:*`, Differenztest
+`WeekPlanningDifferentialTests`. Präzisiert §2 Nr. 10 (`40F6`) und Nr. 45 (`4580`).
+
+| DS | Breite | Name (C#) | Bedeutung |
+|---|---|---|---|
+| `4580` | B s | `TargetPlayer` | Zielspieler der Computer, −1 = keiner (`0180`, höchstens ein `random(5)`) |
+| `40F6` | W[4] s | `MainKind` | Hauptart 0–2 je Spieler; Mensch −1 ohne Art mit ≥ 70 % (`0599`, `061A`, `067D`) |
+| `2C74` / `2C7C` | W[4] s / W s | `Ware3Rank` / `Ware3Lead` | Rang nach Vorrat Ware 3 (Gleichstand senkt beide) / Vorsprung des Ersten (`007D`) |
+| `2C4C` | W[4][3] s, Stride 8 | `QualityShare` | Güteanteil je Art in % (`043F`) |
+| `2C44…2C4A` / `2C6C…2C72` | W[4] s | `PlanFields` / `PlanFieldsLimited` | Sollfelder je Art, [3] = Raketen; zweite Fassung nach Vorratsgrenzen (`078A`) |
+| `303E…3044` / `3046` | W[4] s | `FieldSurplus` / `RocketShortfall` | eigene Felder − Soll / max(0, −`3044`) je Spieler (`078A`, `104B`) |
+| `2F31`, `4654`, `472C` / `48EC` | B[4][54] / W[4] | `PlantList`, `PlantListX`, `PlantListY` / `PlantListLength` | Pflanzliste Plan, x, y / Länge (`0F2E`) |
+| `4560` / `452A` | W[4][4] s, Stride 8 | `WareNeed` / `PriceLimit` | Warenbedarf / Preisgrenze je Ware, `452A[p][3]` = `4560[p][3]` (`104B`) |
+| `48F4` | B[9][26] | `ProductionResult` | in Durchgang 0 Anbauplan (100 = frei, sonst Art bzw. 3 = Rakete), `0B3B` |
+| `08E7` | B[3] s | `SecondWare` | zweite Ware je Art (init. 1, 2, 0), `0AA5`, `104B` |
+
+## 12. Runde 5, Spur `anbau` (Anbauphase `0609:0004`)
 
 Befund [0609_0004_anbau.md](../routines/0609_0004_anbau.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.
 
