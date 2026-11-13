@@ -56,21 +56,9 @@ public class WeekPlanningDifferentialTests
     /// (<see cref="WeekPlanningHarness.Branches"/>) is passed, random(5) is drawn in some runs and not in others.
     /// Counter-checks (local): pass ignored (always 0) → red; random(5) compared with == 1 instead of == 0 → red.
     /// </summary>
-    // Every subroutine is checked through 11A3:0000 (one tag per address until tools/abdeckung.py reads collective tags):
-    // [DIFFERENTIAL] 11A3:007D
-    // [DIFFERENTIAL] 11A3:0180
-    // [DIFFERENTIAL] 11A3:043F
-    // [DIFFERENTIAL] 11A3:0599
-    // [DIFFERENTIAL] 11A3:061A
-    // [DIFFERENTIAL] 11A3:067D
-    // [DIFFERENTIAL] 11A3:078A
-    // [DIFFERENTIAL] 11A3:0AA5
-    // [DIFFERENTIAL] 11A3:0B3B
-    // [DIFFERENTIAL] 11A3:0D35
-    // [DIFFERENTIAL] 11A3:0E01
-    // [DIFFERENTIAL] 11A3:0EB8
-    // [DIFFERENTIAL] 11A3:0F2E
-    // [DIFFERENTIAL] 11A3:104B
+    // Every subroutine is checked through 11A3:0000 (collective tag, every address counts):
+    // [DIFFERENTIAL] 11A3:007D / 0180 / 043F / 0599 / 061A / 067D / 078A
+    // [DIFFERENTIAL] 11A3:0AA5 / 0B3B / 0D35 / 0E01 / 0EB8 / 0F2E / 104B
     [GameDataFact]
     public void Single_calls_match_the_original_on_varied_game_states()
     {
