@@ -84,14 +84,14 @@ public sealed class WaitLoopDifferentialTests
         var input = Input(h, s);
         WaitLoopHarness.Outcome o;
         lock (Lock) o = h.RunOriginal(input, s.Mode, s.Keys.At);
-        var port = WaitLoopHarness.RunPort(input, s.Mode, s.Keys.At);
+        var (port, loop) = WaitLoopHarness.RunPort(input, s.Mode, s.Keys.At);
 
         WaitLoopHarness.AssertSameDs(o.DataSegment, port.State, name);
         Assert.Equal(o.Frames, port.Frames);
-        Assert.Equal(o.Random, port.Loop.RandomCalls);
+        Assert.Equal(o.Random, loop.RandomCalls);
         Assert.Equal(o.Calls, port.Calls);
         bool aborted = s.Keys.Holds.Any(k => k.Key == Abort);
-        Assert.Equal(aborted, port.Loop.Aborted);
+        Assert.Equal(aborted, loop.Aborted);
     }
 
     /// <summary>The scenarios reach the paths they are named for (checked on the original's run only).</summary>

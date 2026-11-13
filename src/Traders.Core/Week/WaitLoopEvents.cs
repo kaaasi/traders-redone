@@ -32,10 +32,43 @@ public enum WeekEventKind
     /// page flip of 21FD:060D follows as <see cref="ListExecute"/>, <see cref="Flip"/>, <see cref="ListExecute"/>.
     /// </summary>
     ReportMark,
+
+    /// <summary>186C:0002(A): picture A is loaded (week report: DS:08CE).</summary>
+    LoadPicture,
+
+    /// <summary>
+    /// A drawing routine of the week report runs: A = its offset in segment 0825 (0072, 0178, 0364, 047D, 0560);
+    /// <see cref="WeekEvent.Values"/> carries what the core computed for it (0178: per player land, wares, gems, other, total).
+    /// </summary>
+    Draw,
+
+    /// <summary>21FD:0590: the drawing page becomes the shown page (two retraces follow as waits).</summary>
+    DrawOnShownPage,
+
+    /// <summary>
+    /// 21FD:03EB(A, B): palette blend toward colour A at stage B; in the opening wipe 0825:09C9 it follows the column pair
+    /// si = B·16 + B0h (one retrace follows as wait).
+    /// </summary>
+    PaletteStep,
+
+    /// <summary>21FD:04DA(A): blend colour DS:10D8 = A.</summary>
+    BlendColor,
+
+    /// <summary>21AF:04CD: the restore records of all objects are invalidated.</summary>
+    InvalidateObjects,
+
+    /// <summary>0A96:0C3F(DS:082E): the drawing page is copied to the other page.</summary>
+    CopyPage,
+
+    /// <summary>21FD:026C(DS:A): base palette from DS:A.</summary>
+    LoadPalette,
+
+    /// <summary>21FD:0329: slow fade-in (32 retraces follow as waits).</summary>
+    FadeIn,
 }
 
 /// <summary>An event of the week screens with the frame in which it happened.</summary>
-public sealed record WeekEvent(WeekEventKind Kind, long Frame, int A = 0, int B = 0)
+public sealed record WeekEvent(WeekEventKind Kind, long Frame, int A = 0, int B = 0, IReadOnlyList<int>? Values = null)
 {
     public override string ToString() => $"frame {Frame} {Kind} {A:X} {B:X}";
 }

@@ -133,7 +133,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   Bildzähler), Bild pixelgenau; Gegenprobe im Review (Rangfolge vertauscht, Ziehung in `21FD:0004` ausgelassen → rot; je neue
   Architekturregel eine Verletzung → rot).
 - **Abhängigkeiten:** keine; Teil 1 zuerst.
-- **Status:** –
+- **Status:** Teile 1, 2a, 2b fertig (PR #124, Draft); offen Teil 3 (Szene `Week/`, #101 R4M-1). `WaitLoop` (`21FD:0004`) und `ReportStep` (Aufruf 3) stehen für Spur 0 bereit.
 
 ## Zuständigkeit gemeinsamer Dateien in R5
 
