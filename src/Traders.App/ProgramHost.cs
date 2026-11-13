@@ -19,8 +19,8 @@ namespace Traders.App;
 /// the core's state and never write it.
 /// </summary>
 // [APPROX] Host parts of the program start: the heap addresses (text buffer, page buffer) and the segment value of DS are
-// fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, fonts from
-// FONTS.PP as the original's driver table, masks). The loading picture and the code request are not shown (F1 = B); the
+// fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
+// and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code request are not shown (F1 = B); the
 // screen steps of the week (R5 ff.) are pending, so the week machine stops at the weekly balance.
 public sealed class ProgramHost
 {
@@ -64,6 +64,7 @@ public sealed class ProgramHost
         ds[GraphicsLayers.CardMode + 1] = 0;
         Layers = new GraphicsLayers(Driver, ds, new VgaDac(), Retraces) { DataSegment = DataSegmentValue };
         Layers.InitializePages(PageBuffer);
+        SetUpGamePages(Layers);
         var texts = new TextMemory(Start);
         Layers.OtherMemory = texts;
         Scene = new MenuScene(Layers, Core, texts, new Pictures(dosDirectory));
@@ -104,6 +105,31 @@ public sealed class ProgramHost
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
         }
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0DFD:0074 (page part) and 0DFD:0132 (flip part) on the layers' data segment: page numbers DS:40DE…40E5 =
+    /// 1, 2 (longs), 0B67:0238(40DE[082E], 40DE[0830]), then the first flip 21FD:051F. Afterwards the game draws on the
+    /// hidden page and every flip of the menus shows the other page (DS:082E = 1, 0830 = 0, 4516 = 2 at the menu entry).
+    /// Without the page numbers 21FD:051F neither shows nor selects a page (finding R4W-1): the host kept showing page 0
+    /// while the menus drew their changes on page 1.
+    /// </summary>
+    // [APPROX] The heap buffers of 0074 and the pointer copies of 0132 (DS:44DE, 45BC) are the host's; the retrace waits of
+    // the first flip are counted but take no display frames (the loading picture is not shown, F1 = B).
+    internal static void SetUpGamePages(GraphicsLayers layers)
+    {
+        var ds = layers.Ds;
+        void Set32(int at, uint v)
+        {
+            for (int i = 0; i < 4; i++) ds[at + i] = (byte)(v >> (8 * i));
+        }
+        uint Page(int index) => BitConverter.ToUInt32(ds, GraphicsLayers.PageNumbers + 4 * index);
+        int Index(int at) => (ushort)(ds[at] | ds[at + 1] << 8);
+
+        Set32(GraphicsLayers.PageNumbers, 1);
+        Set32(GraphicsLayers.PageNumbers + 4, 2);
+        layers.SelectPages(Page(Index(GraphicsLayers.DrawPageIndex)), Page(Index(GraphicsLayers.ShownPageIndex)));
+        layers.FlipPages(); // [ORIGINAL] 0DFD:0132 – first flip 21FD:051F
     }
 
     private byte[] Load(string name) => File.ReadAllBytes(Path.Combine(_dir, name));
