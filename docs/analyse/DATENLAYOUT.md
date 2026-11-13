@@ -335,3 +335,20 @@ Namen in `src/Traders.Core/Ai/WeekPlanningLayout.cs` (alle vorläufig); Formeln 
 | `4560` / `452A` | W[4][4] s, Stride 8 | `WareNeed` / `PriceLimit` | Warenbedarf / Preisgrenze je Ware, `452A[p][3]` = `4560[p][3]` (`104B`) |
 | `48F4` | B[9][26] | `ProductionResult` | in Durchgang 0 Anbauplan (100 = frei, sonst Art bzw. 3 = Rakete), `0B3B` |
 | `08E7` | B[3] s | `SecondWare` | zweite Ware je Art (init. 1, 2, 0), `0AA5`, `104B` |
+
+## 12. Runde 5, Spur `anbau-ki` (Computerzug `135D`)
+
+Belege: Differenztests `tests/Traders.Tests/Ai/Planting*`, Befund [../routines/135D_000E_computerzug.md](../routines/135D_000E_computerzug.md).
+Konstanten in `src/Traders.Core/Ai/Planting.cs`. `135D` zieht keinen Zufall.
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `40CE` / `40D6` | W[4] s | `AiTargetX` / `AiTargetY` | von der KI gewähltes Zielfeld | G – `135D:00AC`/`02BD`/`0480` |
+| `410A` / `4112` | W[4] s | `AiPickX` / `AiPickY` | bestes freies Feld aus `135D:05AF` | G – `135D:05AF` |
+| `4654` / `472C` / `2F31` | B[4·54] | `AiCandX` / `AiCandY` / `AiCandKind` | Kandidatenliste je Spieler (Stride 54) | G – `135D:0935`, L – `02BD`/`0A59` |
+| `48EC` | W[4] s | `AiCandCount` | Zahl der Kandidaten je Spieler | G – `135D:0935` |
+| `3C90` | W[4] s | `AiCandIndex` | aktuell abgearbeiteter Kandidatenindex | G – `135D:02BD`/`0A59` |
+| `4BBE` | B[4] u | `AiNoneFound` | 1 = `05AF` fand kein Feld | G – `135D:05AF` |
+| `43F6` / `43F8` | W s | `AiRefX` / `AiRefY` | Zielbezug (Cursor-x/y aus `135D:000E`) | G – `135D:000E` |
+| `40F6` | W[4] s | `AiWantKind` (vorher `Unknown40F6`) | Wunschart der KI (von `0AB3` bestimmt) | G – `135D:0AB3`, L – `06A1`/`0935` |
+| `08E7` | B[?] s | `KindWare2` | Art → Ware-Index (Vorratsprüfung `02BD`) | L – `135D:02BD` |
