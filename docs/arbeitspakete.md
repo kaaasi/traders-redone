@@ -104,7 +104,7 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 - **Abnahme:** alle drei Läufe grün; beide Durchgänge bitgleich mit dem RefEmu; Gegenprobe im Review (Durchgang vertauscht, eine
   Ziehung vertauscht → rot); `abdeckung.py --check` grün, Sammelmarker belegt (z. B. `192D`-Einsprünge nicht mehr 🔍).
 - **Abhängigkeiten:** keine.
-- **Status:** Teile 1–3 fertig (Claude, PR #123, Base `b80c07d`); Review offen. Restlücke #109: Sammelmarker in anderer Form (`// 1177`, „then 0609:1A61“) zählen weiter nicht – Marker in Listenform bringen (Dateien anderer Spuren).
+- **Status:** Teile 1–3 fertig (Claude, PR #123, Base `b80c07d`); Review R5: R5PL-1 (P2) und R5PL-2 (P3) im Fixlauf behoben, Delta-Prüfung Leitstelle offen. Erbe nur noch für Far-Einsprünge des Kopfsegments, Differenztest nie geerbt: 11 Einträge `192D` jetzt 🟢 bis zu eigenem `[DIFFERENTIAL]` (Liste in `MainMenuDifferentialTests.cs`, Spur/Leitstelle `menue`). Restlücke #109: Sammelmarker in anderer Form (`// 1177`, „then 0609:1A61“) zählen weiter nicht – Marker in Listenform bringen (Dateien anderer Spuren).
 
 ## 3 `bilanz` – Wochenbilanz `0825:000A` und Leseregel der Szenen
 
