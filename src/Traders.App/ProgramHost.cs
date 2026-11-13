@@ -5,7 +5,9 @@ using Traders.Core.Menus;
 using Traders.Core.Phases;
 using Traders.Core.Startup;
 using Traders.Core.State;
+using Traders.Presentation.Field;
 using Traders.Presentation.Menus;
+using Traders.Presentation.Week;
 using Traders.Vga;
 using Traders.Vga.Layers;
 
@@ -13,15 +15,17 @@ namespace Traders.App;
 
 /// <summary>
 /// The program as the host runs it, without a window: the core's program machine (main 1777:000C with all its call steps and
-/// the week loop with the ported rule steps) and the menu scene on the graphics layers. Per display frame the host calls
-/// <see cref="Frame"/> with the held keys; the core processes the frame exactly once (<see cref="ProgramMachine.Advance"/>),
-/// then the scene plays the menu events of that frame. The scene and the layers keep their own data segment image; they read
-/// the core's state and never write it.
+/// the week loop with the ported steps of <see cref="WeekSteps"/>: rule steps, week report, guard of call 4, week planning,
+/// planting phase) and the scenes on the graphics layers – main menu, week report, planting field (decision F1 = A). Per
+/// display frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
+/// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The machine halts at the first call
+/// still pending (call 9, week events, in weeks 0–2; call 4 later with catastrophes on); <see cref="Halt"/> then names it.
+/// The scenes and the layers keep their own data segment image; they read the core's state and never write it.
 /// </summary>
 // [APPROX] Host parts of the program start: the heap addresses (text buffer, page buffer) and the segment value of DS are
 // fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
-// and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code request are not shown (F1 = B); the
-// screen steps of the week (R5 ff.) are pending, so the week machine stops at the weekly balance.
+// and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
+// request are not shown; the week runs up to its first pending call step and halts there with a notice (F1 = A, R5).
 public sealed class ProgramHost
 {
     /// <summary>
@@ -45,8 +49,9 @@ public sealed class ProgramHost
         Core = ProgramSteps.InitialState(exe);
         Start = new ProgramStart(Lengths, new MenuTextPlaque(), new TextFile(Load(ResourceTable.EnglishText), TextBufferOffset, TextBufferSegment));
         Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
+        Week = new WeekSteps(e => Field!.Apply(e), Lengths);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
-            WeekRuleSteps.Handlers());
+            Week.Handlers);
 
         Driver = new ModeXDriver();
         var fonts = PowerPacker.Decrunch(Load(ResourceTable.Fonts));
@@ -67,8 +72,28 @@ public sealed class ProgramHost
         SetUpGamePages(Layers);
         var texts = new TextMemory(Start);
         Layers.OtherMemory = texts;
-        Scene = new MenuScene(Layers, Core, texts, new Pictures(dosDirectory));
+        var pictures = new Pictures(dosDirectory);
+        Scene = new MenuScene(Layers, Core, texts, pictures);
+        Report = new ReportScene(Layers, Core, texts, pictures);
+        Field = new FieldScene(Layers, Core) { Pictures = pictures };
     }
+
+    /// <summary>The ported call steps of the week loop.</summary>
+    public WeekSteps Week { get; }
+
+    /// <summary>Scene of the week report (call 3).</summary>
+    public ReportScene Report { get; }
+
+    /// <summary>Scene of the planting phase (call 8); the core's field events reach it while the frame is processed.</summary>
+    public FieldScene Field { get; }
+
+    /// <summary>
+    /// Notice when the week loop halts at a call step that is not ported yet (null while it runs): the step, its routine and
+    /// the week.
+    /// </summary>
+    public string? Halt => Machine.WeekMachine is { Status: PhaseStatus.Blocked } w
+        ? $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
+        : null;
 
     public Dgroup Core { get; }
 
@@ -99,11 +124,15 @@ public sealed class ProgramHost
     {
         while (Machine.LastFrame < frame && Machine.Status != ProgramStatus.Ended)
         {
+            Field.NextFrame(held); // the planting scene steps first; the core's field events reach it during Advance
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
             Machine.DrainEvents();
             Machine.DrainWeekEvents();
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
+            Report.NextFrame();
+            if (Week.Report.Report is { } report)
+                foreach (var e in report.DrainEvents()) Report.Apply(e);
         }
     }
 

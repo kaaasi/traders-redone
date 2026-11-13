@@ -21,9 +21,10 @@ public class PlantingFrameDifferentialTests
     private Result Check(Script script)
     {
         var r = Run(script);
-        _out.WriteLine($"retraces {r.Retraces} (wait loop {r.OracleRetraces}), passes {r.Passes}, random {r.RandomCalls}, " +
+        _out.WriteLine($"retraces {r.Retraces} (wait loop {r.WaitLoopRetraces}), passes {r.Passes}, random {r.RandomCalls}, " +
             $"pictures compared {r.PicturesCompared} ({r.DistinctPictures} distinct)");
-        Assert.Equal(r.Retraces - r.OracleRetraces + 1, r.PicturesCompared);
+        Assert.Equal(r.Retraces + 1, r.PicturesCompared);
+        Assert.True(r.WaitLoopRetraces > 0, "the wait loop 21FD:0004 ran no frame");
         _out.WriteLine(string.Join("; ", r.Events.GroupBy(e => e[..e.IndexOf('(')]).Select(g => $"{g.Key} {g.Count()}")));
         _out.WriteLine(string.Join("; ", r.Events.Where(e => !e.StartsWith("ComputerTurn") && !e.StartsWith("Sound(2,")).Skip(54).Take(200)));
         return r;

@@ -32,16 +32,13 @@ namespace Traders.Tests.Field;
 /// wait in the port frame of the k-th retrace, and there the four VRAM planes, the DAC and the CRTC start equal the
 /// original's at the entry of its retrace wait; at the return once more.
 ///
-/// Not yet ported and answered from the RefEmu (gleichschritt oracle, docs/arbeitspakete.md §0): the helpers and computer hooks
-/// of lane anbau-ki (0609:074D, 0609:100F, 135D:000E, 135D:0AB3, 135D:0935) run in a second RefEmu on the port's data
-/// segment; the wait loop 21FD:0004 of lane bilanz is taken from the original run itself: the port waits as many frames as the
-/// original does inside 21FD:0004 and takes over its data segment at each of those retraces and at its return. Its picture is
-/// not compared; at its return the port's output (VRAM, DAC, driver registers, atlas, masks and the layers' data segment
-/// image) is taken over from the original as well.
+/// The port runs with the production host <see cref="PlantingHost"/> (part 3, no oracle left): the computer turn 135D:000E
+/// with 0935/0AB3 and the helpers 0609:074D/100F of lane anbau-ki, the wait loop 21FD:0004 (mode 1) of lane bilanz. The wait
+/// loop's frames are compared like all others, picture included.
 /// </summary>
 internal static class PlantingFrameHarness
 {
-    private const ushort Seg0609 = 0x0609, Seg21FD = 0x21FD, SegRetrace = 0x0D73, Seg135D = 0x135D;
+    private const ushort Seg0609 = 0x0609, Seg21FD = 0x21FD, SegRetrace = 0x0D73;
 
     /// <summary>Phase of a key event within a frame (0 = frame start; the retrace starts at the frame start).</summary>
     private const double KeyPhase = 0.4;
@@ -98,7 +95,7 @@ internal static class PlantingFrameHarness
     }
 
     /// <summary>Result of a run (diagnostics and coverage of the scenarios).</summary>
-    public sealed record Result(int Retraces, int OracleRetraces, int Passes, long RandomCalls, byte[] DataSegment, List<string> Events,
+    public sealed record Result(int Retraces, int WaitLoopRetraces, int Passes, long RandomCalls, byte[] DataSegment, List<string> Events,
         int PicturesCompared, int DistinctPictures);
 
     /// <summary>Counter-tests of the picture comparison: a mutation of the port's output.</summary>
@@ -130,15 +127,6 @@ internal static class PlantingFrameHarness
         public required VgaDac Dac { get; init; }
         public required FrameRetraces Retraces { get; init; }
         public Mutation Mutation { get; init; }
-
-        /// <summary>The output state taken over from the original (set-up, and the return of the wait loop oracle).</summary>
-        public void TakeOver(OriginalProgram o)
-        {
-            FieldSceneHarness.SyncDriver(o, Driver);
-            o.Machine.Vga.Dac.CopyTo(Dac.Registers, 0);
-            var ds = o.DataSegment();
-            Array.Copy(ds, Layers.Ds, Math.Min(ds.Length, Layers.Ds.Length));
-        }
 
         public void Apply(FieldEvent e)
         {
@@ -234,7 +222,7 @@ internal static class PlantingFrameHarness
         var core = new Dgroup(o.DataSegment()[..DgroupLayout.Size]);
         var random = new OriginalRandom(new RecordedClock([]), core.U32(DgroupLayout.RandomSeed));
         var output = SetUpOutput(o, core, mutation);
-        var host = new OracleHost(run, output);
+        var host = new PortHost(output);
         var step = new PlantingStep(host, ProgramStartDifferentialTests.Files);
         var machine = new PhaseMachine(core, random, new Dictionary<int, IWeekStepHandler> { [8] = step }, nextStep: 8);
 
@@ -247,22 +235,15 @@ internal static class PlantingFrameHarness
         while (machine.Status == PhaseStatus.Waiting)
         {
             Assert.True(frame < MaxFrames, $"planting did not end within {MaxFrames} frames: modes {core.U8(P.Mode)} {core.U8(P.Mode + 1)} {core.U8(P.Mode + 2)} {core.U8(P.Mode + 3)}, time {core.S16(FieldCursor.TimeLeft)}, cursor {core.S8(FieldCursor.CursorX)},{core.S8(FieldCursor.CursorY)}, players {core.U8(P.Players)}, keys {string.Join(",", run.Held())}; {string.Join("; ", host.Events.TakeLast(30))}");
-            if (!run.Positioned)
-                Assert.True(run.RunToRetraceOrReturn(), $"port waits frame {frame}, the original returned (retrace {retraces})");
-            run.Positioned = false;
+            Assert.True(run.RunToRetraceOrReturn(), $"port waits frame {frame}, the original returned (retrace {retraces})");
             string where = $"retrace {retraces} (port frame {frame})";
-            run.Compare(core, random.Calls + host.OracleDraws, where);
-            if (host.InWaitLoop)
-                Assert.True(output.Retraces.Frames.Count == sceneWaits, $"{where}: the scene waited during the wait loop oracle");
-            else
-            {
-                sceneWaits++;
-                Assert.True(output.Retraces.Frames.Count == sceneWaits && output.Retraces.Frames[^1] == frame,
-                    $"{where}: the core waits its retrace {sceneWaits - 1}, the scene made {output.Retraces.Frames.Count} waits (last in frame {(output.Retraces.Frames.Count > 0 ? output.Retraces.Frames[^1] : -1)})");
-                ComparePicture(o, output, where);
-                pictures++;
-                distinct.Add(PictureHash(o));
-            }
+            run.Compare(core, random.Calls, where);
+            sceneWaits++;
+            Assert.True(output.Retraces.Frames.Count == sceneWaits && output.Retraces.Frames[^1] == frame,
+                $"{where}: the core waits its retrace {sceneWaits - 1}, the scene made {output.Retraces.Frames.Count} waits (last in frame {(output.Retraces.Frames.Count > 0 ? output.Retraces.Frames[^1] : -1)})");
+            ComparePicture(o, output, where);
+            pictures++;
+            distinct.Add(PictureHash(o));
             retraces++;
             run.RunToRetraceEnd();
             run.CheckControls();
@@ -276,13 +257,13 @@ internal static class PlantingFrameHarness
         Assert.False(run.RunToRetraceOrReturn(), $"the port returned after {retraces} retraces, the original waits another");
         run.CheckControls();
         Assert.True(machine.Status == PhaseStatus.Blocked && machine.NextStep == 9, $"phase machine {machine.Status} at {machine.NextStep}");
-        run.Compare(core, random.Calls + host.OracleDraws, $"return of 0609:0004 after {retraces} retraces");
+        run.Compare(core, random.Calls, $"return of 0609:0004 after {retraces} retraces");
         Assert.False(output.Scene.Presenting, "the scene still presents after the return");
         Assert.Equal(sceneWaits, output.Retraces.Frames.Count);
         ComparePicture(o, output, $"return of 0609:0004 after {retraces} retraces");
         pictures++;
         Assert.Equal(retraces, step.Retraces);
-        return new Result(retraces, host.OracleRetraces, host.Passes, random.Calls + host.OracleDraws, core.Bytes, host.Events,
+        return new Result(retraces, host.WaitLoopFrames, host.Passes, random.Calls, core.Bytes, host.Events,
             pictures, distinct.Count);
     }
 
@@ -309,9 +290,6 @@ internal static class PlantingFrameHarness
 
         public long RandomCalls { get; private set; }
 
-        /// <summary>True when the original already stands at the entry of the next retrace wait (set by the wait loop oracle).</summary>
-        public bool Positioned { get; set; }
-
         private byte[] Keys() => _o.Machine.Mem.ReadBlock(_o.Dgroup, DgroupLayout.KeyState, KeyTable.Length);
 
         private bool At(ushort cs, ushort ip) => _o.Machine.Cpu.Cs == cs && _o.Machine.Cpu.IP == ip;
@@ -325,31 +303,6 @@ internal static class PlantingFrameHarness
 
         /// <summary>Runs the original to the next retrace entry (true) or the return of 0609:0004 (false).</summary>
         public bool RunToRetraceOrReturn() => RunTo((cs, ip) => cs == _retraceCs && ip == 0x00D3, true);
-
-        /// <summary>
-        /// Runs the original to the next retrace entry (true) or to <paramref name="cs"/>:<paramref name="ip"/> (false); the
-        /// return of 0609:0004 must not come first.
-        /// </summary>
-        public bool RunToRetraceOr(ushort cs, ushort ip)
-        {
-            bool retrace = RunTo((c, i) => (c == _retraceCs && i == 0x00D3) || (c == cs && i == ip), false);
-            if (retrace) return true;
-            Assert.True(At(cs, ip), "original not at the expected stop");
-            return false;
-        }
-
-        /// <summary>Runs the original to <paramref name="cs"/>:<paramref name="ip"/> without passing a retrace or the return.</summary>
-        public void RunToWithoutRetrace(ushort cs, ushort ip, string what) =>
-            Assert.False(RunTo((c, i) => c == cs && i == ip, false) || !At(cs, ip),
-                $"original waits for a retrace (called from {Caller()}) before {what}");
-
-        /// <summary>Far return address on the stack (where the routine entered just now was called from).</summary>
-        private string Caller()
-        {
-            var m = _o.Machine;
-            ushort ip = m.Mem.Read16(m.Cpu.Ss, m.Cpu.Sp), cs = m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Sp + 2));
-            return $"{cs - _o.Segment(0):X4}:{ip:X4}";
-        }
 
         private bool RunTo(Func<ushort, ushort, bool> stop, bool returnAllowed)
         {
@@ -411,113 +364,73 @@ internal static class PlantingFrameHarness
             Assert.True(RandomCalls == portRandomCalls, $"{where}: original drew {RandomCalls} times, port {portRandomCalls}");
         }
 
-        /// <summary>The original's data segment taken over by the port (the oracle steps).</summary>
-        public void TakeOver(Dgroup core) => _o.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(core.Bytes);
     }
 
-    /// <summary>The port's host: core controls and pause; oracles for lanes anbau-ki and bilanz.</summary>
-    private sealed class OracleHost(OriginalRun run, PortOutput output) : IPlantingHost
+    /// <summary>
+    /// The port's host: <see cref="PlantingHost"/> with the ported routines of lanes anbau-ki (135D, 0609:074D/100F) and bilanz
+    /// (21FD:0004), its output played by the scene; records events and calls for the scenario checks.
+    /// </summary>
+    private sealed class PortHost : IPlantingHost
     {
-        /// <summary>True while the port waits a frame of the wait loop oracle.</summary>
-        public bool InWaitLoop { get; private set; }
+        private readonly PlantingHost _host;
 
-        private readonly OriginalProgram _helper = OriginalProgram.LoadOnly(TestGameData.DosDir);
-
-        public List<string> Events { get; } = [];
-
-        public int OracleRetraces { get; private set; }
-
-        public long OracleDraws { get; private set; }
-
-        public int Passes { get; private set; }
-
-        public void Emit(FieldEvent e)
+        public PortHost(PortOutput output) => _host = new PlantingHost(e =>
         {
             output.Apply(e);
             if (e.Kind == FieldEventKind.FlipPages) Passes++;
             if (e.Kind is FieldEventKind.Sound or FieldEventKind.DrawField or FieldEventKind.DrawFieldAndNeighbours
                 or FieldEventKind.DrawRank or FieldEventKind.DrawSelection or FieldEventKind.DrawPurchaseUsed)
                 Events.Add(e.ToString());
-        }
+        }, KeyboardOnlyDevices.Instance);
+
+        public List<string> Events { get; } = [];
+
+        public int Passes { get; private set; }
+
+        /// <summary>Frames waited inside the wait loop 21FD:0004.</summary>
+        public int WaitLoopFrames { get; private set; }
+
+        public void Emit(FieldEvent e) => _host.Emit(e);
 
         public void ReadControls(Dgroup d)
         {
-            ControlReader.ReadActions(d, KeyboardOnlyDevices.Instance);
+            _host.ReadControls(d);
             if (d.S8(ControlReader.Action) != -1)
                 Events.Add($"Human(a {d.S8(ControlReader.Action)} mode {d.U8(P.Mode)} at {d.S8(FieldCursor.CursorX)},{d.S8(FieldCursor.CursorY)} t {d.S16(FieldCursor.TimeLeft)} pass {Passes})");
         }
 
-        public IEnumerable<FieldWait> PauseCheck(Dgroup d) => P.Pause(d);
+        public IEnumerable<FieldWait> PauseCheck(Dgroup d) => _host.PauseCheck(d);
 
         public void ComputerTurn(Dgroup d, short x, short y)
         {
             Events.Add($"ComputerTurn({x}, {y})");
-            Call(d, Seg135D, 0x000E, true, (ushort)x, (ushort)y);
+            _host.ComputerTurn(d, x, y);
         }
 
-        public bool CanPlaceHq(Dgroup d) => (byte)Call(d, Seg0609, 0x074D, false) != 0;
+        public bool CanPlaceHq(Dgroup d) => _host.CanPlaceHq(d);
 
-        public bool HasOwnNeighbour(Dgroup d, short x, short y) => (byte)Call(d, Seg0609, 0x100F, false, (ushort)x, (ushort)y) == 1;
+        public bool HasOwnNeighbour(Dgroup d, short x, short y) => _host.HasOwnNeighbour(d, x, y);
 
         public void ComputerPlacedHq(Dgroup d)
         {
             Events.Add("ComputerPlacedHq()");
-            Call(d, Seg135D, 0x0AB3, true);
+            _host.ComputerPlacedHq(d);
         }
 
         public void ComputerBoughtField(Dgroup d)
         {
             Events.Add("ComputerBoughtField()");
-            Call(d, Seg135D, 0x0935, true);
+            _host.ComputerBoughtField(d);
         }
 
-        /// <summary>The original routine in a second RefEmu on the port's data segment; DS is taken back if it may write.</summary>
-        private ushort Call(Dgroup d, ushort seg, ushort off, bool writes, params ushort[] args)
-        {
-            var mem = _helper.Machine.Mem;
-            mem.WriteBlock(Traders.RefEmu.Cpu.Memory.Linear(_helper.Dgroup, 0), d.Bytes.AsSpan(0, DgroupLayout.Size).ToArray());
-            ushort ax = _helper.Call(seg, off, args).Ax;
-            var after = _helper.DataSegment();
-            if (writes) after.AsSpan(0, DgroupLayout.Size).CopyTo(d.Bytes);
-            else ControlHarness.AssertSameData($"helper {seg:X4}:{off:X4} changed DS", after[..DgroupLayout.Size], d.Bytes);
-            return ax;
-        }
-
-        /// <summary>
-        /// 21FD:0004 from the original run: it is run to the entry (no retrace before), compared, then retrace by retrace to its
-        /// return; at every retrace and at the return the port takes over its data segment.
-        /// </summary>
         public IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode)
         {
             Events.Add($"WaitLoop({mode})");
-            Assert.False(output.Scene.Presenting, "the scene still presents at the entry of 21FD:0004");
-            var o = run.Program;
-            run.RunToWithoutRetrace(o.Segment(Seg21FD), 0x0004, "21FD:0004");
-            Assert.Equal(mode, (short)o.StackArgument(0));
-            d.Set(DgroupLayout.RandomSeed, random.Seed);
-            run.Compare(d, random.Calls + OracleDraws, "entry of 21FD:0004");
-            var m = o.Machine;
-            ushort retIp = m.Mem.Read16(m.Cpu.Ss, m.Cpu.Sp), retCs = m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Sp + 2));
-            long drawsBefore = run.RandomCalls;
-            while (run.RunToRetraceOr(retCs, retIp))
+            foreach (var w in _host.WaitLoop(d, random, mode))
             {
-                Take(d, random, drawsBefore);
-                drawsBefore = run.RandomCalls;
-                run.Positioned = true;
-                OracleRetraces++;
-                InWaitLoop = true;
-                yield return FieldWait.Retrace;
-                InWaitLoop = false;
+                WaitLoopFrames++;
+                yield return w;
             }
-            Take(d, random, drawsBefore);
-            output.TakeOver(o);
-        }
-
-        private void Take(Dgroup d, OriginalRandom random, long drawsBefore)
-        {
-            run.TakeOver(d);
-            random.Seed = d.U32(DgroupLayout.RandomSeed);
-            OracleDraws += run.RandomCalls - drawsBefore;
         }
     }
 }

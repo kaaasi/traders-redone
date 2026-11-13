@@ -50,6 +50,7 @@ public sealed class HostGame : Game
 
     private readonly ProgramHost? _program;
     private readonly List<byte> _held = [];
+    private bool _haltReported;
 
     public HostGame(HostOptions options, ProgramHost program) : this(options, program.Driver.Vram, program.Layers.Dac.Registers) =>
         _program = program;
@@ -99,9 +100,16 @@ public sealed class HostGame : Game
             DisplayStart = _program.Driver.DisplayStart;
         }
 
+        if (_program?.Halt is { } notice && !_haltReported)
+        {
+            _haltReported = true;
+            Console.WriteLine($"Traders: {notice}");
+        }
         Window.Title = _program is null
             ? $"Traders – frame {_clock.Frames}, tick {_clock.Ticks}, last make {Keys.LastMake:X2}"
-            : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}";
+            : _program.Halt is { } halt
+                ? $"Traders – {halt}"
+                : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}";
         if (_options.MaxFrames is long max && _clock.Frames >= max) Exit();
         base.Update(gameTime);
     }

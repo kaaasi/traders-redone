@@ -383,9 +383,11 @@ public static class Planting
     /// <summary>0609:1FCC: 21AF:0412(player, 0) – core part: frame 0 and active; the restore records are the output's.</summary>
     // [ORIGINAL] 0609:1FCC
     // [ORIGINAL] 21AF:0412 – core part only (object records +0, +18h)
-    public static void ShowCursor(Dgroup d, IFieldOutput output)
+    public static void ShowCursor(Dgroup d, IFieldOutput output) => ShowCursor(d, output, P(d));
+
+    /// <summary>0609:1FCC for player <paramref name="p"/> (the wait loop 21FD:0004 calls it with DS:37AA = p).</summary>
+    public static void ShowCursor(Dgroup d, IFieldOutput output, int p)
     {
-        int p = P(d);
         Emit(output, FieldEventKind.ShowObject, (short)p, 0);
         d.Set(At(ObjectFrame + Obj(p)), (short)0);
         d.Set(At(Objects + Obj(p)), (byte)1);
