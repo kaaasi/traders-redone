@@ -1,4 +1,4 @@
-# 135D:000E – Computerzug im Anbau (mit Einsprüngen 0935, 0AB3 und internen Routinen)
+# 135D:000E / 135D:0240 / 135D:0263 / 135D:0284 / 135D:00AC / 135D:04F5 / 135D:0A59 / 135D:02BD / 135D:0480 / 135D:05AF / 135D:06A1 / 135D:0851 / 135D:0935 / 135D:0AB3 – Computerzug im Anbau
 
 Sammelbefund der Spur **anbau-ki** (R5). Portiert werden `135D:000E`, die Einsprünge `135D:0935` und `135D:0AB3` und die
 internen Routinen `00AC`, `0240`, `0263`, `0284`, `02BD`, `0480`, `04F5`, `05AF`, `06A1`, `0851`, `0A59` sowie die beiden

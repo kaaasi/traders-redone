@@ -1,8 +1,9 @@
 # 0609:074D – Feld bepflanzbar? (Helfer des Computerzugs)
 
 - **Ladebild-Adresse:** Segment `0609` (Dateioffset `0x9690`); `074D` bei `0x9DDD`.
-- **Aufgabe:** prüft, ob das Feld an den **globalen** Schleifenkoordinaten `DS:2EB0` (x) / `DS:2F00` (y) im Anbau bepflanzt
-  werden darf. Kein Zufall, keine Grafik, keine Eingabe, kein Zustand geschrieben (reine Prüfung).
+- **Aufgabe:** prüft, ob am Feld der **globalen** Schleifenkoordinaten `DS:2EB0` (x) / `DS:2F00` (y) ein HQ gebaut werden darf
+  (gültige HQ-Platzierung): nur auf Sondergelände (Güte = 3), nur solange frei, und nicht unmittelbar links/rechts neben einem
+  HQ. Kein Zufall, keine Grafik, keine Eingabe, kein Zustand geschrieben (reine Prüfung).
 - **Aufgerufen von / Phase:** `135D:00AC` (Feldwahl Modus 2) und `0609:06BC` (menschlicher HQ-Bau). Diese Spur portiert
   die Routine (R5P-2), weil `135D` sie braucht; `0609:06BC` ruft sie.
 - **Parameter / Rückgabe:** keine Parameter (liest `DS:2EB0`/`DS:2F00`); `AL` = 1 (bepflanzbar) oder 0, `AH` unbestimmt.
@@ -11,14 +12,15 @@
 ## Ablauf (eigene Worte)
 
 - `cell = 2EB0·6 + 2F00`.
-- Ist die Bodengüte `45DA[cell]` = 3 **und** das Feld nicht frei (`4442[cell]` ≠ 0xFF) → `AL` = 0.
-- Sonst, wenn x = `2EB0` > 0: ist das linke Nachbarfeld eine Art 4 (HQ), also `2EB1[cell − 6]` = 4 → `AL` = 0.
+- Ist die Bodengüte `45DA[cell]` ≠ 3 → `AL` = 0 (nur Güte-3-Gelände kommt in Frage).
+- Ist das Feld nicht frei (`4442[cell]` ≠ 0xFF) → `AL` = 0.
+- Wenn x = `2EB0` > 0: ist das linke Nachbarfeld eine Art 4 (HQ), also `2EB1[cell − 6]` = 4 → `AL` = 0.
   (`2EAB` = `2EB1` − 6 ist die Art des Feldes (x−1, y).)
-- Sonst, wenn x < Spalten − 1 (`2EB0` < `08FC` − 1, vorzeichenbehaftet): ist das rechte Nachbarfeld `2EB1[cell + 6]` = 4
+- Wenn x < Spalten − 1 (`2EB0` < `08FC` − 1, vorzeichenbehaftet): ist das rechte Nachbarfeld `2EB1[cell + 6]` = 4
   (HQ) → `AL` = 0. (`2EB7` = `2EB1` + 6, Feld (x+1, y).)
 - Sonst `AL` = 1.
-- Die Prüfungen laufen in dieser Reihenfolge; das erste Nein beendet. Ein HQ sperrt also die unmittelbar links und rechts
-  angrenzenden Felder (nicht oben/unten), und Güte-3-Felder lassen sich nur bepflanzen, solange sie frei sind.
+- Die Prüfungen laufen in dieser Reihenfolge; das erste Nein beendet. Ein HQ sperrt so die unmittelbar links und rechts
+  angrenzenden Felder (nicht oben/unten).
 
 ## Zustand
 
