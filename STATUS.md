@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 13.11.2026 · Runde 4 (Programmablauf, Menüs, neue Partie, Spielfeldschicht) abgeschlossen ([archiv/runde-4.md](docs/archiv/runde-4.md)); nächste: Runde 5
+Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI): alle Spuren gemergt, Gesamtreview offen ([arbeitspakete.md](docs/arbeitspakete.md))
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -13,14 +13,14 @@ Stand: 13.11.2026 · Runde 4 (Programmablauf, Menüs, neue Partie, Spielfeldschi
 | M1 | Ressourcen | 🟢 | PP20, VGA-Atlas (Kopf korrigiert), Palette, Texte, Schriften, Masken, Musik-Kopf, Asset-Viewer |
 | M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0); Maschinenabzug zum Wiederaufsetzen an Marken (R3 Spur 0) |
 | M3 | Kern-Fundament | ✅ | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Gesamtreview R3 „Ja“ |
-| M4 | Menü & Setup | ✅ | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene und holt Bilder bildweise nach (#111); Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview R4 nach Fix R4G-1 erledigt |
-| M5 | Anbau | 🟡 | Vorarbeit R4: Befehlsquelle `0E9E` (sechs Steuerungsarten), Feldart `0609:10D2`, Cursor `0609:047B`, Spielfeld-Szene `1256/1879/1ED9` |
+| M4 | Menü & Setup | ✅ | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene und holt Bilder bildweise nach (#111); Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview R4 nach Fix R4G-1 erledigt; Windows-Start per Hand bestätigt (Nutzer 13.11.2026), Menü-Neuzeichnen #126 behoben (#127) |
+| M5 | Anbau | 🟢 | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 offen |
 | M6 | Produktion & Wetter | ⬜ | |
 | M7 | Fat Mike / Schnecken | ⬜ | |
 | M8 | Auktion / Handel | ⬜ | |
 | M9 | Rakete & Stationen / Piraten | ⬜ | |
 | M10 | Ereignisse & Katastrophen | ⬜ | |
-| M11 | Wochenbilanz & Einkauf | ⬜ | |
+| M11 | Wochenbilanz & Einkauf | 🟡 | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf offen |
 | M12 | Roboterkampf | ⬜ | |
 | M13 | Ende / Rang | ⬜ | |
 | M14 | Ton | ⬜ | |
