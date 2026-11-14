@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 5 – Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI (13.–14.11.2026) · letzte Spur `96b01bf`
+## Runde 5 – Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI (13.–14.11.2026) · letzte Spur `96b01bf`, Abschluss `9c7c564`
 
 - Spur 2 `planung` (PR #123): Wochenplanung der Computerspieler `11A3` (15 Routinen, beide Durchgänge) mit Differenztests über vier
   Wochen; Sammelmarker in `abdeckung.py` (#109), Erbe nur für Far-Einsprünge des Kopfsegments (R5PL-1); #99 R1/R3.
@@ -11,6 +11,7 @@
   Aufrufe 3/6/8/21 und Wächter 4; Mehrrundenprobe mit Mensch über vier Wochen; Host spielt Bilanz und Anbau (F1 = A).
 - Fix R4W-1 (PR #127, #126): Host richtet Seitennummern und ersten Seitenwechsel ein; Menüänderungen sofort sichtbar.
 - Prozess: Plan (PR #117), Zugriffsweg Referenz-Repo (PR #118). 882 Tests grün mit Originaldaten.
+- Gesamtreview (Codex) „Ja“: keine Fehler, eine Testlücke der Leseregel (R5G-1, #139). M5 abgeschlossen.
 
 ## Runde 4 – Programmablauf, Menüs, neue Partie, Spielfeldschicht (12.–13.11.2026) · letzte Spur `9efc2d2`, Abschluss nach Fix #111 `69db0d4`
 

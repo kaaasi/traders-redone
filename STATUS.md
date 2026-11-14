@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI): alle Spuren gemergt, Gesamtreview offen ([arbeitspakete.md](docs/arbeitspakete.md))
+Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI) abgeschlossen ([archiv/runde-5.md](docs/archiv/runde-5.md)); nächste: Runde 6
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -14,7 +14,7 @@ Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI): 
 | M2 | Analyse-Infrastruktur / RefEmu | 🟢 | 286-Emulator (SingleStepTests grün), DOS/BIOS/VGA, Bildabzug; Partie mit FXDRIVER über mehrere Wochen, Halt an Phasenmarken (`RunToWeekStart`/`RunToMarker`, R2 Spur 1); Bestandsaufnahme aller 45 Segmente (R2 Spur 0); Maschinenabzug zum Wiederaufsetzen an Marken (R3 Spur 0) |
 | M3 | Kern-Fundament | ✅ | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Gesamtreview R3 „Ja“ |
 | M4 | Menü & Setup | ✅ | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene und holt Bilder bildweise nach (#111); Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview R4 nach Fix R4G-1 erledigt; Windows-Start per Hand bestätigt (Nutzer 13.11.2026), Menü-Neuzeichnen #126 behoben (#127) |
-| M5 | Anbau | 🟢 | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 offen |
+| M5 | Anbau | ✅ | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 „Ja“ |
 | M6 | Produktion & Wetter | ⬜ | |
 | M7 | Fat Mike / Schnecken | ⬜ | |
 | M8 | Auktion / Handel | ⬜ | |
@@ -50,8 +50,8 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 |---|---:|---|---|
 | `0000` | 0x5350 | Turbo-C-Laufzeit (Startcode ruft `1777:000C`, Long-Arithmetik, Dateien, `time()`, Tonroutinen `06FE/0724/0750`) | 🔍 nur benötigte Teile werden nachgebildet |
 | `0535` | 0xD40 | Roboterkampf: Aufstellung, Kampfwerte | 🔍 |
-| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | 🟡 `1178` (R3); Feldart `10D2`, Cursor `047B`, Spielfeld-Szene `1256/1879/1ED9/1F04/1854/1A61` (R4 Spur 3); offen `0C73`, `03E0`, Phase `0004` |
-| `0825` | 0xAA0 | Wochenbilanz (Darstellung), Vermögen/Rang (`0813`, `06CB`, `07C4`) | 🟡 Vermögen/Rang/Verlauf `0813`/`06CB`/`07C4` portiert (R3 Spur 1) |
+| `0609` | 0x21C0 | Anbauphase und gemeinsame Spielfeldschicht (Raster, Cursor, Feldart `10D2`, Kopfzeile); Obergrenzen `1178` | ✅ `1178` (R3); Feldart `10D2`, Cursor `047B`, Spielfeld-Szene `1256/1879/1ED9/1F04/1854/1A61` (R4 Spur 3); Anbauphase `0004` mit Spielfeldschleife `03E0`, `DrawSelection` `0C73` und allen Anbauroutinen in Kern und Szene (R5 Spur 0), Helfer `074D`/`100F` (R5 Spur 1); `13C5` Ernte-Teil mit R6 |
+| `0825` | 0xAA0 | Wochenbilanz (Darstellung), Vermögen/Rang (`0813`, `06CB`, `07C4`) | ✅ Vermögen/Rang/Verlauf `0813`/`06CB`/`07C4` (R3 Spur 1); Wochenbilanz `000A`/`02D7` mit Szene `0072…09C9` (R5 Spur 3) |
 | `08CF` | 0x19A0 | Einkauf (Öl, Raketen, Lotto, Edelsteine), Edelsteinkurs `11D7` | 🟡 Edelsteinkurs `11D7` portiert (R3 Spur 1) |
 | `0A69` | 0x2D0 | Grafik: Linien-, Rahmen-, Texthilfen über der Befehlsliste | 🟢 Hilfen portiert (R3 Spur 2) |
 | `0A96` | 0xD10 | Grafik: Befehlsliste (17 Befehlstypen, Ausführung `06A8`) | 🟢 Befehlsliste, alle 17 Typen (R3 Spur 2) |
@@ -63,10 +63,10 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | ✅ alle sieben Routinen mit Differenztest (R4 Spur 2) |
 | `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | ✅ Befehlsquelle im Kern, alle sechs Steuerungsarten (R4 Spur 3) |
 | `0EDE` | 0x23F0 | Roboterkampf: Ablauf, Bewegung, Treffer, Beute | 🔍 |
-| `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | ⬜ |
-| `11A3` | 0x1250 | Computerspieler: Wochenplanung (zwei Durchgänge) | ⬜ |
+| `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | 🟡 Wächter `000D–001B` (Woche ≤ 2 bzw. `DS:2F30` = 0, R5 Spur 0); Katastrophen offen (R6) |
+| `11A3` | 0x1250 | Computerspieler: Wochenplanung (zwei Durchgänge) | ✅ Wochenplanung `0000` mit allen 15 Routinen, beide Durchgänge (R5 Spur 2) |
 | `12C8` | 0x950 | Computerspieler: Roboter-Aufstellung | ⬜ |
-| `135D` | 0xC00 | Computerspieler: Anbau | ⬜ |
+| `135D` | 0xC00 | Computerspieler: Anbau | ✅ Computerzug `000E` mit `0935`/`0AB3` und allen 14 Routinen (R5 Spur 1) |
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
@@ -78,12 +78,12 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `1C68` | 0x1870 | Roboterphase: Steuerung und Roboterkauf-Bildschirm | 🔍 |
 | `1DEF` | 0x8F0 | Zufällige Zusatzphase nach dem Handel (Regel offen) | ⬜ |
 | `1E7E` | 0xE50 | Roboterkampf: Kampffeld erzeugen (Raster `DS:48F4`) | ⬜ |
-| `1F63` | 0x1500 | Fat Mike und Wettbewerb nach dem Einkauf | ⬜ |
+| `1F63` | 0x1500 | Fat Mike und Wettbewerb nach dem Einkauf | 🟡 `113E` (Zufall der Warteschleife) und `104B` (R5 Spur 3); Fat Mike, Wettbewerb offen (R9) |
 | `20B3` | 0xD80 | Endprüfung, Abend- und Endbildschirme | ⬜ |
 | `218B` | 0x1C0 | Musik über residenten Treiber (`int 64h`) | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
 | `21A7` | 0x80 | Toneffekt auslösen, Effektquelle wählen | 🔍 Analyse `docs/analyse/TON.md` (R3 Spur 3) |
 | `21AF` | 0x4E0 | Grafik: bewegte Objekte (8 Sätze ab `DS:330C`) | 🟢 bewegte Objekte (R3 Spur 2) |
-| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3); Code-Abfrage `0687` (R4 Spur 0) |
+| `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3); Code-Abfrage `0687` (R4 Spur 0); Warteschleife `0004` mit `060D`/`0665`/`0590` (R5 Spur 3) |
 | `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🟢 portiert (R3 Spur 2) |
 | `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | 🟡 Produktion `0003`, Schwund `026B` portiert (R3 Spur 1); Ernte offen |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
