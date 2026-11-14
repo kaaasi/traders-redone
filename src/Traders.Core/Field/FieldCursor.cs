@@ -13,6 +13,66 @@ public enum FieldEventKind
     DrawCommand,
     /// <summary>21A7:0054(a, b) – sound request to the sound driver.</summary>
     Sound,
+
+    // Planting phase 0609:0004 (finding docs/routines/0609_0004_anbau.md). Drawing routines of segment 0609 and the
+    // output layers called by the phase, in the original's order; none of them changes game state.
+
+    /// <summary>186C:0002(n) – load picture n (the step handler records it with ImageTable.RecordLoad).</summary>
+    LoadImage,
+    /// <summary>21AF:000D – object tables (the core part, all objects inactive, is done by the core).</summary>
+    InitObjects,
+    /// <summary>21AF:04CD – restore records of all objects cleared.</summary>
+    ResetObjectRestore,
+    /// <summary>21AF:022B(object, x1, y1, x2, y2) – save buffers of an object.</summary>
+    ObjectBuffers,
+    /// <summary>21AF:00CA(object, frame, x, y, mx, my) – image and mask pointer of an object frame.</summary>
+    ObjectImage,
+    /// <summary>21AF:0412(object, frame) – object shown (frame and active flag are set by the core).</summary>
+    ShowObject,
+    /// <summary>21FD:037D(rgb12) – fade out to a colour.</summary>
+    FadeOut,
+    /// <summary>21FD:026C(offset) – base palette from the loaded palette (far pointer DS:offset).</summary>
+    BasePalette,
+    /// <summary>21FD:02C9(index, rgb12) – one colour of the base palette.</summary>
+    PaletteColour,
+    /// <summary>21FD:0329 – fade in.</summary>
+    FadeIn,
+    /// <summary>0A96:001B – empty the command list.</summary>
+    ClearList,
+    /// <summary>0A96:06A8 – execute the command list.</summary>
+    RunList,
+    /// <summary>0A96:0C3F(page) – copy the drawn page to the shown one (the page is the output layers').</summary>
+    ShowPage,
+    /// <summary>21FD:060D – execute the list, flip the pages, execute the list again.</summary>
+    ListOnBothPages,
+    /// <summary>0609:1ED9 – background tiles.</summary>
+    DrawBackground,
+    /// <summary>0609:1256(x, y, w, h) – frame.</summary>
+    DrawFrame,
+    /// <summary>0609:13C5(x, y, w, h, draws…) – border of the field; the core's random(1) results follow, top and bottom per column.</summary>
+    DrawBorder,
+    /// <summary>0609:1C83(x, y) – one field (nothing outside the field).</summary>
+    DrawField,
+    /// <summary>0609:1CB1(x, y) – a field and its four neighbours.</summary>
+    DrawFieldAndNeighbours,
+    /// <summary>0609:1A03 – terrain picture under the cursor of the player at turn and the purchase marker.</summary>
+    DrawPanel,
+    /// <summary>0609:1A97 – clears the purchase marker of the player at turn.</summary>
+    DrawPurchaseUsed,
+    /// <summary>0609:1AC0 – time bar of the player at turn.</summary>
+    DrawPlayer,
+    /// <summary>0609:0204 as a whole – status lines (weather and limits, or the free-field notice), then 21FD:060D; the core yields its frames.</summary>
+    DrawStatus,
+    /// <summary>21FD:051F – flip the pages.</summary>
+    FlipPages,
+    /// <summary>23CD:071C(page) – restore the backgrounds of the objects (page of the output layers).</summary>
+    RestoreObjects,
+    /// <summary>23CD:06E9(page) – draw the objects (page of the output layers).</summary>
+    DrawObjects,
+    /// <summary>21FD:0185(count) – wait for count retraces (count as a long: low word, high word).</summary>
+    Delay,
+    /// <summary>21FD:0665 – last frame of the field: flip, restore, list, objects.</summary>
+    LastFrame,
 }
 
 /// <summary>A request of the field layer to scene or sound output, with the original's arguments in call order.</summary>

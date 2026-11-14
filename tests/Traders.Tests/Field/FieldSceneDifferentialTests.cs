@@ -19,13 +19,7 @@ public class FieldSceneDifferentialTests
 
     private static (int, byte)[] Player(int p) => [(FieldGrid.CurrentPlayer, (byte)p)];
 
-    private static void AssertReadOnly(H.Case c)
-    {
-        var (_, core) = H.AssertSame(c);
-        var before = OriginalProgram.Resume(TestGameData.DosDir, H.AtWeek.Value).DataSegment()[..DgroupLayout.Size];
-        foreach (var (at, v) in c.Set) before[at] = v;
-        Assert.True(before.AsSpan().SequenceEqual(core), $"{c.Label}: the scene changed the core's data segment");
-    }
+    private static void AssertReadOnly(H.Case c) => H.AssertReadOnly(c);
 
     // [DIFFERENTIAL] 0609:1ED9
     [GameDataFact]

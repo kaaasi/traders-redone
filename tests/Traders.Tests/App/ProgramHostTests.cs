@@ -98,25 +98,89 @@ public class ProgramHostTests
     }
 
     /// <summary>
-    /// The whole host run without a window: start, main menu (RETURN), new game, then the week loop of the core, which stops
-    /// at its first screen step (weekly balance, pending until R5). The scene never writes the core's data segment.
+    /// [DIFFERENTIAL] 1777:01F8 – the whole host run without a window against the original (F1 = A): start, main menu (RETURN
+    /// after the second pass, as in the RefEmu by the same pass), new game with four computers, then week 0 in the core with its
+    /// ported screen steps – week report with its scene, guard of call 4, week planning, planting phase with its scene – up to
+    /// the first pending call 9 (week events), where the host halts with a notice. There the data segment (outside the bytes
+    /// of the output layers and the interrupt handlers) and the picture shown equal the original's at the call site of call 9.
+    /// The scenes never write the core's data segment.
     /// </summary>
     [GameDataFact]
-    public void Host_runs_from_the_start_through_the_menu_into_the_week_loop()
+    public void Host_plays_week_0_up_to_the_week_events_like_the_original()
     {
-        var host = new ProgramHost(Dir, new RecordedClock([12345678]), new NoSaveFile());
+        var start = ProgramStartDifferentialTests.ReferenceStart;
+        var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile());
         long f = 0;
         for (; f < 2000 && Passes(host) < 2; f++) host.Frame(f, []);
         for (long until = f + 6; f < until; f++) host.Frame(f, [MenuKeys.Enter]);
-        for (long until = f + 200; f < until && host.Machine.Status != ProgramStatus.InWeek; f++) host.Frame(f, []);
+        for (long until = f + 30_000; f < until && host.Halt is null; f++) host.Frame(f, []);
 
         Assert.Equal(ProgramStatus.InWeek, host.Machine.Status);
         Assert.True(host.Machine.IsBlocked);
-        Assert.Equal(3, host.Machine.WeekMachine!.NextStep);
-        Assert.Equal(1, host.Core.U8(ProgramLoop.NewGameRequest));
+        var week = host.Machine.WeekMachine!;
+        Assert.Equal(0, week.Week);
+        Assert.Equal(9, week.NextStep);
+        Assert.Contains("call 9 ", host.Halt);
         Assert.Equal(1, host.Core.U8(ProgramLoop.GameRunning));
+        Assert.Equal(new byte[] { 1, 1, 1, 1 }, Enumerable.Range(0, 4).Select(i => host.Core.U8(DgroupLayout.IsComputer + i)));
         Assert.NotSame(host.Core.Bytes, host.Layers.Ds);
-        Assert.NotNull(host.Start.Code);
+        Assert.False(host.Field.Presenting);
+        Assert.False(host.Report.Presenting);
+
+        // the original with the same clock and the same key at the same menu pass, to the call site of call 9 in week 0
+        var p = OriginalProgram.Start(Dir, ProgramStartDifferentialTests.Options(start));
+        int passes = 0;
+        ushort menu = p.Segment(0x192D);
+        foreach (ushort site in new ushort[] { 0x0345, 0x1AAD })
+            p.Machine.AddCodeHook(menu, site, m =>
+            {
+                if (++passes == 2) m.ScheduleKey(m.Seconds + 0.001, MenuKeys.Enter, 6 / 70.0);
+            });
+        // bytes the loader and the C start-up set before main (relocated far pointers, environment): the host's initial state
+        // is the unrelocated image (Dgroup.FromExe), so these are host values, not game state
+        new Traders.Tests.Phases.RefEmuProgramOracle(p).RunToCallSite(ProgramLoop.Step(1));
+        var image = ProgramSteps.InitialState(File.ReadAllBytes(TestGameData.Dos("T.EXE"))).Bytes;
+        var atMain = p.DataSegment();
+        var loaded = Enumerable.Range(0, DgroupLayout.Size).Where(i => image[i] != atMain[i]).ToHashSet();
+        ushort loop = p.Segment(WeekLoop.Segment), call9 = WeekLoop.Step(9).Site;
+        p.Machine.Run(40_000_000_000, m => m.Cpu.Cs == loop && m.Cpu.IP == call9);
+        Assert.True(p.Machine.Cpu.Cs == loop && p.Machine.Cpu.IP == call9, "original did not reach call 9");
+        Assert.Equal(0, p.Week);
+
+        var original = p.DataSegment();
+        // bytes of the host (heap, C runtime), the output layers and the music, as in the lockstep tests of program start,
+        // menu and planting; everything else is the core's
+        List<(int Offset, int Length)> ignored = Traders.Tests.Phases.RefEmuWeekOracle.InterruptOwned.Select(r => (r.Offset, r.Length))
+            .Concat(Traders.Tests.Phases.RefEmuProgramOracle.HostOwnedByInitialisation.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Phases.RefEmuProgramOracle.SoundOwned.Select(r => (r.Offset, r.Length)))
+            .Concat(ProgramStartDifferentialTests.OutputOwned.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Phases.ProgramHumanDifferentialTests.MenuOutputOwned.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Field.PlantingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+            .Append((0x023A, 2)) // 0B67:01D4/0206 draw on the shown or the hidden page (Vga pages)
+            .Append((0x37CC, 0x3C90 - 0x37CC)) // text table 192D:18B6: far pointers into the host's text buffer (6000:0000)
+            .Append((0x4884, 4)) // far pointer of the text buffer (host heap)
+            .ToList();
+        var differing = Enumerable.Range(0, DgroupLayout.Size)
+            .Where(i => original[i] != host.Core.Bytes[i] && !loaded.Contains(i) && !ignored.Any(r => i >= r.Offset && i < r.Offset + r.Length)).ToList();
+        var ranges = new List<string>();
+        for (int k = 0; k < differing.Count;)
+        {
+            int a = differing[k], b = a;
+            while (k + 1 < differing.Count && differing[k + 1] <= b + 4) b = differing[++k];
+            k++;
+            ranges.Add($"{a:X4}-{b:X4}");
+        }
+        Assert.True(differing.Count == 0, $"DS differs at {string.Join(" ", ranges.Take(30))}; first {differing.FirstOrDefault():X4}");
+
+        var shown = new uint[FramePresenter.Width * FramePresenter.Height];
+        FramePresenter.Present(host.Driver.Vram, host.Driver.DisplayStart, host.Layers.Dac.Registers, shown);
+        var frame = p.Frame();
+        var expected = new uint[shown.Length];
+        FramePresenter.Present(OriginalScreen(frame), 0, frame.Palette, expected);
+        Assert.True(shown.Distinct().Count() > 8, "the host shows no field");
+        int diff = Enumerable.Range(0, shown.Length).Count(i => shown[i] != expected[i]);
+        Assert.True(diff == 0, $"{diff} pixels differ, first at {Enumerable.Range(0, shown.Length).FirstOrDefault(i => shown[i] != expected[i], -1)}");
     }
 
     private static int Passes(ProgramHost host) => host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;

@@ -71,16 +71,28 @@ internal sealed class RefEmuWeekOracle
     /// As <see cref="Compare(Dgroup, string)"/>; with <paramref name="skipRandomState"/> the random state DS:10D2 is left out
     /// (inside a handler, before the machine has stored the seed back).
     /// </summary>
-    private void Compare(Dgroup core, string where, bool skipRandomState)
+    private void Compare(Dgroup core, string where, bool skipRandomState, (int Offset, int Length)[]? owned = null)
     {
         var emu = _p.DataSegment();
+        var diffs = new List<int>();
         for (int i = 0; i < DgroupLayout.Size; i++)
         {
             if (core.Bytes[i] == emu[i] || IsInterruptOwned(i)) continue;
+            if (owned != null && owned.Any(r => i >= r.Offset && i < r.Offset + r.Length)) continue;
             if (skipRandomState && i >= DgroupLayout.RandomSeed && i < DgroupLayout.RandomSeed + 4) continue;
-            Differences.Add($"{where}: DS:{i:X4} core {core.Bytes[i]:X2} RefEmu {emu[i]:X2}");
-            return;
+            diffs.Add(i);
         }
+        if (diffs.Count == 0) return;
+        int first = diffs[0];
+        var ranges = new List<string>();
+        for (int k = 0; k < diffs.Count;)
+        {
+            int a = diffs[k], b = a;
+            while (k + 1 < diffs.Count && diffs[k + 1] <= b + 4) b = diffs[++k];
+            k++;
+            ranges.Add($"{a:X4}-{b:X4}");
+        }
+        Differences.Add($"{where}: DS:{first:X4} core {core.Bytes[first]:X2} RefEmu {emu[first]:X2} (differing {string.Join(" ", ranges.Take(20))})");
     }
 
     private static bool IsInterruptOwned(int offset) =>
@@ -138,6 +150,107 @@ internal sealed class RefEmuWeekOracle
     {
         var emu = _p.DataSegment();
         foreach (var (offset, length) in InterruptOwned) emu.AsSpan(offset, length).CopyTo(core.Bytes.AsSpan(offset));
+    }
+
+    /// <summary>
+    /// Handler for a ported call step with a screen, frame by frame in lockstep with the RefEmu (<see cref="FramedStep"/>).
+    /// <paramref name="owned"/> are the data segment bytes of the output layers (not compared; taken from the RefEmu at the return).
+    /// </summary>
+    public FramedStep FramedPortHandler(Dgroup core, IWeekStepHandler port, (int Offset, int Length)[] owned,
+        Action<OriginalProgram>? atCallSite = null) => new(this, core, port, owned, atCallSite);
+
+    /// <summary>
+    /// A ported screen step in lockstep with the RefEmu: at the call site the data segment is compared and taken over; then every
+    /// frame of the port is one retrace of the original (entry of the retrace wait 0D73:00D3). Where the port waits a frame the
+    /// RefEmu must stand at its next retrace, where the port returns the RefEmu must return to the loop; at both the data
+    /// segment outside <see cref="InterruptOwned"/> and the output bytes, and the port's generator against DS:10D2, are
+    /// compared. Before the next frame the driver calls <see cref="EndRetrace"/> and gives the port the key table the
+    /// RefEmu holds then (<see cref="Held"/>).
+    /// </summary>
+    public sealed class FramedStep(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port, (int Offset, int Length)[] owned,
+        Action<OriginalProgram>? atCallSite) : IWeekStepHandler
+    {
+        private const ushort RetraceSegment = 0x0D73, RetraceEntry = 0x00D3, RetraceEnd = 0x00F7;
+        private int _week;
+        private long _draws;
+
+        /// <summary>True while the RefEmu stands at a retrace entry and the port waits for the next frame.</summary>
+        public bool AtRetrace { get; private set; }
+
+        /// <summary>Retraces in lockstep so far (all runs of the step).</summary>
+        public int Retraces { get; private set; }
+
+        /// <summary>Frames of each run of the step, in order (week, retraces).</summary>
+        public List<(int Week, int Retraces)> Runs { get; } = [];
+
+        public StepOutcome Begin(StepContext context)
+        {
+            var step = context.Step;
+            o.RunToCallSite(step);
+            _week = o._p.Week;
+            o.Compare(core, $"week {_week} at {step}");
+            atCallSite?.Invoke(o._p);
+            o.TakeOver(core);
+            _draws = context.Random.Calls;
+            Runs.Add((_week, 0));
+            return Sync(context, port.Begin(context));
+        }
+
+        public StepOutcome Tick(StepContext context)
+        {
+            if (AtRetrace) throw new InvalidOperationException("EndRetrace not called before the frame");
+            return Sync(context, port.Tick(context));
+        }
+
+        /// <summary>Runs the RefEmu through the retrace wait it stands at.</summary>
+        public void EndRetrace()
+        {
+            var m = o._p.Machine;
+            ushort seg = o._p.Segment(RetraceSegment);
+            m.Run(4_000_000, mm => mm.Cpu.Cs == seg && mm.Cpu.IP == RetraceEnd);
+            if (!(m.Cpu.Cs == seg && m.Cpu.IP == RetraceEnd)) throw new InvalidOperationException("retrace wait did not end");
+            AtRetrace = false;
+        }
+
+        /// <summary>Scancodes held in the RefEmu's key table now.</summary>
+        public IReadOnlyCollection<byte> Held()
+        {
+            var keys = o._p.Machine.Mem.ReadBlock(o._p.Dgroup, DgroupLayout.KeyState, 0x80);
+            return [.. Enumerable.Range(0, keys.Length).Where(sc => keys[sc] != 0).Select(sc => (byte)sc)];
+        }
+
+        private StepOutcome Sync(StepContext context, StepOutcome outcome)
+        {
+            var step = context.Step;
+            var m = o._p.Machine;
+            ushort retrace = o._p.Segment(RetraceSegment), ret = (ushort)(step.Site + 5);
+            m.Run(1);
+            m.Run(4_000_000_000, mm => (mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry) || (mm.Cpu.Cs == o._loopSegment && mm.Cpu.IP == ret));
+            if (m.Exited) throw new InvalidOperationException("original exited");
+            bool atRetrace = m.Cpu.Cs == retrace && m.Cpu.IP == RetraceEntry;
+            string where = $"week {_week} {step} retrace {Runs[^1].Retraces}";
+            if (outcome.Done == atRetrace)
+                throw new InvalidOperationException(outcome.Done
+                    ? $"{where}: the port returned, the original waits another retrace"
+                    : $"{where}: the port waits a frame, the original returned");
+            o.Compare(core, where + (outcome.Done ? " (return)" : ""), skipRandomState: true, owned);
+            uint emuSeed = BitConverter.ToUInt32(o._p.DataSegment(), DgroupLayout.RandomSeed);
+            if (context.Random.Seed != emuSeed) o.Differences.Add($"{where}: random state core {context.Random.Seed:X8} RefEmu {emuSeed:X8}");
+            if (o.Differences.Count > 0) throw new InvalidOperationException(o.Differences[^1]);
+            if (!outcome.Done)
+            {
+                AtRetrace = true;
+                Retraces++;
+                Runs[^1] = (Runs[^1].Week, Runs[^1].Retraces + 1);
+                return outcome;
+            }
+            o.Passed.Add(ret);
+            o.PortedSteps.Add((_week, step.Number, context.Random.Calls - _draws));
+            var emu = o._p.DataSegment();
+            foreach (var (offset, length) in owned) emu.AsSpan(offset, length).CopyTo(core.Bytes.AsSpan(offset));
+            o.TakeOverInterruptOwned(core);
+            return StepOutcome.Finished((byte)m.Cpu.Ax);
+        }
     }
 
     private sealed class StepHandler(RefEmuWeekOracle o, Dgroup core, Action<OriginalProgram>? atCallSite) : IWeekStepHandler

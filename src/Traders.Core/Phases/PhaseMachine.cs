@@ -10,7 +10,10 @@ public enum PhaseStatus
     /// <summary>A step with a screen runs and is ticked once per frame.</summary>
     Waiting,
 
-    /// <summary>The next step is not ported yet and has no handler; the machine does not skip it.</summary>
+    /// <summary>
+    /// The next step is not ported yet: it has no handler, or its handler does not cover the current state
+    /// (<see cref="IPartialWeekStepHandler"/>); the machine does not skip it.
+    /// </summary>
     Blocked,
 
     /// <summary>The loop returned (exit A or B); <see cref="PhaseMachine.Result"/> holds AL.</summary>
@@ -177,7 +180,8 @@ public sealed class PhaseMachine
                 Advanced();
                 continue;
             }
-            if (!_handlers.TryGetValue(step.Number, out _))
+            if (!_handlers.TryGetValue(step.Number, out var handler)
+                || (handler is IPartialWeekStepHandler partial && partial.IsPending(_state)))
             {
                 Status = PhaseStatus.Blocked;
                 _events.Add(new PhaseEvent(PhaseEventKind.StepPending, Week, step.Number, _currentFrame, 0));
