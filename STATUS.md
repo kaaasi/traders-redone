@@ -207,7 +207,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0A69:0288` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:000A` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:001B` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
-| `0A96:0030` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
+| `0A96:0030` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Vga/Layers/CommandList.cs` | `RulePageDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A96:0089` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:00E2` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:013B` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
@@ -218,10 +218,10 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0A96:0311` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:035F` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:03AD` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
-| `0A96:03FB` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
+| `0A96:03FB` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Vga/Layers/CommandList.cs` | `RulePageDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A96:0433` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:0481` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
-| `0A96:04D7` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
+| `0A96:04D7` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Vga/Layers/CommandList.cs` | `RulePageDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A96:0525` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:057A` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:05FB` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
@@ -263,6 +263,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0E9E:0312` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0E9E:037A` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `111D:0009` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Phases/CatastropheGuardStep.cs` | `CatastropheGuardDifferentialTests.cs` | ✅ |
+| `111D:0112` | [111D_0112_regelseite.md](docs/routines/111D_0112_regelseite.md) | – | – | 🔍 |
 | `11A3:0000` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:007D` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:0180` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
@@ -392,7 +393,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:03B4` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Week/ReportScene.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:04DA` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
-| `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
+| `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
 | `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs` | ✅ |
 | `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
 | `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
@@ -415,6 +416,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `23CD:05D0` | [23CD_311A_seiten.md](docs/routines/23CD_311A_seiten.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
 | `23CD:05DD` | [23CD_05DD_text.md](docs/routines/23CD_05DD_text.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
 | `23CD:06BE` | [23CD_378B_linie.md](docs/routines/23CD_378B_linie.md) | `src/Traders.Vga/ModeXLines.cs` | `DriverLineAndObjectTests.cs` | ✅ |
+| `23CD:06DE` | [111D_0112_regelseite.md](docs/routines/111D_0112_regelseite.md) | `src/Traders.Core/Pixels/RulePage.cs` | `RulePageDifferentialTests.cs` | ✅ |
 | `23CD:06E9` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/Objects.cs`, `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `23CD:071C` | [23CD_06E9_objekte.md](docs/routines/23CD_06E9_objekte.md) | `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/Objects.cs`, `src/Traders.Vga/ModeXObjects.cs` | `DriverLineAndObjectTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `23CD:3042` | [23CD_04F6_kartenwahl.md](docs/routines/23CD_04F6_kartenwahl.md) | `src/Traders.Vga/ModeXSetup.cs` | `DriverEdgeCaseTests.cs` | ✅ |
@@ -431,7 +433,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `23CD:351E` | [23CD_32D8_blits.md](docs/routines/23CD_32D8_blits.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs`, `DriverEdgeCaseTests.cs`, `DriverWrapTests.cs` | ✅ |
 | `23CD:35DF` | [23CD_35DF_masken.md](docs/routines/23CD_35DF_masken.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs`, `DriverEdgeCaseTests.cs`, `DriverWrapTests.cs` | ✅ |
 | `23CD:373B` | [23CD_31A6_rechteck_pixel.md](docs/routines/23CD_31A6_rechteck_pixel.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
-| `23CD:3764` | [23CD_31A6_rechteck_pixel.md](docs/routines/23CD_31A6_rechteck_pixel.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
+| `23CD:3764` | [23CD_31A6_rechteck_pixel.md](docs/routines/23CD_31A6_rechteck_pixel.md) | `src/Traders.Vga/ModeXDriver.cs` | `RulePageDifferentialTests.cs`, `DriverDifferentialTests.cs` | ✅ |
 | `23CD:378B` | [23CD_378B_linie.md](docs/routines/23CD_378B_linie.md) | `src/Traders.Vga/ModeXLines.cs` | `DriverEdgeCaseTests.cs`, `DriverLineAndObjectTests.cs` | ✅ |
 | `23CD:38F2` | [23CD_378B_linie.md](docs/routines/23CD_378B_linie.md) | `src/Traders.Vga/ModeXLines.cs` | `DriverEdgeCaseTests.cs`, `DriverLineAndObjectTests.cs` | ✅ |
 | `23CD:3A9A` | [23CD_32D8_blits.md](docs/routines/23CD_32D8_blits.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs` | ✅ |
@@ -472,7 +474,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 5 | 5 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
-| `111D` | 0x860 | 7 | 1 | 1 | 1 |
+| `111D` | 0x860 | 7 | 2 | 1 | 1 |
 | `11A3` | 0x1250 | 15 | 15 | 15 | 15 |
 | `12C8` | 0x950 | 12 | 0 | 0 | 0 |
 | `135D` | 0xC00 | 14 | 14 | 14 | 14 |
@@ -496,13 +498,13 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2295` | 0xE0 | 4 | 4 | 4 | 4 |
 | `22A3` | 0x930 | 15 | 3 | 3 | 3 |
 | `2336` | 0x970 | 4 | 2 | 2 | 2 |
-| `23CD` | 0x3F90 | 25 | 29 | 29 | 29 |
+| `23CD` | 0x3F90 | 25 | 30 | 30 | 30 |
 | `27C6` | 0x5B0 | 15 | 12 | 5 | 5 |
 | `2821` | 0x2F0 | 1 | 0 | 0 | 0 |
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **318** | **305** | **305** |
+| **Summe** | **0x28DC0** | **891** | **320** | **306** | **306** |
 
 <!-- abdeckung:ende -->
 
