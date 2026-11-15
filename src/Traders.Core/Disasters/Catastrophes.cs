@@ -25,7 +25,10 @@ public static class Catastrophes
     /// <summary>DS:3854, 384C, 3834 – far pointers to the message lines of the kinds 0264 (2 lines), 03B7 (2), 0519 (6).</summary>
     public const int Message0264 = 0x3854, Message03B7 = 0x384C, Message0519 = 0x3834;
 
-    /// <summary>DS:07A0, 0780 – palettes of the kinds (0780 is shared by 03B7 and 0519).</summary>
+    /// <summary>
+    /// DS:07A0, 0780 – 12-bit palettes of the kinds (0780 is shared by 03B7 and 0519): 111D pushes them for 21FD:026C, which
+    /// ignores its argument; 03B7 reads DS:0780 for its colours.
+    /// </summary>
     public const int Palette0264 = 0x07A0, Palette03B7 = 0x0780;
 
     /// <summary>DS:00A8 – palette of the field picture.</summary>

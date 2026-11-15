@@ -58,4 +58,24 @@ public class CatastropheFrameDifferentialTests(ITestOutputHelper output)
     [MemberData(nameof(Humans))]
     public void Catastrophe_with_a_human_runs_in_lockstep(int week, int kind) =>
         Check(new Script(week, [week % 2 == 0 ? 2 : 0], RandomFor(week, kind), Fire(20, 6000)), kind);
+
+    /// <summary>
+    /// Part 2: the scene <see cref="Traders.Presentation.Disasters.DisasterScene"/> pixel by pixel – at every retrace of the
+    /// original and at the return the VRAM planes, the DAC and the CRTC start of the port equal the original's (every kind,
+    /// four computers, week 3; a human in week 4).
+    /// </summary>
+    // [DIFFERENTIAL] 111D:07E2 – columns of the third kind (picture)
+    [GameDataTheory]
+    [InlineData(3, 0, false)]
+    [InlineData(3, 1, false)]
+    [InlineData(3, 2, false)]
+    [InlineData(4, 2, true)]
+    public void Catastrophe_scene_matches_the_original_frame_by_frame(int week, int kind, bool human)
+    {
+        var script = new Script(week, human ? [2] : [], RandomFor(week, kind), human ? Fire(20, 6000) : []);
+        var r = Run(script, picture: true);
+        output.WriteLine($"{script}: kind {r.Kind}, retraces {r.Retraces}, pictures {r.PicturesCompared}");
+        Assert.Equal(kind, r.Kind);
+        Assert.Equal(r.Retraces + 1, r.PicturesCompared);
+    }
 }

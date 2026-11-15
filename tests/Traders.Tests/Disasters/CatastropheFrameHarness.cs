@@ -6,11 +6,15 @@ using Traders.Core.Menus;
 using Traders.Core.Phases;
 using Traders.Core.Pixels;
 using Traders.Core.State;
+using Traders.Presentation.Disasters;
+using Traders.Presentation.Menus;
 using Traders.RefEmu;
 using Traders.RefEmu.Machine;
 using Traders.Tests.Field;
 using Traders.Tests.Input;
 using Traders.Tests.Startup;
+using Traders.Vga;
+using Traders.Vga.Layers;
 using L = Traders.Core.State.DgroupLayout;
 
 namespace Traders.Tests.Disasters;
@@ -84,7 +88,84 @@ internal static class CatastropheFrameHarness
     }
 
     /// <summary>The kind as the original took it: −1 none, 0 (0264), 1 (03B7), 2 (0519).</summary>
-    public sealed record Result(int Kind, int Retraces, int Polls, long RandomCalls, int Typed, int WaitLoopFrames, byte[] DataSegment);
+    public sealed record Result(int Kind, int Retraces, int Polls, long RandomCalls, int Typed, int WaitLoopFrames, byte[] DataSegment,
+        int PicturesCompared);
+
+    /// <summary>
+    /// The picture (part 2): the port's <see cref="DisasterScene"/> plays every event of the core through the graphics layers
+    /// frame by frame (<see cref="DisasterScene.NextFrame"/> before each frame); it must make its k-th retrace wait in the port
+    /// frame of the k-th retrace, and there the four VRAM planes, the DAC and the CRTC start equal the original's at the entry
+    /// of its retrace wait, and so does the command list 0A96 (DS:15BA) of the layers; at the return once more.
+    /// </summary>
+    private sealed class PortOutput
+    {
+        public required DisasterScene Scene { get; init; }
+        public required ModeXDriver Driver { get; init; }
+        public required VgaDac Dac { get; init; }
+        public required FrameRetraces Retraces { get; init; }
+        public required GraphicsLayers Layers { get; init; }
+    }
+
+    private sealed class FrameRetraces : IRetraceWait
+    {
+        public long CurrentFrame { get; set; }
+
+        public List<long> Frames { get; } = [];
+
+        public void WaitForRetrace() => Frames.Add(CurrentFrame);
+    }
+
+    private sealed class PictureFiles : IPictureSource
+    {
+        public byte[] Decrunched(int resource) =>
+            PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Pictures[resource].Vga)));
+    }
+
+    private sealed class LinearMemory(byte[] memory) : IFarMemory
+    {
+        public byte Read(ushort segment, ushort offset) => memory[((segment << 4) + offset) & 0xFFFFF];
+
+        public void Write(ushort segment, ushort offset, byte value) => memory[((segment << 4) + offset) & 0xFFFFF] = value;
+    }
+
+    private static PortOutput SetUpOutput(OriginalProgram o, Dgroup core)
+    {
+        var retraces = new FrameRetraces();
+        var driver = FieldSceneHarness.DriverFrom(o);
+        var dac = new VgaDac();
+        o.Machine.Vga.Dac.CopyTo(dac.Registers, 0);
+        var memory = o.Machine.Mem.ReadBlock(0, 0, 0x100000);
+        var layers = new GraphicsLayers(driver, o.DataSegment(), dac, retraces)
+            { DataSegment = o.Dgroup, OtherMemory = new LinearMemory(memory) };
+        var scene = new DisasterScene(layers, core) { Pictures = new PictureFiles() };
+        return new PortOutput { Scene = scene, Driver = driver, Dac = dac, Retraces = retraces, Layers = layers };
+    }
+
+    private const int CommandList = 0x15BA, CommandListLength = 0x9FA;
+
+    private static void ComparePicture(OriginalProgram o, PortOutput port, string where)
+    {
+        var vga = o.Machine.Vga;
+        Assert.True(vga.StartAddress == port.Driver.DisplayStart,
+            $"{where}: display start original {vga.StartAddress:X4}, port {port.Driver.DisplayStart:X4}");
+        for (int pl = 0; pl < 4; pl++)
+        {
+            var a = vga.Planes[pl].AsSpan();
+            var b = port.Driver.Vram.Planes[pl].AsSpan();
+            int k = a.CommonPrefixLength(b);
+            if (k < a.Length)
+                Assert.Fail($"{where}: plane {pl} offset {k:X4} (page {k / 0x4000}, x {(k % 0x4000) % 80 * 4 + pl}, y {k % 0x4000 / 80}) " +
+                            $"original {a[k]:X2} port {b[k]:X2}");
+        }
+        // the command list 0A96 (DS:15BA, 9FAh bytes) of the layers equals the original's
+        var list = o.DataSegment().AsSpan(CommandList, CommandListLength);
+        int l = list.CommonPrefixLength(port.Layers.Ds.AsSpan(CommandList, CommandListLength));
+        if (l < CommandListLength)
+            Assert.Fail($"{where}: command list DS:{CommandList + l:X4} original {list[l]:X2} port {port.Layers.Ds[CommandList + l]:X2}");
+        int d = vga.Dac.AsSpan().CommonPrefixLength(port.Dac.Registers);
+        if (d < port.Dac.Registers.Length)
+            Assert.Fail($"{where}: DAC colour {d / 3} component {d % 3} original {vga.Dac[d]:X2} port {port.Dac.Registers[d]:X2}");
+    }
 
     private static readonly Lazy<IndexedImage[]> Pictures = new(() =>
         [.. ResourceTable.Pictures.OrderBy(e => (int)e.Id).Select(e => Picture(e.Vga))]);
@@ -112,7 +193,7 @@ internal static class CatastropheFrameHarness
         }
     }
 
-    public static Result Run(Script script)
+    public static Result Run(Script script, bool picture = false)
     {
         var o = OriginalProgram.Resume(TestGameData.DosDir, AtCatastrophes[script.Week].Value);
         var m = o.Machine;
@@ -145,7 +226,8 @@ internal static class CatastropheFrameHarness
         var core = new Dgroup(o.DataSegment()[..L.Size]);
         var random = new OriginalRandom(new RecordedClock([]), core.U32(L.RandomSeed));
         var page = new RulePage(RulePage.DrawPageOf(core));
-        var host = new CountingHost();
+        var output = picture ? SetUpOutput(o, core) : null;
+        var host = new CountingHost(output is null ? null : output.Scene.Apply);
         var step = new CatastropheStep(host, ProgramStartDifferentialTests.Files, page, n => Pictures.Value[n],
             DisasterTestTexts.From(o));
         var machine = new PhaseMachine(core, random,
@@ -153,18 +235,35 @@ internal static class CatastropheFrameHarness
             nextStep: CatastropheGuardStep.Call);
 
         long frame = 0;
-        machine.Advance(new PhaseTick(frame, run.Held()));
+        int pictures = 0;
+        var held = run.Held();
+        output?.Scene.NextFrame(held);
+        machine.Advance(new PhaseTick(frame, held));
         int retraces = 0;
         while (machine.Status == PhaseStatus.Waiting)
         {
             Assert.True(frame < MaxFrames, $"111D:0009 did not end within {MaxFrames} frames");
             Assert.True(run.RunToRetraceOrReturn(), $"port waits frame {frame}, the original returned (retrace {retraces}); last events {string.Join("; ", host.Last)}");
-            run.Compare(core, random.Calls, $"retrace {retraces} (port frame {frame}); last events {string.Join("; ", host.Last)}");
+            string where = $"retrace {retraces} (port frame {frame}); last events {string.Join("; ", host.Last)}";
+            run.Compare(core, random.Calls, where);
+            if (output is not null)
+            {
+                Assert.True(output.Retraces.Frames.Count == retraces + 1 && output.Retraces.Frames[^1] == frame,
+                    $"{where}: the core waits its retrace {retraces}, the scene made {output.Retraces.Frames.Count} waits (last in frame {(output.Retraces.Frames.Count > 0 ? output.Retraces.Frames[^1] : -1)})");
+                ComparePicture(o, output, where);
+                pictures++;
+            }
             retraces++;
             run.RunToRetraceEnd();
             run.CheckControls();
             frame++;
-            machine.Advance(new PhaseTick(frame, run.Held()));
+            held = run.Held();
+            if (output is not null)
+            {
+                output.Retraces.CurrentFrame = frame;
+                output.Scene.NextFrame(held);
+            }
+            machine.Advance(new PhaseTick(frame, held));
         }
         Assert.False(run.RunToRetraceOrReturn(), $"the port returned after {retraces} retraces, the original waits another");
         run.CheckControls();
@@ -172,7 +271,14 @@ internal static class CatastropheFrameHarness
             $"phase machine {machine.Status} at {machine.NextStep}");
         run.Compare(core, random.Calls, $"return of 111D:0009 after {retraces} retraces");
         Assert.Equal(retraces, step.Retraces);
-        return new Result(kind, retraces, step.Polls, random.Calls, host.Typed, host.WaitLoopFrames, core.Bytes);
+        if (output is not null)
+        {
+            Assert.False(output.Scene.Presenting, "the scene still presents after the return");
+            Assert.Equal(retraces, output.Retraces.Frames.Count);
+            ComparePicture(o, output, $"return of 111D:0009 after {retraces} retraces");
+            pictures++;
+        }
+        return new Result(kind, retraces, step.Polls, random.Calls, host.Typed, host.WaitLoopFrames, core.Bytes, pictures);
     }
 
     /// <summary>The production host; counts typed characters and the wait loop's frames, keeps the last events.</summary>
@@ -180,8 +286,9 @@ internal static class CatastropheFrameHarness
     {
         private readonly DisasterHost _host;
 
-        public CountingHost() => _host = new DisasterHost(e =>
+        public CountingHost(Action<DisasterEvent>? scene) => _host = new DisasterHost(e =>
         {
+            scene?.Invoke(e);
             if (e.Kind == DisasterEventKind.TypeCharacter) Typed++;
             Last.Enqueue(e.ToString());
             if (Last.Count > 8) Last.Dequeue();

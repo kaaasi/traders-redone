@@ -202,7 +202,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0A69:00D3` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:011B` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:0164` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
-| `0A69:01AD` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
+| `0A69:01AD` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A69:0243` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A69:0288` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A96:000A` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
@@ -268,6 +268,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `111D:03B7` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Disasters/Catastrophes.cs` | `StarShowDifferentialTests.cs` | ✅ |
 | `111D:0519` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Disasters/Catastrophes.cs` | `CatastropheDifferentialTests.cs` | ✅ |
 | `111D:0757` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Disasters/Catastrophes.cs` | `CatastropheFrameDifferentialTests.cs`, `StarShowDifferentialTests.cs` | ✅ |
+| `111D:07E2` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Presentation/Disasters/DisasterScene.cs` | `CatastropheFrameDifferentialTests.cs` | ✅ |
 | `11A3:0000` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:007D` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:0180` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
@@ -386,22 +387,22 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21AF:04A2` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21AF:04CD` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:0004` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Week/WaitLoop.cs` | `WaitLoopDifferentialTests.cs` | ✅ |
-| `21FD:0185` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PlantingFrameDifferentialTests.cs`, `PaletteLayerTests.cs` | ✅ |
+| `21FD:0185` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PlantingFrameDifferentialTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `ProgramHostTests.cs`, `RandomDifferentialTests.cs` | ✅ |
 | `21FD:021F` | [21FD_021F_wetter.md](docs/routines/21FD_021F_wetter.md) | `src/Traders.Core/Rules/WeatherRule.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `21FD:0245` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Week/WaitLoop.cs` | `MainMenuDifferentialTests.cs`, `MenuFrameDifferentialTests.cs` | ✅ |
-| `21FD:026C` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
+| `21FD:026C` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:02C9` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:0329` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:0353` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
-| `21FD:037D` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PlantingFrameDifferentialTests.cs`, `PaletteLayerTests.cs` | ✅ |
+| `21FD:037D` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PlantingFrameDifferentialTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:03B4` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Week/ReportScene.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:04DA` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
-| `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `CatastropheFrameDifferentialTests.cs`, `WeekReportSceneDifferentialTests.cs` | ✅ |
+| `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `CatastropheFrameDifferentialTests.cs`, `WeekReportSceneDifferentialTests.cs` | ✅ |
 | `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
-| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
+| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
 | `21FD:0665` | [0609_0C73_anbauszene.md](docs/routines/0609_0C73_anbauszene.md) | `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs` | ✅ |
 | `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `21FD:081D` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
@@ -479,7 +480,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 5 | 5 |
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
-| `111D` | 0x860 | 7 | 6 | 6 | 6 |
+| `111D` | 0x860 | 7 | 7 | 7 | 7 |
 | `11A3` | 0x1250 | 15 | 15 | 15 | 15 |
 | `12C8` | 0x950 | 12 | 0 | 0 | 0 |
 | `135D` | 0xC00 | 14 | 14 | 14 | 14 |
@@ -509,7 +510,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **324** | **311** | **311** |
+| **Summe** | **0x28DC0** | **891** | **325** | **312** | **312** |
 
 <!-- abdeckung:ende -->
 

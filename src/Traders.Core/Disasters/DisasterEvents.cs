@@ -16,7 +16,10 @@ public enum DisasterEventKind
     FadeOut,
     /// <summary>21FD:0329 – fade in.</summary>
     FadeIn,
-    /// <summary>21FD:026C(offset) – base palette from the palette at DS:offset.</summary>
+    /// <summary>
+    /// 21FD:026C – base palette ← loaded palette (DS:5017 → DS:3DCB); the argument is the far pointer 111D pushes (DS:00A8,
+    /// 07A0, 0780), which 026C ignores.
+    /// </summary>
     BasePalette,
     /// <summary>2295:006D(index, rgb12) – one colour register.</summary>
     SetColour,

@@ -1,4 +1,4 @@
-# 111D:0009 / 111D:0112 / 111D:0264 / 111D:03B7 / 111D:0519 / 111D:0757 – Katastrophen (Wächter R5, Rest und Arten R6)
+# 111D:0009 / 111D:0112 / 111D:0264 / 111D:03B7 / 111D:0519 / 111D:0757 / 111D:07E2 – Katastrophen (Wächter R5, Rest und Arten R6)
 
 - **Ladebild-Adresse:** `111D:0009` (Dateioffset `0x147D9`, Segment `111D` bei `0x147D0`)
 - **Aufgabe:** Aufruf 4 der Wochenschleife `1777:01F8` (`1777:021A`). Der **Wächter** (R5P-6) kehrt in den ersten Wochen und bei
@@ -106,7 +106,7 @@ Kacheln `0609:1ED9` und der Rahmen `0609:1256(8Ch, 88h, A0h, 2Ch)` aus `0009` (d
 | `08F1` | B | u | Landart für `0E31:0361` | gelesen |
 | `08CE` / `08D2` | W | s | Bildnummern Feld / Berge | gelesen |
 | `385C`, `3854`, `384C`, `3834` | D | – | Fernzeiger auf Titel und Meldezeilen | gelesen (nur weitergereicht) |
-| `07A0`, `0780` | W[] | u | Paletten der Arten (12-Bit-Farben) | gelesen |
+| `07A0`, `0780` | W[] | u | Paletten der Arten (12-Bit-Farben); `21FD:026C` bekommt den Zeiger, wertet ihn aber nicht aus (Grundpalette = geladene Palette) | `0780` gelesen (`03B7`) |
 
 ### Zufall in Reihenfolge
 
@@ -130,6 +130,15 @@ als Eingabe. Die getippten Zeilen (`TypeLines`, `0A69:0288`/`0243`/`01AD`) liefe
 aus dem Textpuffer als expliziter Eingabe (`DisasterTexts`, im Host `ProgramStart.TextBuffer`), jedes Zeichen als Ereignis
 `TypeCharacter` für die Szene. `DisasterHost` ist der Host mit Pause `21FD:0245` und Warteschleife `21FD:0004(3)` (Spur bilanz).
 
+### Szene (Teil 2)
+
+`src/Traders.Presentation/Disasters/DisasterScene.cs` spielt die `DisasterEvent`s über die Grafikschichten (`Traders.Vga`) Bild für
+Bild ab (`NextFrame` je Bild, wie `FieldScene`): Bildladen, Aus-/Einblenden, Grundpalette (`21FD:026C` ohne Argument), Farbregister
+`2295:006D`, Kacheln und Rahmen über `FieldScene.Background`/`Frame`, Titel `0A69:00D3`, getippte Zeichen (`0A69:0243`/`01AD`: zentriert,
+Zeile y + i·(`[34A4]` + `[34A4]`/5), Zeichen über `DS:0140`, `21FD:060D`, `0185(Wartezeit)`), `21FD:060D`/`051F`/`0590` (zwei Rückläufe),
+Spalten `07E2` (Linie `0A69:002C(x + 60, si, h, 12)` bzw. Atlas-Spalte, `si = max(0, 45 − x/3)`, `h = 46 − x/5 − si`), Vorführung
+(`0A96:0030`/`04D7`/`03FB`/`06A8`), Objekte der Warteschleife. Liest nur; Ton gehört der Tonschicht.
+
 ### Prüfung (Rest)
 
 `tests/Traders.Tests/Disasters/CatastropheFrameDifferentialTests.cs` (`CatastropheFrameHarness`): `111D:0009` als Aufruf 4 der
@@ -139,6 +148,10 @@ des Originals wartet der Port sein Bild, Datensegment (außer den Bytes der Ausg
 `DS:10D2` und Zahl der Ziehungen gleich, bei der Rückkehr erneut. Fälle: keine, Art 0, 1, 2 mit vier Computern und je eine Art mit
 einem Menschen (Steuerung 4, Ins bestätigt die Warteschleife); die Art liest der Test aus dem Original (Eintritt `0264`/`03B7`/`0519`).
 Gegenproben lokal rot: Wartezeit je Zeichen 2 statt 3; `21FD:0590` ohne Wartebilder. Nicht geprüft: Pause (P) mitten in der Routine.
+Bild (Teil 2): `Catastrophe_scene_matches_the_original_frame_by_frame` (Art 0, 1, 2 mit vier Computern in Woche 3, Art 2 mit einem
+Menschen in Woche 4): an jedem Rücklauf und bei der Rückkehr VRAM-Ebenen, DAC, CRTC-Start und Befehlsliste `DS:15BA` der Szene gleich
+dem Original; die Szene wartet ihre Rückläufe in den Bildern des Kerns. Gegenproben lokal rot: Sternfarbe fest 9; getipptes Zeichen
+um 1 Pixel versetzt; eine Spalte von `07E2` ausgelassen.
 
 `tests/Traders.Tests/Disasters/StarShowDifferentialTests.cs` (Abzug am Hauptmenü, Zeichnen des Originals echt; Ein-/Ausblenden,
 Paletten, Ton, getippte Zeilen, `07E2`, Wartezeiten, Pause und Warteschleife durch `retf` ersetzt; mitgeschrieben die Aufrufe aus
