@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md)).
 
-## Aktuelle Runde: 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (Plan Leitstelle 15.11.2026, F1 = B, Go nötig)
+## Aktuelle Runde: 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (Plan Leitstelle 15.11.2026, F1 = B, Go Nutzer 15.11.2026)
 
 **Ziel:** Die Wochenschritte 4, 9, 11 und 16 laufen im Port statt im RefEmu: Katastrophen `111D:0009` mit Sternvorführung
 (`V-BERGE`, Aufruf 4, ab Woche 3 bei eingeschaltetem Schalter `DS:2F30`; der Wächter ist seit R5 portiert), Wochenereignisse
@@ -136,7 +136,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
   Spielers vertauscht, Kollision um ein Pixel verschoben, eine Ziehung ausgelassen, Ertrag doppelt gebucht → rot);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** keine; `23CD:06DE` bis zum Merge von 1 über das Orakel bzw. als Aufruf der Spur-1-Klasse nach deren Commit.
-  Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 nur nach F2.
+  Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
 - **Status:** –
 
 ## Zuständigkeit gemeinsamer Dateien in R6
@@ -156,11 +156,11 @@ werden gerufen, nicht geändert; braucht eine Spur dort eine Änderung, meldet s
 2 → 1 → 3 → 0 (Teil 3 von 0 erst nach Merge von 1, 2 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss
 M6/M9/M10.
 
-## Offene Fragen an den Nutzer (R6)
+## Entscheidungen des Nutzers (R6)
 
-- **G1:** Go für Runde 6 mit diesem Plan (vier Spuren, alle Opus)?
+- **G1 = ja** (Nutzer 15.11.2026): Go für Runde 6 mit diesem Plan (vier Spuren, alle Opus).
 - **F1 = B** (Nutzer 15.11.2026): Stationen `1B03` aus R7 vorgezogen (Spur 3), Host spielt bis zur Ernte.
-- **F2:** Darf Spur 3 `stationen` wie `anbau` in R5 bis zu zwei Fortsetzungen über das Limit von 3 hinaus bekommen?
+- **F2 = ja** (Nutzer 15.11.2026): Spur 3 `stationen` darf bis zu zwei Fortsetzungen über das Limit von 3 hinaus bekommen.
 
 Offen und nicht in R6: P3 #49, #75, #76 (P3-2/-3). #121 und #142 behebt der Plan-PR.
 
