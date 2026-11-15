@@ -109,7 +109,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Szene pixelgenau; Gegenprobe im Review (Katastrophenart vertauscht, eine Ziehung der Vorführung ausgelassen, falsches Feld
   getroffen → rot); `abdeckung.py --check` grün, `192D:1177` gezählt.
 - **Abhängigkeiten:** keine (Spur 0 bindet ein).
-- **Status:** –
+- **Status:** Teil 1a (Regelseite, Branch `paket/regelseite`) fertig, Ready for review (Claude, 15.11.2026); Teil 1 auf `paket/katastrophen` begonnen.
 
 ## 2 `ereignisse` – Wochenereignisse `17CB:0005` und Leseregel
 
