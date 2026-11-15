@@ -91,7 +91,9 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
 
 - **Teile:** (1) **Befund und Kern** (`src/Traders.Core/Disasters/**`): Befund `111D:0009` (Nachtrag zum Wächter-Befund
   `111D_0009_katastrophen.md`) mit `0112` (Vorführung, Ziehungen 319/150), den drei Katastrophenarten `0264`, `03B7`, `0519`
-  (Wahl über `random(10)`/`random(2)` in `0009`), Meldefenster `0757`, `07E2`; zuerst die **Regelseite** (gemeinsame Vorgaben, sofort committen) mit den Pixel-Lesestellen in `0112`: Auswahl, Wirkung auf Felder
+  (Wahl über `random(10)`/`random(2)` in `0009`), Meldefenster `0757`, `07E2`; zuerst die **Regelseite** (gemeinsame Vorgaben) als **eigener kleiner PR** `paket/regelseite` (Teil 1a, R6N-1: Seitenmodell,
+  Bildeingabe, Differenztest an den Lesestellen von `0112`; sofort Ready for review, die Leitstelle legt das Erstreview an und
+  merged vor allen anderen), danach auf `paket/katastrophen`: Auswahl, Wirkung auf Felder
   (`0609:10D2`, Bodengüte, Feldart, Rücksetzen über `0E31:0361`), betroffene Spieler, Zufall in Reihenfolge, Bildfolge mit
   Seitenwechseln `21FD:051F`/`0185`/`0245` und Warteschleife `21FD:0004(3)`. Handler als Rest hinter `CatastropheGuardStep`
   (Vertrag `IWeekStepHandler`, im Befund festhalten). Differenztests über `LoadOnly`/`Call(111D:0009)` mit Zuständen, in denen
@@ -135,7 +137,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Reihenfolge (u. a. `0079` 11/2/3, `0101` 6, `01C3` 2, `0849` 3/299, `0A62` 10, `0B7A` 5000, `0EA9` 20/30, `1178` 319/199/2),
   Kern- und Zeichenteil je Routine belegen und trennen; Stationswahl und -ertrag (Buchungen auf Geld, Vorräte, Felder über
   `0609:10D2`) im Kern mit Differenztests über `LoadOnly`/`Call`. (2) **Kern II:** Raketenflug und Piraten Bild für Bild als
-  Kern-Ereignisse – Bewegung, Eingabe, Kollision gegen `V-RAKETE` (kanonischer Atlas im Kern), Sichtbarkeit, Piratenangriff mit
+  Kern-Ereignisse – Bewegung, Eingabe, Kollision gegen `V-RAKETE` (Regelseite des Kerns `Pixels/`), Sichtbarkeit, Piratenangriff mit
   Folgen; Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler) für Woche 0 und eine spätere Woche, je mit Mensch und
   Computer, Grenzfälle (kein Geld, Rakete getroffen, Zeitablauf). (3) **Szene** `src/Traders.Presentation/Stations/`:
   Zeichenteil aller Routinen (Objekte `21AF`, Seiten `0B67`, Schichten `0A96`/`0A69`), pixelgenau gegen den RefEmu je Bild über
@@ -145,8 +147,9 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Station eines
   Spielers vertauscht, Kollision um ein Pixel verschoben, eine Ziehung ausgelassen, Ertrag doppelt gebucht → rot);
   `check-architecture.py` grün.
-- **Abhängigkeiten:** Regelseite von Spur 1 (Teil 1, sofort committet; bis zum Merge von 1 per Merge des Branches oder über das
-  Orakel); Teil 1 braucht sie nicht.
+- **Abhängigkeiten:** Regelseite (Spur 1 Teil 1a, eigener PR) – Teil 1 braucht sie schon für `1178` (R6N-1): bis zu deren
+  Merge zuerst die pixelfreien Routinen, nie Dateien aus `Pixels/**` außer `Pixels/Stations*` übernehmen; ist sonst nichts mehr
+  zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
 - **Status:** –
 
@@ -165,7 +168,7 @@ werden gerufen, nicht geändert; braucht eine Spur dort eine Änderung, meldet s
 
 ## Integrationsfolge R6
 
-2 → 1 → 3 → 0 (3 nach 1 wegen der Regelseite; Teil 3 von 0 erst nach Merge von 1, 2 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss
+Regelseite (1a) → 2 → 1 → 3 → 0 (1a so früh wie möglich; Teil 3 von 0 erst nach Merge von 1, 2 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss
 M6/M9/M10.
 
 ## Entscheidungen des Nutzers (R6)
