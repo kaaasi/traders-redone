@@ -404,3 +404,5 @@ Befund [17CB_0005_wochenereignisse.md](../routines/17CB_0005_wochenereignisse.md
 | `3940` | far ptr | `TakeoverText` | Text 5Dh der Tabelle `37CC`: Feldübernahme (7 Zeilen) | G |
 | `395C + 10h·k` | far ptr | `BlightText` | Text 64h + 4·k: Ernteausfall der Art k (4 Zeilen) | G |
 | `082E` | W | `PageCopyArgument` | Argument der Seitenkopie `0A96:0C3F` im Fenster `0986` | G |
+| `0140` | B | `TypewriterChar` | Zeichen der Schreibmaschine `0A69:01AD` (vom Kern geschrieben, `0141` = 0) | G |
+| `1126` | B | `IncidentText.NumberFill` | Füllzeichen für führende Leerzeichen/Nullen in `2295:0001` (gelesen) | G |

@@ -42,9 +42,11 @@ public sealed class IncidentsDifferentialTests
     internal sealed record Scenario(int[] Cash, int[] Fields, bool[] Computers, uint Seed, KeyScript Keys, short Iq = 1,
         short Week = 2, int[][]? Kinds = null, int Columns = 9, int Rows = 6, short LandPrice = 0);
 
-    internal static Dgroup Input(IncidentsHarness h, Scenario s)
+    internal static Dgroup Input(IncidentsHarness h, Scenario s) => Apply(h.Initial(), s);
+
+    /// <summary>Sets the scenario's values in <paramref name="d"/> (also used on a running game's state by the scene tests).</summary>
+    internal static Dgroup Apply(Dgroup d, Scenario s)
     {
-        var d = h.Initial();
         d.Set(L.FieldColumns, (short)s.Columns);
         d.Set(L.FieldRows, (short)s.Rows);
         for (int i = 0; i < 9 * 6; i++)
@@ -114,6 +116,9 @@ public sealed class IncidentsDifferentialTests
     private static readonly int[][] BlightKinds = [[0], [0, 1], [1, 2], [0]];
 
     /// <summary>Scenarios with the branch they reach in the original (seeds found by searching the original's runs).</summary>
+    /// <summary>The scenario named <paramref name="name"/>.</summary>
+    internal static Scenario Get(string name) => Table[name];
+
     private static readonly Dictionary<string, Scenario> Table = new()
     {
         ["nothing happens"] = new([90_000, 50_000, 20_000, 5_000], [9, 5, 5, 5], AllComputers, 15, new KeyScript(), Kinds: BlightKinds, Week: 0),

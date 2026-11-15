@@ -57,6 +57,13 @@ Rang 0 `random(3)` = 0. Erste Art si 0…2 mit `342C[di·3 + si]` > 60 (vorzeich
 
 **`09E0` Text:** `0A69:0288(0, 86h − 7·Zeilen, 140h, Zeiger, Zeilen, Farbe, 5)`.
 
+**Schreibmaschine `0A69:0288` → `0243` → `01AD`:** je Zeile i (0 … Zeilen − 1, vorzeichenbehaftet; Nullzeiger überspringen) je
+Zeichen k, solange strlen > k: `DS:0140` = Zeichen, `0A96:001B`, `0A96:0525(x, y, DS:0140, Farbe, −1)` mit
+x = 1 + (140h − strlen·`3CA8`)/2 (vorzeichenlos) + k·`3CA8`, y = 86h − 7·Zeilen + i·(`34A4` + `34A4`/5); `21FD:060D`, Klick
+`21A7:0054(1, 16h)` außer bei Leerzeichen, Pause-Taste `21FD:0245`, `21FD:0185(5)`; Endwartezeit −1 (keine).
+**`2295:0001`** schreibt den Betrag (Breite 4, führende Leerzeichen/Nullen → `DS:1126`) ohne Endnull in den Text; der Text ist
+danach im Textpuffer `DS:4884` geändert.
+
 ## Zustand
 | DS-Offset | Breite | Vorzeichen | Bedeutung | gelesen/geschrieben |
 |---|---|---|---|---|
@@ -73,17 +80,21 @@ Rang 0 `random(3)` = 0. Erste Art si 0…2 mit `342C[di·3 + si]` > 60 (vorzeich
 | `10D2` | D | u | Zufall | g/s |
 
 ## Seiteneffekte in Reihenfolge
-Zufall in Reihenfolge (oben); Uhr nur über `random(0)` in `0736`. Grafik, Palette, Schrift (`05DB` schreibt `3CA8`/`34A4`),
-Ton: Ausgabe (Szene, Teil 3). Wartezeiten: `037D` acht Stufen à `0185(4)`, `0329` à `0185(3)`, je plus ein Bildwechsel in
-`2295:00C5` bei `090E` = 1; `0185(n)` n Bildwechsel; Seitenwechsel `051F` wie im Menü; Eingabe nur in `21FD:0004(0)`.
+Zufall in Reihenfolge (oben); Uhr nur über `random(0)` in `0736`. Textpuffer: Betrag (`2295:0001`); `DS:0140` je Zeichen.
+Grafik, Palette, Schrift (`05DB` schreibt `3CA8`/`34A4`), Ton: Ausgabe (Szene). Wartezeiten: `037D` acht Stufen à `0185(4)`, `0329` à `0185(3)`, je plus ein Bildwechsel in
+`2295:00C5` bei `090E` = 1; `0185(n)` n Bildwechsel; Seitenwechsel `051F` wie im Menü; Schreibmaschine je Zeichen `060D` (Seitenwechsel), `0245`
+(P-Taste) und `0185(5)`; Eingabe sonst nur in `21FD:0004(0)`.
 
-Noch nicht portiert und nur als Ereignis: `21A7:0054` (Ton, R10), `0609:1879`, `0609:1ED9`, `0609:1256`, `0A69:0288`,
-`2295:0001` (Zeichenseite, Teil 3). Gerufen statt nachgebaut: `0825:06CB`, `22A3:0750`, `0609:10D2`, `21FD:0004`,
-`21FD:0185`/`037D`/`0329` (Wartezeiten über `Planting.Retraces`/`Fade`).
+Nur als Ereignis: `21A7:0054` (Ton, R10). Zeichenteil in der Szene: `0609:1879`, `0609:1ED9`, `0609:1256`, Zeichen von
+`0A69:01AD`, Fenster, Blenden, Seiten. Im Kern: Takt und Speicher von `0A69:0288`/`0243`/`01AD`, `2295:0001`. Gerufen statt
+nachgebaut: `0825:06CB`, `22A3:0750`, `0609:10D2`, `21FD:0004`, `21FD:0245` (`Planting.Pause`), `21FD:0185`/`037D`/`0329`
+(Wartezeiten über `Planting.Retraces`/`Fade`); Szene: `FieldScene.Background`/`Frame`, Blenden und Seitenwechsel der Schichten.
 
 ## C#-Umsetzung
 `src/Traders.Core/Events/WeekIncidents.cs` (`WeekIncidents`, `IncidentLayout`, Schritt `WeekIncidentsStep`),
-`src/Traders.Core/Events/IncidentEvents.cs` (ein Ereignis je Aufruf des Originals).
+`src/Traders.Core/Events/IncidentEvents.cs` (ein Ereignis je Aufruf des Originals), `src/Traders.Core/Events/IncidentTexts.cs`
+(`ITextMemory`, `TextBufferMemory` über `ProgramStart.TextBuffer`, `2295:0001`). Szene
+`src/Traders.Presentation/Events/IncidentScene.cs` (spielt die Ereignisse ab, liest Kern und Textpuffer).
 
 ## Prüfung
 - `IncidentsDifferentialTests.Week_incidents_17CB_0005_matches_original` (22 Szenarien, Schichten gestubbt): ganzes
@@ -93,5 +104,13 @@ Noch nicht portiert und nur als Ereignis: `21A7:0054` (Ton, R10), `0609:1879`, `
   Abbruch), Ernteausfall (Rang 0 und 1, `random(0)`, kleines Feld 5 × 4); Wochen 0–3.
 - `Scenarios_reach_every_branch_in_the_original`: jeder Verzweigungspunkt, alle fünf Klassen, `random(0)` und Abbruch im
   Original erreicht.
-- Mehrrundenprobe `IncidentsMultiWeekTests` (Standardspiel, Wochen 0–3, ungestubbter RefEmu, Ereignis in Woche 2).
+- Schreibmaschine im Differenztest: `0A69:01AD`/`0243`/`0288` und `2295:0001` laufen im Original (übrige Schichten gestubbt),
+  hinter den Textmarken liegen die Zeilen aus `ENGLISCH.TXT`; verglichen werden zusätzlich `0A96:0525` (Zeichen, Farbe), der
+  Klick, alle Bildwechsel und der Textspeicher.
+- Szene `EventsSceneDifferentialTests` (`EventsSceneHarness`, laufendes Standardspiel, alle Schichten live): VRAM aller Seiten,
+  DAC, CRTC-Start, Retraces und Bildnummer bei jeder Blende, jedem Seitenwechsel (auch je Zeichen und in der Warteschleife) und
+  am Ende; kein Ereignis (Woche 0), Ereignis der Woche 2, Übernahme (auch Menschen mit Keypad und Feuer), Verlust,
+  Gewinn mit P-Pause, Ernteausfall mit Gewinn. Gegenproben: Zeichen eine Spalte versetzt (6 von 7 rot), Wartezeit 4 statt 5
+  (25 von 30 rot).
+- Mehrrundenprobe `IncidentsMultiWeekTests` (vergleicht auch den Textpuffer) (Standardspiel, Wochen 0–3, ungestubbter RefEmu, Ereignis in Woche 2).
 - Gegenproben (gezeigt): Gruppen vertauscht, Vorzeichen der Buchung, ausgelassene `random(9)`, umgekehrte Ernteziehung → rot.

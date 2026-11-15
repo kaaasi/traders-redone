@@ -55,12 +55,14 @@ public sealed class IncidentsMultiWeekTests
             Assert.True(p.RunToRoutine(0x17CB, 0x0005, 1800), $"incidents of week {week} not reached");
             Assert.Equal(week, p.Week);
             var core = new Dgroup(p.DataSegment().AsSpan(0, L.Size).ToArray());
+            var texts = TextBuffer(p, core);
             clock.Clear();
             Assert.True(p.RunToRoutine(0x1777, 0x0240, 600), $"return of the incidents of week {week} not reached");
             var original = p.DataSegment();
+            var originalTexts = TextBuffer(p, core);
 
             var random = new OriginalRandom(new RecordedClock(clock), core.U32(L.RandomSeed));
-            var incidents = new WeekIncidents(core, random, KeyboardOnlyDevices.Instance);
+            var incidents = new WeekIncidents(core, random, KeyboardOnlyDevices.Instance, new TextBufferMemory(core, () => texts));
             long frames = 0;
             KeyTable.Write(core, []);
             foreach (var _ in incidents.Run())
@@ -76,7 +78,17 @@ public sealed class IncidentsMultiWeekTests
                 for (int i = 0; i < length; i++)
                     Assert.True(original[offset + i] == core.U8(offset + i),
                         $"week {week} {name} DS:{offset + i:X4} original {original[offset + i]:X2} port {core.U8(offset + i):X2}");
+            Assert.True(originalTexts.AsSpan().SequenceEqual(texts), $"week {week}: text buffer (amount of 2295:0001) differs");
         }
         Assert.True(windows.Sum() > 0, "no incident in four weeks: " + string.Join(", ", windows));
+    }
+
+    /// <summary>The text buffer behind DS:4884 in the RefEmu (the scan range of 192D:18B6).</summary>
+    private static byte[] TextBuffer(OriginalProgram p, Dgroup core)
+    {
+        ushort off = core.U16(MenuLayout.TextBuffer), seg = core.U16(MenuLayout.TextBuffer + 2);
+        var b = new byte[MenuTexts.ScanLimit + 1];
+        for (int i = 0; i < b.Length; i++) b[i] = p.Machine.Mem.Read8(seg, (ushort)(off + i));
+        return b;
     }
 }

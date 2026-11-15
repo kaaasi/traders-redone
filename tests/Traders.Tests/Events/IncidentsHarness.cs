@@ -15,12 +15,14 @@ namespace Traders.Tests.Events;
 /// the same data segment and the same keys per frame, and compares the data segment, random() and the calls to the layers.
 ///
 /// Graphics, sound, palettes and waits are the scene's business, so in the original their far routines return at once (stubs:
-/// 0A96, 0A69, 21A7, 23CD, 186C, 21AF, 2295, 0609:1FCC/1ED9/1256/1879 and in 21FD the page flip 051F, the fades 037D/0329, the
-/// palette routines 026C/03EB/04DA/0590, the font 05DB and the wait 0185) and are logged with their arguments; the rules
-/// (0825:06CB, 22A3:0750, 0609:10D2, the wait loop 21FD:0004 with 0E9E:037A) run. Frames as in
+/// 0A96, 0A69 except the typewriter 01AD/0243/0288, 21A7, 23CD, 186C, 21AF, 2295 except the number text 0001,
+/// 0609:1FCC/1ED9/1256/1879 and in 21FD the page flip 051F, the fades 037D/0329, the palette routines 026C/03EB/04DA/0590, the
+/// font 05DB and the wait 0185) and are logged with their arguments; the rules (0825:06CB, 22A3:0750, 0609:10D2, the wait loop
+/// 21FD:0004 with 0E9E:037A) and the typewriter's frames, DS:0140 and the amount written into the text (2295:0001) run. Frames as in
 /// <see cref="Week.WaitLoopHarness"/>: page flip two retraces (keypad plus/minus), 0185(n) n retraces, the fades eight stages of
 /// 0185(4) resp. 0185(3) plus the retrace of 2295:00C5 in VGA mode (DS:090E = 1), every taken back edge of the pause loop one.
-/// The text pointers DS:37CC are replaced by marks (text i → 7000:i·100h) so the logged far pointers name the text index.
+/// The text pointers DS:37CC are replaced by marks (text i → 7000:i·100h) so the logged far pointers name the text index;
+/// behind each mark lies the text line i of ENGLISCH.TXT (both sides), and the text memory is compared after the run.
 /// </summary>
 internal sealed class IncidentsHarness
 {
@@ -59,6 +61,7 @@ internal sealed class IncidentsHarness
 
     private readonly OriginalProgram _program = OriginalProgram.LoadOnly(TestGameData.DosDir);
     private readonly byte[] _initial;
+    private readonly byte[] _texts = MarkedTextMemory();
     private Func<long, IReadOnlyCollection<byte>> _keys = _ => [];
     private long _frame;
     private readonly List<Call> _calls = [];
@@ -82,11 +85,16 @@ internal sealed class IncidentsHarness
         var exe = m.Files.Load("T.EXE") ?? throw new FileNotFoundException("T.EXE");
         foreach (var (seg, off) in MzLoader.FarCallTargets(exe))
         {
-            bool stub = seg is 0x0A96 or 0x0A69 or 0x21A7 or 0x23CD or 0x186C or 0x21AF or 0x2295
+            bool stub = seg is 0x0A96 or 0x21A7 or 0x23CD or 0x186C or 0x21AF
+                || (seg == 0x0A69 && off is not (0x01AD or 0x0243 or 0x0288))
+                || (seg == 0x2295 && off != 0x0001)
                 || (seg == 0x0609 && off is 0x1FCC or 0x1ED9 or 0x1256 or 0x1879)
                 || (seg == Seg21FD && Stubs21FD.Contains(off));
             if (stub) m.AddCodeHook(_program.Segment(seg), off, mm => Stub(mm, seg, off));
         }
+        // the typewriter and the number text run; their calls are logged at the entry (arguments behind the return address)
+        m.AddCodeHook(_program.Segment(0x0A69), 0x0288, _ => Log(0x0A69, 0x0288, 2));
+        m.AddCodeHook(_program.Segment(0x2295), 0x0001, _ => Log(0x2295, 0x0001, 2));
         foreach (var (off, onZero) in PauseEdges)
             m.AddCodeHook(_program.Segment(Seg21FD), off, mm => { if (mm.Cpu.GetFlag(Cpu286.ZF) == onZero) NextFrame(); });
         m.AddCodeHook(_program.Segment(Seg21FD), 0x01BA, _ => _random.Add((_frame, (short)_program.StackArgument(0))));
@@ -123,8 +131,17 @@ internal sealed class IncidentsHarness
         }
     }
 
-    // After the return address is popped the arguments start at SS:SP.
-    private int ArgAt(int i) => _program.Machine.Mem.Read16(_program.Machine.Cpu.Ss, (ushort)(_program.Machine.Cpu.Sp + 2 * i));
+    // After the return address is popped the arguments start at SS:SP (at a routine's entry 2 words later).
+    private int _skip;
+
+    private int ArgAt(int i) => _program.Machine.Mem.Read16(_program.Machine.Cpu.Ss, (ushort)(_program.Machine.Cpu.Sp + 2 * (i + _skip)));
+
+    private void Log(ushort seg, ushort off, int skip)
+    {
+        _skip = skip;
+        Log(seg, off);
+        _skip = 0;
+    }
 
     private void Log(ushort seg, ushort off)
     {
@@ -149,6 +166,11 @@ internal sealed class IncidentsHarness
                 Assert.Equal((0, 0x140, 5), (ArgAt(0), ArgAt(2), ArgAt(7)));
                 Assert.Equal(_program.Dgroup, ArgAt(4));
                 _calls.Add(new(_frame, seg, off, (ArgAt(3) - MenuLayout.TextPointers) / 4, ArgAt(5), ArgAt(6)));
+                break;
+            case (0x0A96, 0x0525):
+                // 0A69:01AD: (x, y, DS:0140, colour, −1); the positions depend on the font (the scene's)
+                Assert.Equal((IncidentLayout.TypewriterChar, _program.Dgroup, 0xFFFF), (ArgAt(2), ArgAt(3), ArgAt(5)));
+                _calls.Add(new(_frame, seg, off, _program.ReadByte(IncidentLayout.TypewriterChar), ArgAt(4)));
                 break;
             case (0x0A96, 0x0C3F) or (Seg21FD, 0x037D) or (Seg21FD, 0x05DB) or (Seg21FD, 0x026C):
                 _calls.Add(new(_frame, seg, off, ArgAt(0)));
@@ -183,6 +205,42 @@ internal sealed class IncidentsHarness
         foreach (byte sc in held) _program.WriteByte((ushort)(DgroupLayout.KeyState + sc), 1);
     }
 
+    /// <summary>Text memory of segment <see cref="TextSegment"/>: text line i of ENGLISCH.TXT (zero-terminated) at i·100h.</summary>
+    public static byte[] MarkedTextMemory()
+    {
+        var file = File.ReadAllBytes(TestGameData.Dos(Traders.Assets.ResourceTable.EnglishText));
+        var buffer = new byte[Math.Max(file.Length, MenuTexts.ScanLimit) + 1];
+        file.CopyTo(buffer, 0);
+        var table = new Dgroup(new byte[DgroupLayout.Size]);
+        MenuTexts.Build(table, buffer); // buffer at 0000:0000, so the pointers are offsets into it
+        var memory = new byte[MarkedTexts << 8];
+        for (int i = 1; i < MarkedTexts; i++)
+        {
+            int at = table.U16(MenuLayout.TextPointers + 4 * i);
+            int n = Array.IndexOf(buffer, (byte)0, at) - at;
+            Assert.True(n < 0x100, $"text {i:X} longer than its mark");
+            Array.Copy(buffer, at, memory, i << 8, n);
+        }
+        return memory;
+    }
+
+    /// <summary>The text memory behind the marks for the port (<see cref="TextMarks"/>).</summary>
+    public sealed class TextMarks(byte[] memory) : ITextMemory
+    {
+        public byte[] Memory { get; } = memory;
+
+        private int Index(ushort segment, ushort offset)
+        {
+            Assert.Equal(TextSegment, segment);
+            Assert.True(offset < Memory.Length, $"text read {segment:X4}:{offset:X4} beyond the marks");
+            return offset;
+        }
+
+        public byte Read(ushort segment, ushort offset) => Memory[Index(segment, offset)];
+
+        public void Write(ushort segment, ushort offset, byte value) => Memory[Index(segment, offset)] = value;
+    }
+
     /// <summary>Fresh copy of the data segment as loaded from T.EXE, with the text pointers replaced by marks.</summary>
     public Dgroup Initial()
     {
@@ -196,7 +254,7 @@ internal sealed class IncidentsHarness
     }
 
     public sealed record Outcome(byte[] DataSegment, long Frames, IReadOnlyList<(long Frame, short Arg)> Random,
-        IReadOnlyList<Call> Calls, IReadOnlyList<int> Clock, IReadOnlySet<string> Visited);
+        IReadOnlyList<Call> Calls, IReadOnlyList<int> Clock, IReadOnlySet<string> Visited, byte[] Texts);
 
     /// <summary>Calls 17CB:0005 in the original with <paramref name="input"/> and the keys per frame.</summary>
     public Outcome RunOriginal(Dgroup input, Func<long, IReadOnlyCollection<byte>> keys)
@@ -205,6 +263,7 @@ internal sealed class IncidentsHarness
         var full = (byte[])_initial.Clone();
         input.Bytes.AsSpan(0, DgroupLayout.Size).CopyTo(full);
         m.Mem.WriteBlock((uint)(_program.Dgroup * 16), full);
+        m.Mem.WriteBlock((uint)TextSegment << 4, _texts);
         m.Cpu.Ss = 0x9000;
         m.Cpu.Sp = 0xFFF0;
         _keys = keys;
@@ -215,10 +274,13 @@ internal sealed class IncidentsHarness
         _visited.Clear();
         WriteKeys(keys(0));
         _program.Call(Seg17CB, 0x0005);
-        return new Outcome(_program.DataSegment(), _frame, _random.ToList(), _calls.ToList(), _clock.ToList(), _visited.ToHashSet());
+        var texts = new byte[_texts.Length];
+        for (int i = 0; i < texts.Length; i++) texts[i] = m.Mem.Read8(TextSegment, (ushort)i);
+        return new Outcome(_program.DataSegment(), _frame, _random.ToList(), _calls.ToList(), _clock.ToList(), _visited.ToHashSet(),
+            texts);
     }
 
-    public sealed record PortOutcome(Dgroup State, long Frames, IReadOnlyList<Call> Calls, WeekIncidents Incidents);
+    public sealed record PortOutcome(Dgroup State, long Frames, IReadOnlyList<Call> Calls, WeekIncidents Incidents, byte[] Texts);
 
     /// <summary>
     /// Port run: frame 0 runs the coroutine to its first wait, every later frame resumes it once with the keys of that frame
@@ -228,7 +290,8 @@ internal sealed class IncidentsHarness
     {
         var d = new Dgroup((byte[])input.Bytes.Clone());
         var random = new OriginalRandom(new RecordedClock(clock), d.U32(DgroupLayout.RandomSeed));
-        var incidents = new WeekIncidents(d, random, KeyboardOnlyDevices.Instance);
+        var texts = new TextMarks(MarkedTextMemory());
+        var incidents = new WeekIncidents(d, random, KeyboardOnlyDevices.Instance, texts);
         using var run = incidents.Run().GetEnumerator();
         long frame = 0;
         KeyTable.Write(d, keys(0));
@@ -242,11 +305,11 @@ internal sealed class IncidentsHarness
             if (++frame > 50_000) throw new InvalidOperationException("Port coroutine did not finish.");
             KeyTable.Write(d, keys(frame));
         }
-        return new PortOutcome(d, frame, Expand(incidents.Events), incidents);
+        return new PortOutcome(d, frame, Expand(incidents.Events, texts), incidents, texts.Memory);
     }
 
     /// <summary>The original calls each port event stands for.</summary>
-    private static List<Call> Expand(IEnumerable<IncidentEvent> events)
+    private static List<Call> Expand(IEnumerable<IncidentEvent> events, TextMarks texts)
     {
         var calls = new List<Call>();
         foreach (var e in events)
@@ -268,6 +331,7 @@ internal sealed class IncidentsHarness
                 IncidentEventKind.Flip => new(e.Frame, Seg21FD, 0x051F),
                 IncidentEventKind.Number => new(e.Frame, 0x2295, 0x0001, e.A, e.B, e.C),
                 IncidentEventKind.Text => new(e.Frame, 0x0A69, 0x0288, e.A, e.B, e.C),
+                IncidentEventKind.Character => new(e.Frame, 0x0A96, 0x0525, texts.Memory[(e.A << 8) + e.B], e.C),
                 IncidentEventKind.WaitLoop => Inner(e.Inner!),
                 _ => throw new InvalidOperationException(e.Kind.ToString()),
             };

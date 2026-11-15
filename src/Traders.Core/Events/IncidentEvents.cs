@@ -56,6 +56,12 @@ public enum IncidentEventKind
     /// <summary>17CB:09E0 → 0A69:0288: B lines of text from text index A on (table DS:37CC), colour C, centred at y 86h − 7·B.</summary>
     Text,
 
+    /// <summary>
+    /// 0A69:01AD inside 0A69:0288: character B (0-based) of text A in colour C, line D of the text (the character itself is in
+    /// DS:0140); the scene adds it to the list at its centred position (0A96:0525).
+    /// </summary>
+    Character,
+
     /// <summary>An event of the wait loop 21FD:0004(0) (<see cref="IncidentEvent.Inner"/>).</summary>
     WaitLoop,
 }

@@ -41,6 +41,12 @@ public static class IncidentLayout
 
     /// <summary>DS offset of the palette the window loads with 21FD:026C.</summary>
     public const int Palette = 0x00A8;
+
+    /// <summary>byte – DS:0140, the one-character string of the typewriter 0A69:01AD (DS:0141 holds 0).</summary>
+    public const int TypewriterChar = 0x0140;
+
+    /// <summary>Retraces the typewriter waits after every character (last argument of 0A69:0288 in 17CB:09E0).</summary>
+    public const short TypewriterWait = 5;
 }
 
 /// <summary>
@@ -56,15 +62,21 @@ public sealed class WeekIncidents
     private readonly Dgroup _d;
     private readonly OriginalRandom _random;
     private readonly IControlDevices _devices;
+    private readonly ITextMemory _texts;
     private readonly List<IncidentEvent> _events = [];
     private WaitLoop? _waitLoop;
     private long _frame;
 
-    public WeekIncidents(Dgroup state, OriginalRandom random, IControlDevices devices)
+    /// <param name="state">The core's data segment.</param>
+    /// <param name="random">random() 21FD:01BA.</param>
+    /// <param name="devices">Control devices of the wait loop 21FD:0004.</param>
+    /// <param name="texts">Memory behind the text pointers DS:37CC (read by the typewriter, written by 2295:0001).</param>
+    public WeekIncidents(Dgroup state, OriginalRandom random, IControlDevices devices, ITextMemory texts)
     {
         _d = state;
         _random = random;
         _devices = devices;
+        _texts = texts;
     }
 
     /// <summary>Frame stamped on new events (set by the driver).</summary>
@@ -188,8 +200,9 @@ public sealed class WeekIncidents
         foreach (var w in Show()) yield return w;
         foreach (var w in Pause(30)) yield return w;
         int line = _d.S8((gain ? IncidentLayout.GainNumberLine : IncidentLayout.LossNumberLine) + cls);
-        Emit(IncidentEventKind.Number, amount, 4, Int16Math.S(text + line));
-        Emit(IncidentEventKind.Text, text, _d.S8((gain ? IncidentLayout.GainLines : IncidentLayout.LossLines) + cls), gain ? 4 : 5);
+        Number(amount, Int16Math.S(text + line));
+        int lines = _d.S8((gain ? IncidentLayout.GainLines : IncidentLayout.LossLines) + cls);
+        foreach (var w in Text(text, lines, gain ? 4 : 5)) yield return w;
         int at = Int16Math.U(L.Cash + Int16Math.S(Player << 2));
         _d.Set(at, Int16Math.L((long)_d.S32(at) + (gain ? amount : -(long)amount)));
     }
@@ -227,7 +240,7 @@ public sealed class WeekIncidents
         short scaled = Int16Math.Div(Int16Math.S(_d.U8(L.FieldCount + w) * 15), 10);
         if (scaled > _d.U8(L.FieldCount + v) && Random(8) != 0) yield break;
         foreach (var x in Window()) yield return x;
-        Emit(IncidentEventKind.Text, IncidentLayout.TakeoverText, 7, 5);
+        foreach (var x in Text(IncidentLayout.TakeoverText, 7, 5)) yield return x;
         _d.Set(L.ActivePlayer, unchecked((byte)v));
         Emit(IncidentEventKind.Sound, 0, 0x4F);
         foreach (var x in Pause(50)) yield return x;
@@ -291,7 +304,7 @@ public sealed class WeekIncidents
                 x = Int16Math.S(x - 0x3A);
                 foreach (var w in Pause(20)) yield return w;
             }
-            Emit(IncidentEventKind.Text, IncidentLayout.BlightText + 4 * si, 4, 5);
+            foreach (var w in Text(IncidentLayout.BlightText + 4 * si, 4, 5)) yield return w;
             for (_d.Set(L.LoopY, (sbyte)0); _d.S8(L.LoopY) <= Int16Math.S(_d.S16(L.FieldRows) - 1); Inc(L.LoopY))
             {
                 for (_d.Set(L.LoopX, (sbyte)0); _d.S8(L.LoopX) <= Int16Math.S(_d.S16(L.FieldColumns) - 1); Inc(L.LoopX))
@@ -337,6 +350,59 @@ public sealed class WeekIncidents
         Emit(IncidentEventKind.LoadPalette, IncidentLayout.Palette);
         Emit(IncidentEventKind.FadeIn);
         foreach (var w in Planting.Fade(_d, 3)) yield return MenuWait.Retrace; // 21FD:0329: eight stages, 0185(3)
+    }
+
+    private (ushort Offset, ushort Segment) TextPointer(int index)
+    {
+        int at = Int16Math.U(MenuLayout.TextPointers + Int16Math.S(index << 2));
+        return (_d.U16(at), _d.U16(Int16Math.U(at + 2)));
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 2295:0001 – called by 17CB:02BD/039D with (amount, 4, text pointer of line <paramref name="text"/> + 2): the amount
+    /// goes into the text from its third character on (<see cref="IncidentText.FormatNumber"/>).
+    /// </summary>
+    private void Number(int amount, short text)
+    {
+        Emit(IncidentEventKind.Number, amount, 4, text);
+        var (offset, segment) = TextPointer(text);
+        IncidentText.FormatNumber(_d, _texts, unchecked((uint)amount), 4, Int16Math.U(offset + 2), segment);
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 17CB:09E0 – 0A69:0288(0, 86h − 7·lines, 140h, far pointer DS:37CC + 4·<paramref name="first"/>, lines, colour, 5):
+    /// the <see cref="IncidentEventKind.Text"/> event, then the typewriter frame by frame.
+    /// </summary>
+    private IEnumerable<MenuWait> Text(int first, int lines, int colour)
+    {
+        Emit(IncidentEventKind.Text, first, lines, colour);
+        // [ORIGINAL] 0A69:0288 – lines i = 0 … count − 1 (signed), each with 0A69:0243 (centred; positions are the scene's)
+        for (short i = 0; i < lines; i++)
+        {
+            var (offset, segment) = TextPointer(first + i);
+            if (offset == 0 && segment == 0) continue; // [ORIGINAL] 0A69:0243 – nothing for a null pointer
+            foreach (var w in Typewriter(first + i, i, offset, segment, colour)) yield return w;
+        }
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0A69:01AD (with wait 5 and final wait −1) – per character i while strlen &gt; i: DS:0140 = character, list emptied,
+    /// the character (<see cref="IncidentEventKind.Character"/>), 21FD:060D, a key click 21A7:0054(1, 16h) unless it is a blank,
+    /// the pause key 21FD:0245, then 21FD:0185(5).
+    /// </summary>
+    private IEnumerable<MenuWait> Typewriter(int text, short line, ushort offset, ushort segment, int colour)
+    {
+        for (ushort i = 0; IncidentText.Length(_texts, offset, segment) > i; i++)
+        {
+            byte c = _texts.Read(segment, Int16Math.U(offset + i));
+            _d.Set(IncidentLayout.TypewriterChar, c);
+            Emit(IncidentEventKind.ListClear);
+            Emit(IncidentEventKind.Character, text, i, colour, line);
+            foreach (var w in Show()) yield return w;
+            if (c != (byte)' ') Emit(IncidentEventKind.Sound, 1, 0x16);
+            foreach (var _ in Planting.Pause(_d)) yield return MenuWait.Poll; // 21FD:0245
+            foreach (var w in Pause(IncidentLayout.TypewriterWait)) yield return w;
+        }
     }
 
     /// <summary>End of every incident: wait loop 21FD:0004(0), then font 0 (21FD:05DB(0)).</summary>
@@ -410,7 +476,7 @@ public sealed class WeekIncidents
 /// The week incidents as a step of the week loop (<see cref="IWeekStepHandler"/>, call 9 = 17CB:0005): <see cref="Begin"/> runs
 /// them to their first wait, every <see cref="Tick"/> one frame further. Not wired into the phase machine yet (lane 0, part 3).
 /// </summary>
-public sealed class WeekIncidentsStep(IControlDevices? devices = null) : IWeekStepHandler
+public sealed class WeekIncidentsStep(ITextMemory texts, IControlDevices? devices = null) : IWeekStepHandler
 {
     private IEnumerator<MenuWait>? _run;
 
@@ -418,7 +484,7 @@ public sealed class WeekIncidentsStep(IControlDevices? devices = null) : IWeekSt
 
     public StepOutcome Begin(StepContext context)
     {
-        Incidents = new WeekIncidents(context.State, context.Random, devices ?? KeyboardOnlyDevices.Instance);
+        Incidents = new WeekIncidents(context.State, context.Random, devices ?? KeyboardOnlyDevices.Instance, texts);
         _run = Incidents.Run().GetEnumerator();
         return Tick(context);
     }
