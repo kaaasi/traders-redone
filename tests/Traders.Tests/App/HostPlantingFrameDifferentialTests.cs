@@ -130,6 +130,34 @@ public class HostPlantingFrameDifferentialTests
         Assert.True(plantingWithObjects > 100, $"only {plantingWithObjects} planting frames with moving objects");
     }
 
+    /// <summary>
+    /// Quick check of #147 without the RefEmu: the host's heap pointers of the RAM atlas (DS:45D6) and the masks (DS:4BC6) in
+    /// the layers' data segment address separate ranges, apart from the page buffer, the text buffer and DGROUP – the object
+    /// layer 21AF tells image, mask and save buffer pointers apart by these ranges.
+    /// </summary>
+    [GameDataFact]
+    public void Host_heap_buffers_of_atlas_and_masks_are_separate()
+    {
+        var host = new ProgramHost(Dir, new RecordedClock([0]), new NoSaveFile());
+        var ds = host.Layers.Ds;
+        int Linear(int at) => (BitConverter.ToUInt16(ds, at + 2) << 4) + BitConverter.ToUInt16(ds, at);
+        int Of(uint far) => (int)(far >> 16 << 4) + (ushort)far;
+        (int Start, int End, string Name)[] ranges =
+        [
+            (Linear(Traders.Vga.Layers.GraphicsLayers.AtlasPointer), Linear(Traders.Vga.Layers.GraphicsLayers.AtlasPointer) + host.Driver.Atlas.Data.Length, "atlas"),
+            (Linear(Traders.Vga.Layers.GraphicsLayers.MaskPointer), Linear(Traders.Vga.Layers.GraphicsLayers.MaskPointer) + host.Driver.Masks.Length, "masks"),
+            (Of(ProgramHost.PageBuffer), Of(ProgramHost.PageBuffer) + 0x10000, "page buffer"),
+            ((ProgramHost.TextBufferSegment << 4) + ProgramHost.TextBufferOffset, (ProgramHost.TextBufferSegment << 4) + 0x10000, "text buffer"),
+            (ProgramHost.DataSegmentValue << 4, (ProgramHost.DataSegmentValue << 4) + 0x10000, "DGROUP"),
+        ];
+        Assert.Equal(Of(ProgramHost.AtlasBuffer), ranges[0].Start);
+        Assert.Equal(Of(ProgramHost.MaskBuffer), ranges[1].Start);
+        foreach (var a in ranges)
+            foreach (var b in ranges.Where(b => b.Name != a.Name))
+                Assert.True(a.End <= b.Start || b.End <= a.Start, $"{a.Name} {a.Start:X5}-{a.End:X5} overlaps {b.Name} {b.Start:X5}-{b.End:X5}");
+        Assert.True(ranges.All(r => r.End <= 0x100000), "a buffer lies above 1 MB");
+    }
+
     /// <summary>Key presses of the human in the RefEmu: every <see cref="KeyEvery"/> frames from the next frame on.</summary>
     private static void ScheduleHuman(OriginalProgram p)
     {

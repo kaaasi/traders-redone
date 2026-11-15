@@ -89,13 +89,14 @@ public sealed class HostGame : Game
         Keys.Receive(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_scancodes));
         if (_program is not null && frames > 0)
         {
-            // every frame passed is processed once with the keys held now: after a short stall (at most MaxStep) the host
-            // catches up frame by frame, core and scene in step, before it presents the last one
+            // every frame passed is processed once with the keys held now: whenever an update covers more than one frame –
+            // regularly, as the window updates at the monitor's rate (often 60 Hz) and the game runs at 70 Hz, and after a
+            // stall up to MaxStep (17–18 frames) – ProgramHost.Frame catches up frame by frame, core and scene in step,
+            // before the last one is presented
             _held.Clear();
             for (int sc = 0; sc < KeyStateTable.Size; sc++)
                 if (Keys.IsDown((byte)sc)) _held.Add((byte)sc);
-            for (long f = _program.LastFrame + 1; f < _clock.Frames && _program.Machine.Status != Traders.Core.Phases.ProgramStatus.Ended; f++)
-                _program.Frame(f, _held);
+            _program.Frame(_clock.Frames - 1, _held);
             if (_program.Machine.Status == Traders.Core.Phases.ProgramStatus.Ended) Exit();
             DisplayStart = _program.Driver.DisplayStart;
         }
