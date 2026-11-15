@@ -85,7 +85,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Vorratsgrenze ausgelassen, ein Bild doppelt verarbeitet → rot); Mehrrundenprobe ≥ 5 Wochen, in der nachweislich (Assert) mindestens ein Lauf von `111D:0112` mit einer Katastrophenart im Port
   verglichen wird (R6P-2: im R5-Tastenmuster Katastrophe in Woche 4; Woche bzw. Tastenmuster im Test festlegen); `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1, 2 und 3 (sonst `spur-wartet`, „wartet auf 1/2/3“).
-- **Status:** –
+- **Status:** in Arbeit (Claude, Draft-PR, Teil 1)
 
 ## 1 `katastrophen` – Katastrophen und Sternvorführung `111D:0009`
 
