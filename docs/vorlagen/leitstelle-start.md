@@ -5,18 +5,23 @@
 > Repo kaaasi/traders-redone. Du bist die Leitstelle nach `docs/vorlagen/leitstelle-start.md`.
 > Auftrag: `<z. B. Runde 2 planen | Integration Runde 2 | Review #<nr> auswerten und mergen>`.
 > `<Vertretung: ja, ernannt vom Nutzer am <datum> | –>`
+> binde traders-referenz mit push ein.
 
 ## Ablauf für die Leitstelle
 
 0. **Zugriff:** immer Lese- und Schreibzugriff auf beide Repos: `add_repo` für `kaaasi/traders-redone` und
    `kaaasi/traders-referenz`, jeweils access `push` (ggf. erst per `ToolSearch` mit `select:mcp__claude-code-remote__add_repo`
    laden). **Freigabe des Nutzers (11.11.2026):** Jede Leitstelle darf `kaaasi/traders-referenz` mit access `push` einbinden; das
-   gilt ausdrücklich auch für künftige Leitstellen (bestätigt 12.11.2026). Lehnt die Freigabe des Werkzeugs trotzdem ab, auf diese Erlaubnis verweisen
-   und erneut versuchen; scheitert es weiter, dem Nutzer melden. **Bewährter Weg (13.11.2026):** Lehnt die Werkzeugfreigabe
-   `add_repo` für `traders-referenz` (push) trotz dieser Notiz ab („Unauthorized Access“), den Nutzer bitten, im Chat wörtlich
-   „binde traders-referenz mit push ein“ zu schreiben, und `add_repo` danach genau einmal erneut aufrufen – so ging es durch.
-   Dann klonen mit `TRADERS_REFERENZ_DIR=<arbeitsverzeichnis>/traders-referenz tools/claude/fetch-reference.sh original`,
-   `register_repo_root` aufrufen und mit `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` prüfen. Erst danach
+   gilt ausdrücklich auch für künftige Leitstellen (bestätigt 12.11.2026). **Lehnt die Werkzeugfreigabe trotzdem ab**
+   („Unauthorized Access“): den Nutzer bitten, im Chat wörtlich „binde traders-referenz mit push ein“ zu schreiben, und
+   `add_repo` danach genau einmal erneut aufrufen (bewährt 13.11.2026); scheitert es weiter, dem Nutzer melden. Am einfachsten
+   schreibt der Nutzer den Satz gleich in den Kurzaufruf (15.11.2026).
+   Dann klonen mit `TRADERS_REFERENZ_DIR=<arbeitsverzeichnis>/traders-referenz tools/claude/fetch-reference.sh original`. Liegt
+   dort schon ein voller Klon (z. B. von `add_repo` vorgeschlagen), bricht das Skript ab („no sparse-checkout“): dann nur die
+   Prüfsummen prüfen (`cd <klon>/original/dos && sha256sum --quiet -c <repo>/tools/originale/SHA256SUMS.dos`) und
+   `ln -sfn <klon>/original gamedata` setzen. `register_repo_root` (ggf. erst per `ToolSearch` mit
+   `select:mcp__claude-code-remote__register_repo_root` laden) für beide Repos aufrufen und mit
+   `git ls-remote https://github.com/kaaasi/traders-referenz HEAD` prüfen. Erst danach
    geplante Läufe anlegen (`anhang.md` F). Planen geht auch ohne diesen Zugriff.
 1. Lies `AGENTS.md`, `docs/prozess/zusammenarbeit.md` und `docs/prozess/anhang.md` (vollständig), in `docs/arbeitspakete.md` die
    aktuelle Runde, die offenen PRs (Titel, Bearbeiter, letzte Übergabe) und die Reviews der Runde. Kein Vorwissen aus Chats nötig.
