@@ -1,0 +1,165 @@
+using Traders.Core.Input;
+using Traders.Core.State;
+using L = Traders.Core.State.DgroupLayout;
+using S = Traders.Core.Stations.StationsLayout;
+
+namespace Traders.Core.Stations;
+
+/// <summary>
+/// Stations phase 1B03:0009 (docs/routines/1B03_0009_stationen.md): station draw, choice of a station by every player (humans
+/// through the controls 0E9E, computers through 1B03:0632), rocket flight with pirates, lost rocket fields and the weekly
+/// bonuses. Works on the data segment like the original; every call into the output layers is reported as a
+/// <see cref="StationEvent"/> in the original order, random numbers come from <see cref="OriginalRandom"/>.
+/// Part 1 of lane stationen: the routines without pixel reads (the star field 1B03:1178 and the flight loop 1B03:08ED with
+/// 1B03:0BE7 read the drawn page and follow in part 2 with the rule page of the core).
+/// </summary>
+public sealed partial class StationPhase
+{
+    private readonly Dgroup _d;
+    private readonly OriginalRandom _random;
+    private readonly IControlDevices _devices;
+    private readonly List<StationEvent> _events = [];
+
+    public StationPhase(Dgroup state, OriginalRandom random, IControlDevices devices)
+    {
+        _d = state;
+        _random = random;
+        _devices = devices;
+    }
+
+    /// <summary>Output calls reported so far.</summary>
+    public IReadOnlyList<StationEvent> Events => _events;
+
+    /// <summary>Returns and clears the reported output calls.</summary>
+    public List<StationEvent> DrainEvents()
+    {
+        var list = new List<StationEvent>(_events);
+        _events.Clear();
+        return list;
+    }
+
+    private const short Ds = StationEvent.DataSegment;
+
+    private void Emit(StationCall call, params short[] args) => _events.Add(new StationEvent(call, args));
+
+    private sbyte P => _d.S8(L.ActivePlayer);
+
+    private void SetP(int p) => _d.Set(L.ActivePlayer, unchecked((sbyte)p));
+
+    // Effective addresses wrap at 64 KB like the original's 16-bit index arithmetic.
+    private static int At(int offset) => Int16Math.U(offset);
+
+    private static int Obj(int p) => Int16Math.U(Int16Math.S(p * S.ObjectSize));
+
+    private short Word(int offset) => _d.S16(At(offset));
+
+    private byte Byte(int offset) => _d.U8(At(offset));
+
+    private sbyte SByte(int offset) => _d.S8(At(offset));
+
+    private short Page => _d.S16(S.DrawPage);
+
+    /// <summary>The rocket fields of player p (DS:2EE7 + 4p + 3, i.e. DS:2EEA + 4p).</summary>
+    private sbyte RocketFields(int p) => SByte(L.FieldsByKind + 4 * p + 3);
+
+    private short PlayerColor(int p) => Word(S.PlayerColor + 2 * p);
+
+    // ------------------------------------------------------------------ 21FD helpers reported as calls
+
+    private void Delay(short retraces) => Emit(StationCall.Delay, retraces, 0); // high word 0 (xor ax, ax)
+
+    private void ListOnBothPages() => Emit(StationCall.ListOnBothPages);
+
+    private void ClearList() => Emit(StationCall.ClearList);
+
+    // ------------------------------------------------------------------ 21AF core parts
+
+    /// <summary>21AF:0412(object, frame) – core part: frame (+18h) and active (+0); restore records are the output's.</summary>
+    // [ORIGINAL] 21AF:0412 – core part only (object records +0, +18h)
+    private void ShowObject(int obj, short frame)
+    {
+        Emit(StationCall.ShowObject, (short)obj, frame);
+        _d.Set(At(S.ObjectFrame + Obj(obj)), frame);
+        _d.Set(At(S.Objects + Obj(obj)), (byte)1);
+    }
+
+    /// <summary>21AF:045E(object) – inactive (+0 = 0).</summary>
+    // [ORIGINAL] 21AF:045E
+    private void HideObject(int obj)
+    {
+        Emit(StationCall.HideObject, (short)obj);
+        _d.Set(At(S.Objects + Obj(obj)), (byte)0);
+    }
+
+    // ------------------------------------------------------------------ 1B03:0009 entry
+
+    /// <summary>
+    /// 1B03:0079 – four times a random station 0…10: a station without value gets 10 (chance 1/2) or random(3), a station with
+    /// a value loses it (−1). Station 11 is never drawn.
+    /// </summary>
+    // [ORIGINAL] 1B03:0079
+    public void DrawStationValues()
+    {
+        for (int i = 0; i <= 3; i++)
+        {
+            short si = _random.Next(11);
+            int at = At(L.StationValue + 2 * si);
+            if (_d.S16(at) == -1) _d.Set(at, _random.Next(2) != 0 ? (short)10 : _random.Next(3));
+            else _d.Set(at, (short)-1);
+        }
+    }
+
+    /// <summary>True when any player has a rocket field (1B03:0009 checks DS:2EEA, 2EEE, 2EF2, 2EF6).</summary>
+    public bool AnyRockets()
+    {
+        for (int p = 0; p < L.PlayerCount; p++)
+            if (RocketFields(p) != 0) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// 1B03:148B – object setup: the explosion object 4 (layer 13, save buffers, five frames) and one rocket object per player
+    /// (layer 15, save buffers, two frames, shown with frame 0); DS:37AA ends at 4.
+    /// </summary>
+    // [ORIGINAL] 1B03:148B
+    public void SetUpObjects()
+    {
+        _d.Set(S.ObjectLayer + Obj(S.ExplosionObject), (short)0x0D);
+        Emit(StationCall.ObjectBuffers, 4, 0, 0x78, 0, 0x85);
+        for (short si = 0; si < 3; si++)
+            Emit(StationCall.ObjectImage, 4, si, Int16Math.S((si << 4) + 0x100), 0xD3, Int16Math.S((si << 4) + 0x50), 0x28);
+        for (short si = 0; si < 2; si++)
+            Emit(StationCall.ObjectImage, 4, Int16Math.S(si + 3), Int16Math.S(0x110 - (si << 4)), 0xD3, Int16Math.S(0x60 - (si << 4)), 0x28);
+        for (SetP(0); P < 4; SetP(P + 1))
+        {
+            int p = P;
+            _d.Set(At(S.ObjectLayer + Obj(p)), (short)0x0F);
+            Emit(StationCall.ObjectBuffers, (short)p, 0, Int16Math.S(p * 15), 0, Int16Math.S(p * 15 + 0x3C));
+            Emit(StationCall.ObjectImage, (short)p, 0, Int16Math.S((p << 4) + 0x100), 0xE2, Int16Math.S(p << 4), 0x28);
+            Emit(StationCall.ObjectImage, (short)p, 1, Int16Math.S((p << 4) + 0x100), 0xF1, 0x40, 0x28);
+            ShowObject(p, 0);
+        }
+    }
+
+    /// <summary>
+    /// 1B03:0009 from the start up to the star field: station values, the rocket check, picture and objects. Returns false
+    /// when nobody has a rocket field (the phase ends after 1B03:0079).
+    /// </summary>
+    // 1B03:0009 up to the star field (marker and differential test with the whole phase in part 2)
+    public bool Begin()
+    {
+        DrawStationValues();
+        if (!AnyRockets()) return false;
+        Emit(StationCall.LoadPicture, Word(S.Picture));
+        SetUpObjects();
+        Emit(StationCall.FadeOut, 2);
+        return true;
+    }
+
+    /// <summary>1B03:0009 after the star field 1B03:1178: palette and fade-in, then the selection 1B03:00D4 follows.</summary>
+    public void ShowScreen()
+    {
+        Emit(StationCall.BasePalette, S.Palette, Ds);
+        Emit(StationCall.FadeIn);
+    }
+}
