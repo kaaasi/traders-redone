@@ -165,7 +165,9 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   dort belegt ist). Überschneidung mit R6: `Traders.App` gehört Spur 0 erst ab Teil 3 – der Fixlauf wird vorher gemergt, sonst
   rebased Spur 0; `Field/**` ändert keine R6-Spur.
 - **Modell:** Claude Opus. **Abnahme:** neuer Test vor dem Fix rot, danach grün; alle drei Läufe grün (Testinfrastruktur);
-  Gegenprobe im Review (Fehler wieder eingebaut → rot). **Status:** –
+  Gegenprobe im Review (Fehler wieder eingebaut → rot). **Status:** PR #150 (Claude), **gemergt 15.11.2026** (Review
+  `reviews/2026-11-15-fix-anbau-figuren.md` „Ja“): Ursache – Heap-Zeiger von Atlas und Masken (`DS:45D6`/`4BC6`) im Host nie gesetzt;
+  Host-Test Bild für Bild durch den Anbau (vor dem Fix rot in Bild 136); #113 erledigt. Offen P3 #157, #158.
 
 ## Zuständigkeit gemeinsamer Dateien in R6
 
