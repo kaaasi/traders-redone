@@ -34,8 +34,9 @@ gezeichneten Seite ab.
 (`2F30` = 1, `random(10)` in `0028` auf 0 gesetzt) zeigte: alle 90 Lesestellen der ersten Schleife gleich `V-BERGE`, die der
 zweiten nicht (`V-BERGE` 5, `V-ANBAU` 12 von 90 gleich). Nach der Disassemblierung zeichnet `0009` vor `0112` mit `21FD:060D` auf
 **beide** Seiten: Kacheln `0609:1ED9` (Atlas `V-ANBAU`), Rahmen `0609:1256(8Ch, 88h, A0h, 2Ch)` und den Meldetext
-`0A69:00D3(8Ch, A0h, …)`. Der Text liegt ab Zeile A0h (160) und damit unter den Lesezeilen (`y − 3` ≤ 146); Kacheln und Rahmen
-nicht. Diese Schritte muss Spur 1 Teil 1 vor `0112` auf die Regelseite zeichnen und im Differenztest der ganzen Routine belegen.
+`0A69:00D3(8Ch, A0h, …)`. Der Text liegt ab Zeile A0h (160) und damit unter den Lesezeilen (`y − 3` ≤ 147, `random(96h)` liefert 0 … 150); Kacheln und Rahmen
+nicht. Diese Schritte zeichnet seit Spur 1 Teil 1 (Fortsetzung 1) `Catastrophes.Run` mit `FieldBackdrop` vor `0112` auf die Regelseite;
+belegt in `tests/Traders.Tests/Disasters/StarShowDifferentialTests.cs` (Befund `111D_0009_katastrophen.md`, „Sternvorführung“).
 
 ## Zustand
 
@@ -60,6 +61,9 @@ kein Zustand im Datensegment. Zufall, Bildfolge und Seitenwechsel gehören zu `0
   (`[APPROX]`: RefEmu-Wert; die Leser vergleichen nur mit 1).
 - `Blit` (`0A96:0030` → `23CD:32D8`), `FillRect` (`04D7` → `31A6`), `SetPixel` (`03FB` → `373B`) – angewandt dort, wo das Original
   `06A8` ausführt; nur Rechtecke innerhalb von Atlas und Seite (`h` = 0 und Adressumlauf nicht nachgebildet).
+- `Tiles` (`0A96:0267` → `0884`, Kacheln als Blits; Fortsetzung 1) und `DrawOnShownPage()` (`21FD:0590`: Zeichenseite = gezeigte, also
+  die andere Seite); `FieldBackdrop.Background`/`Frame` (`0609:1ED9`, `1256`/`1F04`) für die Schritte aus `0009`. `RulePage` ist `partial`
+  (R6R-1, #155): Ergänzungen anderer Spuren in eigenen Dateien.
 - `Flip()` (`21FD:051F`, solange `40DE` die Nummern 1 und 2 hält) und `DrawPageOf(Dgroup)` (Seitennummer `40DE[082E]` über
   `0B67:0238`).
 - `src/Traders.Core/Pixels/IndexedImage.cs` – Bildpixel als explizite Eingabe (Host und Tests aus `Traders.Assets`,
@@ -75,7 +79,8 @@ kein Zustand im Datensegment. Zufall, Bildfolge und Seitenwechsel gehören zu `0
   Lesestellen gleich dem Rückgabewert des Originals, danach beide Seiten vollständig gleich dem VRAM und `DrawPageOf` gleich der
   Zeichenseite. Abgedeckt (Ausgabe): Treffer auf 1 in beiden Schleifen, negative `y` auf beiden Seiten (je 22).
 - `Pixel_reader_matches_for_every_word_argument` – `[DIFFERENTIAL] 23CD:3764`: `06DE` direkt gerufen, beide Seiten, Ecken, negative
-  `x`/`y`, `y` ≥ 200 (Lücke hinter Seite 0, Seite 1 von Seite 0 aus), `x` ≥ 320.
+  `x`/`y`, `y` ≥ 200 (Lücke hinter Seite 0, Seite 1 von Seite 0 aus), `x` ≥ 320, Offsets mit Umlauf über 10000h zurück in eine
+  Seite (R6R-2, #156; Gegenprobe `int` statt `ushort` im Offset rot).
 - `Drawing_steps_match_the_command_list` – `[DIFFERENTIAL] 0A96:0030, 0A96:04D7, 0A96:03FB`: unausgerichtete Blits (verschiedene
   `x mod 4`, Breiten ≠ 4n, Atlaszeilen ≥ 200), Rechtecke, Pixel an den Rändern; danach beide Seiten gleich dem VRAM.
 - Gegenproben (lokal ausgeführt, rot): ohne `Flip` beim Wechsel; `Get` außerhalb der Seiten 1 statt 0; Blit mit vertauschten

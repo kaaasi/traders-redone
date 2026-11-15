@@ -109,7 +109,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Szene pixelgenau; Gegenprobe im Review (Katastrophenart vertauscht, eine Ziehung der Vorführung ausgelassen, falsches Feld
   getroffen → rot); `abdeckung.py --check` grün, `192D:1177` gezählt.
 - **Abhängigkeiten:** keine (Spur 0 bindet ein).
-- **Status:** Teil 1a (Regelseite, Branch `paket/regelseite`) fertig, Ready for review (Claude, 15.11.2026); Teil 1 auf `paket/katastrophen` begonnen.
+- **Status:** Teil 1a (Regelseite, #149) gemergt; Teil 3 fertig; Teil 1 auf `paket/katastrophen` (#153): Auswahl, Arten, Meldefenster und Sternvorführung `0112` auf der Regelseite im Kern mit Differenztests, offen Bildfolge gegen den RefEmu und Zustände aus laufenden Partien; Teil 2 offen (Claude, Fortsetzung 1, 15.11.2026). Mitgenommen: #155, #156.
 
 ## 2 `ereignisse` – Wochenereignisse `17CB:0005` und Leseregel
 

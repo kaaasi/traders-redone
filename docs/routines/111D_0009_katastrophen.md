@@ -1,4 +1,4 @@
-# 111D:0009 / 111D:0264 / 111D:03B7 / 111D:0519 / 111D:0757 – Katastrophen (Wächter R5, Rest und Arten R6)
+# 111D:0009 / 111D:0112 / 111D:0264 / 111D:03B7 / 111D:0519 / 111D:0757 – Katastrophen (Wächter R5, Rest und Arten R6)
 
 - **Ladebild-Adresse:** `111D:0009` (Dateioffset `0x147D9`, Segment `111D` bei `0x147D0`)
 - **Aufgabe:** Aufruf 4 der Wochenschleife `1777:01F8` (`1777:021A`). Der **Wächter** (R5P-6) kehrt in den ersten Wochen und bei
@@ -41,14 +41,16 @@ sonst ist der Port ausstehend, genau wenn das Original `001E` erreicht. In der M
 
 ## Rest ab 001E (R6, eigene Worte)
 
+**Zufall:** `21FD:01BA random(n)` liefert **0 … n** (Rest durch n + 1, `OriginalRandom.Next`); alle Bereiche unten schließen n ein
+(Berichtigung 15.11.2026, Fortsetzung 1: der erste Nachtrag las `random(n)` als 0 … n − 1).
+
 **Auswahl (`001E–0046`):** `r = random(10)`; ist `r ≠ 0` und die Woche kein Vielfaches von 15 (`idiv`, Rest mit Vorzeichen), Ende
-(nur diese eine Ziehung). Sonst `si = random(2)`. In den Wochen 15, 30, … kommt also immer eine Katastrophe.
+(nur diese eine Ziehung). Sonst `si = random(2)` ∈ {0, 1, 2}. Eine Katastrophe kommt also mit 1/11 und in den Wochen 15, 30, … immer.
 
 **Ablauf danach:** Ränge `0825:06CB`; Bild `[08CE]` (`V-ANBAU`) laden, Ausblenden `21FD:037D(550h)`; Liste leeren, Kacheln
 `0609:1ED9`, Rahmen `0609:1256(8Ch, 88h, A0h, 2Ch)`, Titel `0A69:00D3(8Ch, A0h, A0h, Text [385C], 5, 0Bh, −1, 1)`; `21FD:060D`
 (beide Seiten); Palette `DS:00A8`, Einblenden `0329`; Bild `[08D2]` (`V-BERGE`) laden, Ausblenden `037D(550h)`; Sternvorführung
-`111D:0112`; dann nach `si`: 0 → `0264`, 1 → `03B7`, 2 → `0519` – **`0519` ist von `0009` aus unerreichbar** (`random(2)` liefert nur
-0 und 1); zuletzt `21FD:0004(3)`.
+`111D:0112`; dann nach `si`: 0 → `0264`, 1 → `03B7`, 2 → `0519` (je 1/3); zuletzt `21FD:0004(3)`.
 
 **`0264` (Art 0, neue Bodengüte):** Palette `DS:07A0`, Einblenden, `0185(100)`, Ton `21A7:0054(0, 48h)`; 80-mal `0245`, zweimal
 (`051F`, `0185(1)`); Ton aus; Meldung `0757(DS:3854, 2)`; **`0E31:0361`** (Bodengüte neu wie bei einer neuen Partie, nach `DS:08F1`
@@ -57,11 +59,11 @@ zufällig oder „echt“); dann für alle Felder (Zeile `DS:2F00` außen, Spalt
 
 **`03B7` (Art 1, Feldarten wechseln):** Palette `DS:0780`, Einblenden, `0185(100)`; Farben 2 … 7 − i aus `DS:0780 + 2·Farbe` + i + 1
 (`2295:006D`) für i = 0 … 5, je `0185(10)`; Ton `49h`, `0185(250)`, Ton aus; rückwärts i = 5 … 0 mit + i; Meldung `0757(DS:384C, 2)`;
-`n = random(15) + 10` Ziehungen: Spalte `random(Spalten − 1)` nach `DS:2EB0`, Zeile `random(Zeilen − 1)` nach `DS:2F00` (letzte Spalte
-und Zeile werden **nie** getroffen); ist das Feld kein Hauptquartier: `0609:10D2(x, y, Besitzer, random(2))` – Besitzer bleibt, Art
+`n = random(15) + 10` Ziehungen: Spalte `random(Spalten − 1)` nach `DS:2EB0`, Zeile `random(Zeilen − 1)` nach `DS:2F00` (also jede Spalte
+und Zeile); ist das Feld kein Hauptquartier: `0609:10D2(x, y, Besitzer, random(2))` – Besitzer bleibt, Art
 0 oder 1, Zähler wandern mit.
 
-**`0519` (Art 2, Felder geräumt; nur direkt erreichbar):** Palette `DS:0780`, Einblenden, `0185(100)`, `21FD:0590`, Farbe 12 = 770h;
+**`0519` (Art 2, Felder geräumt):** Palette `DS:0780`, Einblenden, `0185(100)`, `21FD:0590`, Farbe 12 = 770h;
 4-mal: `0245`, Ton `(1, 4Ch)`, Spalten E5h … 0 an (`111D:07E2(x, 1)`), `0185(5)`, `0245`, Spalten E5h … 0 aus; `0185(100)`; Farbe 12 =
 700h, Ton `(1, 4Bh)`, `0185(1)`, Ton `(2, 4Bh)`, Spalten 0 … E5h an, `0185(10)`, `0245`, Spalten 0 … E5h aus; Ton `(0, 4Ah)`, 50-mal
 `0245` und zweimal (`051F`, `0185(1)`); Ton aus; Meldung `0757(DS:3834, 6)`; dann für alle Felder: Besitzer nach `DS:37AA`; ist er
@@ -74,8 +76,15 @@ und Zeile werden **nie** getroffen); ist das Feld kein Hauptquartier: `0609:10D2
 **`07E2(x, an)` (nur Zeichnen):** `si = max(0, 45 − x/3)`, `h = 46 − x/5 − si`; Liste leeren; an: senkrechte Linie
 `0A69:002C(x + 60, si, h, 12)`, sonst Atlas-Spalte `0A96:0030(x + 60, si, 1, h, x + 60, si)`; Liste ausführen. Gehört zur Szene (Teil 2).
 
-**Gerufene, noch nicht portierte Routinen** (`tools/callgraph.py`-Liste der Leitstelle nachgeprüft): nur `111D:0112` (Rest von
-Teil 1, mit der Regelseite) und `111D:07E2` (Szene); alle übrigen Ziele sind portiert (`0825:06CB`, `0E31:0361`, `0609:10D2`,
+**Sternvorführung `0112`** (Lesestellen und Regelseite: [111D_0112_regelseite.md](111D_0112_regelseite.md)): Liste leeren, Blit
+`0A96:0030(0, 0, 140h, C8h, 0, 0)` (Bild `V-BERGE` aus dem Atlas), `06A8`, Liste leeren; 90-mal `x = random(13Fh)` (0 … 319), `y =
+random(96h)` (0 … 150), beide gemerkt, `23CD:06DE(x, y)` auf der Zeichenseite; ist es 1, `0A96:03FB(x, y, random(2) + 8)` (Farbe 8 … 10);
+`06A8`, `21FD:051F`; Liste leeren, Blit `0030(0, 0, 140h, C5h, 0, 3)`, Rechteck `04D7(0, 0, 140h, 3, 1)`; je gemerktem Stern
+`06DE(x, y − 3)` und bei 1 `03FB(x, y, random(2) + 8)`; `06A8`. Kein Wartebild außer dem Seitenwechsel. Gelesen wird in der ersten
+Schleife das unveränderte `V-BERGE` (Zeilen 0–150), in der zweiten die andere Seite **vor** dem Blit (Zeilen −3–147): dort stehen die
+Kacheln `0609:1ED9` und der Rahmen `0609:1256(8Ch, 88h, A0h, 2Ch)` aus `0009` (der Titel liegt tiefer, im Test belegt).
+
+**Gerufene, noch nicht portierte Routinen** (`tools/callgraph.py`-Liste der Leitstelle nachgeprüft): nur `111D:07E2` (Szene); alle übrigen Ziele sind portiert (`0825:06CB`, `0E31:0361`, `0609:10D2`,
 `0609:1ED9`/`1256`, `0A69:00D3`/`0288`/`002C`, `0A96`, `21FD:0004`/`0185`/`0245`/`026C`/`0329`/`037D`/`051F`/`0590`/`060D`,
 `2295:006D`, `186C:0002`, `21A7:0054` als Ereignis).
 
@@ -96,8 +105,8 @@ Teil 1, mit der Regelseite) und `111D:07E2` (Szene); alle übrigen Ziele sind po
 
 ### Zufall in Reihenfolge
 
-`random(10)`; dann (wenn es kommt) `random(2)`; `0112`: 90 × (`random(13Fh)`, `random(96h)`, bei Treffer `random(2)`), zweite
-Schleife je Treffer `random(2)`; `0264`: Ziehungen von `0E31:0361`, dann je Raketenfeld mit Güte 3 `random(2)`; `03B7`:
+`random(10)`; dann (wenn es kommt) `random(2)`; `0112`: 90 × (`random(13Fh)`, `random(96h)`, bei Pixel 1 `random(2)`), zweite
+Schleife je Pixel 1 `random(2)` – die Zahl hängt vom Seiteninhalt ab; `0264`: Ziehungen von `0E31:0361`, dann je Raketenfeld mit Güte 3 `random(2)`; `03B7`:
 `random(15)`, dann je Ziehung `random(Spalten − 1)`, `random(Zeilen − 1)`, außer bei Hauptquartier `random(2)`; `0519`: je Feld
 mit Besitzer außer Hauptquartier `random(19)`.
 
@@ -107,15 +116,24 @@ mit Besitzer außer Hauptquartier `random(19)`.
 `FieldsChanged` (`03B7`), `FieldsCleared` (`0519`), `Message` (`0757`). Ausgaben als `DisasterEvent` (`DisasterEvents.cs`), Wartebilder
 wie in der Anbauphase (`Planting.Fade`/`Flip`/`Retraces`). `CatastropheStep` ist der Rest-Handler hinter `CatastropheGuardStep`
 (Vertrag `IWeekStepHandler`: `Begin` bis zur ersten Wartestelle, `Tick` je Bild, fertig im Bild der Rückkehr, sofort ohne Katastrophe;
-Bildladen mit `ImageTable.RecordLoad`); eingebunden wird er von Spur 0 Teil 3. **Offen:** Sternvorführung `0112` läuft bis zum Merge
-der Regelseite über `IDisasterHost.StarShow` (im Test das Original); `[APPROX]` die getippten Zeilen `0A69:0288` liefern noch keine
-Wartebilder.
+Bildladen mit `ImageTable.RecordLoad`); eingebunden wird er von Spur 0 Teil 3. `StarShow` (`0112`) im Kern auf der Regelseite
+(`RulePage`, `src/Traders.Core/Pixels/`): `Run` zeichnet vor `0112` Kacheln und Rahmen (`FieldBackdrop`, `0609:1ED9`/`1256`/`1F04` über
+`RulePage.Tiles` = `0A96:0267`/`0884`) auf beide Seiten, folgt jedem Seitenwechsel und `21FD:0590` (`RulePage.DrawOnShownPage`);
+Zeichenbefehle der Vorführung als `DisasterEvent` (`Blit`, `FillRect`, `SetPixel`, `ExecuteList`). Was nach `0112` gezeichnet wird,
+liest `111D` nicht mehr und steht nicht auf der Regelseite. `CatastropheStep` bekommt Regelseite und Bildpixel (`Func<int, IndexedImage>`)
+als Eingabe. **Offen:** `[APPROX]` die getippten Zeilen `0A69:0288` liefern noch keine Wartebilder.
 
 ### Prüfung (Rest)
 
-`tests/Traders.Tests/Disasters/CatastropheDifferentialTests.cs` (LoadOnly, Ausgaben, Pause, Warteschleife und `0112` durch `retf`
-ersetzt und mitgeschrieben; `0825:06CB`, `0E31:0361`, `0609:10D2` laufen im Original): `Catastrophe_matches_the_original` (24 Fälle:
-Wochen 3, 4, 5, 15, 30, Felder 9 × 6, 6 × 4, 4 × 3, beide Landarten) und `Third_kind_matches_the_original` (`0519` direkt) – ganzes
-Datensegment, `DS:10D2`, Zahl der Ziehungen und Folge der Aufrufe gleich. `Every_branch_of_0009_is_covered`: keine Katastrophe, Art 0,
-Art 1, Treffer über Woche 15/30 und über `random(10)` = 0. Gegenproben lokal rot: Grenze 12 statt 11 in `0519`; Art 0 und 1
-vertauscht; Raketenfeld ohne Güteprüfung; Spalte `random(Spalten)` statt `random(Spalten − 1)`.
+`tests/Traders.Tests/Disasters/StarShowDifferentialTests.cs` (Abzug am Hauptmenü, Zeichnen des Originals echt; Ein-/Ausblenden,
+Paletten, Ton, getippte Zeilen, `07E2`, Wartezeiten, Pause und Warteschleife durch `retf` ersetzt; mitgeschrieben die Aufrufe aus
+Segment `111D`): `Catastrophe_with_star_show_matches_the_original` (24 Fälle: Wochen 3, 4, 5, 15, 30, Felder 9 × 6, 6 × 4, 4 × 3,
+beide Landarten; keine, Art 0, 1, 2) – Folge der Aufrufe, `DS:10D2`, Zahl der Ziehungen und Datensegment (außer den Bytes der
+Ausgabeschichten, `ProgramStartDifferentialTests.OutputOwned`, und den Tickzählern `117E`/`1180`) gleich, beim Eintritt in `0112`
+Regelseite = VRAM in den gelesenen Zeilen beider Seiten; `Star_show_matches_the_original` (`0112` allein, 16 Fälle, beide Seiten
+danach vollständig gleich dem VRAM); `Field_backdrop_matches_the_command_list` (Kacheln und Rahmen). `CatastropheDifferentialTests.cs`
+(LoadOnly, Ausgaben und `0112` durch `retf` ersetzt): `Third_kind_matches_the_original` (`0519` direkt, ganzes Datensegment);
+`Every_branch_of_0009_is_covered`: keine Katastrophe, Art 0, 1, 2, Treffer über Woche 15/30 und über `random(10)` = 0. Gegenproben
+der Vorführung lokal rot: zweite Schleife liest `y` statt `y − 3`; Sterne sofort statt bei `06A8` auf die Seite; Rahmen nicht auf
+der Regelseite; Seitenwechsel in `060D` ausgelassen; aus dem ersten Nachtrag (gegen die neuen Tests wiederholt): Grenze 12 statt
+11 in `0519`; Art 0 und 1 vertauscht; Raketenfeld ohne Güteprüfung; Spalte `random(Spalten)` statt `random(Spalten − 1)`.

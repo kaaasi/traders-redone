@@ -1,6 +1,7 @@
 using Traders.Core;
 using Traders.Core.Disasters;
 using Traders.Core.Field;
+using Traders.Core.Pixels;
 using Traders.Core.State;
 using Traders.RefEmu;
 using Traders.Tests.Input;
@@ -10,10 +11,11 @@ using L = Traders.Core.State.DgroupLayout;
 namespace Traders.Tests.Disasters;
 
 /// <summary>
-/// Differential tests of the catastrophes 111D:0009 behind the guard and of the kinds 111D:0264, 03B7, 0519 with the message
-/// 111D:0757 (finding docs/routines/111D_0009_katastrophen.md). The original runs in the RefEmu (LoadOnly, direct calls). Its
-/// output calls, the pause check, the wait loop and the star show 111D:0112 are replaced by a far return and recorded with their
-/// arguments; the port emits the same calls as <see cref="DisasterEvent"/>s or host calls. 0825:06CB, 0E31:0361 and 0609:10D2
+/// Differential tests of the third kind 111D:0519 with the message 111D:0757 and the cases of 111D:0009 (finding
+/// docs/routines/111D_0009_katastrophen.md; 0009 with the star show and real drawing: <see cref="StarShowDifferentialTests"/>).
+/// The original runs in the RefEmu (LoadOnly, direct calls). Its output calls, the pause check, the wait loop and the star show
+/// 111D:0112 are replaced by a far return and recorded with their arguments; the port emits the same calls as
+/// <see cref="DisasterEvent"/>s or host calls. 0825:06CB, 0E31:0361 and 0609:10D2
 /// run in the original. Compared: the whole data segment, the random state, the arguments of all random() calls and the
 /// sequence of recorded calls. Expected values come only from the RefEmu.
 /// </summary>
@@ -82,22 +84,16 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
             Calls.Add($"WaitLoop({mode})");
             return [];
         }
-
-        public IEnumerable<FieldWait> StarShow(Dgroup d, OriginalRandom random)
-        {
-            Calls.Add("StarShow()");
-            return [];
-        }
     }
 
     /// <summary>One input state: name, generator seed of the field, week, grid, land type DS:08F1, random state DS:10D2.</summary>
-    private sealed record Case(string Name, int Seed, short Week, short Columns, short Rows, byte LandType, uint Random);
+    internal sealed record Case(string Name, int Seed, short Week, short Columns, short Rows, byte LandType, uint Random);
 
     /// <summary>
     /// A game-like field: <paramref name="c"/> columns × rows with owners −1..3, kinds −2..4 (headquarters only for owners),
     /// qualities 0..3, distinct or tied cash per player (ranks), catastrophes on, week and land type as given. Input only.
     /// </summary>
-    private static void SetState(OriginalProgram p, Case c)
+    internal static void SetState(OriginalProgram p, Case c)
     {
         var rng = new Random(c.Seed);
         p.WriteWord(L.Week, (ushort)c.Week);
@@ -139,25 +135,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
 
     public static TheoryData<int> Seeds() => [.. Enumerable.Range(0, 24)];
 
-    /// <summary>
-    /// [DIFFERENTIAL] 111D:0009, 111D:0264, 111D:03B7, 111D:0757 – 0009 after its guard: weeks 3, 4, 5, 15 and 30 (multiples of
-    /// 15 strike without random(10) = 0), grids 9 × 6, 6 × 4 and 4 × 3, both land types; across the seeds every kind and the
-    /// case "none" occur (checked in <see cref="Every_branch_of_0009_is_covered"/>).
-    /// </summary>
-    [GameDataTheory]
-    [MemberData(nameof(Seeds))]
-    public void Catastrophe_matches_the_original(int seed)
-    {
-        var c = CaseFor(seed);
-        var (h, core, random) = Prepare(c);
-        h.Program.Call(Seg, 0x0009);
-        var host = new PortHost();
-        foreach (var _ in Catastrophes.Run(core, random, host)) { }
-        core.Set(L.RandomSeed, random.Seed);
-        AssertSame(h, host, core, random, c.ToString());
-    }
-
-    private static Case CaseFor(int seed)
+    internal static Case CaseFor(int seed)
     {
         short[] weeks = [3, 4, 5, 15, 30];
         (short C, short R)[] grids = [(9, 6), (6, 4), (4, 3)];
@@ -165,7 +143,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         return new Case($"seed {seed}", seed, weeks[seed % 5], g.C, g.R, (byte)(seed / 3 % 2), (uint)(seed * 0x9E3779B9u + 7));
     }
 
-    /// <summary>The cases of <see cref="Catastrophe_matches_the_original"/> reach none, kind 0 and kind 1, and week 15/30 strikes.</summary>
+    /// <summary>The cases of <see cref="StarShowDifferentialTests.Catastrophe_with_star_show_matches_the_original"/> reach none and the kinds 0, 1 and 2 (random(2) is 0…2), and week 15/30 strikes.</summary>
     [GameDataFact]
     public void Every_branch_of_0009_is_covered()
     {
@@ -176,7 +154,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
             var (h, _, _) = Prepare(c);
             h.Program.Call(Seg, 0x0009);
             bool star = h.Calls.Contains("StarShow()");
-            int kind = !star ? -1 : h.Calls.Contains("BasePalette(1952)") ? 0 : 1;
+            int kind = !star ? -1 : h.Calls.Contains("BasePalette(1952)") ? 0 : h.Calls.Contains("DrawOnShownPage()") ? 2 : 1;
             bool tenth = h.RandomArgs.Count > 0 && h.RandomArgs[0] == 10;
             seen.Add($"kind {kind}");
             if (star && c.Week % 15 == 0) seen.Add("week multiple of 15");
@@ -185,11 +163,12 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         Assert.Contains("kind -1", seen);
         Assert.Contains("kind 0", seen);
         Assert.Contains("kind 1", seen);
+        Assert.Contains("kind 2", seen);
         Assert.Contains("week multiple of 15", seen);
     }
 
     /// <summary>
-    /// [DIFFERENTIAL] 111D:0519 – the third kind, called directly (0009 never chooses it): grids 9 × 6, 6 × 4, 4 × 3, ranks with
+    /// [DIFFERENTIAL] 111D:0519 – the third kind, called directly (also reached from 0009 with random(2) = 2): grids 9 × 6, 6 × 4, 4 × 3, ranks with
     /// ties, owners −1..3 and headquarters, several random states.
     /// </summary>
     [GameDataTheory]
@@ -203,7 +182,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         Traders.Core.Rules.Ranking.Apply(core);
         h.Program.Call(Seg, 0x0519);
         var host = new PortHost();
-        foreach (var _ in Catastrophes.FieldsCleared(core, random, host)) { }
+        foreach (var _ in Catastrophes.FieldsCleared(core, random, host, new RulePage())) { }
         core.Set(L.RandomSeed, random.Seed);
         AssertSame(h, host, core, random, c.ToString());
     }

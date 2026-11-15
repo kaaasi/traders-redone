@@ -1,5 +1,6 @@
 using Traders.Core.Field;
 using Traders.Core.Phases;
+using Traders.Core.Pixels;
 using Traders.Core.Startup;
 using Traders.Core.State;
 
@@ -11,15 +12,19 @@ namespace Traders.Core.Disasters;
 /// on to 001E): <see cref="Begin"/> runs <see cref="Catastrophes.Run"/> up to its first wait, every <see cref="Tick"/> one
 /// frame further; the step finishes in the frame in which 111D:0009 returns (at once when no catastrophe strikes). Picture
 /// loads 186C:0002 are recorded in the picture table (<see cref="ImageTable.RecordLoad"/>) when they are emitted; all
-/// other events go to <paramref name="host"/> unchanged. Bound into the phase machine by lane ernte (part 3).
+/// other events go to <paramref name="host"/> unchanged. <paramref name="page"/> is the core's rule page (its draw page
+/// must be the original's when the step begins, <see cref="RulePage.DrawPageOf"/>); <paramref name="images"/> gives the
+/// pixels of a picture by number (host and tests from Traders.Assets). Bound into the phase machine by lane ernte (part 3).
 /// </summary>
-public sealed class CatastropheStep(IDisasterHost host, Func<int, ImageFileLengths> files) : IWeekStepHandler
+public sealed class CatastropheStep(
+    IDisasterHost host, Func<int, ImageFileLengths> files, RulePage page, Func<int, IndexedImage> images) : IWeekStepHandler
 {
     private IEnumerator<FieldWait>? _run;
 
     public StepOutcome Begin(StepContext context)
     {
-        _run = Catastrophes.Run(context.State, context.Random, new LoadRecorder(host, context.State, files)).GetEnumerator();
+        _run = Catastrophes.Run(
+            context.State, context.Random, new LoadRecorder(host, context.State, files), page, images).GetEnumerator();
         return Next();
     }
 
@@ -49,7 +54,5 @@ public sealed class CatastropheStep(IDisasterHost host, Func<int, ImageFileLengt
         public IEnumerable<FieldWait> PauseCheck(Dgroup d) => host.PauseCheck(d);
 
         public IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode) => host.WaitLoop(d, random, mode);
-
-        public IEnumerable<FieldWait> StarShow(Dgroup d, OriginalRandom random) => host.StarShow(d, random);
     }
 }

@@ -42,6 +42,14 @@ public enum DisasterEventKind
     Sound,
     /// <summary>21FD:0185(low, high) – wait for that many retraces (the core yields them).</summary>
     Delay,
+    /// <summary>0A96:0030(sx, sy, w, h, dx, dy) – atlas rectangle to the draw page (command list, star show 111D:0112).</summary>
+    Blit,
+    /// <summary>0A96:04D7(x, y, w, h, colour) – filled rectangle (command list, star show).</summary>
+    FillRect,
+    /// <summary>0A96:03FB(x, y, colour) – one pixel, a star (command list, star show).</summary>
+    SetPixel,
+    /// <summary>0A96:06A8 – execute the command list on the draw page (star show).</summary>
+    ExecuteList,
 }
 
 public sealed record DisasterEvent(DisasterEventKind Kind, params short[] Args)
@@ -59,11 +67,4 @@ public interface IDisasterHost
 
     /// <summary>21FD:0004(mode) – wait loop of lane bilanz (R5).</summary>
     IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode);
-
-    /// <summary>
-    /// 111D:0112 – the star show (two loops of 90 stars, random positions, pixel reads of the draw page). Its rule part needs
-    /// the rule page (src/Traders.Core/Pixels, PR of part 1a); until that is merged the host carries it out (tests: the
-    /// original in the RefEmu).
-    /// </summary>
-    IEnumerable<FieldWait> StarShow(Dgroup d, OriginalRandom random);
 }

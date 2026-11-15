@@ -11,7 +11,7 @@ namespace Traders.Core.Pixels;
 /// read, applied when the original executes them (for the command list 0A96 that is 0A96:06A8, not the enqueue).
 /// Scenes and the host never write here; the page carries no palette and no display state.
 /// </summary>
-public sealed class RulePage
+public sealed partial class RulePage
 {
     public const int Width = 320, Height = 200;
 
@@ -62,6 +62,13 @@ public sealed class RulePage
     // [ORIGINAL] 21FD:051F – 082E ^= 1, draw page = page of 40DE[082E]
     public void Flip() => DrawPage ^= 1;
 
+    /// <summary>
+    /// 21FD:0590 for the rule page: the game draws on the page shown, i.e. on the other page (DS:0830 is the complement of
+    /// DS:082E after every flip). Valid under the same condition as <see cref="Flip"/>.
+    /// </summary>
+    // [ORIGINAL] 21FD:0590 – 082E = 0830, draw page = page of 40DE[082E]
+    public void DrawOnShownPage() => DrawPage ^= 1;
+
     /// <summary>Pixel (x, y) of the physical page <paramref name="page"/> (0 ≤ x &lt; 320, 0 ≤ y &lt; 200).</summary>
     public byte this[int page, int x, int y] => _pages[CheckPage(page)][Index(x, y)];
 
@@ -107,6 +114,20 @@ public sealed class RulePage
         for (int j = 0; j < h; j++)
             for (int i = 0; i < w; i++)
                 page[Index(dx + i, dy + j)] = atlas[sx + i, sy + j];
+    }
+
+    /// <summary>
+    /// Area w × h at (dx, dy) tiled with the atlas tile (sx, sy) tw × th: rows 0, th, 2·th … while below h, columns 0, tw …
+    /// while below w (signed), the last row and column cut to what is left; each cell is a <see cref="Blit"/>. Only areas
+    /// inside the page (w, h ≤ 0 draw nothing).
+    /// </summary>
+    // [ORIGINAL] 0A96:0267 – type 6, executed by 0A96:06A8 through 0A96:0884 (cells as type 0 → 23CD:32D8)
+    public void Tiles(IndexedImage atlas, int sx, int sy, int tw, int th, int dx, int dy, int w, int h)
+    {
+        if (tw < 1 || th < 1) throw new ArgumentOutOfRangeException(nameof(tw), "Tile of at least 1 × 1.");
+        for (int si = 0; si < h; si += th)
+            for (int di = 0; di < w; di += tw)
+                Blit(atlas, sx, sy, Math.Min(tw, w - di), Math.Min(th, h - si), dx + di, dy + si);
     }
 
     /// <summary>Filled rectangle on the draw page in colour <paramref name="color"/> (VGA: colour unchanged).</summary>
