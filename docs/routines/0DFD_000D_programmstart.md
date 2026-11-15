@@ -52,8 +52,10 @@ Dateien (Schriften, Masken, Texte, Bilder, Musik), Grafik (Ladebild, Paletten), 
 Textpuffer, dessen Far-Adresse `DS:4884` der Host vorgibt (`TextFile`; `[APPROX]` Heap des Hosts); Texttafel der Abfrage
 `MenuTextPlaque` (`192D:16AF` über `MenuBackdrop`). `[APPROX]`: Anzeige-, Datei-, Heap- und Tonteile oben laufen nicht im Kern
 (Tabelle „Port“); die Anzeigebytes führt `Traders.Vga` in eigenem Zustand (Entscheidung Leitstelle 12.11.2026), der Host
-(`src/Traders.App/ProgramHost.cs`) richtet davon Seiten (`0B67:0002`), Schriften und Masken ein. Ladebild und Abfragebild
-zeigt der Port nicht (F1 = B).
+(`src/Traders.App/ProgramHost.cs`) richtet davon Seiten (`0B67:0002`), Schriften und Masken ein; den Seitenteil von `0074`
+(Seitennummern `DS:40DE…40E5` = 1, 2 und `0B67:0238`) und den ersten Seitenwechsel von `0132` (`21FD:051F`) führt
+`ProgramHost.SetUpGamePages` auf dem Datensegment der Grafikschichten aus (`[ORIGINAL] 0DFD:0074`/`0132`; Heap-Puffer und
+Zeigerkopien `DS:44DE`/`45BC` `[APPROX]` beim Host). Ladebild und Abfragebild zeigt der Port nicht (F1 = B).
 
 ## Prüfung
 `tests/Traders.Tests/Startup/ProgramStartDifferentialTests.cs` (`[DIFFERENTIAL] 0DFD:000D`): Gleichschritt Schritt 1 → 2 → Aufrufstelle 3
@@ -62,4 +64,7 @@ vier Eingaben (1111, Ziffernblock, falsche Ziffern, Buchstaben und Minus zuerst)
 Gegenproben: ohne Neusaat rot (`DS:10D2`); lokal geprüft: ohne Entschlüsselung rot `DS:10FF`, falsche Länge rot `DS:09DD`,
 falsches `09C8` rot. Seit Teil 3 auch Texttabelle, `DS:4884`, `DS:5334` und der Textpuffer (gegen den Heap des Originals) im
 Vergleich; `ProgramHumanDifferentialTests` führt den Programmstart im ganzen Programmlauf (s. [1777_000C_main.md](1777_000C_main.md)).
-Nicht verglichen: die Anzeigebytes von `Traders.Vga` (Abbildung auf die DS-Adressen erst mit einem Port von `0074`/`0132`/`0158`/`21AF:000D`).
+`tests/Traders.Tests/App/HostMenuPictureDifferentialTests.cs` (`[DIFFERENTIAL] 0DFD:0074`, `[DIFFERENTIAL] 0DFD:0132`, R4W-1/#126/#127):
+der Host richtet mit `SetUpGamePages` seine Seiten selbst ein; ab dem dritten Durchlauf der Menüschleife sind an jedem Rücklauf
+gezeigtes Bild (DAC), CRTC-Start und `DS:082E`/`0830` der Schichten gleich dem Original. Nicht verglichen: die übrigen
+Anzeigebytes von `Traders.Vga` (Schriften `0158`, Objekte `21AF:000D`).
