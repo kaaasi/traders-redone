@@ -151,7 +151,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Merge zuerst die pixelfreien Routinen, nie Dateien aus `Pixels/**` außer `Pixels/Stations*` übernehmen; ist sonst nichts mehr
   zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** Teil 1 fertig (PR #151, Draft): Befund `1B03_0009_stationen.md` (44 Routinen), Kern der pixelfreien Routinen mit 32 Differenztests; offen Teil 2 (`1178`, `08ED`, `0BE7` über die Regelseite, Bildgleichschritt) und Teil 3 (Szene).
+- **Status:** Teil 1 und 2 fertig (PR #151, Draft): Befund `1B03_0009_stationen.md` (44 Routinen), Kern aller Routinen; `1178`, `08ED`, `0BE7` über die Regelseite (`Pixels/StationsPage.cs`), ganze Phase `0009` im Bildgleichschritt mit dem RefEmu (16 Zufallszustände, Standardpartie Woche 0–2); offen Teil 3 (Szene).
 
 ## Fixlauf `fix/anbau-figuren` – #147 (P2) aus dem Windows-Handtest R5, mit #113
 

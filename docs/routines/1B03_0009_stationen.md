@@ -17,7 +17,7 @@ Blitz aus `0CAC`, Felder `0E11`, Boni `0EA9`.
   `DS:348A[si]` = −1 → `random(2) ≠ 0 ? 10 : random(3)`, sonst → −1.
 - `148B`: Objekt 4 (Explosion) Ebene `DS:3376` = 13, `21AF:022B(4, 0, 78h, 0, 85h)`, fünf Bilder `21AF:00CA`; je Spieler Ebene 15,
   Puffer, zwei Bilder, `21AF:0412(p, 0)`. `DS:37AA` danach 4.
-- `1178` (**Pixel**, Teil 2): Liste, Fläche 320 × 200 aus dem Atlas, ausführen; 200-mal `x = random(319)`, `y = random(199)`,
+- `1178` (**Pixel**): Liste, Fläche 320 × 200 aus dem Atlas, ausführen; 200-mal `x = random(319)`, `y = random(199)`,
   liest `23CD:06DE(x, y)`; nur bei Pixel 1 zusätzlich `random(2)` (Sternfarbe `DS:0DD9[…]`) und Punkt `0A96:03FB`. Die Zahl der
   Ziehungen hängt also am Pixel der Zeichenseite (Regelseite R6P-1). Danach die zwölf Stationsbilder (`DS:0DCD`, `0C84`, `0C9C`),
   ausführen, `0A96:0C3F`.
@@ -49,7 +49,7 @@ Blitz aus `0CAC`, Felder `0E11`, Boni `0EA9`.
 - `07C4`: je Spieler gestartet `DS:53A6` und verloren `DS:53AD` = 0, Raketen summiert nach `DS:53B2` (Byte), Text 225, `0D75`.
 - `0849`: Startspieler `random(3)` (Spieler 3 nie zuerst), reihum je Rakete k: Fortschritt `DS:53B6[k]` = −5k, Ziel
   `DS:533A[k]` = `random(299) + 10`, Besitzer `DS:5434[k]`; `DS:53B4` zählt fliegende.
-- `08ED` (**Pixel**, Teil 2): solange `DS:53B4` > 0 je Bild: Seitenwechsel, Pause 3, Objekte, Liste, Pause; je Rakete: über 59h
+- `08ED` (**Pixel**): solange `DS:53B4` > 0 je Bild: Seitenwechsel, Pause 3, Objekte, Liste, Pause; je Rakete: über 59h
   fertig; negativ: hochzählen; sonst (bei 0 Startton 12h) `0CCF`, `0B7A`, angegriffene → `0BE7`, sonst bei Pixel 1 an
   (`DS:5424`, `DS:5426`) Punkt in `DS:0CF8[p]`; Fortschritt + 1, über 59h → `DS:53B4` − 1. Dann `12D7(3)`, `0A62`, `0C89`, Liste,
   Objekte. Am Ende Ton 0, `21FD:0665`.
@@ -61,7 +61,7 @@ Blitz aus `0CAC`, Felder `0E11`, Boni `0EA9`.
   zurück; 17 bereit `DS:53B3` = 1, Zustand 0.
 - `0B7A`: Angriff auf Rakete `DS:53AC`, wenn (`546A[p]` = 1 oder ohne Piraten `random(5000) = 0`) und kein Angriff läuft und das
   Schiff wartet, oder mit Piraten nach „bereit“; nur bis y BEh: `DS:5422` = 0, `DS:53B5` = k, Ton (2, 15h), bereit = 0.
-- `0BE7` (**Pixel**, Teil 2): erstes Bild: Blitz 7; Pixel an der Rakete = 1 → sichtbar `DS:5336` = 1, Objekt 4 an
+- `0BE7` (**Pixel**): erstes Bild: Blitz 7; Pixel an der Rakete = 1 → sichtbar `DS:5336` = 1, Objekt 4 an
   (x − 8, y − 6); bis Bild 14 bei sichtbar Objektbild `DS:5422 / 3`, sonst Objekt 4 aus, Rakete verloren (`53B6[k]` = 5Ah,
   `53B4` − 1, `53AD[p]` + 1, `0D75`), kein Angriff mehr. `DS:5422` + 1.
 - `0C89`: `DS:546F` > 0 → − 1, `21FD:03EB(777h, Wert)`. `0CAC`: zehnmal `0C89`, Pause 4.
@@ -93,20 +93,47 @@ Stärke − 1 · `05E7`/`0632` keiner · `0849` 3, je Rakete 299 · `08ED` je Bi
 
 ## Kern und Zeichenteil
 
-Kern (Teil 1, `src/Traders.Core/Stations/`): alle Zustands- und Zufallsteile außer `1178`, `08ED`, `0BE7`; jede Ausgabe als
-`StationEvent` mit den Originalargumenten (Liste, Text, Objekte, Seiten, Palette, Pausen, Ton). Teil 2: `1178`, `08ED`, `0BE7`
-über die Regelseite (`Pixels/`, Spur 1, PR #149; Ergänzungen in `Pixels/Stations*`), Bild für Bild. Teil 3: Szene.
+Kern (`src/Traders.Core/Stations/`): alle Zustands- und Zufallsteile; jede Ausgabe als `StationEvent` mit den
+Originalargumenten (Liste, Text, Objekte, Seiten, Palette, Pausen, Ton). `1178`, `08ED`, `0BE7` lesen die Zeichenseite über die
+Regelseite (`Pixels/RulePage.cs`, PR #149; Ergänzung `Pixels/StationsPage.cs`). Teil 3: Szene.
 
 **Transitiv gerufen:** portiert `0E31:023D`, `0E9E:000E`, `0609:10D2`, `21FD:01BA`, LDIV `0000:4F89`, `21AF:0412`/`045E` (Kernteil);
 Ausgabe (Ereignis, in `Traders.Vga` vorhanden) `0A96:001B/0030/0311/03FB/0525/06A8/0C3F`, `0A69:004D/011B/0243/0288`,
 `23CD:06E9/071C`, `21AF:00CA/022B`, `0B67:01D4/0206`, `21FD:0185/026C/0329/037D/03EB/051F/060D/0665`, `2295:0001`, `186C:0002`;
-Pause `21FD:0245` (Ereignis); Ton `21A7:0054` (Ereignis bis R10); Pixel-Leser `23CD:06DE` → Regelseite (Teil 2). Keiner gehört
+Pause `21FD:0245` (Ereignis); Ton `21A7:0054` (Ereignis bis R10); Pixel-Leser `23CD:06DE` → Regelseite. Keiner gehört
 einer anderen Spur von R6.
+
+## Regelseite (was die Lesestellen sehen)
+
+Alle drei Leser vergleichen das Pixel (AX, `23CD:3764` löscht AH) mit 1. Was vorher auf die Zeichenseite kommt (belegt durch den
+Gleichschritt unten, Seiten je Bild gleich dem VRAM außerhalb der Meldetafel):
+
+- **Befehlsliste `0A96`:** Einträge werden erst bei `06A8` gezeichnet, auch in `21FD:060D` (Liste, Wechsel, Liste) und `0665`
+  (Wechsel, Objekte zurück, Liste, Objekte); `001B` leert. Gezeichnet werden Blits aus dem RAM-Atlas (`0030`, `0311` = Breite 8),
+  Pixel (`03FB`: Sterne, Raketenspur) und Texte aus DS ohne Schatten (`0525`: Marke `P` neben Stationen, `OK` links oben) mit der
+  aktuellen Schrift; Glyphenpixel laufen im Seitenspeicher weiter (x ≥ 320 → nächste Zeile, Station 9).
+- **`1178`:** die Lesestelle sieht das Bild und die schon gesetzten Sterne (jeder Stern wird sofort ausgeführt).
+- **`08ED`/`0BE7`:** gelesen wird nach `071C` und `06A8` der Liste des Vorbilds, Punkte desselben Bildes sind noch nicht
+  gezeichnet. Objekte sind beim Lesen im Normalfall zurückgesetzt; **aber** `21AF:0412` löscht die Rücksetzsätze beider Seiten:
+  wird die Explosion (Objekt 4) für eine neue Rakete gezeigt, bleibt ihr altes Bild auf der Seite, auf der es zuletzt gezeichnet
+  war, und ein späteres Lesen dort trifft es (Rakete dann „unsichtbar“ getroffen und sofort verloren). Die Regelseite zeichnet und
+  setzt Objekte deshalb wie `23CD:06E9/071C` (16 Pixel breit, Maske aus `MASKS.PP`, Sätze je physischer Seite).
+- **Seitenwechsel:** `0A69:0243`/`0288` (getippte Texte) rufen je Zeichen `21FD:060D` – die Zahl der Wechsel ist die Textlänge
+  (Textpuffer `DS:4884` als Eingabe). Zeichenseite danach wie `21FD:051F`; `0B67:01D4/0206` in `15D7` nur für das Zurücksetzen.
+- **Nicht gezeichnet (`[APPROX]`):** Texte der Meldetafel `0A69:004D/011B/0243/0288` (Tafel 70h…CFh × AFh…C7h ohne Farbe 1 in
+  `V-RAKETE`, Textfarben ≠ 1): ein Lesen dort bleibt ≠ 1, der genaue Wert kann abweichen. Gilt für die kleine Schrift (Schrift 0,
+  im Spiel an Aufruf 11 gewählt); mit der großen reichen Tafeltexte über die Tafel hinaus.
+- **Annahmen beim Start:** kein Objekt hat einen gültigen Rücksetzsatz, Objekte 5…7 inaktiv (im Test am Original geprüft).
+  `21AF:022B` legt die Sicherungspuffer in den RAM-Atlas (x 0…15, Zeilen 0…93h); in der Phase wird von dort nichts mehr geblittet,
+  der Atlas der Regelseite bleibt das Bild.
 
 ## C#-Umsetzung
 
-`StationPhase` (`StationPhase*.cs`): `Begin`/`ShowScreen` (Rahmen von `0009` ohne `1178`), `Selection`/`Choose` als Koroutinen
-(Halt nach jedem Seitenwechsel, Eingabe danach vom Host), `FlightBegin`/`FlightEnd`/`End`, je Routine eine Methode mit Marke.
+`StationPhase` (`StationPhase*.cs`): `Run` (`0009`) und `Flight` (`0705`) als Koroutinen (Halt nach jedem Seitenwechsel von
+`02C0` und `08ED`, Eingabe danach vom Host), darin `Begin`/`StarField`/`ShowScreen`, `Selection`/`Choose`,
+`FlightBegin`/`FlightLoop`/`FlightEnd`, `End`; je Routine eine Methode mit Marke. `StationPhase.Pixels` (`StationsPage`) spielt
+jedes Ereignis auf die Regelseite; Eingaben: Regelseite (Zeichenseite wie `DS:40DE[DS:082E]`), Bild `V-RAKETE`, `MASKS.PP`,
+Schrift (`TextFont`), Textpuffer (`TextFile`).
 
 ## Prüfung
 
@@ -114,3 +141,11 @@ einer anderen Spur von R6.
 protokolliert, `21AF:0412/045E` laufen): zufällige Zustände je Routine; verglichen ganzes DS (ohne Objektzeiger/Restaurierung
 und tzset-Namen), Zahl der `random`-Aufrufe, AX, Aufruffolge mit Argumenten, Tastendurchgänge. `random(0)`: die Uhr des Ports
 bekommt den `time()`-Wert des Originals (Haken bei `21FD:01CE`).
+
+`tests/Traders.Tests/Stations/StationsLockstepTests.cs` mit `StationsLockstep` (Original mit echter Ausgabe aus dem Abzug am
+Hauptmenü bzw. aus der Standardpartie, nur Ton `21A7:0054` und Wartezeit `21FD:0185` als `retf`): je Bild (`051F` aus `1B03`) DS
+ohne Ausgabebereiche (Befehlsliste, Seiten, Objekttabellen `21AF`, Palettenpuffer, Zeitgeber), Zahl der `random`-Aufrufe,
+Zeichenseite und beide Seiten außerhalb der Tafel; jedes Lesen von `06DE` (in der Tafel nur „= 1“); Bildzahl und Endzustand.
+`Star_field_1178` (8 Zustände, Seiten danach vollständig gleich), `Whole_phase_0009` (16 Zufallszustände mit Menschen und
+Computern, 6184 Bilder), `Game_week` (Standardpartie Woche 0, 1, 2). Gegenproben beim Entwickeln: ohne Objekte auf der
+Regelseite rot (Zustand 15, Explosionsrest), ohne Wechsel der getippten Texte rot (Seiten vertauscht), große Schrift rot.

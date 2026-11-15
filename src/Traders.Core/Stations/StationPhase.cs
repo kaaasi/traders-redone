@@ -10,8 +10,8 @@ namespace Traders.Core.Stations;
 /// through the controls 0E9E, computers through 1B03:0632), rocket flight with pirates, lost rocket fields and the weekly
 /// bonuses. Works on the data segment like the original; every call into the output layers is reported as a
 /// <see cref="StationEvent"/> in the original order, random numbers come from <see cref="OriginalRandom"/>.
-/// Part 1 of lane stationen: the routines without pixel reads (the star field 1B03:1178 and the flight loop 1B03:08ED with
-/// 1B03:0BE7 read the drawn page and follow in part 2 with the rule page of the core).
+/// The star field 1B03:1178, the flight loop 1B03:08ED and the hit test 1B03:0BE7 read the drawn page: the core reads
+/// its rule page <see cref="Pixels"/> instead (R6P-1).
 /// </summary>
 public sealed partial class StationPhase
 {
@@ -27,6 +27,12 @@ public sealed partial class StationPhase
         _devices = devices;
     }
 
+    /// <summary>
+    /// Rule page of the phase: every output call is also played onto it; the star field, the flight loop and the
+    /// hit test read their pixels there. Required for <see cref="StarField"/>, <see cref="FlightLoop"/> and <see cref="Run"/>.
+    /// </summary>
+    public Pixels.StationsPage? Pixels { get; init; }
+
     /// <summary>Output calls reported so far.</summary>
     public IReadOnlyList<StationEvent> Events => _events;
 
@@ -40,7 +46,12 @@ public sealed partial class StationPhase
 
     private const short Ds = StationEvent.DataSegment;
 
-    private void Emit(StationCall call, params short[] args) => _events.Add(new StationEvent(call, args));
+    private void Emit(StationCall call, params short[] args)
+    {
+        var e = new StationEvent(call, args);
+        _events.Add(e);
+        Pixels?.Apply(e);
+    }
 
     private sbyte P => _d.S8(L.ActivePlayer);
 
@@ -145,7 +156,7 @@ public sealed partial class StationPhase
     /// 1B03:0009 from the start up to the star field: station values, the rocket check, picture and objects. Returns false
     /// when nobody has a rocket field (the phase ends after 1B03:0079).
     /// </summary>
-    // 1B03:0009 up to the star field (marker and differential test with the whole phase in part 2)
+    // part of 1B03:0009 (marker at Run)
     public bool Begin()
     {
         DrawStationValues();

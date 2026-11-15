@@ -12,7 +12,7 @@ namespace Traders.Core.Stations;
 public sealed partial class StationPhase
 {
     /// <summary>1B03:0705 up to its flight loop 08ED: reset (0740), messages (0763), rocket lines (07C4), schedule (0849), list cleared.</summary>
-    // 1B03:0705 before its frame loop (marker and differential test with 08ED in part 2)
+    // part of 1B03:0705 (marker at Flight)
     public void FlightBegin()
     {
         ResetFlight();

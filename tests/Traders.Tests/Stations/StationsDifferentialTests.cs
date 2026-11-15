@@ -25,9 +25,11 @@ public sealed class StationsDifferentialTests
     private static (IEnumerable<StationWait>?, Func<int>?) Act(Action a) => (null, () => { a(); return 0; });
 
     /// <summary>A data segment with every value the phase reads set from <paramref name="r"/> within the game's ranges.</summary>
-    private static Dgroup State(Inputs r, bool humans = true)
+    private static Dgroup State(Inputs r, bool humans = true) => Fill(H().Initial(), r, humans);
+
+    /// <summary>Sets every value the phase reads in <paramref name="d"/> from <paramref name="r"/>; returns <paramref name="d"/>.</summary>
+    internal static Dgroup Fill(Dgroup d, Inputs r, bool humans = true)
     {
-        var d = H().Initial();
         d.Set(L.RandomSeed, r.Next());
         d.Set(L.ActivePlayer, (sbyte)r.Range(-3, 7));
         d.Set(L.ComputerIq, (short)r.Range(0, 3));
@@ -199,7 +201,7 @@ public sealed class StationsDifferentialTests
     /// Keys per pass for the two human key sets (cursor keys for players 0 and 2, letter keys for 1 and 3): random presses at
     /// first, from pass 40 on fire every fourth pass and a step right in between, so every human confirms in the end.
     /// </summary>
-    private static Func<int, IReadOnlyCollection<byte>> ChoiceKeys(int seed) => pass =>
+    internal static Func<int, IReadOnlyCollection<byte>> ChoiceKeys(int seed) => pass =>
     {
         var keys = new List<byte>();
         uint h = (uint)(seed * 7919 + pass * 104729);

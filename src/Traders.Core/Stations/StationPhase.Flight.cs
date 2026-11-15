@@ -6,7 +6,7 @@ namespace Traders.Core.Stations;
 /// <summary>
 /// Rocket flight 1B03:0705 without its frame loop (docs/routines/1B03_0009_stationen.md, section "Raketenflug"): setup,
 /// messages, launch schedule, flight curve, pirate state machine and attack decision, ship drawing and palette flash. The
-/// frame loop 1B03:08ED with the hit test 1B03:0BE7 reads the drawn page (rule page) and follows in part 2.
+/// frame loop 1B03:08ED with the hit test 1B03:0BE7 reads the drawn page (rule page, StationPhase.Pixels.cs).
 /// </summary>
 public sealed partial class StationPhase
 {
