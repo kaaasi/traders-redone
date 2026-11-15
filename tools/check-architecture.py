@@ -6,28 +6,47 @@ import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
 errors = []
-for name, allowed in {'Traders.Core': set(), 'Traders.Assets': set(),
-                      'Traders.Vga': {'Traders.Assets'}, 'Traders.Audio': {'Traders.Assets'},
-                      # Scenes (R4, lane menue): read the core, draw through the layers; no oracle, no host
-                      'Traders.Presentation': {'Traders.Core', 'Traders.Assets', 'Traders.Vga'},
-                      # Host (R3P-3): no oracle in the shipped program, nothing depends back on it
-                      'Traders.App': {'Traders.Core', 'Traders.Assets', 'Traders.Vga', 'Traders.Audio', 'Traders.Presentation'}}.items():
-    project = root / 'src' / name / (name + '.csproj')
-    for node in ET.parse(project).iter('ProjectReference'):
-        target = node.attrib['Include'].replace('\\', '/').split('/')[-1].removesuffix('.csproj')
-        if target not in allowed:
-            errors.append(f'{name}: unerlaubte Projektabhängigkeit {target}')
+# Allowed project references of the layered projects (forward direction).
+_ALLOWED = {'Traders.Core': set(), 'Traders.Assets': set(),
+            'Traders.Vga': {'Traders.Assets'}, 'Traders.Audio': {'Traders.Assets'},
+            # Scenes (R4, lane menue): read the core, draw through the layers; no oracle, no host
+            'Traders.Presentation': {'Traders.Core', 'Traders.Assets', 'Traders.Vga'},
+            # Host (R3P-3): no oracle in the shipped program, nothing depends back on it
+            'Traders.App': {'Traders.Core', 'Traders.Assets', 'Traders.Vga', 'Traders.Audio', 'Traders.Presentation'}}
 # Reverse direction for every project in src/ (#76 P3-1): host, oracle and tools are leaves nobody references, and the
 # scenes are referenced by the host only.
-leaves = {'Traders.App', 'Traders.RefEmu', 'Traders.Viewer', 'Traders.Tools'}
-for project in sorted((root / 'src').glob('*/*.csproj')):
-    name = project.stem
-    for node in ET.parse(project).iter('ProjectReference'):
-        target = node.attrib['Include'].replace('\\', '/').split('/')[-1].removesuffix('.csproj')
-        if target in leaves:
-            errors.append(f'{name}: Rückrichtung auf {target} (Host, Orakel und Werkzeuge sind Blätter)')
-        if target == 'Traders.Presentation' and name != 'Traders.App':
-            errors.append(f'{name}: Szenen nur vom Host referenziert (Traders.Presentation)')
+_LEAVES = {'Traders.App', 'Traders.RefEmu', 'Traders.Viewer', 'Traders.Tools'}
+
+
+def reference_violations(references):
+    """references: project -> set of referenced projects (every project in src/). Forward rule for the layered projects
+    (a missing layered project is an error), reverse rule for all projects."""
+    found = []
+    for name, allowed in _ALLOWED.items():
+        if name not in references:
+            found.append(f'{name}: Projekt fehlt')
+            continue
+        for target in sorted(references[name] - allowed):
+            found.append(f'{name}: unerlaubte Projektabhängigkeit {target}')
+    for name, targets in sorted(references.items()):
+        for target in sorted(targets):
+            if target in _LEAVES:
+                found.append(f'{name}: Rückrichtung auf {target} (Host, Orakel und Werkzeuge sind Blätter)')
+            if target == 'Traders.Presentation' and name != 'Traders.App':
+                found.append(f'{name}: Szenen nur vom Host referenziert (Traders.Presentation)')
+    return found
+
+
+def project_references(directory):
+    """project name -> referenced project names for every */*.csproj below directory."""
+    refs = {}
+    for project in sorted(directory.glob('*/*.csproj')):
+        refs[project.stem] = {node.attrib['Include'].replace('\\', '/').split('/')[-1].removesuffix('.csproj')
+                              for node in ET.parse(project).iter('ProjectReference')}
+    return refs
+
+
+errors.extend(reference_violations(project_references(root / 'src')))
 
 def strip_comments(text):
     return re.sub(r'/\*.*?\*/|//[^\n]*', '', text, flags=re.S)
@@ -75,7 +94,8 @@ def _types(text):
 
 
 def _methods(text):
-    """(class, name, static, body) for every method, constructor, local function and expression-bodied member."""
+    """(class, name, static, body, parameters) for every method, constructor, local function and expression-bodied
+    member."""
     types = _types(text)
     head = re.compile(r'(\w+)\s*(?:<[^<>()]*>)?\s*\(')
     pos = 0
@@ -104,7 +124,7 @@ def _methods(text):
             end = _block_end(text, start - 1)
         else:
             end = text.find(';', start)
-        yield cls, name, bool(re.search(r'\bstatic\b', prefix)), text[start:end]
+        yield cls, name, bool(re.search(r'\bstatic\b', prefix)), text[start:end], text[m.end():i - 1]
         pos = start
 
 
@@ -156,33 +176,40 @@ def core_members(sources):
 def core_writers(sources):
     """Core members that change the game state (#101 R4M-2, #103 P3-1, #105 P3-1), decided from the bodies: a method writes
     if it stores into a data segment (Set, raw bytes) or calls a writing member - qualified (Class.Method), unqualified in
-    the same class, through a variable of a core type, or as a constructor (new X(...)). Return type and parameters do not
+    the same class, through a variable, parameter (#139) or field of a core type, or as a constructor (new X(...)). Return type and parameters do not
     matter (Wealth.Wares returns int and writes DS:45D0). Every method of a step handler (IWeekStepHandler,
     IProgramStepHandler, also through a base class) counts as writing: it drives the core (R5B-3, ReportStep.Tick).
     Returns {'Class.Method': is_static}; 'X.X' marks a constructor."""
-    members = []  # (cls, name, static, body)
+    members = []  # (cls, name, static, body, parameters)
     texts = [strip_code(t) for t in sources]
     for text in texts:
         members.extend(_methods(text))
     classes = {c for c, *_ in members if c}
     for text in texts:
         classes.update(name for *_, name in _types(text))
+    # Fields, properties and primary constructor parameters of each class (#139: _a.Write(d) through a field). The scan
+    # covers the whole class text, so a local of another method may count too - that errs towards "writing".
+    fields = {}
+    for text in texts:
+        for start, end, cls in _types(text):
+            fields.setdefault(cls, {}).update(_locals(text[start:end], classes))
     handlers = _step_handlers(texts)
     writers = {}
-    for cls, name, static, body in members:
+    for cls, name, static, body, _ in members:
         if cls and (_DIRECT_WRITE.search(body) or cls in handlers):
             writers[f'{cls}.{name}'] = static
     changed = True
     while changed:
         changed = False
-        for cls, name, static, body in members:
+        for cls, name, static, body, parameters in members:
             key = f'{cls}.{name}'
             if not cls or key in writers:
                 continue
             calls = {f'{c}.{n}' for c, n in re.findall(r'\b([A-Z]\w*)\s*\.\s*(\w+)\s*\(', body)}
             calls |= {f'{cls}.{n}' for n in re.findall(r'(?<![.\w])(\w+)\s*\(', body)}
             calls |= {f'{c}.{c}' for c in re.findall(r'\bnew\s+([A-Z]\w*)\s*\(', body)}
-            variables = _locals(body, classes)
+            # locals of the body, parameters of the signature (#139 R5G-1) and fields of the owning class
+            variables = {**fields.get(cls, {}), **_locals(parameters + ')', classes), **_locals(body, classes)}
             calls |= {f'{variables[v]}.{n}' for v, n in re.findall(r'\b(\w+)\s*\.\s*(\w+)\s*\(', body) if v in variables}
             if calls & writers.keys():
                 writers[key] = static
@@ -276,7 +303,14 @@ _core = ['public static class KeyTable { public static void Write(Dgroup state, 
          'public sealed class Report { public bool Aborted { get; } public IEnumerable<int> Run() { Ranking.Apply(_d); yield return 0; } }',
          'public class ReportStep(int arg = 1) : IWeekStepHandler { private IEnumerator<int>? _run;'
          ' public Report? Report { get; private set; } public StepOutcome Tick(StepContext c) { _run!.MoveNext(); return default; } }',
-         'public sealed class LaterStep : ReportStep { public new StepOutcome Tick(StepContext c) => default; }']
+         'public sealed class LaterStep : ReportStep { public new StepOutcome Tick(StepContext c) => default; }',
+         # #139 R5G-1: writes reached through a method parameter (B.Go) and through a field of the class (Holder.Go)
+         'public class A { public void Write(Dgroup d) { d.Set(0, (byte)1); } public int Read(Dgroup d) => d.U8(0); }',
+         'public static class B { public static void Go(A a, Dgroup d) { a.Write(d); } public static int Look(Dgroup d) => d.U8(1); }',
+         'public sealed class Holder { private readonly A _a = new(); public void Go(Dgroup d) { _a.Write(d); }'
+         ' public int Peek(Dgroup d) => _a.Read(d); }']
+_layers = {**{k: set(v) for k, v in _ALLOWED.items()}, 'Traders.RefEmu': {'Traders.Core', 'Traders.Assets'},
+           'Traders.Viewer': {'Traders.Assets', 'Traders.Vga'}, 'Traders.Tools': {'Traders.Assets'}}
 _writers = core_writers(_core)
 _members = core_members(_core)
 for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers), CATCH),
@@ -300,6 +334,17 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
                     (scene_violations('Func<IEnumerable<int>> r = _st.Report!.Run;', _writers, _members), CATCH),
                     (scene_violations('ReportStep st = _st; bool a = st.Report!.Aborted; Func<Dgroup, int> c = Wealth.Cash;',
                                       _writers, _members), CLEAN),
+                    # #139 R5G-1: a writing core call through a parameter or a field of a core type is writing too
+                    (scene_violations('B.Go(a, _state);', _writers, _members), CATCH),
+                    (scene_violations('Holder h = _h; h.Go(_state);', _writers, _members), CATCH),
+                    (scene_violations('int c = B.Look(_state); Holder h = _h; int p = h.Peek(_state);', _writers, _members), CLEAN),
+                    # #76 P3-1: one violation per reference rule, and the real layering stays clean
+                    (reference_violations({**_layers, 'Traders.Vga': {'Traders.Assets', 'Traders.Core'}}), CATCH),
+                    (reference_violations({**_layers, 'Traders.Tools': {'Traders.App'}}), CATCH),
+                    (reference_violations({**_layers, 'Traders.Viewer': {'Traders.RefEmu'}}), CATCH),
+                    (reference_violations({**_layers, 'Traders.Viewer': {'Traders.Presentation'}}), CATCH),
+                    (reference_violations({k: v for k, v in _layers.items() if k != 'Traders.Core'}), CATCH),
+                    (reference_violations(_layers), CLEAN),
                     (raw_offset_violations('uint seed = d.U32(0x10D2);'), CATCH),
                     (raw_offset_violations('void F(Dgroup d) { short v = d.S16(2298); }'), CATCH),
                     (raw_offset_violations('const int Req = 0x3CCC; void F(Dgroup d) { byte v = d.U8(Req); }'), CATCH),
