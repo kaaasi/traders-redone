@@ -18,9 +18,27 @@ public class ProgramHostCatchUpTests
     public static TheoryData<long[]> Jumps => new()
     {
         new long[] { 20, 35 },                    // probe of the review: 21 single frames, then a jump of 15
-        new long[] { 0, 15, 30, 45, 60, 75, 90 }, // steady catch-up of 15 frames (a quarter second is about 17)
-        new long[] { 5, 22, 39, 56, 73, 90 },     // jumps of 17, the upper bound of one update
+        new long[] { 0, 15, 30, 45, 60, 75, 90 }, // steady catch-up of 15 frames
+        new long[] { 5, 22, 39, 56, 73, 90 },     // jumps of 17 and
+        new long[] { 4, 22, 40, 58, 76, 94 },     // of 18: one update of HostGame.MaxStep (0.25 s at 70 Hz) covers 17 or 18
     };
+
+    /// <summary>
+    /// The bound of the jumps above (#113): an update of <see cref="HostGame.MaxStep"/> completes 17 or 18 frames of the
+    /// host clock, depending on where in a frame it starts – never more than 18.
+    /// </summary>
+    [Fact]
+    public void One_update_of_the_longest_step_covers_17_or_18_frames()
+    {
+        var counts = new HashSet<int>();
+        for (int phase = 0; phase < 70; phase++)
+        {
+            var clock = new Traders.App.Timing.HostClock();
+            clock.Advance(TimeSpan.FromSeconds(phase / 4900.0)); // 70 starting points within one frame
+            counts.Add(clock.Advance(HostGame.MaxStep).Frames);
+        }
+        Assert.Equal([17, 18], counts.Order());
+    }
 
     [GameDataTheory]
     [MemberData(nameof(Jumps))]

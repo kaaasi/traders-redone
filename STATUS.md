@@ -122,7 +122,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
 | `0000:5101` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
-| `0609:0004` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingFrameDifferentialTests.cs` | ✅ |
+| `0609:0004` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `HostPlantingFrameDifferentialTests.cs`, `PlantingDifferentialTests.cs`, `PlantingFrameDifferentialTests.cs` | ✅ |
 | `0609:00D6` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:0160` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:0204` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Field/FieldScene.cs` | `PlantingFrameDifferentialTests.cs`, `PlantingSceneDifferentialTests.cs` | ✅ |
