@@ -62,6 +62,28 @@ public sealed class StationsPage
         _masks = masks;
         _font = font;
         _d = state;
+        DrawIndex = state.S16(RulePage.DrawPageIndex);
+        ShownIndex = state.S16(ShownPageIndex);
+    }
+
+    private const int ShownPageIndex = 0x0830;
+
+    /// <summary>
+    /// DS:082E as the original's 21FD:051F keeps it: the index of the page being drawn, flipped with every page flip of the
+    /// phase (also inside 21FD:060D, 0665 and the typed texts). The core's data segment leaves it to the output layers; the
+    /// phase passes this value where the original pushes [082E] (23CD:06E9/071C, 0A96:0C3F).
+    /// </summary>
+    public short DrawIndex { get; private set; }
+
+    /// <summary>DS:0830 as 21FD:051F keeps it: 1 when the draw index is 0, else 0 (the start value from the data segment).</summary>
+    public short ShownIndex { get; private set; }
+
+    // [ORIGINAL] 21FD:051F – 082E ^= 1, 0830 = (082E == 0), draw page = page of 40DE[082E]
+    private void Flip()
+    {
+        Page.Flip();
+        DrawIndex ^= 1;
+        ShownIndex = (short)(DrawIndex == 0 ? 1 : 0);
     }
 
     public RulePage Page { get; }
@@ -108,15 +130,15 @@ public sealed class StationsPage
             case StationCall.ListOnBothPages:
                 // [ORIGINAL] 21FD:060D – 0A96:06A8, 21FD:051F, 0A96:06A8
                 RunList();
-                Page.Flip();
+                Flip();
                 RunList();
                 break;
             case StationCall.Flip:
-                Page.Flip();
+                Flip();
                 break;
             case StationCall.LastFrame:
                 // [ORIGINAL] 21FD:0665 – 21FD:051F, 23CD:071C, 0A96:06A8, 23CD:06E9
-                Page.Flip();
+                Flip();
                 RestoreObjects();
                 RunList();
                 DrawObjects();
@@ -183,7 +205,7 @@ public sealed class StationsPage
         for (int i = 0; i < length; i++)
         {
             _list.Clear();
-            Page.Flip();
+            Flip();
         }
     }
 

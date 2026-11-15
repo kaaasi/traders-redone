@@ -287,7 +287,7 @@ public sealed partial class StationPhase
         for (SetP(0); P < 4; SetP(P + 1)) HideObject(P);
         Emit(StationCall.RestoreObjects, Page);
         Emit(StationCall.DrawOnShownPage);
-        Emit(StationCall.RestoreObjects, _d.S16(S.ShownPage));
+        Emit(StationCall.RestoreObjects, ShownPage);
         Emit(StationCall.DrawOnHiddenPage);
     }
 

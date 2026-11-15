@@ -33,6 +33,12 @@ public sealed partial class StationPhase
     /// </summary>
     public Pixels.StationsPage? Pixels { get; init; }
 
+    /// <summary>
+    /// Receiver of every output call at the moment it is reported (the scene plays it with the data segment of that moment:
+    /// object records, key table). Optional; <see cref="Events"/> keeps the calls either way.
+    /// </summary>
+    public Action<StationEvent>? Output { get; init; }
+
     /// <summary>Output calls reported so far.</summary>
     public IReadOnlyList<StationEvent> Events => _events;
 
@@ -51,6 +57,7 @@ public sealed partial class StationPhase
         var e = new StationEvent(call, args);
         _events.Add(e);
         Pixels?.Apply(e);
+        Output?.Invoke(e);
     }
 
     private sbyte P => _d.S8(L.ActivePlayer);
@@ -68,7 +75,11 @@ public sealed partial class StationPhase
 
     private sbyte SByte(int offset) => _d.S8(At(offset));
 
-    private short Page => _d.S16(S.DrawPage);
+    /// <summary>[082E], the draw page index: the rule page's (the core's data segment leaves it to the output layers).</summary>
+    private short Page => Pixels?.DrawIndex ?? _d.S16(S.DrawPage);
+
+    /// <summary>[0830], the shown page index: the rule page's.</summary>
+    private short ShownPage => Pixels?.ShownIndex ?? _d.S16(S.ShownPage);
 
     /// <summary>The rocket fields of player p (DS:2EE7 + 4p + 3, i.e. DS:2EEA + 4p).</summary>
     private sbyte RocketFields(int p) => SByte(L.FieldsByKind + 4 * p + 3);

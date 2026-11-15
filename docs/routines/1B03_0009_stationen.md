@@ -95,7 +95,7 @@ Stärke − 1 · `05E7`/`0632` keiner · `0849` 3, je Rakete 299 · `08ED` je Bi
 
 Kern (`src/Traders.Core/Stations/`): alle Zustands- und Zufallsteile; jede Ausgabe als `StationEvent` mit den
 Originalargumenten (Liste, Text, Objekte, Seiten, Palette, Pausen, Ton). `1178`, `08ED`, `0BE7` lesen die Zeichenseite über die
-Regelseite (`Pixels/RulePage.cs`, PR #149; Ergänzung `Pixels/StationsPage.cs`). Teil 3: Szene.
+Regelseite (`Pixels/RulePage.cs`, PR #149; Ergänzung `Pixels/StationsPage.cs`). Teil 3: Szene (Abschnitt „Szene“).
 
 **Transitiv gerufen:** portiert `0E31:023D`, `0E9E:000E`, `0609:10D2`, `21FD:01BA`, LDIV `0000:4F89`, `21AF:0412`/`045E` (Kernteil);
 Ausgabe (Ereignis, in `Traders.Vga` vorhanden) `0A96:001B/0030/0311/03FB/0525/06A8/0C3F`, `0A69:004D/011B/0243/0288`,
@@ -127,6 +127,26 @@ Gleichschritt unten, Seiten je Bild gleich dem VRAM außerhalb der Meldetafel):
   `21AF:022B` legt die Sicherungspuffer in den RAM-Atlas (x 0…15, Zeilen 0…93h); in der Phase wird von dort nichts mehr geblittet,
   der Atlas der Regelseite bleibt das Bild.
 
+## Szene (Teil 3)
+
+Die Zeichenteile aller 44 Routinen sind Ausgabeaufrufe; die Szene `src/Traders.Presentation/Stations/StationScene.cs` spielt jedes
+`StationEvent` über `Traders.Vga.Layers` ab (Liste `0A96`, Schatten- und Tipptexte `0A69`, Zahl im Text `2295:0001` in den
+Textpuffer, Objekte `21AF`/`23CD`, Seiten `0B67`, `21FD:0185/026C/0329/037D/03EB/051F/060D/0665`, Bildlader `186C:0002` wie
+`FieldScene`). Sie bekommt jedes Ereignis im Augenblick des Aufrufs (`StationPhase.Output`) und liest dann die Objektfelder
+(`+0/+2/+14h/+16h/+18h`) und die Tastentabelle aus dem DS des Kerns; das DS des Kerns schreibt sie nie.
+
+- **Seitenindex `DS:082E/0830`:** `1B03` übergibt `[082E]` an `23CD:06E9/071C` und `0A96:0C3F`, `15D7` auch `[0830]`. Beide
+  gehören der Ausgabe (`21FD:051F`); der Kern führt sie deshalb in `StationsPage` (`DrawIndex`/`ShownIndex`, je Wechsel wie
+  `051F`, auch in `060D`, `0665` und den Tipptexten) und übergibt diese Werte. Vorher stand dort der unveränderte DS-Wert (falsche
+  Seite beim Zurücksetzen, im Bildvergleich rot; die Regelseite war nicht betroffen, sie nutzt ihre eigene Zeichenseite).
+- **Pause `21FD:0245`:** zeichnet nichts (Pausetaste ist Sache des Kerns, `[APPROX]` wie bisher). Ton `21A7:0054` geht an
+  `StationScene.Sound`.
+- **Handler Aufruf 11:** `StationsStep` (`src/Traders.Core/Stations/StationsStep.cs`, nicht eingebunden): `Begin` bis zum ersten
+  Seitenwechsel, je `Tick` ein Wechsel von `02C0`/`08ED`; Bildladen in der Bildtabelle (`ImageTable.RecordLoad`) wie
+  `PlantingStep`; Regelseite leer beim Start (`1178` überdeckt die Zeichenseite ganz und kopiert sie vor dem ersten Lesen).
+  `[APPROX]`: ein Takt je Seitenwechsel von `1B03`, die Rückläufe der Ausgabe (Pausen, Blenden, Wechsel in `060D`/`0665`/Tipptexten)
+  sind keine Takte der Phasenmaschine; `DS:082E/0830/40DE` müssen beim Start die der Ausgabe sein (Einbindung Spur `ernte`).
+
 ## C#-Umsetzung
 
 `StationPhase` (`StationPhase*.cs`): `Run` (`0009`) und `Flight` (`0705`) als Koroutinen (Halt nach jedem Seitenwechsel von
@@ -149,3 +169,11 @@ Zeichenseite und beide Seiten außerhalb der Tafel; jedes Lesen von `06DE` (in d
 `Star_field_1178` (8 Zustände, Seiten danach vollständig gleich), `Whole_phase_0009` (16 Zufallszustände mit Menschen und
 Computern, 6184 Bilder), `Game_week` (Standardpartie Woche 0, 1, 2). Gegenproben beim Entwickeln: ohne Objekte auf der
 Regelseite rot (Zustand 15, Explosionsrest), ohne Wechsel der getippten Texte rot (Seiten vertauscht), große Schrift rot.
+
+`tests/Traders.Tests/Stations/StationsSceneTests.cs` mit `StationsSceneHarness` (Teil 3; Original mit ganzer Ausgabe einschließlich
+der Rückläufe, nur Ton als `retf`): je Bild (Eintritt `0D73:00D3`) die vier VRAM-Ebenen, DAC, CRTC-Start und die Befehlsliste
+(`DS:15BE` Zahl und Einträge) gleich dem Port (Kern mit Regelseite, `StationScene` auf Grafikschichten aus demselben Zustand, Takte
+über die Rückläufe der Schichten); Bildzahl und Endzustand. `Scene_with_humans` (12 Zufallszustände, Menschen und Computer, jeder
+zweite mit Piraten; alle 31 Aufrufarten gespielt, 22 703 Bilder), `Scene_game_week_0` (Standardpartie, 1268 Bilder),
+`Step_handler_call_11` (4 Zustände über `StationsStep` in einer `PhaseMachine` ab Aufruf 11, Halt an Aufruf 12). Gegenproben
+beim Entwickeln: eine Pause zu kurz, Schatten- und Textfarbe vertauscht, Objekte ohne Spiegelung der Kernfelder – jeweils rot.
