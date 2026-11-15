@@ -414,7 +414,7 @@ public sealed class MainMenu
         foreach (var w in DrawMainMenu()) yield return w;
     }
 
-    /// <summary>[ORIGINAL] 192D:10F8 – L load, S save, RETURN; no random() per pass.</summary>
+    /// <summary>[ORIGINAL] 192D:10F8, 192D:1177 – L load (1177), S save, RETURN; no random() per pass.</summary>
     private IEnumerable<MenuWait> DiskLoop()
     {
         bool done = false;
@@ -427,7 +427,7 @@ public sealed class MainMenu
             foreach (var w in Pause()) yield return w;
             if (Key(MenuKeys.L))
             {
-                // 1177
+                // 192D:1177 – load (sound, 2336:0539, message)
                 Sound(0, 2);
                 if (_host.LoadGame(_d))
                 {

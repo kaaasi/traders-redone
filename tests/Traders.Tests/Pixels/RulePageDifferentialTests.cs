@@ -171,7 +171,7 @@ public class RulePageDifferentialTests(ITestOutputHelper output)
     /// <summary>
     /// [DIFFERENTIAL] 23CD:06DE, 23CD:3764 – <see cref="RulePage.Get(int, int)"/> against the pixel reader called directly through
     /// 23CD:06DE on both physical pages: corners, negative y, y ≥ 200 (the gap behind page 0 and page 1 itself), x ≥ 320 and
-    /// negative x, with both pages prefilled with different pictures.
+    /// negative x, offsets wrapping around 10000h back into a page, with both pages prefilled with different pictures.
     /// </summary>
     [GameDataFact]
     public void Pixel_reader_matches_for_every_word_argument()
@@ -183,6 +183,8 @@ public class RulePageDifferentialTests(ITestOutputHelper output)
             (0, 0), (319, 0), (0, 199), (319, 199), (1, 1), (2, 2), (3, 3), (157, 83), (318, 149),
             (0, -1), (5, -3), (318, -2), (319, -205), (0, 200), (7, 204), (0, 205), (13, 300), (319, 404), (2, 405),
             (320, 0), (323, 10), (639, 5), (-1, 0), (-4, 7), (-321, 50), (unchecked((short)0x8000), 0), (0, short.MaxValue),
+            // offsets that wrap around 10000h back into a page (R6R-2, #156)
+            (0, 820), (17, 1024), (300, 1023), (9, -820),
         };
         for (int draw = 0; draw < 2; draw++)
         {
