@@ -75,7 +75,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Computerspielern, Katastrophen eingeschaltet, in der die Aufrufe 3, 4, 6, 8, 9, 11, 16, 21 im Port laufen (Aufruf 18 `1C68`, 19
   und die Handelsschritte weiter aus dem Orakel; Vergleich Datensegment und `DS:10D2` je Aufrufstelle, Bild für Bild für 4, 9,
   11, 16); Host nach F1 = B: spielt die Woche von der Bilanz bis zur Ernte, Halt mit Hinweis an Aufruf 18. P3 #135 (schneller Test
-  `ReportPictureStep`) und #113 (Nachholgrenze 17–18 im Test, doppelte Nachholschleife in `HostGame.Update`).
+  `ReportPictureStep`); #113 geht an den Fixlauf `fix/anbau-figuren`.
 - **Dateigrenzen:** `src/Traders.Core/Harvest/**`, `tests/Traders.Tests/Harvest/**`, `src/Traders.Presentation/Harvest/**`,
   `tests/Traders.Tests/Presentation/Harvest*`, `docs/routines/22A3_*` außer `22A3_0003*`/`22A3_026B*`, `docs/routines/0609_0004*`
   (nur Nachtrag `13C5`), ab Teil 3 `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`,
@@ -152,6 +152,20 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
 - **Status:** –
+
+## Fixlauf `fix/anbau-figuren` – #147 (P2) aus dem Windows-Handtest R5, mit #113
+
+- **Auftrag:** Im Host zeigt die Anbauphase die bewegten Spielfiguren (Objekte `21AF`) als schmale senkrechte Farbstreifen
+  (#147, `main` `95d6e8d`); `PlantingFrameHarness` ist Bild für Bild gleich, der Host-Test vergleicht nur an Aufrufstelle 9.
+  Erst reproduzieren: roter Regressionstest auf dem Host-Pfad (`ProgramHost` Bild für Bild durch den Anbau von Woche 0 gegen den
+  RefEmu: VRAM, DAC, CRTC-Start je Rücklauf, mit Mensch), dann beheben, Testlücke schließen. Dazu P3 #113 (Nachholgrenze 17–18
+  im Test, doppelte Nachholschleife in `HostGame.Update`).
+- **Dateigrenzen:** `src/Traders.App/**`, `tests/Traders.Tests/App/**`, `src/Traders.Presentation/Field/**`,
+  `tests/Traders.Tests/Presentation/Field*`, `src/Traders.Core/Field/**` und `tests/Traders.Tests/Field/**` (nur wenn der Fehler
+  dort belegt ist). Überschneidung mit R6: `Traders.App` gehört Spur 0 erst ab Teil 3 – der Fixlauf wird vorher gemergt, sonst
+  rebased Spur 0; `Field/**` ändert keine R6-Spur.
+- **Modell:** Claude Opus. **Abnahme:** neuer Test vor dem Fix rot, danach grün; alle drei Läufe grün (Testinfrastruktur);
+  Gegenprobe im Review (Fehler wieder eingebaut → rot). **Status:** –
 
 ## Zuständigkeit gemeinsamer Dateien in R6
 
