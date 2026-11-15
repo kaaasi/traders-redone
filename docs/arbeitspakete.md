@@ -151,7 +151,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Merge zuerst die pixelfreien Routinen, nie Dateien aus `Pixels/**` außer `Pixels/Stations*` übernehmen; ist sonst nichts mehr
   zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** –
+- **Status:** in Arbeit (Claude, Teil 1, Draft-PR, Base `e04742b`)
 
 ## Fixlauf `fix/anbau-figuren` – #147 (P2) aus dem Windows-Handtest R5, mit #113
 
