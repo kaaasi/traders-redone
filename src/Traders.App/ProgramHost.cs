@@ -40,6 +40,12 @@ public sealed class ProgramHost
     /// <summary>Far address of the page buffer of 0B67:0002 (host heap).</summary>
     public const uint PageBuffer = 0x7000_0000;
 
+    /// <summary>Far address of the RAM atlas buffer DS:45D6 (host heap; 4 + 320 · 256 bytes up to 9400:0004).</summary>
+    public const uint AtlasBuffer = 0x8000_0000;
+
+    /// <summary>Far address of the mask atlas DS:4BC6 (host heap, behind the atlas).</summary>
+    public const uint MaskBuffer = 0x9800_0000;
+
     private readonly string _dir;
 
     public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null)
@@ -143,7 +149,8 @@ public sealed class ProgramHost
     /// Without the page numbers 21FD:051F neither shows nor selects a page (finding R4W-1): the host kept showing page 0
     /// while the menus drew their changes on page 1.
     /// </summary>
-    // [APPROX] The heap buffers of 0074 and the pointer copies of 0132 (DS:44DE, 45BC) are the host's; the retrace waits of
+    // [APPROX] The heap buffers of 0074 (atlas DS:45D6, masks DS:4BC6: host addresses, only their distinct ranges matter to the
+    // object layer) and the pointer copies of 0132 (DS:44DE, 45BC) are the host's; the retrace waits of
     // the first flip are counted but take no display frames (the loading picture is not shown, F1 = B).
     internal static void SetUpGamePages(GraphicsLayers layers)
     {
@@ -155,6 +162,11 @@ public sealed class ProgramHost
         uint Page(int index) => BitConverter.ToUInt32(ds, GraphicsLayers.PageNumbers + 4 * index);
         int Index(int at) => (ushort)(ds[at] | ds[at + 1] << 8);
 
+        // heap buffers of the RAM atlas and the masks (0DFD:0074): the object layer 21AF resolves the image, mask and save
+        // buffer pointers of the moving objects by these addresses; left at 0000:0000 both overlap and every mask was read
+        // from the picture atlas (finding #147: the figures in the planting phase drawn as narrow stripes)
+        Set32(GraphicsLayers.AtlasPointer, AtlasBuffer);
+        Set32(GraphicsLayers.MaskPointer, MaskBuffer);
         Set32(GraphicsLayers.PageNumbers, 1);
         Set32(GraphicsLayers.PageNumbers + 4, 2);
         layers.SelectPages(Page(Index(GraphicsLayers.DrawPageIndex)), Page(Index(GraphicsLayers.ShownPageIndex)));
