@@ -18,7 +18,7 @@ Methodenparameter (#139), Sammelmarker ohne Listenform (#140), schneller Test `R
 
 **Leitstelle R6:** Claude (Sitzung vom 15.11.2026). **Modell:** alle Spuren und Erstreviews Claude Opus (Spielkern, Zufall,
 Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:** `main` `15fd3bd`. Namen der Läufe: `Traders R6 <spur>`.
-**Starts zeitversetzt** (Nutzungslimit): 2 und 3 sofort, 1 und 0 eine Stunde später.
+**Starts zeitversetzt** (Nutzungslimit): 1 und 2 sofort (1 legt in Teil 1 zuerst die Regelseite an), 3 und 0 eine Stunde später.
 
 **Gemeinsame Vorgaben für alle vier Spuren** (wie R5):
 
@@ -33,8 +33,16 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   Zeichenereignisse ab (Muster `FieldEvent`/`WeekEvent` aus R5). Eingaben über die Befehlsquelle `0E9E`; Spielerhandlungen als
   Befehle. Warteschleife `21FD:0004` (R5) wird gerufen, nicht nachgebaut.
 - **Ton** `21A7:0054`/`000D` (mit `218B:013A`/`0153`, `27C6:041B`, `2850:00CC`): nur als Ereignis bzw. `[APPROX]` bis R10, wie R5.
-- **Regelrelevante Pixel:** Prüft eine Routine Pixel von `V-RAKETE`, `V-BERGE` oder `V-ANBAU` für eine Entscheidung
-  (Kollision, Sichtbarkeit), nutzt der Kern den kanonischen Original-Atlas (`AGENTS.md` §4); im Befund belegen, ob das der Fall ist.
+- **Regelrelevante Pixel – Regelseite des Kerns** (R6P-1): Liest das Original Pixel der Zeichenseite für eine Entscheidung
+  (`23CD:06DE` = Sprung auf den portierten Pixel-Leser `23CD:3764`; gerufen aus `111D:0112` und `1B03:08ED`/`0BE7`/`1178`; davon
+  hängt z. B. die Zahl der Ziehungen in `0112` ab), führt der Kern eine eigene **Regelseite** (`src/Traders.Core/Pixels/**`,
+  indizierte 320 × 200-Seite mit `Get(x, y)`): Startbild aus den Bildpixeln (`V-BERGE`, `V-RAKETE`, `V-ANBAU`), die der Kern als
+  explizite Eingabe bekommt (`Func<string, IndexedImage>` o. ä., gespeist von Host und Tests aus `Traders.Assets`, wie
+  `Func<int, ImageFileLengths>`), plus genau die Zeichenschritte, die vor einem Lesen die gelesenen Pixel ändern (Sterne,
+  Verschiebung, Objekte; im Befund belegt). `Traders.Core` bekommt **keine** Projektreferenz. `23CD:06DE`/`3764` werden nicht neu
+  portiert. **Besitz:** Spur 1 legt die Regelseite in Teil 1 als Erstes an und committet sie sofort; Spur 3 nutzt sie (Ergänzungen
+  nur additiv in eigener Datei `Pixels/Stations*`). Differenztest: Regelseite an jeder Lesestelle gleich dem VRAM der Zeichenseite
+  im RefEmu (an den gelesenen Stellen).
 - Schritt-Handler liefern die Spuren 1, 2 und 3 als Klassen in ihren Dateien; **eingebunden in die Phasenmaschine werden sie nur von
   Spur 0 Teil 3** (`Phases/**` gehört 0). Bis dahin laufen ihre Differenztests über `LoadOnly`/`Call` bzw. das Wochenorakel.
 - Nur VGA; Regeln auf `Dgroup` mit Offsets aus `DgroupLayout.cs` (nur additiv); `GameState`/`GameStateMapper.cs` nur additiv
@@ -43,12 +51,12 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
   von `main`, `--write`, Label `leitstelle-delta`).
 
 **Noch offene Routinen laut Aufrufgraph** (Leitstelle, `tools/callgraph.py` auf `T.EXE`, transitiv ab dem Einsprung bis zu
-portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und `23CD:06DE` (aus `0112`) · `17CB`: `001E`, `02BD`,
+portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`23CD:06DE` ist der portierte Pixel-Leser `3764`, R6P-1) · `17CB`: `001E`, `02BD`,
 `039D`, `047E`, `04D7`, `0736`, `0986`, `09E0` · `22A3`: `0340`, `0426`, `04B1`, `04DA`, `04F7`, `062E`, `07C2`, `0806`, `082F`,
 `0874`, `08C1` · `1B03`: `0009`, `0079`, `00D4`, `0101`, `0153`, `01C3`, `0201`, `02C0`, `0413`, `04D4`, `0548`, `05E7`, `0632`,
 `0705`, `0740`, `0763`, `07C4`, `0849`, `08ED`, `0A62`, `0B7A`, `0BE7`, `0C89`, `0CAC`, `0CCF`, `0D75`, `0DC0`, `0E11`, `0EA9`,
-`10EA`, `1178`, `1257`, `128D`, `12D7`, `131B`, `1345`, `139D`, `13C9`, `13EE`, `141D`, `1454`, `148B`, `15D7`, `1617` (und
-`23CD:06DE`, gehört Spur 1). Schon portiert und gerufen u. a.: `0609:10D2` (Feldart), `0609:1BE5`/`13C5`/`1F2D`/`11E7`/`1AC0`/`1FCC`/`21BA`,
+`10EA`, `1178`, `1257`, `128D`, `12D7`, `131B`, `1345`, `139D`, `13C9`, `13EE`, `141D`, `1454`, `148B`, `15D7`, `1617` (Pixel-Leser
+`23CD:06DE` über die Regelseite). Schon portiert und gerufen u. a.: `0609:10D2` (Feldart), `0609:1BE5`/`13C5`/`1F2D`/`11E7`/`1AC0`/`1FCC`/`21BA`,
 `0825:06CB`, `0E31:0361`/`023D`, `21AF:00CA`/`022B`/`0412`/`045E`, `0B67:01D4`/`0206`, `0E9E:000E`, `22A3:0750`, `2295:0001`/`006D`, `21FD:0004`/`0185`/`05DB`, `0E9E:037A`, Grafikschichten `0A96`/`0A69`.
 
 ## 0 `ernte` – Ernte zeigen und einsammeln `22A3:02D3`, Einbindung der Wochenschritte
@@ -57,8 +65,8 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
   `062E` und den Zeichenhelfern `07C2`, `0806`, `082F`, `0874`, `08C1` (Kern- und Zeichenteil je Routine belegen und trennen):
   Ablauf je Spieler und Feld, Einsammeln in die Vorräte, Raster `DS:48F4` (Ergebnis von `22A3:0003`), `DS:3CE6`, `DS:45D0`,
   Schleifenvariablen `2EB0`/`2F00`/`37AA`, Eingabe über `0E9E:037A` (Abbruch/Weiter), jedes Bild als Kern-Ereignis. Die
-  vorhandenen `0609`-Routinen aus R5 (`1BE5` mit `13C5`, `1F2D`, `11E7`, `1AC0`, `1FCC`, `21BA`) werden gerufen; der „Ernte-Teil“
-  von `13C5` (Aufrufer außerhalb des Anbaus) wird hier im Befund geklärt. Differenztests über `LoadOnly`/`Call(22A3:02D3)` mit
+  vorhandenen `0609`-Routinen aus R5 (`1BE5` mit `13C5`, `1F2D`, `11E7`, `1AC0`, `1FCC`, `21BA`) werden gerufen; `13C5` erreicht die
+  Ernte nur über `1BE5` wie der Anbau (R6P-4): Nachtrag „Aufruf über `1BE5` aus `22A3:02D3`“ in `0609_0004_anbau.md`. Differenztests über `LoadOnly`/`Call(22A3:02D3)` mit
   Wochenzuständen aus echten Partien (Wochen 0–3, Mensch und Computer, volle und leere Felder, Vorräte an der Obergrenze).
   (2) **Szene** `src/Traders.Presentation/Harvest/`: Zeichenteil aller Ernte-Routinen, pixelgenau gegen den RefEmu je Bild über
   eine Ernte mit Mensch, auch Befehlsliste (`0A96`/`0A69`). (3) **Einbindung** (nach Merge von 1, 2 und 3): Handler für Aufruf 4
@@ -69,12 +77,13 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
   11, 16); Host nach F1 = B: spielt die Woche von der Bilanz bis zur Ernte, Halt mit Hinweis an Aufruf 18. P3 #135 (schneller Test
   `ReportPictureStep`) und #113 (Nachholgrenze 17–18 im Test, doppelte Nachholschleife in `HostGame.Update`).
 - **Dateigrenzen:** `src/Traders.Core/Harvest/**`, `tests/Traders.Tests/Harvest/**`, `src/Traders.Presentation/Harvest/**`,
-  `tests/Traders.Tests/Presentation/Harvest*`, `docs/routines/22A3_*` außer `22A3_0003*`/`22A3_026B*`, `docs/routines/0609_0C73*`
+  `tests/Traders.Tests/Presentation/Harvest*`, `docs/routines/22A3_*` außer `22A3_0003*`/`22A3_026B*`, `docs/routines/0609_0004*`
   (nur Nachtrag `13C5`), ab Teil 3 `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`,
   `tests/Traders.Tests/App/**`, `src/Traders.RefEmu/OriginalProgram.cs` (additiv, Hilfen für Bildfolgen).
 - **Abnahme:** alle drei Läufe grün; Ernte im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler) für Woche 0 und
   eine spätere Woche, je mit Mensch und Computer; Szene pixelgenau; Gegenprobe im Review (Ertrag eines Feldes doppelt eingesammelt,
-  Vorratsgrenze ausgelassen, ein Bild doppelt verarbeitet → rot); Mehrrundenprobe ≥ 5 Wochen; `check-architecture.py` grün.
+  Vorratsgrenze ausgelassen, ein Bild doppelt verarbeitet → rot); Mehrrundenprobe ≥ 5 Wochen, in der nachweislich (Assert) mindestens ein Lauf von `111D:0112` mit einer Katastrophenart im Port
+  verglichen wird (R6P-2: im R5-Tastenmuster Katastrophe in Woche 4; Woche bzw. Tastenmuster im Test festlegen); `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1, 2 und 3 (sonst `spur-wartet`, „wartet auf 1/2/3“).
 - **Status:** –
 
@@ -82,7 +91,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
 
 - **Teile:** (1) **Befund und Kern** (`src/Traders.Core/Disasters/**`): Befund `111D:0009` (Nachtrag zum Wächter-Befund
   `111D_0009_katastrophen.md`) mit `0112` (Vorführung, Ziehungen 319/150), den drei Katastrophenarten `0264`, `03B7`, `0519`
-  (Wahl über `random(10)`/`random(2)` in `0009`), Meldefenster `0757`, `07E2` und `23CD:06DE` (gerufen auch von `1B03`, Spur 3: zuerst portieren und sofort committen): Auswahl, Wirkung auf Felder
+  (Wahl über `random(10)`/`random(2)` in `0009`), Meldefenster `0757`, `07E2`; zuerst die **Regelseite** (gemeinsame Vorgaben, sofort committen) mit den Pixel-Lesestellen in `0112`: Auswahl, Wirkung auf Felder
   (`0609:10D2`, Bodengüte, Feldart, Rücksetzen über `0E31:0361`), betroffene Spieler, Zufall in Reihenfolge, Bildfolge mit
   Seitenwechseln `21FD:051F`/`0185`/`0245` und Warteschleife `21FD:0004(3)`. Handler als Rest hinter `CatastropheGuardStep`
   (Vertrag `IWeekStepHandler`, im Befund festhalten). Differenztests über `LoadOnly`/`Call(111D:0009)` mit Zuständen, in denen
@@ -91,7 +100,8 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
   den RefEmu je Bild für jede Katastrophenart, auch Befehlsliste. (3) Kleinigkeiten: #140 (Sammelmarker in `MainMenu.cs` in
   Listenform, `192D:1177` im erzeugten Block) und #131 (Befund `0DFD_000D_programmstart.md` nachziehen).
 - **Dateigrenzen:** `src/Traders.Core/Disasters/**`, `tests/Traders.Tests/Disasters/**`, `src/Traders.Presentation/Disasters/**`,
-  `tests/Traders.Tests/Presentation/Disasters*`, `docs/routines/111D_*`, `docs/routines/23CD_06DE*`; für #140
+  `tests/Traders.Tests/Presentation/Disasters*`, `docs/routines/111D_*`, `src/Traders.Core/Pixels/**` (außer `Pixels/Stations*`),
+  `tests/Traders.Tests/Pixels/**`; für #140
   `src/Traders.Core/Menus/MainMenu.cs` (nur Marker), für #131 `docs/routines/0DFD_000D*`.
 - **Abnahme:** alle drei Läufe grün; jede Katastrophenart im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler),
   Szene pixelgenau; Gegenprobe im Review (Katastrophenart vertauscht, eine Ziehung der Vorführung ausgelassen, falsches Feld
@@ -130,12 +140,13 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
   Computer, Grenzfälle (kein Geld, Rakete getroffen, Zeitablauf). (3) **Szene** `src/Traders.Presentation/Stations/`:
   Zeichenteil aller Routinen (Objekte `21AF`, Seiten `0B67`, Schichten `0A96`/`0A69`), pixelgenau gegen den RefEmu je Bild über
   eine Phase mit Mensch, auch Befehlsliste. Handler für Aufruf 11 (ohne Einbindung).
-- **Dateigrenzen:** `src/Traders.Core/Stations/**`, `tests/Traders.Tests/Stations/**`, `src/Traders.Presentation/Stations/**`,
+- **Dateigrenzen:** `src/Traders.Core/Stations/**`, `src/Traders.Core/Pixels/Stations*`, `tests/Traders.Tests/Stations/**`, `src/Traders.Presentation/Stations/**`,
   `tests/Traders.Tests/Presentation/Stations*`, `docs/routines/1B03_*`.
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Station eines
   Spielers vertauscht, Kollision um ein Pixel verschoben, eine Ziehung ausgelassen, Ertrag doppelt gebucht → rot);
   `check-architecture.py` grün.
-- **Abhängigkeiten:** keine; `23CD:06DE` bis zum Merge von 1 über das Orakel bzw. als Aufruf der Spur-1-Klasse nach deren Commit.
+- **Abhängigkeiten:** Regelseite von Spur 1 (Teil 1, sofort committet; bis zum Merge von 1 per Merge des Branches oder über das
+  Orakel); Teil 1 braucht sie nicht.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
 - **Status:** –
 
@@ -143,7 +154,8 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` und
 
 `tools/check-architecture.py`: 2. `tools/abdeckung.py`: niemand (Sammelmarker in Listenform zählen schon). `src/Traders.Core/Phases/**`,
 `src/Traders.App/**`, `OriginalProgram.cs` (additiv): 0; braucht eine andere Spur eine Hilfe in `OriginalProgram.cs`, legt sie sie
-additiv in eine eigene `partial`-Datei. `src/Traders.Core/`: `Harvest/` 0, `Disasters/` 1 (mit `23CD:06DE`), `Events/` 2, `Stations/` 3,
+additiv in eine eigene `partial`-Datei; fehlt das Schlüsselwort `partial` (`OriginalProgram`, `GameState`), setzt es die erste
+Spur, die es braucht, als einzige Änderung an der Datei (R6P-3). `src/Traders.Core/`: `Harvest/` 0, `Disasters/` 1, `Pixels/` 1 (außer `Pixels/Stations*`: 3), `Events/` 2, `Stations/` 3,
 `Menus/MainMenu.cs` 1 (nur Marker). `src/Traders.Presentation/`: `Harvest/` 0, `Disasters/` 1, `Events/` 2, `Stations/` 3. Vorhandene `Field/`-, `Week/`- und `Rules/`-Klassen
 werden gerufen, nicht geändert; braucht eine Spur dort eine Änderung, meldet sie `spur-wartet` mit Begründung. `DgroupLayout.cs`,
 `GameState.cs` (`partial`), `GameStateMapper.cs`: nur additiv (alle), bei Konflikt rebased die später gemergte Spur.
@@ -153,7 +165,7 @@ werden gerufen, nicht geändert; braucht eine Spur dort eine Änderung, meldet s
 
 ## Integrationsfolge R6
 
-2 → 1 → 3 → 0 (Teil 3 von 0 erst nach Merge von 1, 2 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss
+2 → 1 → 3 → 0 (3 nach 1 wegen der Regelseite; Teil 3 von 0 erst nach Merge von 1, 2 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss
 M6/M9/M10.
 
 ## Entscheidungen des Nutzers (R6)
