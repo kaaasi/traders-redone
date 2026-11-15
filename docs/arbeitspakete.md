@@ -128,7 +128,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   pixelgenau; Gegenprobe im Review (Ereignisgruppen vertauscht, Betrag mit Vorzeichenfehler, eine Ziehung ausgelassen → rot; je
   neue Architekturregel eine Verletzung → rot).
 - **Abhängigkeiten:** keine; Teil 1 zuerst.
-- **Status:** Draft-PR #146 (Claude). Teil 1 ✅ (Leseregel #139, Rückrichtung #76 P3-1 mit Gegenproben), Teil 2 ✅ (Kern `17CB:0005`, 22 Differenzszenarien, Mehrrundenprobe), Teil 3 (Szene) offen.
+- **Status:** PR #146 (Claude), alle Teile fertig, Review offen. Teil 1 ✅ (Leseregel #139, Rückrichtung #76 P3-1 mit Gegenproben), Teil 2 ✅ (Kern `17CB:0005`, 22 Differenzszenarien, Mehrrundenprobe), Teil 3 ✅ (Szene `IncidentScene` pixelgenau in 7 Szenarien; Schreibmaschine `0A69:0288` mit Takt und Betrag `2295:0001` im Kern).
 
 ## 3 `stationen` – Stationswahl, Raketenflug, Piraten, Stationsertrag `1B03:0009` (F1 = B)
 
