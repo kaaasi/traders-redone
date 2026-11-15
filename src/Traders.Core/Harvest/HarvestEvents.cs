@@ -20,8 +20,9 @@ public enum HarvestEventKind
     TypeLines,
 
     /// <summary>
-    /// 0A69:01AD, one character (char, line, index): the list is emptied and the character drawn as text 0A96:0525 (the
-    /// character buffer DS:0140 and the position are the output's); 21FD:060D follows as its own event.
+    /// 0A69:01AD, one character (char, line, index, length of the line): the character drawn as text 0A96:0525 (the
+    /// character buffer DS:0140 and the position are the output's); the list is emptied before by its own event, 21FD:060D
+    /// follows as its own event.
     /// </summary>
     TypeCharacter,
 

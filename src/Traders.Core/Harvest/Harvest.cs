@@ -119,7 +119,7 @@ public static class Harvest
             for (int k = 0; k < text.Length; k++)
             {
                 Emit(host, FieldEventKind.ClearList);
-                Emit(host, HarvestEventKind.TypeCharacter, text[k], i, (short)k);
+                Emit(host, HarvestEventKind.TypeCharacter, text[k], i, (short)k, (short)text.Length);
                 Emit(host, FieldEventKind.ListOnBothPages);
                 foreach (var f in Planting.Flip(d)) yield return f;
                 if (text[k] != (byte)' ') Emit(host, FieldEventKind.Sound, 1, 0x16);

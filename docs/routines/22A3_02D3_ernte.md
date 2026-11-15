@@ -108,6 +108,15 @@ Neue Adressen in [DATENLAYOUT.md](../analyse/DATENLAYOUT.md) §15.
 `ShowRunningStock` = `082F`, `ShowStock` = `0874`. `HarvestEvents.cs`: Ereignisse und `IHarvestHost`. Aufbau, Blenden,
 Seitenwechsel, Cursorobjekte über `Planting` (R5). `HarvestStep` (Aufruf 16 als `IWeekStepHandler`, wie `PlantingStep`) wird
 in Teil 3 in die Phasenmaschine eingebunden.
+`HarvestHost.cs`: Spielfassung des Wirts (Steuerung `ControlReader.ReadActions`, Pause `Planting.Pause`, Texte über einen
+Lesezugriff auf den Textpuffer).
+
+**Szene (Teil 2):** `src/Traders.Presentation/Harvest/HarvestScene.cs` spielt die gemeinsamen Ereignisse über eine `FieldScene`
+auf denselben Schichten (Aufbau, Rang, Zeitleiste, Objekte, Blenden, Seiten, Warten) und die eigenen: `SetFont` = `21FD:05DB`
+(wie `MenuScene`), `TypeLines`/`TypeCharacter` = Zeichnen von `0A69:0288`/`0243`/`01AD` (Zeile i bei y + i·(`34A4` + `34A4`/5),
+mittig x + 1 + (w − Länge·`3CA8`)/2 vorzeichenlos geschoben, Zeichen k bei + k·`3CA8`, `DS:0140` = Zeichen, `0A96:0525`),
+`TileArea` = `0609:1F04`, `DrawEmptyPanel` = `0609:18E5`, `DrawGoods` = `0609:1912`, `Number`/`Line`/`FillRect` =
+`0A96:057A`/`0433`/`04D7`.
 
 ## Prüfung
 
@@ -118,3 +127,11 @@ Ausgabebytes), `10D2`, Zahl der `random`-Aufrufe, Aufruffolge. `04F7` 3000 Fäll
 Buchung, Grenze 999 je > 100), `04B1`/`04DA` je 2000, `0340` und `08C1` je 600 (Nullzeiger, leere Zeilen, Leerzeichen, Wetter
 −2…7), `0426` Durchgang für Durchgang an `22A3:04A3` in 150 Läufen mit Tastenskript, `02D3` ganz 120 Läufe, dazu echte Partien:
 Wochen 0–3 je sechs Läufe (Computer wie gespielt, Spieler zu Menschen gemacht, Vorräte nahe 999, Felder und Erträge verändert).
+
+**Gleichschritt Bild für Bild** (`tests/Traders.Tests/Harvest/HarvestFrameDifferentialTests.cs`, Harness
+`HarvestFrameHarness`, Muster `PlantingFrameHarness`): Original ab Schnappschuss am Einsprung von `02D3` (Woche 0 bzw. 2, vier
+Computer) mit echter Grafik und Tastatur-Interrupts; Port `HarvestStep` in der Phasenmaschine ab Aufruf 16 mit `HarvestHost` und
+`HarvestScene`. An jedem Rücklauf des Originals: DS (ohne Ausgabebytes), `10D2`, Zahl der Ziehungen, VRAM-Ebenen, DAC,
+CRTC-Start; ebenso am Rücksprung (Maschine danach blockiert an Aufruf 18, 17 ist Marker 3). Läufe: vier Computer Woche 0,
+Mensch mit „rechts“ und Feuer und Vorräten bei 990 (Woche 0), zwei Menschen in Woche 2. Gegenproben (je rot): Balkenlinie
+ausgelassen, ein getipptes Zeichen ausgelassen (beide am Bild), ein Bild doppelt verarbeitet.
