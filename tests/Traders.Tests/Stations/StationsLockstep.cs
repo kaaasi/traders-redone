@@ -1,5 +1,6 @@
 using Traders.Assets;
 using Traders.Core;
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Menus;
 using Traders.Core.Pixels;
@@ -198,7 +199,7 @@ internal static class StationsLockstep
     /// Runs <paramref name="port"/> on the original's start state: the data segment, both VRAM pages on the rule page (draw
     /// page from DS:40DE[DS:082E]), V-RAKETE as atlas and font <paramref name="font"/>; random(0) gets the original's clock.
     /// </summary>
-    public static (Run Run, StationPhase Phase) RunPort(Original o, int font, Func<StationPhase, IEnumerable<StationWait>> port,
+    public static (Run Run, StationPhase Phase) RunPort(Original o, int font, Func<StationPhase, IEnumerable<FieldWait>> port,
         Func<int, IReadOnlyCollection<byte>> keys)
     {
         var d = new Dgroup(o.StartDs[..DgroupLayout.Size]);
@@ -218,11 +219,11 @@ internal static class StationsLockstep
         var frames = new List<Frame>();
         int pass = 0;
         KeyTable.Write(d, keys(0));
-        foreach (var w in port(phase))
+        foreach (var _ in port(phase))
         {
-            if (w != StationWait.Flip) continue;
+            if (phase.Flips == pass) continue;
             d.Set(DgroupLayout.RandomSeed, random.Seed);
-            // the coroutine yields right after the flip: the draw page before it is the other one
+            // first frame of a flip of 1B03 (its first retrace): the draw page before it is the other one
             frames.Add(new Frame(d.Bytes[..DgroupLayout.Size], random.Calls, PageHash(page.PagePixels), 1 - page.DrawPage));
             KeyTable.Write(d, keys(++pass));
             if (pass > 100_000) throw new InvalidOperationException("Port coroutine did not finish.");
@@ -258,7 +259,7 @@ internal static class StationsLockstep
         (InPanel(original.X, original.Y) ? (original.Value == 1) == (port.Value == 1) : original.Value == port.Value);
 
     /// <summary>Original and port in lockstep; returns the original's run for coverage counts.</summary>
-    public static Run AssertSame(Action<OriginalProgram> setUp, ushort off, int font, Func<StationPhase, IEnumerable<StationWait>> port,
+    public static Run AssertSame(Action<OriginalProgram> setUp, ushort off, int font, Func<StationPhase, IEnumerable<FieldWait>> port,
         string label, Func<int, IReadOnlyCollection<byte>>? keys = null, MachineSnapshot? from = null)
     {
         keys ??= _ => [];

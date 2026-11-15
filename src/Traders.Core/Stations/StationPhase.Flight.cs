@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using L = Traders.Core.State.DgroupLayout;
 using S = Traders.Core.Stations.StationsLayout;
 
@@ -27,7 +28,7 @@ public sealed partial class StationPhase
     /// and DS:546A = 1, every other player 0. The value is read at DS:348A + 2·station, also for station −1.
     /// </summary>
     // [ORIGINAL] 1B03:0763
-    public void OccupiedMessages()
+    public IEnumerable<FieldWait> OccupiedMessages()
     {
         for (SetP(0); P < 4; SetP(P + 1))
         {
@@ -35,7 +36,7 @@ public sealed partial class StationPhase
             short si = Word(L.StationValue + 2 * Word(L.Station + 2 * p));
             if (si != -1 && p != si)
             {
-                Message(S.OccupiedText, 4);
+                foreach (var w in Message(S.OccupiedText, 4)) yield return w;
                 _d.Set(S.Occupied + p, (byte)1);
             }
             else _d.Set(S.Occupied + p, (byte)0);
@@ -47,7 +48,7 @@ public sealed partial class StationPhase
     /// (0D75) in his line; list on both pages. DS:37AA ends at 4.
     /// </summary>
     // [ORIGINAL] 1B03:07C4
-    public void PrepareRockets()
+    public IEnumerable<FieldWait> PrepareRockets()
     {
         ClearList();
         for (SetP(0); P < 4; SetP(P + 1))
@@ -60,7 +61,7 @@ public sealed partial class StationPhase
                 PlayerColor(p), 0, -1, 0);
             DrawLostCount();
         }
-        ListOnBothPages();
+        foreach (var w in ListOnBothPages()) yield return w;
     }
 
     /// <summary>
@@ -202,22 +203,22 @@ public sealed partial class StationPhase
 
     /// <summary>1B03:0C89 – one step of the palette flash: while DS:546F > 0 it counts down and the palette moves to grey 777h.</summary>
     // [ORIGINAL] 1B03:0C89
-    public void FlashStep()
+    public IEnumerable<FieldWait> FlashStep()
     {
-        if (_d.S8(S.Flash) <= 0) return;
+        if (_d.S8(S.Flash) <= 0) yield break;
         sbyte f = unchecked((sbyte)(_d.S8(S.Flash) - 1));
         _d.Set(S.Flash, f);
-        Emit(StationCall.PaletteStep, 0x777, f);
+        foreach (var w in PaletteStep(0x777, f)) yield return w;
     }
 
     /// <summary>1B03:0CAC – ten flash steps with four retraces each (the flash fades out after the flight).</summary>
     // [ORIGINAL] 1B03:0CAC
-    public void FlashOut()
+    public IEnumerable<FieldWait> FlashOut()
     {
         for (int i = 0; i < 10; i++)
         {
-            FlashStep();
-            Delay(4);
+            foreach (var w in FlashStep()) yield return w;
+            foreach (var w in Delay(4)) yield return w;
         }
     }
 
@@ -241,13 +242,14 @@ public sealed partial class StationPhase
 
     /// <summary>1B03:0DC0 – a player who lost more than three rockets and all of his rocket fields gets the seven lines of text 199.</summary>
     // [ORIGINAL] 1B03:0DC0
-    public void AllLostMessages()
+    public IEnumerable<FieldWait> AllLostMessages()
     {
         for (SetP(0); P < 4; SetP(P + 1))
         {
             int p = P;
             sbyte lost = SByte(S.Lost + p);
-            if (lost > 3 && RocketFields(p) == lost) Message(S.AllLostText, 7);
+            if (lost > 3 && RocketFields(p) == lost)
+                foreach (var w in Message(S.AllLostText, 7)) yield return w;
         }
     }
 

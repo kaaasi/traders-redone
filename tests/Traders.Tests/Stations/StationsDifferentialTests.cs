@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.State;
 using Traders.Core.Stations;
@@ -22,7 +23,7 @@ public sealed class StationsDifferentialTests
         lock (Lock) return _harness ??= new StationsHarness();
     }
 
-    private static (IEnumerable<StationWait>?, Func<int>?) Act(Action a) => (null, () => { a(); return 0; });
+    private static (IEnumerable<FieldWait>?, Func<int>?) Act(Action a) => (null, () => { a(); return 0; });
 
     /// <summary>A data segment with every value the phase reads set from <paramref name="r"/> within the game's ranges.</summary>
     private static Dgroup State(Inputs r, bool humans = true) => Fill(H().Initial(), r, humans);
@@ -109,7 +110,7 @@ public sealed class StationsDifferentialTests
             var d = State(r);
             var o = H().RunOriginal(d, 0x0101, []);
             if (o.Calls.Count > 0) renewed++;
-            H().AssertSame(d, 0x0101, [], ph => Act(ph.NewStations), $"state {i}");
+            H().AssertSame(d, 0x0101, [], ph => (ph.NewStations(), null), $"state {i}");
         }
         Assert.InRange(renewed, 3, 40);
     }
@@ -120,7 +121,7 @@ public sealed class StationsDifferentialTests
     {
         var r = new Inputs(0x0153);
         for (int i = 0; i < 30; i++)
-            H().AssertSame(State(r), 0x0153, [], ph => Act(ph.DrawStationMarks), $"state {i}");
+            H().AssertSame(State(r), 0x0153, [], ph => (ph.DrawStationMarks(), null), $"state {i}");
     }
 
     // [DIFFERENTIAL] 1B03:01C3
@@ -132,7 +133,7 @@ public sealed class StationsDifferentialTests
     {
         var r = new Inputs(0x01C3);
         for (int i = 0; i < 120; i++)
-            H().AssertSame(State(r), 0x01C3, [], ph => Act(ph.PlacePirates), $"state {i}");
+            H().AssertSame(State(r), 0x01C3, [], ph => (ph.PlacePirates(), null), $"state {i}");
     }
 
     // [DIFFERENTIAL] 1B03:0201
@@ -144,7 +145,7 @@ public sealed class StationsDifferentialTests
     {
         var r = new Inputs(0x0201);
         for (int i = 0; i < 60; i++)
-            H().AssertSame(State(r), 0x0201, [], ph => Act(ph.PlaceCursors), $"state {i}");
+            H().AssertSame(State(r), 0x0201, [], ph => (ph.PlaceCursors(), null), $"state {i}");
     }
 
     // [DIFFERENTIAL] 1B03:0413
@@ -279,7 +280,7 @@ public sealed class StationsDifferentialTests
     {
         var r = new Inputs(0x0763);
         for (int i = 0; i < 60; i++)
-            H().AssertSame(State(r), 0x0763, [], ph => Act(ph.OccupiedMessages), $"state {i}");
+            H().AssertSame(State(r), 0x0763, [], ph => (ph.OccupiedMessages(), null), $"state {i}");
     }
 
     // [DIFFERENTIAL] 1B03:10EA
@@ -296,7 +297,7 @@ public sealed class StationsDifferentialTests
         var d = State(new Inputs((uint)(0x10EA + count)));
         d.Set(L.ActivePlayer, (sbyte)(count & 3));
         H().AssertSame(d, 0x10EA, [(ushort)S.CashBonusText, H().Dgroup, (ushort)count],
-            ph => Act(() => ph.Message(S.CashBonusText, count)), $"count {count}");
+            ph => (ph.Message(S.CashBonusText, count), null), $"count {count}");
     }
 
     // [DIFFERENTIAL] 1B03:07C4
@@ -310,7 +311,7 @@ public sealed class StationsDifferentialTests
         {
             var d = State(r);
             d.Set(S.RocketTotal, (sbyte)r.Range(-3, 10));
-            H().AssertSame(d, 0x07C4, [], ph => Act(ph.PrepareRockets), $"state {i}");
+            H().AssertSame(d, 0x07C4, [], ph => (ph.PrepareRockets(), null), $"state {i}");
         }
     }
 
@@ -389,8 +390,8 @@ public sealed class StationsDifferentialTests
         for (int i = 0; i < 12; i++)
         {
             var d = State(r);
-            H().AssertSame(d, 0x0C89, [], ph => Act(ph.FlashStep), $"step {i}");
-            H().AssertSame(d, 0x0CAC, [], ph => Act(ph.FlashOut), $"out {i}");
+            H().AssertSame(d, 0x0C89, [], ph => (ph.FlashStep(), null), $"step {i}");
+            H().AssertSame(d, 0x0CAC, [], ph => (ph.FlashOut(), null), $"out {i}");
         }
     }
 
@@ -404,7 +405,7 @@ public sealed class StationsDifferentialTests
             var d = State(r);
             for (int p = 0; p < 4; p++)
                 if (r.Chance(40)) d.Set(S.Lost + p, d.S8(L.FieldsByKind + 4 * p + 3));
-            H().AssertSame(d, 0x0DC0, [], ph => Act(ph.AllLostMessages), $"state {i}");
+            H().AssertSame(d, 0x0DC0, [], ph => (ph.AllLostMessages(), null), $"state {i}");
         }
     }
 
@@ -447,7 +448,7 @@ public sealed class StationsDifferentialTests
             }
             var o = H().RunOriginal(d, 0x0EA9, []);
             bonuses += o.Calls.Count(c => c.StartsWith(nameof(StationCall.NumberText)));
-            H().AssertSame(d, 0x0EA9, [], ph => Act(ph.Bonuses), $"state {i}");
+            H().AssertSame(d, 0x0EA9, [], ph => (ph.Bonuses(), null), $"state {i}");
         }
         Assert.True(bonuses > 50, $"only {bonuses} bonuses");
     }

@@ -13,29 +13,29 @@ public sealed partial class StationPhase
 {
     /// <summary>1B03:0705 up to its flight loop 08ED: reset (0740), messages (0763), rocket lines (07C4), schedule (0849), list cleared.</summary>
     // part of 1B03:0705 (marker at Flight)
-    public void FlightBegin()
+    public IEnumerable<FieldWait> FlightBegin()
     {
         ResetFlight();
-        OccupiedMessages();
-        PrepareRockets();
+        foreach (var w in OccupiedMessages()) yield return w;
+        foreach (var w in PrepareRockets()) yield return w;
         ScheduleLaunches();
         ClearList();
     }
 
     /// <summary>1B03:0705 after its flight loop: pause of 100 retraces, message box cleared, messages for total losses (0DC0).</summary>
-    public void FlightEnd()
+    public IEnumerable<FieldWait> FlightEnd()
     {
-        Delay(100);
-        ClearMessageBox();
-        AllLostMessages();
+        foreach (var w in Delay(100)) yield return w;
+        foreach (var w in ClearMessageBox()) yield return w;
+        foreach (var w in AllLostMessages()) yield return w;
     }
 
     /// <summary>1B03:0009 after the flight: flash out (0CAC), lost rocket fields (0E11), bonuses (0EA9).</summary>
-    public void End()
+    public IEnumerable<FieldWait> End()
     {
-        FlashOut();
+        foreach (var w in FlashOut()) yield return w;
         RemoveLostFields();
-        Bonuses();
+        foreach (var w in Bonuses()) yield return w;
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public sealed partial class StationPhase
     /// DS:37AA ends at 4.
     /// </summary>
     // [ORIGINAL] 1B03:0EA9
-    public void Bonuses()
+    public IEnumerable<FieldWait> Bonuses()
     {
         for (SetP(0); P < 4; SetP(P + 1))
         {
@@ -81,7 +81,7 @@ public sealed partial class StationPhase
             {
                 short amount = Int16Math.S(_random.Next(Int16Math.S(_d.S16(L.GemPriceFactor) << 1)) + 2);
                 NumberText(amount, 0, 3, S.GemNumberText);
-                Message(S.GemBonusText, 4);
+                foreach (var w in Message(S.GemBonusText, 4)) yield return w;
                 short credit = Int16Math.S(_d.S16(L.GemCredit + 2 * p) + amount);
                 _d.Set(L.GemCredit + 2 * p, credit);
                 if (credit > 2000) _d.Set(L.GemCredit + 2 * p, (short)2000);
@@ -90,7 +90,7 @@ public sealed partial class StationPhase
             {
                 short amount = Int16Math.S(_random.Next(20) + 2);
                 NumberText(amount, 0, 3, S.OilNumberText);
-                Message(S.OilBonusText, 4);
+                foreach (var w in Message(S.OilBonusText, 4)) yield return w;
                 short oil = Int16Math.S(_d.S16(L.Oil + 2 * p) + amount);
                 _d.Set(L.Oil + 2 * p, oil);
                 if (oil > 40) _d.Set(L.Oil + 2 * p, (short)40);
@@ -101,7 +101,7 @@ public sealed partial class StationPhase
             Emit(StationCall.NumberText, Int16Math.S(bonus), Int16Math.S(bonus >> 16), 5,
                 Int16Math.S(_d.S16(S.CashNumberText) + 2), _d.S16(S.CashNumberText + 2));
             _d.Set(L.Cash + 4 * p, unchecked(cash + bonus));
-            Message(S.CashBonusText, 11);
+            foreach (var w in Message(S.CashBonusText, 11)) yield return w;
         }
     }
 
@@ -113,22 +113,23 @@ public sealed partial class StationPhase
     /// four a pause of 20 retraces and the box cleared), at least one line; then a pause of 50 retraces and the box cleared.
     /// </summary>
     // [ORIGINAL] 1B03:10EA
-    public void Message(int table, short count)
+    public IEnumerable<FieldWait> Message(int table, short count)
     {
         short di = 0, si = 0;
         while (true)
         {
             int at = At(table + 4 * di);
-            Emit(StationCall.TypedText, 0x71, Int16Math.S(si * 6 + 0xB4), 0x56, _d.S16(at), _d.S16(At(at + 2)), PlayerColor(P), 5, -1);
+            foreach (var w in TypedText(0x71, Int16Math.S(si * 6 + 0xB4), 0x56, _d.S16(at), _d.S16(At(at + 2)), PlayerColor(P), 5, -1))
+                yield return w;
             di++;
             if (di >= count) break;
             si++;
             if (si < 4) continue;
-            Delay(20);
-            ClearMessageBox();
+            foreach (var w in Delay(20)) yield return w;
+            foreach (var w in ClearMessageBox()) yield return w;
             si = 0;
         }
-        Delay(50);
-        ClearMessageBox();
+        foreach (var w in Delay(50)) yield return w;
+        foreach (var w in ClearMessageBox()) yield return w;
     }
 }

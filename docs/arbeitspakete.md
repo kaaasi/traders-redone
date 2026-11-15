@@ -151,7 +151,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Merge zuerst die pixelfreien Routinen, nie Dateien aus `Pixels/**` außer `Pixels/Stations*` übernehmen; ist sonst nichts mehr
   zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** Teile 1–3 fertig (PR #151): Befund `1B03_0009_stationen.md` (44 Routinen), Kern aller Routinen; `1178`, `08ED`, `0BE7` über die Regelseite (`Pixels/StationsPage.cs`), ganze Phase `0009` im Bildgleichschritt mit dem RefEmu (16 Zufallszustände, Standardpartie Woche 0–2); Szene `Presentation/Stations/StationScene.cs` je Rücklauf pixelgenau (VRAM, DAC, Start, Befehlsliste; 12 Zustände mit Menschen, Woche 0), Handler `StationsStep` für Aufruf 11 (nicht eingebunden).
+- **Status:** Teile 1–3 fertig (PR #151): Befund `1B03_0009_stationen.md` (44 Routinen), Kern aller Routinen; `1178`, `08ED`, `0BE7` über die Regelseite (`Pixels/StationsPage.cs`), ganze Phase `0009` im Bildgleichschritt mit dem RefEmu (16 Zufallszustände, Standardpartie Woche 0–2); Szene `Presentation/Stations/StationScene.cs` je Rücklauf pixelgenau (VRAM, DAC, Start, Befehlsliste; 12 Zustände mit Menschen, Woche 0), Handler `StationsStep` für Aufruf 11 (nicht eingebunden), tickt je Bild des Originals (Fixlauf R6S-1).
 
 ## Fixlauf `fix/anbau-figuren` – #147 (P2) aus dem Windows-Handtest R5, mit #113
 

@@ -72,8 +72,9 @@ public sealed class StationsSceneTests(ITestOutputHelper output)
 
     /// <summary>
     /// Handler of call 11 (<see cref="StationsStep"/>, not wired into the week loop): the phase with humans and computers from
-    /// random states through a phase machine started at call 11, one tick per page flip, with an empty rule page at the start.
-    /// Pictures, end state and the stop at call 12 as above.
+    /// random states and the default game's week 0 through a phase machine started at call 11, one tick per frame, with an
+    /// empty rule page at the start. Per state the number of ticks equals the original's retrace waits (R6S-1); pictures, end
+    /// state and the stop at call 12 as above.
     /// </summary>
     // [DIFFERENTIAL] 1B03:0009
     [GameDataFact]
@@ -88,6 +89,9 @@ public sealed class StationsSceneTests(ITestOutputHelper output)
             pictures += StationsSceneHarness.AssertSame(p => SetState(p, r, humans, i % 2 == 0), 0, keys, $"state {i}",
                 viaStep: true).Pictures;
         }
-        output.WriteLine($"pictures {pictures}");
+        var w = OriginalProgram.Resume(TestGameData.DosDir, Field.FieldSceneHarness.AtWeek.Value);
+        Assert.True(w.RunToRoutine(StationsLockstep.Seg, 0x0009, 600), "1B03:0009 not reached.");
+        int week0 = StationsSceneHarness.AssertSame(_ => { }, 0, _ => [], "week 0", w.Snapshot(), viaStep: true).Pictures;
+        output.WriteLine($"pictures {pictures}, week 0: {week0}");
     }
 }

@@ -14,8 +14,10 @@ namespace Traders.Presentation.Stations;
 /// receives each one when the core reports it (<see cref="StationPhase.Output"/>), so what it reads from the core's data
 /// segment (object records, key table) is the state at that call. The core's data segment is never written; the graphics
 /// state lives in the layers' own data segment image, the number texts 2295:0001 in the text buffer behind
-/// <see cref="GraphicsLayers.OtherMemory"/>. Retrace waits go to the layers' <see cref="GraphicsLayers.Retrace"/> (one per
-/// frame of the original).
+/// <see cref="GraphicsLayers.OtherMemory"/>. Routines that wait for retraces (21FD:0185, the flips 21FD:051F/060D/0665, the
+/// fades, the palette step 21FD:03EB, the typed texts 0A69:0243/0288) and the pause 21FD:0245 run up to their next wait per
+/// frame (<see cref="NextFrame"/>), in step with the core's frames (StationPhase halts at the same waits); each retrace wait
+/// goes to the layers' <see cref="GraphicsLayers.Retrace"/>.
 /// </summary>
 public sealed class StationScene
 {
@@ -24,6 +26,7 @@ public sealed class StationScene
     private readonly GraphicsLayers _gfx;
     private readonly Dgroup _state;
     private readonly IPictureSource _pictures;
+    private IEnumerator<int>? _pending;
 
     /// <param name="layers">
     /// Graphics layers with their own data segment image (DataSegment = segment value of DS) and the text buffer DS:4884 as
@@ -42,6 +45,43 @@ public sealed class StationScene
 
     /// <summary>Sounds 21A7:0054(channel, sound) of the phase, for the sound layer (optional).</summary>
     public Action<short, short>? Sound { get; set; }
+
+    /// <summary>True while a routine still has waits for later frames.</summary>
+    public bool Presenting => _pending is not null;
+
+    /// <summary>
+    /// Starts a new frame with the keys held in it (the key table the core gets for the same frame); a presenting routine runs
+    /// on up to its next wait. Called before the core's tick of the frame.
+    /// </summary>
+    public void NextFrame(IReadOnlyCollection<byte> held)
+    {
+        Array.Clear(_gfx.Ds, DgroupLayout.KeyState, Core.Menus.KeyTable.Length);
+        foreach (byte sc in held)
+            if (sc < Core.Menus.KeyTable.Length) _gfx.Ds[DgroupLayout.KeyState + sc] = 1;
+        Step();
+    }
+
+    /// <summary>Runs a presenting routine in progress to its end (after the phase returned).</summary>
+    public void Finish()
+    {
+        while (_pending is not null) Step();
+    }
+
+    private void Step()
+    {
+        if (_pending is not null && !_pending.MoveNext())
+        {
+            _pending.Dispose();
+            _pending = null;
+        }
+    }
+
+    private void Present(IEnumerable<int> steps)
+    {
+        if (_pending is not null) throw new InvalidOperationException("A presenting routine is still running.");
+        _pending = steps.GetEnumerator();
+        Step();
+    }
 
     private static ushort W(short v) => unchecked((ushort)v);
 
@@ -74,10 +114,10 @@ public sealed class StationScene
                 _gfx.AddShadowNumber(W(a[0]), W(a[1]), Long(a[2], a[3]), W(a[4]), W(a[5]), W(a[6]), W(a[7]), W(a[8]));
                 break;
             case StationCall.TypedText:
-                _gfx.CenteredTypewriter(W(a[0]), W(a[1]), W(a[2]), W(a[3]), Seg(a[4]), W(a[5]), W(a[6]), W(a[7]));
+                Present(CenteredTypewriterSteps(W(a[0]), W(a[1]), W(a[2]), W(a[3]), Seg(a[4]), W(a[5]), a[6], a[7]));
                 break;
             case StationCall.TypedLines:
-                _gfx.TypewriterLines(W(a[0]), W(a[1]), W(a[2]), W(a[3]), Seg(a[4]), W(a[5]), W(a[6]), W(a[7]));
+                Present(TypewriterLinesSteps(W(a[0]), W(a[1]), W(a[2]), W(a[3]), Seg(a[4]), a[5], W(a[6]), a[7]));
                 break;
             case StationCall.NumberText: _gfx.FormatNumber(Long(a[0], a[1]), W(a[2]), W(a[3]), Seg(a[4])); break;
 
@@ -92,29 +132,18 @@ public sealed class StationScene
             // ---------------------------------------------------------- pages 0B67, frames 21FD
             case StationCall.DrawOnShownPage: _gfx.DrawOnShownPage(); break;
             case StationCall.DrawOnHiddenPage: _gfx.DrawOnHiddenPage(); break;
-            case StationCall.Flip: _gfx.FlipPages(); break;
-            case StationCall.ListOnBothPages:
-                // [ORIGINAL] 21FD:060D – 0A96:06A8, 21FD:051F, 0A96:06A8
-                _gfx.ExecuteList();
-                _gfx.FlipPages();
-                _gfx.ExecuteList();
-                break;
-            case StationCall.LastFrame:
-                // [ORIGINAL] 21FD:0665 – 21FD:051F, 23CD:071C([082E]), 0A96:06A8, 23CD:06E9([082E])
-                _gfx.FlipPages();
-                RestoreObjects(DrawPage);
-                _gfx.ExecuteList();
-                DrawObjects(DrawPage);
-                break;
-            case StationCall.Delay: Delay(a[0], a[1]); break;
-            case StationCall.Pause: break; // 21FD:0245: the pause key is the core's; nothing drawn
+            case StationCall.Flip: Present(_gfx.FlipPagesSteps()); break;
+            case StationCall.ListOnBothPages: Present(ListOnBothPagesSteps()); break;
+            case StationCall.LastFrame: Present(LastFrameSteps()); break;
+            case StationCall.Delay: Present(RetraceSteps(a[0], a[1])); break;
+            case StationCall.Pause: Present(PauseSteps()); break; // nothing drawn; the polls keep the frames in step
 
             // ---------------------------------------------------------- palettes 21FD, picture 186C, sound 21A7
-            case StationCall.FadeOut: _gfx.FadeOut(W(a[0])); break;
+            case StationCall.FadeOut: Present(FadeOutSteps(W(a[0]))); break;
             // [ORIGINAL] 21FD:026C – the argument is not used: loaded palette DS:5017 → base palette DS:3DCB
             case StationCall.BasePalette: _gfx.CopyLoadedToBase(); break;
-            case StationCall.FadeIn: _gfx.FadeIn(); break;
-            case StationCall.PaletteStep: _gfx.Blend(W(a[0]), W(a[1])); break;
+            case StationCall.FadeIn: Present(_gfx.FadeInSteps()); break;
+            case StationCall.PaletteStep: Present(BlendSteps(W(a[0]), W(a[1]))); break;
             case StationCall.LoadPicture: LoadPicture(a[0]); break;
             case StationCall.Sound: Sound?.Invoke(a[0], a[1]); break;
             default: throw new NotSupportedException($"Station call {e.Call} is not played.");
@@ -124,12 +153,152 @@ public sealed class StationScene
     /// <summary>DS:082E of the layers: index of the page being drawn (21FD:051F).</summary>
     private ushort DrawPage => (ushort)(_gfx.Ds[GraphicsLayers.DrawPageIndex] | _gfx.Ds[GraphicsLayers.DrawPageIndex + 1] << 8);
 
-    /// <summary>[ORIGINAL] 21FD:0185(n): n retraces, n a long (low, high); none when the high word is negative.</summary>
-    private void Delay(short low, short high)
+    private IEnumerable<int> Retrace()
     {
-        if (high < 0) return;
+        _gfx.WaitRetrace();
+        yield return 0;
+    }
+
+    /// <summary>[ORIGINAL] 21FD:0185(n) as steps: n retraces, n a long (low, high); none when the high word is negative.</summary>
+    private IEnumerable<int> RetraceSteps(short low, short high)
+    {
+        if (high < 0) yield break;
         long n = ((long)high << 16) | W(low);
-        for (long i = 0; i < n; i++) _gfx.WaitRetrace();
+        for (long i = 0; i < n; i++)
+            foreach (int s in Retrace()) yield return s;
+    }
+
+    /// <summary>[ORIGINAL] 21FD:060D as steps: 0A96:06A8, 21FD:051F, 0A96:06A8.</summary>
+    private IEnumerable<int> ListOnBothPagesSteps()
+    {
+        _gfx.ExecuteList();
+        foreach (int s in _gfx.FlipPagesSteps()) yield return s;
+        _gfx.ExecuteList();
+    }
+
+    /// <summary>[ORIGINAL] 21FD:0665 as steps: 21FD:051F, 23CD:071C([082E]), 0A96:06A8, 23CD:06E9([082E]).</summary>
+    private IEnumerable<int> LastFrameSteps()
+    {
+        foreach (int s in _gfx.FlipPagesSteps()) yield return s;
+        RestoreObjects(DrawPage);
+        _gfx.ExecuteList();
+        DrawObjects(DrawPage);
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 21FD:0245 as steps: with P held (DS:3D60) one frame per busy poll while it is held, released, pressed again
+    /// and released, as the core polls; nothing is drawn.
+    /// </summary>
+    private IEnumerable<int> PauseSteps()
+    {
+        if (_gfx.Ds[PauseKey] == 0) yield break;
+        while (_gfx.Ds[PauseKey] != 0) yield return 0;
+        while (_gfx.Ds[PauseKey] == 0) yield return 0;
+        while (_gfx.Ds[PauseKey] != 0) yield return 0;
+    }
+
+    private const int PauseKey = DgroupLayout.KeyState + 0x19;
+
+    private bool IsVga => (_gfx.Ds[GraphicsLayers.CardMode] | _gfx.Ds[GraphicsLayers.CardMode + 1] << 8) == 1;
+
+    /// <summary>
+    /// [ORIGINAL] 21FD:03EB(rgb12, steps) as steps: the working palette, on VGA the retrace wait of 2295:00C5 and then the DAC
+    /// (the DAC values become visible after the retrace).
+    /// </summary>
+    private IEnumerable<int> BlendSteps(ushort rgb12, ushort steps)
+    {
+        var dac = _gfx.Dac.Registers;
+        var before = (byte[])dac.Clone();
+        _gfx.Blend(rgb12, steps);
+        if (!IsVga) yield break;
+        var after = (byte[])dac.Clone();
+        before.CopyTo(dac, 0);
+        yield return 0;
+        after.CopyTo(dac, 0);
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 21FD:037D(rgb12) as steps: eight stages of 21FD:03EB and 21FD:0185(4); then the blend colour and 21AF:04CD.
+    /// </summary>
+    private IEnumerable<int> FadeOutSteps(ushort rgb12)
+    {
+        for (ushort n = 0; n <= 7; n++)
+        {
+            foreach (int s in BlendSteps(rgb12, n)) yield return s;
+            foreach (int s in RetraceSteps(4, 0)) yield return s;
+        }
+        _gfx.SetBlendColor(rgb12);
+        _gfx.InvalidateAllRestoreRecords();
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0A69:0288(x, y, w, far lines, count, colour, wait) as steps: lines i = 0 … count − 1 (signed) of the far
+    /// pointer table, each with 0243 at y + i·([34A4] + [34A4]/5) (signed division), final wait −1.
+    /// </summary>
+    private IEnumerable<int> TypewriterLinesSteps(ushort x, ushort y, ushort w, ushort linesOffset, ushort linesSegment,
+        short count, ushort colour, short wait)
+    {
+        for (short i = 0; i < count; i++)
+        {
+            short height = (short)U16(GraphicsLayers.FontLineHeight);
+            ushort step = (ushort)(height + height / 5);
+            ushort at = (ushort)(linesOffset + (ushort)(i << 2));
+            ushort lineOffset = ReadFar16(linesSegment, at), lineSegment = ReadFar16(linesSegment, (ushort)(at + 2));
+            foreach (int s in CenteredTypewriterSteps(x, (ushort)(y + step * i), w, lineOffset, lineSegment, colour, wait, -1))
+                yield return s;
+        }
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0A69:0243(x, y, w, far text, colour, wait, final wait) as steps: 01AD centred in w,
+    /// x + 1 + (w − strlen · [3CA8]) / 2 (the difference shifted as an unsigned word); nothing for a null pointer.
+    /// </summary>
+    private IEnumerable<int> CenteredTypewriterSteps(ushort x, ushort y, ushort w, ushort offset, ushort segment, ushort colour,
+        short wait, short finalWait)
+    {
+        if (offset == 0 && segment == 0) yield break;
+        int length = Length(segment, offset);
+        ushort left = (ushort)(x + 1 + ((ushort)(w - length * (short)U16(GraphicsLayers.FontAdvance)) >> 1));
+        foreach (int s in TypewriterSteps(left, y, offset, segment, colour, wait, finalWait)) yield return s;
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0A69:01AD as steps: per character DS:0140 = character, list emptied, the character as text at
+    /// x + i·[3CA8] (no shadow), 21FD:060D; the key click (21A7:0054(1, 16h)) except for blanks, 21FD:0245, 21FD:0185(wait);
+    /// finally 0185(final wait) if it is &gt; 0.
+    /// </summary>
+    private IEnumerable<int> TypewriterSteps(ushort x, ushort y, ushort offset, ushort segment, ushort colour, short wait,
+        short finalWait)
+    {
+        for (ushort i = 0; Length(segment, offset) > i; i++)
+        {
+            _gfx.Ds[GraphicsLayers.TypewriterChar] = ReadFar(segment, (ushort)(offset + i));
+            _gfx.ClearList();
+            _gfx.AddText((ushort)(x + i * (short)U16(GraphicsLayers.FontAdvance)), y, GraphicsLayers.TypewriterChar,
+                _gfx.DataSegment, colour, 0xFFFF);
+            foreach (int s in ListOnBothPagesSteps()) yield return s;
+            if (_gfx.Ds[GraphicsLayers.TypewriterChar] != (byte)' ') _gfx.Effects?.PlaySound(1, 0x16);
+            foreach (int s in PauseSteps()) yield return s;
+            foreach (int s in RetraceSteps(wait, (short)(wait >> 15))) yield return s;
+        }
+        if (finalWait > 0)
+            foreach (int s in RetraceSteps(finalWait, (short)(finalWait >> 15))) yield return s;
+    }
+
+    private ushort U16(int at) => (ushort)(_gfx.Ds[at] | _gfx.Ds[at + 1] << 8);
+
+    private byte ReadFar(ushort segment, ushort offset) =>
+        segment == _gfx.DataSegment ? _gfx.Ds[offset]
+        : (_gfx.OtherMemory ?? throw new InvalidOperationException("No far memory for the texts.")).Read(segment, offset);
+
+    private ushort ReadFar16(ushort segment, ushort offset) =>
+        (ushort)(ReadFar(segment, offset) | ReadFar(segment, (ushort)(offset + 1)) << 8);
+
+    private int Length(ushort segment, ushort offset)
+    {
+        int n = 0;
+        while (ReadFar(segment, (ushort)(offset + n)) != 0) n++;
+        return n;
     }
 
     /// <summary>[ORIGINAL] 23CD:071C(page) on the layers' records with the core's fields mirrored.</summary>

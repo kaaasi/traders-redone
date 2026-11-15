@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.State;
 using L = Traders.Core.State.DgroupLayout;
@@ -9,7 +10,10 @@ namespace Traders.Core.Stations;
 /// Stations phase 1B03:0009 (docs/routines/1B03_0009_stationen.md): station draw, choice of a station by every player (humans
 /// through the controls 0E9E, computers through 1B03:0632), rocket flight with pirates, lost rocket fields and the weekly
 /// bonuses. Works on the data segment like the original; every call into the output layers is reported as a
-/// <see cref="StationEvent"/> in the original order, random numbers come from <see cref="OriginalRandom"/>.
+/// <see cref="StationEvent"/> in the original order, random numbers come from <see cref="OriginalRandom"/>. The coroutines
+/// halt at every frame of the original: one <see cref="FieldWait.Retrace"/> per retrace wait (21FD:0185, the flips of
+/// 21FD:051F/060D/0665 and of the typed texts 0A69:01AD, the fades 21FD:037D/0329 and the palette step 21FD:03EB), one
+/// <see cref="FieldWait.Poll"/> per busy poll of the pause 21FD:0245; the events reported before a wait belong to its frame.
 /// The star field 1B03:1178, the flight loop 1B03:08ED and the hit test 1B03:0BE7 read the drawn page: the core reads
 /// its rule page <see cref="Pixels"/> instead (R6P-1).
 /// </summary>
@@ -38,6 +42,15 @@ public sealed partial class StationPhase
     /// object records, key table). Optional; <see cref="Events"/> keeps the calls either way.
     /// </summary>
     public Action<StationEvent>? Output { get; init; }
+
+    /// <summary>
+    /// strlen of a typed text by far pointer (offset, segment), for the frames of 0A69:01AD; by default from the text buffer of
+    /// <see cref="Pixels"/>.
+    /// </summary>
+    public Func<ushort, ushort, int>? TextLength { get; init; }
+
+    /// <summary>Page flips 21FD:051F called by 1B03 itself so far (the controls of the next pass are read after each).</summary>
+    public int Flips { get; private set; }
 
     /// <summary>Output calls reported so far.</summary>
     public IReadOnlyList<StationEvent> Events => _events;
@@ -88,9 +101,119 @@ public sealed partial class StationPhase
 
     // ------------------------------------------------------------------ 21FD helpers reported as calls
 
-    private void Delay(short retraces) => Emit(StationCall.Delay, retraces, 0); // high word 0 (xor ax, ax)
+    // Retraces per stage of the fades 21FD:037D (0185(4)) and 21FD:0329 (0185(3)), as in Planting.
+    private const int FadeOutRetraces = 4, FadeInRetraces = 3;
 
-    private void ListOnBothPages() => Emit(StationCall.ListOnBothPages);
+    /// <summary>21FD:0185(n, 0) – n retraces (the high word is 0 at every call in 1B03: xor ax, ax).</summary>
+    // [ORIGINAL] 21FD:0185
+    private IEnumerable<FieldWait> Delay(short retraces)
+    {
+        Emit(StationCall.Delay, retraces, 0);
+        foreach (var w in Planting.Retraces(retraces, 0)) yield return w;
+    }
+
+    /// <summary>21FD:051F called by 1B03 – flip with its retraces (<see cref="Planting.Flip"/>); counted in <see cref="Flips"/>.</summary>
+    // [ORIGINAL] 21FD:051F
+    private IEnumerable<FieldWait> Flip()
+    {
+        Emit(StationCall.Flip);
+        Flips++;
+        foreach (var w in Planting.Flip(_d)) yield return w;
+    }
+
+    /// <summary>21FD:060D – list, flip (its retraces), list.</summary>
+    // [ORIGINAL] 21FD:060D – 0A96:06A8, 21FD:051F, 0A96:06A8
+    private IEnumerable<FieldWait> ListOnBothPages()
+    {
+        Emit(StationCall.ListOnBothPages);
+        foreach (var w in Planting.Flip(_d)) yield return w;
+    }
+
+    /// <summary>21FD:0665 – flip (its retraces), restore, list, objects.</summary>
+    // [ORIGINAL] 21FD:0665 – 21FD:051F, 23CD:071C, 0A96:06A8, 23CD:06E9
+    private IEnumerable<FieldWait> LastFrame()
+    {
+        Emit(StationCall.LastFrame);
+        foreach (var w in Planting.Flip(_d)) yield return w;
+    }
+
+    /// <summary>21FD:0245 – pause check: busy polls while P is held, released, pressed again (<see cref="Planting.Pause"/>).</summary>
+    // [ORIGINAL] 21FD:0245
+    private IEnumerable<FieldWait> Pause()
+    {
+        Emit(StationCall.Pause);
+        foreach (var w in Planting.Pause(_d)) yield return w;
+    }
+
+    /// <summary>21FD:037D(rgb12) – fade out: eight stages of 03EB and 0185(4) (<see cref="Planting.Fade"/>).</summary>
+    // [ORIGINAL] 21FD:037D
+    private IEnumerable<FieldWait> FadeOut(short rgb12)
+    {
+        Emit(StationCall.FadeOut, rgb12);
+        foreach (var w in Planting.Fade(_d, FadeOutRetraces)) yield return w;
+    }
+
+    /// <summary>21FD:0329 – fade in: eight stages of 03EB and 0185(3).</summary>
+    // [ORIGINAL] 21FD:0329
+    private IEnumerable<FieldWait> FadeIn()
+    {
+        Emit(StationCall.FadeIn);
+        foreach (var w in Planting.Fade(_d, FadeInRetraces)) yield return w;
+    }
+
+    /// <summary>21FD:03EB(rgb12, steps) – one palette step; on VGA (DS:090E = 1) the DAC through 2295:00C5 (one retrace).</summary>
+    // [ORIGINAL] 21FD:03EB – 2295:00C5 only when DS:090E = 1
+    private IEnumerable<FieldWait> PaletteStep(short rgb12, short steps)
+    {
+        Emit(StationCall.PaletteStep, rgb12, steps);
+        if (_d.S16(Planting.CardMode) == 1) yield return FieldWait.Retrace;
+    }
+
+    /// <summary>
+    /// 0A69:0243(x, y, w, far text, colour, wait, final wait) – centred typed text: nothing for a null pointer, else per
+    /// character (0A69:01AD) 21FD:060D (flip), the key click, 21FD:0245 and 21FD:0185(wait); then 0185(final wait) if it is
+    /// &gt; 0. The length of the text is read from the text buffer of <see cref="Pixels"/>.
+    /// </summary>
+    // [ORIGINAL] 0A69:0243, 0A69:01AD
+    private IEnumerable<FieldWait> TypedText(short x, short y, short w, short offset, short segment, short colour, short wait,
+        short finalWait)
+    {
+        Emit(StationCall.TypedText, x, y, w, offset, segment, colour, wait, finalWait);
+        foreach (var f in Typewriter(offset, segment, wait, finalWait)) yield return f;
+    }
+
+    /// <summary>
+    /// 0A69:0288(x, y, w, far lines, count, colour, wait) – the lines i = 0 … count − 1 (signed) of the far pointer table, each
+    /// typed with 0A69:0243 and final wait −1.
+    /// </summary>
+    // [ORIGINAL] 0A69:0288
+    private IEnumerable<FieldWait> TypedLines(short x, short y, short w, short lines, short segment, short count, short colour,
+        short wait)
+    {
+        Emit(StationCall.TypedLines, x, y, w, lines, segment, count, colour, wait);
+        for (short i = 0; i < count; i++)
+        {
+            int entry = Int16Math.U(lines + 4 * i); // the table lies in DS at every call in 1B03
+            foreach (var f in Typewriter(_d.S16(entry), _d.S16(Int16Math.U(entry + 2)), wait, -1)) yield return f;
+        }
+    }
+
+    // [ORIGINAL] 0A69:01AD – strlen(text) passes of 060D, 21A7:0054, 21FD:0245, 21FD:0185(wait); 0185(final wait) if > 0
+    private IEnumerable<FieldWait> Typewriter(short offset, short segment, short wait, short finalWait)
+    {
+        int length = offset == 0 && segment == 0 ? 0
+            : TextLength?.Invoke((ushort)offset, (ushort)segment)
+              ?? (Pixels ?? throw new InvalidOperationException("Typed texts need the text buffer: set StationPhase.Pixels."))
+                  .TextLength((ushort)offset, (ushort)segment);
+        for (int i = 0; i < length; i++)
+        {
+            foreach (var f in Planting.Flip(_d)) yield return f;
+            foreach (var f in Planting.Pause(_d)) yield return f;
+            foreach (var f in Planting.Retraces(wait, (short)(wait >> 15))) yield return f;
+        }
+        if (finalWait > 0)
+            foreach (var f in Planting.Retraces(finalWait, (short)(finalWait >> 15))) yield return f;
+    }
 
     private void ClearList() => Emit(StationCall.ClearList);
 
@@ -164,24 +287,20 @@ public sealed partial class StationPhase
     }
 
     /// <summary>
-    /// 1B03:0009 from the start up to the star field: station values, the rocket check, picture and objects. Returns false
-    /// when nobody has a rocket field (the phase ends after 1B03:0079).
+    /// 1B03:0009 after the rocket check (<see cref="AnyRockets"/>) up to the star field: picture, objects and the fade-out.
     /// </summary>
     // part of 1B03:0009 (marker at Run)
-    public bool Begin()
+    public IEnumerable<FieldWait> Begin()
     {
-        DrawStationValues();
-        if (!AnyRockets()) return false;
         Emit(StationCall.LoadPicture, Word(S.Picture));
         SetUpObjects();
-        Emit(StationCall.FadeOut, 2);
-        return true;
+        foreach (var w in FadeOut(2)) yield return w;
     }
 
     /// <summary>1B03:0009 after the star field 1B03:1178: palette and fade-in, then the selection 1B03:00D4 follows.</summary>
-    public void ShowScreen()
+    public IEnumerable<FieldWait> ShowScreen()
     {
         Emit(StationCall.BasePalette, S.Palette, Ds);
-        Emit(StationCall.FadeIn);
+        foreach (var w in FadeIn()) yield return w;
     }
 }

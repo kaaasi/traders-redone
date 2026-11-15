@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Rules;
 using L = Traders.Core.State.DgroupLayout;
@@ -10,19 +11,19 @@ public sealed partial class StationPhase
 {
     /// <summary>
     /// 1B03:00D4 – new stations (0101), station marks (0153), pirates (01C3), cursors (0201), the choice loop (02C0), hiding
-    /// the cursors (15D7) and clearing the message box (13EE). Yields after every page flip of the choice loop.
+    /// the cursors (15D7) and clearing the message box (13EE). Yields once per frame.
     /// </summary>
     // [ORIGINAL] 1B03:00D4
-    public IEnumerable<StationWait> Selection()
+    public IEnumerable<FieldWait> Selection()
     {
-        NewStations();
-        DrawStationMarks();
-        PlacePirates();
-        PlaceCursors();
+        foreach (var w in NewStations()) yield return w;
+        foreach (var w in DrawStationMarks()) yield return w;
+        foreach (var w in PlacePirates()) yield return w;
+        foreach (var w in PlaceCursors()) yield return w;
         ClearList();
         foreach (var w in Choose()) yield return w;
         HideCursors();
-        ClearMessageBox();
+        foreach (var w in ClearMessageBox()) yield return w;
     }
 
     /// <summary>
@@ -30,13 +31,13 @@ public sealed partial class StationPhase
     /// retraces and the message box cleared.
     /// </summary>
     // [ORIGINAL] 1B03:0101
-    public void NewStations()
+    public IEnumerable<FieldWait> NewStations()
     {
-        if (_random.Next(6) != 0) return;
-        Emit(StationCall.TypedLines, 0x71, 0xB4, 0x56, S.NewStationsText, Ds, 3, 7, 5);
+        if (_random.Next(6) != 0) yield break;
+        foreach (var w in TypedLines(0x71, 0xB4, 0x56, S.NewStationsText, Ds, 3, 7, 5)) yield return w;
         NewGame.CreateStations(_d, _random); // 0E31:023D
-        Delay(50);
-        ClearMessageBox();
+        foreach (var w in Delay(50)) yield return w;
+        foreach (var w in ClearMessageBox()) yield return w;
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ public sealed partial class StationPhase
     /// the value; then the list on both pages.
     /// </summary>
     // [ORIGINAL] 1B03:0153
-    public void DrawStationMarks()
+    public IEnumerable<FieldWait> DrawStationMarks()
     {
         ClearList();
         for (int si = 0; si <= 11; si++)
@@ -55,7 +56,7 @@ public sealed partial class StationPhase
             Emit(StationCall.Text, Int16Math.S(_d.S16(S.StationX + 2 * si) + 0x12), (short)(_d.U8(S.StationY + si) + 9),
                 S.StationMarkText, Ds, colour, -1);
         }
-        ListOnBothPages();
+        foreach (var w in ListOnBothPages()) yield return w;
     }
 
     /// <summary>
@@ -63,17 +64,17 @@ public sealed partial class StationPhase
     /// is drawn (1257, list on both pages); otherwise DS:546E = −1.
     /// </summary>
     // [ORIGINAL] 1B03:01C3
-    public void PlacePirates()
+    public IEnumerable<FieldWait> PlacePirates()
     {
         if (_d.S16(L.PiratePresence) < 1 || _random.Next(2) != 0)
         {
             _d.Set(S.PiratePosition, (sbyte)-1);
-            return;
+            yield break;
         }
         _d.Set(S.PiratePosition, unchecked((byte)_random.Next(Int16Math.S(_d.S16(L.PiratePresence) - 1))));
         ClearList();
         DrawShip();
-        ListOnBothPages();
+        foreach (var w in ListOnBothPages()) yield return w;
     }
 
     /// <summary>
@@ -81,7 +82,7 @@ public sealed partial class StationPhase
     /// or at station 2p (frame 0), the cursor object placed (1617) and the cursor line drawn (0548). DS:37AA ends at 4.
     /// </summary>
     // [ORIGINAL] 1B03:0201
-    public void PlaceCursors()
+    public IEnumerable<FieldWait> PlaceCursors()
     {
         for (int si = 0; si <= 11; si++) _d.Set(S.Taken + si, (byte)0);
         ClearList();
@@ -105,7 +106,7 @@ public sealed partial class StationPhase
             }
             DrawCursorLine();
         }
-        ListOnBothPages();
+        foreach (var w in ListOnBothPages()) yield return w;
     }
 
     /// <summary>
@@ -113,23 +114,22 @@ public sealed partial class StationPhase
     /// lights (12D7(10)), checks the pause, sets the computers' controls (05E7) and reads all controls (0E9E:000E); each player
     /// still choosing moves left or right (0413) or fires: without a station he takes the one under his cursor (04D4), with
     /// one he confirms it (state 2, the mark of text DS:0E40 in his colour) and is done. Ends with 21FD:0665 when all four
-    /// confirmed. Yields after each flip (the controls of the next pass come from the host).
+    /// confirmed. Yields once per frame (the controls of the next pass come from the host).
     /// </summary>
     // [ORIGINAL] 1B03:02C0
-    public IEnumerable<StationWait> Choose()
+    public IEnumerable<FieldWait> Choose()
     {
         bool[] choosing = [true, true, true, true]; // local byte[4] at bp-6 in the original
         int left = 4;
         for (SetP(0); P < 4; SetP(P + 1)) { }
         while (left != 0)
         {
-            Emit(StationCall.Flip);
-            yield return StationWait.Flip;
+            foreach (var w in Flip()) yield return w;
             Emit(StationCall.RestoreObjects, Page);
             Emit(StationCall.RunList);
             ClearList();
             AnimateLights(10);
-            Emit(StationCall.Pause);
+            foreach (var w in Pause()) yield return w;
             SetComputerControls();
             ControlReader.ReadAll(_d, _devices); // 0E9E:000E
             for (SetP(0); P < 4; SetP(P + 1))
@@ -155,7 +155,7 @@ public sealed partial class StationPhase
             Emit(StationCall.RunList);
             Emit(StationCall.DrawObjects, Page);
         }
-        Emit(StationCall.LastFrame);
+        foreach (var w in LastFrame()) yield return w;
     }
 
     /// <summary>
@@ -301,10 +301,10 @@ public sealed partial class StationPhase
 
     /// <summary>1B03:13EE – clears the message box on both pages.</summary>
     // [ORIGINAL] 1B03:13EE
-    public void ClearMessageBox()
+    public IEnumerable<FieldWait> ClearMessageBox()
     {
         ClearList();
         Emit(StationCall.Blit, 0x70, 0xAF, 0x60, 0x19, 0x70, 0xAF);
-        ListOnBothPages();
+        foreach (var w in ListOnBothPages()) yield return w;
     }
 }

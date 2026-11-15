@@ -1,4 +1,5 @@
 using Traders.Core;
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Menus;
 using Traders.Core.State;
@@ -17,7 +18,7 @@ namespace Traders.Tests.Stations;
 /// <see cref="PlantingDifferentialTests.OutputOwned"/>). 0E31:023D, 0609:10D2, 0E9E:000E, the runtime's LDIV and random()
 /// run in the original and are called by the port. Compared: the whole data segment (with DS:10D2), the number of random()
 /// calls, the result in AX and the sequence of recorded calls. At every page flip 21FD:051F the key table gets the keys of the
-/// next pass, in the original inside the stub, in the port after the coroutine yielded <see cref="StationWait.Flip"/>.
+/// next pass, in the original inside the stub, in the port at the first frame after a flip of 1B03 (<see cref="StationPhase.Flips"/>).
 /// </summary>
 internal sealed class StationsHarness
 {
@@ -150,21 +151,22 @@ internal sealed class StationsHarness
 
     /// <summary>
     /// Runs <paramref name="port"/> on a copy of <paramref name="input"/>; it may return a coroutine (driven to its end, keys
-    /// written after every <see cref="StationWait.Flip"/>) and a result (compared with AX).
+    /// written at the first frame after every flip of 1B03) and a result (compared with AX).
     /// </summary>
-    public PortOutcome RunPort(Dgroup input, Func<StationPhase, (IEnumerable<StationWait>? Run, Func<int>? Result)> port,
+    public PortOutcome RunPort(Dgroup input, Func<StationPhase, (IEnumerable<FieldWait>? Run, Func<int>? Result)> port,
         Func<int, IReadOnlyCollection<byte>>? keys = null)
     {
         keys ??= _ => [];
         var d = new Dgroup((byte[])input.Bytes.Clone());
         var random = new OriginalRandom(new RecordedClock(_clock.ToList()), d.U32(DgroupLayout.RandomSeed));
-        var phase = new StationPhase(d, random, KeyboardOnlyDevices.Instance);
+        // The output is stubbed on both sides, so the frames of the typed texts are not compared here (no text buffer).
+        var phase = new StationPhase(d, random, KeyboardOnlyDevices.Instance) { TextLength = (_, _) => 0 };
         KeyTable.Write(d, keys(0));
         var (run, result) = port(phase);
         int passes = 0;
         if (run is not null)
-            foreach (var w in run)
-                if (w == StationWait.Flip)
+            foreach (var _ in run)
+                if (phase.Flips > passes)
                 {
                     KeyTable.Write(d, keys(++passes));
                     if (passes > 100_000) throw new InvalidOperationException("Port coroutine did not finish.");
@@ -183,7 +185,7 @@ internal sealed class StationsHarness
     /// random() calls, same recorded calls, same AX (when the port gives a result). Returns the port's state.
     /// </summary>
     public Dgroup AssertSame(Dgroup input, ushort off, ushort[] args,
-        Func<StationPhase, (IEnumerable<StationWait>? Run, Func<int>? Result)> port, string label,
+        Func<StationPhase, (IEnumerable<FieldWait>? Run, Func<int>? Result)> port, string label,
         Func<int, IReadOnlyCollection<byte>>? keys = null)
     {
         var original = RunOriginal(input, off, args, keys);

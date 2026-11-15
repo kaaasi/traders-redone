@@ -139,18 +139,23 @@ Textpuffer, Objekte `21AF`/`23CD`, Seiten `0B67`, `21FD:0185/026C/0329/037D/03EB
   gehören der Ausgabe (`21FD:051F`); der Kern führt sie deshalb in `StationsPage` (`DrawIndex`/`ShownIndex`, je Wechsel wie
   `051F`, auch in `060D`, `0665` und den Tipptexten) und übergibt diese Werte. Vorher stand dort der unveränderte DS-Wert (falsche
   Seite beim Zurücksetzen, im Bildvergleich rot; die Regelseite war nicht betroffen, sie nutzt ihre eigene Zeichenseite).
-- **Pause `21FD:0245`:** zeichnet nichts (Pausetaste ist Sache des Kerns, `[APPROX]` wie bisher). Ton `21A7:0054` geht an
-  `StationScene.Sound`.
+- **Bildtakt (R6S-1):** Der Kern hält bei jedem Rücklauf des Originals (`0D73:00D3`): `21FD:0185(n)` n-mal, Seitenwechsel
+  `051F` (auch in `060D`, `0665` und je getipptem Zeichen `0A69:01AD`) einmal plus einmal ohne `Num+` (`DS:3D95`) plus viermal
+  mit `Num−` (`DS:3D91`), Blenden `037D`/`0329` 8 · (4 bzw. 3 + 1 auf VGA), Palettenschritt `03EB` einmal auf VGA (`2295:00C5`);
+  getippte Texte je Zeichen Wechsel, Pause `0245`, `0185(wait)`, danach `0185(Endwartezeit)` wenn > 0 (Länge per `strlen` aus dem
+  Textpuffer). Die Pause `0245` hält je Abfrage einmal (`FieldWait.Poll`), solange P gedrückt, losgelassen, erneut gedrückt ist.
+  Die Szene spielt jede Warteroutine schrittweise (`StationScene.NextFrame` vor dem Takt des Kerns, wie `DisasterScene`) und
+  bekommt je Takt nur die Ereignisse dieses Bildes; sie hält bei denselben Rückläufen. Ton `21A7:0054` geht an
+  `StationScene.Sound`, der Tastenklick der Tipptexte an `GraphicsLayers.Effects`.
 - **Handler Aufruf 11:** `StationsStep` (`src/Traders.Core/Stations/StationsStep.cs`, nicht eingebunden): `Begin` bis zum ersten
-  Seitenwechsel, je `Tick` ein Wechsel von `02C0`/`08ED`; Bildladen in der Bildtabelle (`ImageTable.RecordLoad`) wie
-  `PlantingStep`; Regelseite leer beim Start (`1178` überdeckt die Zeichenseite ganz und kopiert sie vor dem ersten Lesen).
-  `[APPROX]`: ein Takt je Seitenwechsel von `1B03`, die Rückläufe der Ausgabe (Pausen, Blenden, Wechsel in `060D`/`0665`/Tipptexten)
-  sind keine Takte der Phasenmaschine; `DS:082E/0830/40DE` müssen beim Start die der Ausgabe sein (Einbindung Spur `ernte`).
+  Halt, je `Tick` ein Bild (Zähler `Retraces`, `Polls`); fertig im Bild, in dem `0009` zurückkehrt. Bildladen in der Bildtabelle
+  (`ImageTable.RecordLoad`) wie `PlantingStep`; Regelseite leer beim Start (`1178` überdeckt die Zeichenseite ganz und kopiert sie
+  vor dem ersten Lesen). `DS:082E/0830/40DE` müssen beim Start die der Ausgabe sein (Einbindung Spur `ernte`).
 
 ## C#-Umsetzung
 
-`StationPhase` (`StationPhase*.cs`): `Run` (`0009`) und `Flight` (`0705`) als Koroutinen (Halt nach jedem Seitenwechsel von
-`02C0` und `08ED`, Eingabe danach vom Host), darin `Begin`/`StarField`/`ShowScreen`, `Selection`/`Choose`,
+`StationPhase` (`StationPhase*.cs`): `Run` (`0009`) und `Flight` (`0705`) als Koroutinen (Halt je Bild des Originals, siehe
+„Bildtakt“; `Flips` zählt die Seitenwechsel von `1B03`, die Eingabe des nächsten Durchgangs gilt ab dem Bild danach), darin `Begin`/`StarField`/`ShowScreen`, `Selection`/`Choose`,
 `FlightBegin`/`FlightLoop`/`FlightEnd`, `End`; je Routine eine Methode mit Marke. `StationPhase.Pixels` (`StationsPage`) spielt
 jedes Ereignis auf die Regelseite; Eingaben: Regelseite (Zeichenseite wie `DS:40DE[DS:082E]`), Bild `V-RAKETE`, `MASKS.PP`,
 Schrift (`TextFont`), Textpuffer (`TextFile`).
@@ -175,5 +180,7 @@ der Rückläufe, nur Ton als `retf`): je Bild (Eintritt `0D73:00D3`) die vier VR
 (`DS:15BE` Zahl und Einträge) gleich dem Port (Kern mit Regelseite, `StationScene` auf Grafikschichten aus demselben Zustand, Takte
 über die Rückläufe der Schichten); Bildzahl und Endzustand. `Scene_with_humans` (12 Zufallszustände, Menschen und Computer, jeder
 zweite mit Piraten; alle 31 Aufrufarten gespielt, 22 703 Bilder), `Scene_game_week_0` (Standardpartie, 1268 Bilder),
-`Step_handler_call_11` (4 Zustände über `StationsStep` in einer `PhaseMachine` ab Aufruf 11, Halt an Aufruf 12). Gegenproben
-beim Entwickeln: eine Pause zu kurz, Schatten- und Textfarbe vertauscht, Objekte ohne Spiegelung der Kernfelder – jeweils rot.
+`Step_handler_call_11` (4 Zustände und Standardpartie Woche 0 über `StationsStep` in einer `PhaseMachine` ab Aufruf 11, Halt an
+Aufruf 12; je Zustand Zahl der Takte = Rückläufe des Originals, Woche 0: 1267 Takte, 1268 Bilder mit dem Schlussbild; vor R6S-1
+rot mit 291 Takten gegen 1453 Rückläufe). Gegenproben beim Entwickeln: eine Pause zu kurz, Schatten- und Textfarbe vertauscht,
+Objekte ohne Spiegelung der Kernfelder, `0185` im Kern ein Rücklauf mehr bzw. weniger – jeweils rot.

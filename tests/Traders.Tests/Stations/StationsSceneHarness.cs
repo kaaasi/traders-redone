@@ -22,10 +22,10 @@ namespace Traders.Tests.Stations;
 /// in the RefEmu with all its output (command list, VGA pages, objects, palettes, fades and its retrace waits); only the
 /// sounds 21A7:0054 are far returns. A picture is one retrace wait (entry into 0D73:00D3): there the four VRAM planes, the
 /// DAC, the CRTC start and the command list DS:15BE/15C0 (count and entries) are captured. The port runs
-/// <see cref="StationPhase.Run"/> on the original's start state with its rule page, every output call played at once by
-/// <see cref="StationScene"/> through graphics layers set up from the same state; the layers' retrace waits capture the same
-/// values. Keys change at every page flip called by 1B03 on both sides (as in <see cref="StationsLockstep"/>). Expected
-/// values come from the original only.
+/// <see cref="StationPhase.Run"/> on the original's start state with its rule page, every output call played when reported by
+/// <see cref="StationScene"/> through graphics layers set up from the same state, one frame of the core and of the scene per
+/// retrace wait of the original; the layers' retrace waits capture the same values. Keys change at every page flip called by
+/// 1B03 on both sides (as in <see cref="StationsLockstep"/>). Expected values come from the original only.
 /// </summary>
 internal static class StationsSceneHarness
 {
@@ -138,7 +138,7 @@ internal static class StationsSceneHarness
     /// buffer from the original's memory. random(0) gets the original's clock values.
     /// </summary>
     public static Result RunPort(MachineSnapshot start, List<int> clock, int font, Func<int, IReadOnlyCollection<byte>> keys,
-        int keep, bool viaStep = false)
+        int keep, bool viaStep = false, int originalPictures = -1)
     {
         var snap = OriginalProgram.Resume(TestGameData.DosDir, start);
         var ds = snap.DataSegment();
@@ -190,7 +190,7 @@ internal static class StationsSceneHarness
         var random = new OriginalRandom(new RecordedClock(clock.ToList()), core.U32(DgroupLayout.RandomSeed));
         var texts = new TextFile(textBytes, textOff, textSeg);
         if (viaStep) return RunStep(core, random, scene, texts, font, keys, captures, () => (kept, keptDac, keptEvents), Take,
-            source => currentPhase = source);
+            source => currentPhase = source, originalPictures);
 
         var page = new RulePage(RulePage.DrawPageOf(core));
         int draw = page.DrawPage;
@@ -208,13 +208,20 @@ internal static class StationsSceneHarness
         };
         currentPhase = () => phase;
         int pass = 0;
-        KeyTable.Write(core, keys(0));
-        foreach (var w in phase.Run())
+        var held = keys(0);
+        KeyTable.Write(core, held);
+        foreach (var _ in phase.Run())
         {
-            if (w != StationWait.Flip) continue;
-            KeyTable.Write(core, keys(++pass));
+            // keys of the next pass from the first frame after a flip of 1B03 on (the original: at its entry)
+            if (phase.Flips > pass)
+            {
+                held = keys(++pass);
+                KeyTable.Write(core, held);
+            }
+            scene.NextFrame(held);
             if (pass > 100_000) throw new InvalidOperationException("Port coroutine did not finish.");
         }
+        Assert.False(scene.Presenting, "scene still presenting after 1B03:0009 returned");
         core.Set(DgroupLayout.RandomSeed, random.Seed);
         Take();
         return new Result
@@ -226,28 +233,36 @@ internal static class StationsSceneHarness
 
     /// <summary>
     /// The port through the handler of call 11 (<see cref="StationsStep"/>) in a <see cref="PhaseMachine"/> started at call 11:
-    /// one frame per tick with the keys of the next pass, the scene as the step's output, the rule page empty at the start.
-    /// The machine must stop at call 12 (no handler).
+    /// one tick per frame (the scene's <see cref="StationScene.NextFrame"/> before it), the keys of the next pass from the
+    /// first frame after each flip of 1B03, the scene as the step's output, the rule page empty at the start. The number of
+    /// frames must equal the original's retrace waits (no pause key here) and the machine must stop at call 12 (no handler).
     /// </summary>
     private static Result RunStep(Dgroup core, OriginalRandom random, StationScene scene, TextFile texts, int font,
         Func<int, IReadOnlyCollection<byte>> keys, List<Capture> captures, Func<(byte[][]?, byte[]?, List<string>?)> kept,
-        Action take, Action<Func<StationPhase?>> phaseSource)
+        Action take, Action<Func<StationPhase?>> phaseSource, int originalPictures)
     {
         var step = new StationsStep(new StationsInputs(StationsLockstep.Rakete.Value, StationsLockstep.Masks.Value,
             StationsLockstep.Font(font), texts), KeyboardOnlyDevices.Instance, scene.Apply, _ => new ImageFileLengths(100, 200));
         var machine = new PhaseMachine(core, random, new Dictionary<int, IWeekStepHandler> { [11] = step }, nextStep: 11);
         phaseSource(() => step.Phase);
-        int pass = 0;
-        machine.Advance(new PhaseTick(0, keys(0)));
+        int pass = 0, frames = 0;
+        var held = keys(0);
+        machine.Advance(new PhaseTick(0, held));
         while (machine.Status == PhaseStatus.Waiting)
         {
-            machine.Advance(new PhaseTick(pass + 1, keys(pass + 1)));
-            pass++;
-            if (pass > 100_000) throw new InvalidOperationException("Port step did not finish.");
+            // keys of the next pass from the first frame after a flip of 1B03 on (the original: at its entry)
+            if (step.Phase!.Flips > pass) held = keys(++pass);
+            scene.NextFrame(held);
+            machine.Advance(new PhaseTick(++frames, held));
+            if (frames > 1_000_000) throw new InvalidOperationException("Port step did not finish.");
         }
+        Assert.False(scene.Presenting, "scene still presenting after 1B03:0009 returned");
         Assert.Equal(PhaseStatus.Blocked, machine.Status);
         Assert.Equal(12, machine.NextStep);
-        Assert.Equal(pass, step.Flips);
+        Assert.Equal(frames, step.Retraces + step.Polls);
+        if (originalPictures >= 0)
+            Assert.True(frames == originalPictures, $"frames of the phase machine {frames}, retrace waits of the original {originalPictures}");
+        Assert.Equal(step.Phase!.Flips, pass);
         take();
         var (planes, dac, events) = kept();
         return new Result
@@ -265,7 +280,8 @@ internal static class StationsSceneHarness
         Func<int, IReadOnlyCollection<byte>> keys, string label, MachineSnapshot? from = null, bool viaStep = false)
     {
         var (start, clock, original) = RunOriginal(setUp, font, keys, from, -1);
-        var port = RunPort(start, clock, font, keys, -1, viaStep);
+        // the last capture is taken after 1B03:0009 returned; the others are the original's retrace waits
+        var port = RunPort(start, clock, font, keys, -1, viaStep, original.Captures.Count - 1);
         int n = Math.Min(original.Captures.Count, port.Captures.Count);
         for (int i = 0; i < n; i++)
         {

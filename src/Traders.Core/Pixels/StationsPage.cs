@@ -196,17 +196,25 @@ public sealed class StationsPage
     private void TypedText(ushort offset, ushort segment)
     {
         if (offset == 0 && segment == 0) return;
+        int length = TextLength(offset, segment);
+        for (int i = 0; i < length; i++)
+        {
+            _list.Clear();
+            Flip();
+        }
+    }
+
+    /// <summary>strlen of a text in the text buffer DS:4884 (far pointer <paramref name="segment"/>:<paramref name="offset"/>).</summary>
+    // strlen of the C runtime (0000:42E5), as called by 0A69:01AD
+    public int TextLength(ushort offset, ushort segment)
+    {
         int at = (segment << 4) + offset - ((_texts.BufferSegment << 4) + _texts.BufferOffset);
         var span = _texts.Contents.Span;
         if (at < 0 || at >= span.Length)
             throw new NotSupportedException($"Typed text at {segment:X4}:{offset:X4} lies outside the text buffer.");
         int length = span[at..].IndexOf((byte)0);
         if (length < 0) throw new NotSupportedException($"Typed text at {segment:X4}:{offset:X4} has no end in the text buffer.");
-        for (int i = 0; i < length; i++)
-        {
-            _list.Clear();
-            Flip();
-        }
+        return length;
     }
 
     /// <summary>Saved background of an object on one page: where it was drawn and the 16 × height pixels under it.</summary>

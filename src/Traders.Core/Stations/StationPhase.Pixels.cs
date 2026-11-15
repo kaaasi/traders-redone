@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using S = Traders.Core.Stations.StationsLayout;
 
 namespace Traders.Core.Stations;
@@ -17,18 +18,20 @@ public sealed partial class StationPhase
 
     /// <summary>
     /// 1B03:0009 – the whole stations phase: station values and the rocket check (<see cref="Begin"/>), the star field, palette
-    /// and fade-in, the choice of stations, the rocket flight, the flash, lost rocket fields and the bonuses. Yields after
-    /// every page flip of the choice loop and of the flight loop (the controls of the next pass come from the host).
+    /// and fade-in, the choice of stations, the rocket flight, the flash, lost rocket fields and the bonuses. Yields once per
+    /// frame of the original (see the class remarks); the controls of the next pass come from the host.
     /// </summary>
     // [ORIGINAL] 1B03:0009
-    public IEnumerable<StationWait> Run()
+    public IEnumerable<FieldWait> Run()
     {
-        if (!Begin()) yield break;
+        DrawStationValues();
+        if (!AnyRockets()) yield break;
+        foreach (var w in Begin()) yield return w;
         StarField();
-        ShowScreen();
+        foreach (var w in ShowScreen()) yield return w;
         foreach (var w in Selection()) yield return w;
         foreach (var w in Flight()) yield return w;
-        End();
+        foreach (var w in End()) yield return w;
     }
 
     /// <summary>
@@ -36,11 +39,11 @@ public sealed partial class StationPhase
     /// flight loop 08ED, then pause, message box and the messages for total losses (<see cref="FlightEnd"/>).
     /// </summary>
     // [ORIGINAL] 1B03:0705
-    public IEnumerable<StationWait> Flight()
+    public IEnumerable<FieldWait> Flight()
     {
-        FlightBegin();
+        foreach (var w in FlightBegin()) yield return w;
         foreach (var w in FlightLoop()) yield return w;
-        FlightEnd();
+        foreach (var w in FlightEnd()) yield return w;
     }
 
     /// <summary>
@@ -78,20 +81,19 @@ public sealed partial class StationPhase
     /// position 0CCF, attack decision 0B7A; the attacked rocket goes to the hit test 0BE7, every other one leaves a point of
     /// its owner's colour where the pixel under it is 1 and moves on (past 59h it has arrived). After the rockets: ship
     /// lights 12D7(3), pirates 0A62, flash 0C89, list and objects drawn. At the end the sound stops and 21FD:0665.
-    /// Yields after every flip.
+    /// Yields once per frame.
     /// </summary>
     // [ORIGINAL] 1B03:08ED
-    public IEnumerable<StationWait> FlightLoop()
+    public IEnumerable<FieldWait> FlightLoop()
     {
         while (_d.S8(S.Flying) > 0)
         {
-            Emit(StationCall.Flip);
-            yield return StationWait.Flip;
-            Delay(3);
+            foreach (var w in Flip()) yield return w;
+            foreach (var w in Delay(3)) yield return w;
             Emit(StationCall.RestoreObjects, Page);
             Emit(StationCall.RunList);
             ClearList();
-            Emit(StationCall.Pause);
+            foreach (var w in Pause()) yield return w;
             for (_d.Set(S.RocketIndex, (byte)0); _d.S8(S.RocketIndex) <= _d.S8(S.RocketTotal) - 1; Inc(S.RocketIndex))
             {
                 int k = _d.S8(S.RocketIndex);
@@ -119,12 +121,12 @@ public sealed partial class StationPhase
             }
             AnimateLights(3);
             PirateStep();
-            FlashStep();
+            foreach (var w in FlashStep()) yield return w;
             Emit(StationCall.RunList);
             Emit(StationCall.DrawObjects, Page);
         }
         Emit(StationCall.Sound, 0, 0);
-        Emit(StationCall.LastFrame);
+        foreach (var w in LastFrame()) yield return w;
     }
 
     /// <summary>

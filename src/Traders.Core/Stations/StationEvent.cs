@@ -81,10 +81,3 @@ public sealed record StationEvent(StationCall Call, short[] Args)
     public override string ToString() =>
         $"{Call}({string.Join(", ", Args.Select(a => a == DataSegment ? "DS" : a.ToString()))})";
 }
-
-/// <summary>What the stations coroutines yield: a page flip after which the host may change the controls.</summary>
-public enum StationWait
-{
-    /// <summary>21FD:051F was reported; the next pass reads the controls again.</summary>
-    Flip,
-}

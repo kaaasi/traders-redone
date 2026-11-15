@@ -1,3 +1,4 @@
+using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.State;
 using Traders.Core.Stations;
@@ -16,7 +17,7 @@ namespace Traders.Tests.Stations;
 /// </summary>
 public sealed class StationsLockstepTests(ITestOutputHelper output)
 {
-    private static IEnumerable<StationWait> Once(Action a)
+    private static IEnumerable<FieldWait> Once(Action a)
     {
         a();
         yield break;
