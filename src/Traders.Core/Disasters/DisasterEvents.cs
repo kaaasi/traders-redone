@@ -28,8 +28,17 @@ public enum DisasterEventKind
     DrawFrame,
     /// <summary>0A69:00D3(x, y, w, text offset, text segment, colour, shadow, ox, oy) – centred title; the far text pointer is the one in DS:385C.</summary>
     DrawTitle,
-    /// <summary>0A69:0288(x, y, w, lines offset, count, colour, wait) – typed lines from the far pointers at DS:offset.</summary>
+    /// <summary>
+    /// 0A69:0288(x, y, w, lines offset, count, colour, wait) – typed lines from the far pointers at DS:offset; every character
+    /// follows as <see cref="TypeCharacter"/>.
+    /// </summary>
     TypeLines,
+    /// <summary>
+    /// 0A69:01AD, one character (line, index, character) of the last <see cref="TypeLines"/>: list emptied, the character at
+    /// its place (DS:0140, 0A96:0525), 21FD:060D (list, page flip, list), sound 21A7:0054(1, 16h) unless a space; the waits
+    /// (flip, pause check, 21FD:0185(wait)) are the core's.
+    /// </summary>
+    TypeCharacter,
     /// <summary>21FD:060D – execute the list, flip the pages, execute the list again.</summary>
     ListOnBothPages,
     /// <summary>21FD:051F – flip the pages.</summary>
@@ -48,8 +57,12 @@ public enum DisasterEventKind
     FillRect,
     /// <summary>0A96:03FB(x, y, colour) – one pixel, a star (command list, star show).</summary>
     SetPixel,
-    /// <summary>0A96:06A8 – execute the command list on the draw page (star show).</summary>
+    /// <summary>0A96:06A8 – execute the command list on the draw page (star show, wait loop).</summary>
     ExecuteList,
+    /// <summary>23CD:071C(DS:082E) – backgrounds of the moving objects written back (wait loop 21FD:0004).</summary>
+    RestoreObjects,
+    /// <summary>23CD:06E9(DS:082E) – the moving objects drawn (wait loop 21FD:0004).</summary>
+    DrawObjects,
 }
 
 public sealed record DisasterEvent(DisasterEventKind Kind, params short[] Args)

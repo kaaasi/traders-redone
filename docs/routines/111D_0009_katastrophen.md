@@ -71,7 +71,12 @@ und Zeile); ist das Feld kein Hauptquartier: `0609:10D2(x, y, Besitzer, random(2
 
 **`0757(Zeilen, Anzahl)` (Meldefenster):** Bild `[08CE]` laden, Ausblenden `037D(4)`, Liste leeren, Kacheln, Rahmen
 `0609:1256(28h, 4Bh, F0h, 32h)`, `060D`, Palette `DS:00A8`, Einblenden; getippte Zeilen
-`0A69:0288(28h, (32h − 6·Anzahl)/2 + 51h, F0h, Zeilen, Anzahl, 5, 3)`.
+`0A69:0288(28h, (32h − 6·Anzahl)/2 + 51h, F0h, Zeilen, Anzahl, 5, 3)`. Wartebilder von `0288` (über `0243`/`01AD`): je Zeile mit Zeiger ≠ 0 je Zeichen
+(solange `strlen > i`, vorzeichenlos) Liste leeren, Zeichen nach `DS:0140`, `0A96:0525`, `21FD:060D` (ein Seitenwechsel mit seinen
+Wartebildern), Ton `21A7:0054(1, 16h)` außer bei Leerzeichen, `21FD:0245`, `21FD:0185(3)`; keine Schlusswartezeit (−1). Die Texte
+stehen im Textpuffer (`DS:3834` … `385C` sind Einträge 26 … 36 der Texttabelle `DS:37CC`, `192D:18B6`).
+**`21FD:0590`** (in `0519`) wartet zwei Bilder: `0B67:0238` zeigt die Seite aus `DS:0830` erneut (`0196`/`01B5`, ein Rücklauf), dann
+`0B67:028F` (ein Rücklauf); keine Tastenabfrage wie in `051F`; `DS:023A` wird 0 (Ausgabeschicht).
 
 **`07E2(x, an)` (nur Zeichnen):** `si = max(0, 45 − x/3)`, `h = 46 − x/5 − si`; Liste leeren; an: senkrechte Linie
 `0A69:002C(x + 60, si, h, 12)`, sonst Atlas-Spalte `0A96:0030(x + 60, si, 1, h, x + 60, si)`; Liste ausführen. Gehört zur Szene (Teil 2).
@@ -121,9 +126,19 @@ Bildladen mit `ImageTable.RecordLoad`); eingebunden wird er von Spur 0 Teil 3. `
 `RulePage.Tiles` = `0A96:0267`/`0884`) auf beide Seiten, folgt jedem Seitenwechsel und `21FD:0590` (`RulePage.DrawOnShownPage`);
 Zeichenbefehle der Vorführung als `DisasterEvent` (`Blit`, `FillRect`, `SetPixel`, `ExecuteList`). Was nach `0112` gezeichnet wird,
 liest `111D` nicht mehr und steht nicht auf der Regelseite. `CatastropheStep` bekommt Regelseite und Bildpixel (`Func<int, IndexedImage>`)
-als Eingabe. **Offen:** `[APPROX]` die getippten Zeilen `0A69:0288` liefern noch keine Wartebilder.
+als Eingabe. Die getippten Zeilen (`TypeLines`, `0A69:0288`/`0243`/`01AD`) liefern ihre Wartebilder je Zeichen; die Textlängen kommen
+aus dem Textpuffer als expliziter Eingabe (`DisasterTexts`, im Host `ProgramStart.TextBuffer`), jedes Zeichen als Ereignis
+`TypeCharacter` für die Szene. `DisasterHost` ist der Host mit Pause `21FD:0245` und Warteschleife `21FD:0004(3)` (Spur bilanz).
 
 ### Prüfung (Rest)
+
+`tests/Traders.Tests/Disasters/CatastropheFrameDifferentialTests.cs` (`CatastropheFrameHarness`): `111D:0009` als Aufruf 4 der
+Phasenmaschine (`CatastropheGuardStep` mit `CatastropheStep`, Host `DisasterHost`) im Gleichschritt mit dem Original aus einer
+laufenden Partie (Abzug beim Eintritt in `0009`, Wochen 3, 4, 5, vier Computer; Grafik, Ton und Tastatur echt): an jedem Rücklauf
+des Originals wartet der Port sein Bild, Datensegment (außer den Bytes der Ausgabeschichten, dazu `DS:0140` und `DS:023A`),
+`DS:10D2` und Zahl der Ziehungen gleich, bei der Rückkehr erneut. Fälle: keine, Art 0, 1, 2 mit vier Computern und je eine Art mit
+einem Menschen (Steuerung 4, Ins bestätigt die Warteschleife); die Art liest der Test aus dem Original (Eintritt `0264`/`03B7`/`0519`).
+Gegenproben lokal rot: Wartezeit je Zeichen 2 statt 3; `21FD:0590` ohne Wartebilder. Nicht geprüft: Pause (P) mitten in der Routine.
 
 `tests/Traders.Tests/Disasters/StarShowDifferentialTests.cs` (Abzug am Hauptmenü, Zeichnen des Originals echt; Ein-/Ausblenden,
 Paletten, Ton, getippte Zeilen, `07E2`, Wartezeiten, Pause und Warteschleife durch `retf` ersetzt; mitgeschrieben die Aufrufe aus

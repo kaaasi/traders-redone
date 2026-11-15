@@ -14,17 +14,26 @@ namespace Traders.Core.Disasters;
 /// loads 186C:0002 are recorded in the picture table (<see cref="ImageTable.RecordLoad"/>) when they are emitted; all
 /// other events go to <paramref name="host"/> unchanged. <paramref name="page"/> is the core's rule page (its draw page
 /// must be the original's when the step begins, <see cref="RulePage.DrawPageOf"/>); <paramref name="images"/> gives the
-/// pixels of a picture by number (host and tests from Traders.Assets). Bound into the phase machine by lane ernte (part 3).
+/// pixels of a picture by number (host and tests from Traders.Assets), <paramref name="texts"/> the text buffer for the typed
+/// lines. Bound into the phase machine by lane ernte (part 3).
 /// </summary>
 public sealed class CatastropheStep(
-    IDisasterHost host, Func<int, ImageFileLengths> files, RulePage page, Func<int, IndexedImage> images) : IWeekStepHandler
+    IDisasterHost host, Func<int, ImageFileLengths> files, RulePage page, Func<int, IndexedImage> images, DisasterTexts texts)
+    : IWeekStepHandler
 {
     private IEnumerator<FieldWait>? _run;
 
+    /// <summary>Retrace waits of the last run (frames of the original).</summary>
+    public int Retraces { get; private set; }
+
+    /// <summary>Busy polls of the pause key of the last run.</summary>
+    public int Polls { get; private set; }
+
     public StepOutcome Begin(StepContext context)
     {
+        Retraces = Polls = 0;
         _run = Catastrophes.Run(
-            context.State, context.Random, new LoadRecorder(host, context.State, files), page, images).GetEnumerator();
+            context.State, context.Random, new LoadRecorder(host, context.State, files), page, images, texts).GetEnumerator();
         return Next();
     }
 
@@ -36,7 +45,12 @@ public sealed class CatastropheStep(
 
     private StepOutcome Next()
     {
-        if (_run!.MoveNext()) return StepOutcome.Running;
+        if (_run!.MoveNext())
+        {
+            if (_run.Current == FieldWait.Retrace) Retraces++;
+            else Polls++;
+            return StepOutcome.Running;
+        }
         _run.Dispose();
         _run = null;
         return StepOutcome.Finished();

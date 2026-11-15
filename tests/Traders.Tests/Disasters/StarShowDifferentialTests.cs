@@ -114,8 +114,16 @@ public class StarShowDifferentialTests(ITestOutputHelper output)
 
         public Dgroup? State { get; init; }
 
+        /// <summary>Characters typed by the port (0A69:0288 is a stub in the original here, each character flips the pages).</summary>
+        public int Typed { get; private set; }
+
         public void Emit(DisasterEvent e)
         {
+            if (e.Kind == DisasterEventKind.TypeCharacter)
+            {
+                Typed++;
+                return;
+            }
             Calls.Add(e.ToString());
             if (e.Kind != DisasterEventKind.LoadImage) return;
             if (State is not null) ImageTable.RecordLoad(State, e.Args[0], ProgramStartDifferentialTests.Files);
@@ -265,7 +273,7 @@ public class StarShowDifferentialTests(ITestOutputHelper output)
         p.Call(Seg, 0x0009);
 
         var host = new PortHost(page) { State = core };
-        foreach (var _ in Catastrophes.Run(core, random, host, page, Images)) { }
+        foreach (var _ in Catastrophes.Run(core, random, host, page, Images, DisasterTestTexts.From(p))) { }
         core.Set(L.RandomSeed, random.Seed);
         Assert.Equal(h.Calls, host.Calls);
         Assert.Equal(h.AtStarShow is null, host.AtStarShow is null);
@@ -275,7 +283,8 @@ public class StarShowDifferentialTests(ITestOutputHelper output)
             output.WriteLine($"{c}: stars set {h.Reads.Count(r => r.Value == 1)} of {h.Reads.Count}");
         }
         AssertSameState(p, core, random, h, c.ToString());
-        Assert.Equal(RulePage.DrawPageOf(Ds(p)), page.DrawPage);
+        // the stubbed 0A69:0288 of the original does not flip; every character typed by the port does
+        Assert.Equal(RulePage.DrawPageOf(Ds(p)) ^ (host.Typed & 1), page.DrawPage);
     }
 
     /// <summary>Rows 0112 reads: 0–150 on the page drawn first, −3–147 on the other (random(n) is 0…n).</summary>

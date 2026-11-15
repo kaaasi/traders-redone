@@ -71,7 +71,11 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
     {
         public List<string> Calls { get; } = [];
 
-        public void Emit(DisasterEvent e) => Calls.Add(e.ToString());
+        public void Emit(DisasterEvent e)
+        {
+            // the typed characters happen inside 0A69:0288, which the original runs as a stub here
+            if (e.Kind != DisasterEventKind.TypeCharacter) Calls.Add(e.ToString());
+        }
 
         public IEnumerable<FieldWait> PauseCheck(Dgroup d)
         {
@@ -182,7 +186,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         Traders.Core.Rules.Ranking.Apply(core);
         h.Program.Call(Seg, 0x0519);
         var host = new PortHost();
-        foreach (var _ in Catastrophes.FieldsCleared(core, random, host, new RulePage())) { }
+        foreach (var _ in Catastrophes.FieldsCleared(core, random, host, new RulePage(), DisasterTestTexts.From(h.Program))) { }
         core.Set(L.RandomSeed, random.Seed);
         AssertSame(h, host, core, random, c.ToString());
     }

@@ -56,7 +56,8 @@ public static class Catastrophes
     /// </summary>
     // [ORIGINAL] 111D:0009 – rest 001E–010E (ranks, title, star show, kind, wait loop 21FD:0004(3))
     public static IEnumerable<FieldWait> Run(
-        Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page, Func<int, IndexedImage> images)
+        Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page, Func<int, IndexedImage> images,
+        DisasterTexts texts)
     {
         short? kind = Choose(d, random);
         if (kind is not { } k) yield break;
@@ -82,9 +83,9 @@ public static class Catastrophes
         foreach (var w in StarShow(d, random, host, page, atlas)) yield return w;
         var rest = k switch
         {
-            0 => LandRedrawn(d, random, host, page),
-            1 => FieldsChanged(d, random, host, page),
-            2 => FieldsCleared(d, random, host, page),
+            0 => LandRedrawn(d, random, host, page, texts),
+            1 => FieldsChanged(d, random, host, page, texts),
+            2 => FieldsCleared(d, random, host, page, texts),
             _ => [],
         };
         foreach (var w in rest) yield return w;
@@ -159,7 +160,8 @@ public static class Catastrophes
     /// every headquarters field gets quality 3 and every rocket field with quality 3 the quality random(2).
     /// </summary>
     // [ORIGINAL] 111D:0264
-    public static IEnumerable<FieldWait> LandRedrawn(Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page)
+    public static IEnumerable<FieldWait> LandRedrawn(
+        Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page, DisasterTexts texts)
     {
         Emit(host, E.BasePalette, Palette0264);
         foreach (var w in FadeIn(d, host)) yield return w;
@@ -172,7 +174,7 @@ public static class Catastrophes
             foreach (var w in FlipAndDelay(d, host, page)) yield return w;
         }
         Emit(host, E.Sound, 0, 0);
-        foreach (var w in Message(d, host, page, Message0264, 2)) yield return w;
+        foreach (var w in Message(d, host, page, texts, Message0264, 2)) yield return w;
         NewGameLand.Create(d, random);
         ForFields(d, cell =>
         {
@@ -189,7 +191,8 @@ public static class Catastrophes
     /// random(15) + 10 draws of a field (column random(columns − 1), row random(rows − 1), i.e. every column and row); a field that is not a headquarters keeps its owner and gets the kind random(2) (0609:10D2).
     /// </summary>
     // [ORIGINAL] 111D:03B7
-    public static IEnumerable<FieldWait> FieldsChanged(Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page)
+    public static IEnumerable<FieldWait> FieldsChanged(
+        Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page, DisasterTexts texts)
     {
         Emit(host, E.BasePalette, Palette03B7);
         foreach (var w in FadeIn(d, host)) yield return w;
@@ -209,7 +212,7 @@ public static class Catastrophes
                 Emit(host, E.SetColour, si, Int16Math.S(d.U16(Int16Math.U(Palette03B7 + 2 * si)) + di));
             foreach (var w in Delay(host, 10)) yield return w;
         }
-        foreach (var w in Message(d, host, page, Message03B7, 2)) yield return w;
+        foreach (var w in Message(d, host, page, texts, Message03B7, 2)) yield return w;
         short count = Int16Math.S(random.Next(15) + 10);
         for (short si = 0; Int16Math.S(count - 1) >= si; si++)
         {
@@ -228,13 +231,13 @@ public static class Catastrophes
     /// 11 − 3 · rank of its owner (DS:3D42). DS:37AA is left at the owner of the last field read.
     /// </summary>
     // [ORIGINAL] 111D:0519
-    public static IEnumerable<FieldWait> FieldsCleared(Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page)
+    public static IEnumerable<FieldWait> FieldsCleared(
+        Dgroup d, OriginalRandom random, IDisasterHost host, RulePage page, DisasterTexts texts)
     {
         Emit(host, E.BasePalette, Palette03B7);
         foreach (var w in FadeIn(d, host)) yield return w;
         foreach (var w in Delay(host, 100)) yield return w;
-        Emit(host, E.DrawOnShownPage);
-        page.DrawOnShownPage();
+        foreach (var w in DrawOnShownPage(host, page)) yield return w;
         Emit(host, E.SetColour, 0x0C, 0x770);
         for (int n = 0; n < 4; n++)
         {
@@ -262,7 +265,7 @@ public static class Catastrophes
             foreach (var w in FlipAndDelay(d, host, page)) yield return w;
         }
         Emit(host, E.Sound, 0, 0);
-        foreach (var w in Message(d, host, page, Message0519, 6)) yield return w;
+        foreach (var w in Message(d, host, page, texts, Message0519, 6)) yield return w;
         ForFields(d, cell =>
         {
             sbyte owner = d.S8(Int16Math.U(L.FieldOwner + cell));
@@ -278,10 +281,11 @@ public static class Catastrophes
     /// <summary>
     /// 111D:0757(lines, count) – message window: field picture, fade-out, background and frame on both pages, field palette,
     /// fade-in, then <paramref name="count"/> lines typed from the far pointers at DS:<paramref name="lines"/>, vertically
-    /// centred in the frame.
+    /// centred in the frame (<see cref="TypeLines"/>).
     /// </summary>
     // [ORIGINAL] 111D:0757
-    public static IEnumerable<FieldWait> Message(Dgroup d, IDisasterHost host, RulePage page, short lines, short count)
+    public static IEnumerable<FieldWait> Message(
+        Dgroup d, IDisasterHost host, RulePage page, DisasterTexts texts, short lines, short count)
     {
         Emit(host, E.LoadImage, d.S16(FieldPicture));
         foreach (var w in FadeOut(d, host, 4)) yield return w;
@@ -292,9 +296,35 @@ public static class Catastrophes
         Emit(host, E.BasePalette, FieldPalette);
         foreach (var w in FadeIn(d, host)) yield return w;
         short y = Int16Math.S((short)(0x32 - Int16Math.S(count * 6)) / 2 + 0x51);
-        // [APPROX] The typed lines 0A69:0288 wait per character (texts outside the data segment, not modelled here):
-        // their frames are not yielded yet (part 1, frames against the RefEmu).
-        Emit(host, E.TypeLines, 0x28, y, 0xF0, lines, count, 5, 3);
+        foreach (var w in TypeLines(d, host, page, texts, 0x28, y, 0xF0, lines, count, 5, 3)) yield return w;
+    }
+
+    /// <summary>
+    /// 0A69:0288(x, y, w, lines, count, colour, wait), its frames: for every line i = 0 … count − 1 with a non-null far pointer
+    /// at DS:lines + 4i (0A69:0243) every character of the text (0A69:01AD, while strlen &gt; i, unsigned) is drawn alone into
+    /// the emptied list (<see cref="DisasterEventKind.TypeCharacter"/>), then 21FD:060D (list, flip, list), the typing sound
+    /// unless a space, the pause check 21FD:0245 and 21FD:0185(wait). No final wait (−1). The drawing is the scene's; the
+    /// rule page only follows the flips.
+    /// </summary>
+    // [ORIGINAL] 0A69:0288, 0A69:0243, 0A69:01AD
+    public static IEnumerable<FieldWait> TypeLines(Dgroup d, IDisasterHost host, RulePage page, DisasterTexts texts,
+        short x, short y, short w, short lines, short count, short colour, short wait)
+    {
+        Emit(host, E.TypeLines, x, y, w, lines, count, colour, wait);
+        for (short i = 0; i < count; i++)
+        {
+            int at = Int16Math.U(lines + 4 * i);
+            ushort offset = d.U16(at), segment = d.U16(Int16Math.U(at + 2));
+            if (offset == 0 && segment == 0) continue;
+            for (int c = 0; c < texts.Length(d, offset, segment); c++)
+            {
+                Emit(host, E.TypeCharacter, i, (short)c, texts.At(d, offset, segment, c));
+                page.Flip();
+                foreach (var f in Planting.Flip(d)) yield return f;
+                foreach (var f in Planting.Pause(d)) yield return f;
+                foreach (var f in Planting.Retraces(wait, (short)(wait >> 15))) yield return f;
+            }
+        }
     }
 
     /// <summary>
@@ -355,6 +385,19 @@ public static class Catastrophes
     {
         Emit(host, E.Delay, n, 0);
         return Planting.Retraces(n, 0);
+    }
+
+    /// <summary>
+    /// 21FD:0590 – draw on the page shown: 0B67:0238 shows the page of DS:0830 once more (0196/01B5, one retrace), then
+    /// 0B67:028F (one retrace); no key is read, unlike 21FD:051F.
+    /// </summary>
+    // [ORIGINAL] 21FD:0590 – 0B67:0238 (show, retrace), 0B67:028F (retrace)
+    private static IEnumerable<FieldWait> DrawOnShownPage(IDisasterHost host, RulePage page)
+    {
+        Emit(host, E.DrawOnShownPage);
+        page.DrawOnShownPage();
+        yield return FieldWait.Retrace;
+        yield return FieldWait.Retrace;
     }
 
     /// <summary>21FD:051F, then 21FD:0185(1) (one half of a flash in 0264 and 0519).</summary>
