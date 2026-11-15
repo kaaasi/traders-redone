@@ -32,8 +32,8 @@ des Vorversuchs, alle dort genannten Adressen gelten).
 3. **Einmal rechnen, dann vorführen.** Der Kern bucht; Animationen lesen nur. Rendern,
    Pause, Laden verbrauchen nie Zufall und buchen nie doppelt.
 4. **Regelrelevante Pixel gehören in den Kern.** Kollision gegen `V-RAKETE`, Sichtbarkeit
-   gegen `V-BERGE` nutzen den kanonischen Original-Atlas – unabhängig vom späteren
-   Grafikpaket.
+   gegen `V-BERGE` liest der Kern aus seiner Regelseite (`src/Traders.Core/Pixels/`), gefüllt
+   aus den Original-Bildpixeln – unabhängig vom späteren Grafikpaket.
 5. **Persistenter Bildpuffer.** Der VGA-Renderer arbeitet wie das Original auf einem
    bleibenden Framebuffer (Verkäuferbalken/Spuren entstehen so von selbst).
 6. **Erweiterungen erst auf geprüftem Kern.** Jede Erweiterung ist abschaltbar; der

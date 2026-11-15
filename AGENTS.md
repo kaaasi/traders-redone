@@ -76,7 +76,8 @@ Testergebnisse und werden als blockiert dokumentiert; Proxy, Sandbox und Freigab
 - **Szenen und Rendering lesen nur:** sie buchen nichts, ziehen keinen Zufall (`OriginalRandom` nur im Kern) und ändern keinen
   Zustand durch Öffnen, Pause oder Laden. Was das Original je Bild ändert – auch Zufallsverbrauch (F3 = A) –, ist ein Kern-Ereignis
   im Takt der Phasenmaschine: der Host meldet das erreichte Bild mit `PhaseMachine.Advance`, der Kern verarbeitet jedes Bild genau einmal.
-- **Regelrelevante Pixel** (Kollision gegen `V-RAKETE`, Sichtbarkeit gegen `V-BERGE`) nutzen den kanonischen Original-Atlas im Kern.
+- **Regelrelevante Pixel** (Kollision gegen `V-RAKETE`, Sichtbarkeit gegen `V-BERGE`) liest der Kern aus seiner eigenen
+  Regelseite (`src/Traders.Core/Pixels/`), gefüllt aus den Original-Bildpixeln als expliziter Eingabe; keine Projektreferenz (R6P-1).
 
 **Originaltreue:** (1) **Vorlage:** `T.EXE` (Disassemblierung `tools/segmap.py`, Segmentkarte `docs/analyse/segments.md`,
 Datenlayout `docs/analyse/DATENLAYOUT.md`), RefEmu-Lauf, Videobilder (`fetch-reference.sh videos`). (2) **Belegen:** Differenztest gegen RefEmu.
