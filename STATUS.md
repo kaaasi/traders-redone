@@ -297,6 +297,15 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `1777:04E4` | [1777_04E4_initialisierung.md](docs/routines/1777_04E4_initialisierung.md) | `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramMachineDifferentialTests.cs` | ✅ |
+| `17CB:0005` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs`, `IncidentsMultiWeekTests.cs` | ✅ |
+| `17CB:001E` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:02BD` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:039D` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:047E` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:04D7` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:0736` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:0986` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
+| `17CB:09E0` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | – | `IncidentsDifferentialTests.cs` | 🔍 |
 | `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Field/PlantingStep.cs`, `src/Traders.Core/Phases/WeekSteps.cs`, `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `186C:01A9` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:021E` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
@@ -393,10 +402,10 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:03B4` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:03EB` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Week/ReportScene.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:04DA` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
-| `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
+| `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
 | `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs` | ✅ |
 | `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
-| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
+| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
 | `21FD:0665` | [0609_0C73_anbauszene.md](docs/routines/0609_0C73_anbauszene.md) | `src/Traders.Presentation/Field/FieldScene.Output.cs` | `PlantingFrameDifferentialTests.cs` | ✅ |
 | `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `21FD:081D` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
@@ -482,7 +491,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `150F` | 0x1C70 | 41 | 0 | 0 | 0 |
 | `16D6` | 0xA10 | 12 | 0 | 0 | 0 |
 | `1777` | 0x540 | 4 | 4 | 4 | 4 |
-| `17CB` | 0xA10 | 9 | 0 | 0 | 0 |
+| `17CB` | 0xA10 | 9 | 9 | 8 | 8 |
 | `186C` | 0xC10 | 19 | 7 | 2 | 2 |
 | `192D` | 0x1D60 | 74 | 55 | 55 | 55 |
 | `1B03` | 0x1650 | 44 | 0 | 0 | 0 |
@@ -504,7 +513,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **320** | **306** | **306** |
+| **Summe** | **0x28DC0** | **891** | **329** | **314** | **314** |
 
 <!-- abdeckung:ende -->
 

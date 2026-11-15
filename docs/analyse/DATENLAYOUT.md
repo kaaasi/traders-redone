@@ -390,3 +390,17 @@ Befund [0609_0004_anbau.md](../routines/0609_0004_anbau.md). G = belegt durch Di
 | `330C + 1Ah·p` +0/+2/+14h/+16h/+18h | B/W | `Planting.Objects`, `ObjectLayer`, `ObjectX`, `ObjectY`, `ObjectFrame` | Cursorobjekt je Spieler: aktiv, Ebene 0Ah, Position, Bild; **Besitzer Kern** (#103 P3-4), Zeiger +4…+13h und `33E4`… gehören der Objektschicht | G – `032A`, `1F2D`, `1FCC`, `1FE0` |
 | `08CE` | W | `Planting.PictureNumber` | Bildnummer des Anbaubilds (`186C:0002`) | G – `00D6` |
 | `2EB0` / `2F00` | B s | `LoopX` / `LoopY` | nach `1BE5` Spalten bzw. Zeilen (Schleifenende), in `069F` Cursor für `074D` | G – `1BE5`, `069F` |
+
+## Runde 6, Spur `ereignisse` (Wochenereignisse `17CB`)
+
+Befund [17CB_0005_wochenereignisse.md](../routines/17CB_0005_wochenereignisse.md); Namen in `IncidentLayout`
+(`src/Traders.Core/Events/WeekIncidents.cs`). G = belegt durch Differenztest `17CB:0005`.
+
+| DS | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `09AA` / `09B9` | B[5] s | `GainNumberLine` / `LossNumberLine` | je Betragsklasse: Zeile des Betrags im Gewinn- bzw. Verlusttext; vorbelegt | G |
+| `09AF` / `09BE` | B[5] s | `GainText` / `LossText` | je Betragsklasse: erster Textindex (Tabelle `37CC`); vorbelegt | G |
+| `09B4` / `09C3` | B[5] s | `GainLines` / `LossLines` | je Betragsklasse: Zeilenzahl des Textes; vorbelegt | G |
+| `3940` | far ptr | `TakeoverText` | Text 5Dh der Tabelle `37CC`: Feldübernahme (7 Zeilen) | G |
+| `395C + 10h·k` | far ptr | `BlightText` | Text 64h + 4·k: Ernteausfall der Art k (4 Zeilen) | G |
+| `082E` | W | `PageCopyArgument` | Argument der Seitenkopie `0A96:0C3F` im Fenster `0986` | G |
