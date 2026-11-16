@@ -448,3 +448,18 @@ Befund [22A3_02D3_ernte.md](../routines/22A3_02D3_ernte.md). G = belegt durch Di
 | `00C8` | W[4] | `Harvest.ColourOfPlayer` | Farbe des Erntebalkens je Spieler (initialisierte Daten) | G – `07C2` (nur Ausgabe) |
 | `45D0` | W s | `LoopWare` | nach `0340` 4, in `062E` Art des gesammelten Feldes (Index in `3CF4`) | G – `0340`, `062E` |
 | `0140` | B | – | Zeichenpuffer der Schreibmaschine `0A69:01AD` (Ausgabe) | G – `08C1` (ausgenommen) |
+
+## Runde 7, Spur `zusatz` (Zusatzphase `1DEF:000C`)
+
+Befund [1DEF_000C_zusatzphase.md](../routines/1DEF_000C_zusatzphase.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `54A6` / `547C` / `54A2` | Fernzeiger | `ExtraPhase.GroundPointer` / `GoodsPointer` / `ClaimsPointer` | auf die Stapelfelder von `000C`: Bodenkachel W[42], Ware W[42] (−1 = keine), Ziel B[42] (FFh = frei); Zelle = 6·Zeile + Spalte | G – `000C` (Zeiger), alle Routinen (Felder) |
+| `5480` | W s | `ExtraPhase.Collected` | aufgenommene Stücke; die Phase endet bei 25 | G – `000C`, `04A9`, `0651` |
+| `5482` | W[4][4] s | `ExtraPhase.Gains` | Gewinn je Spieler und Ware (Schritt 8), am Ende auf `3CF4` addiert ohne Obergrenze | G – `03CD`, `0651`, `0751` |
+| `0F22` / `0F2A` | W[4] | `ExtraPhase.TileX` / `TileY` | Atlaskoordinaten der vier Bodenkacheln (initialisierte Daten) | G – `0308` (nur Ausgabe) |
+| `3B5C` | Fernzeiger[2] | `ExtraPhase.NoticeLines` | Hinweis: Textzeilen 227/228 der Tabelle `37D0` (0-basiert) | G – `0105`; W |
+| `57F0` / `57F2` | W s | `ProductionIdle` / `ProductionActive` | Auslösung: 2·`57F2` < `57F0` (ergänzt §7) | G – `00DB` |
+| `2F26` | B s | `LimitLow` | Einheiten je Stück 2·`2F26` (ergänzt §7) | G – `0651` |
+| `304E` / `305A` | B[4] | `FieldCursor.CursorX` / `CursorY` | in der Zusatzphase Spalte 0…5 / Zeile 0…6 des Bretts | G – `03CD`, `04A9`, `0651`, `07AD` |
