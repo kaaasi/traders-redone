@@ -108,7 +108,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abhängigkeiten:** Spur 2 für alle Stellen, an denen `141D` gerufen wird: bis zu deren Merge Befund, pixelfreie und KI-freie
   Teile und Szene; ist sonst nichts mehr zu tun, `spur-wartet` mit „wartet auf handelski“. Größte Spur der Runde (≈ 0x1D00 Byte);
   bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** Teil 1 und 2 fertig (PR #186: Befund, Regeln, Countdown, Ablauf Bild für Bild, Handler Aufruf 23, Gleichschritt Woche 0 und 2 mit `141D` ersetzt); Teil 3 (Szene) offen, Gleichschritt mit echter KI nach Merge von `handelski`.
+- **Status:** Teil 1 fertig; Teil 2 bis auf die KI-Anbindung fertig (PR #186: Ablauf Bild für Bild, Handler Aufruf 23, Gleichschritt Woche 0 und 2 mit `141D` ersetzt); offen: Adapter `ITradeAi` → `TradeAi` (Stapelwort von `0397`) mit Gleichschritt echter KI, Teil 3 (Szene).
 
 ## 2 `handelski` – Handels-KI `141D` und P3-Sammlung
 
