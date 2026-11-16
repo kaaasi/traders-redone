@@ -154,7 +154,8 @@ internal sealed class TradeHarness
     }
 
     /// <summary>The port's host and trading computer: records like the stubs of the original.</summary>
-    internal sealed class Recorder(Func<int, sbyte[]>? script) : ITradeHost, ITradeAi
+    internal sealed class Recorder(Func<int, sbyte[]>? script, Func<int, Func<int, byte>, sbyte[]>? stateScript = null)
+        : ITradeHost, ITradeAi
     {
         private int _reads;
 
@@ -167,9 +168,15 @@ internal sealed class TradeHarness
         public void ReadControls(Dgroup d)
         {
             Calls.Add(Format("ReadControls"));
-            if (script is null) return;
-            var a = script(_reads++);
+            if (script is null && stateScript is null) return;
+            var a = stateScript is not null ? stateScript(_reads++, at => d.U8(at)) : script!(_reads++);
             for (int i = 0; i < 4; i++) d.Set(T.Action + i, a[i]);
+        }
+
+        public IEnumerable<Traders.Core.Field.FieldWait> PauseCheck(Dgroup d)
+        {
+            Calls.Add(Format("PauseCheck"));
+            return [];
         }
 
         public void Prepare(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.Prepare"));

@@ -99,7 +99,20 @@ Kein Zufall im Handel selbst (nur in der KI `141D`). Ton `21A7:0054` als Ereigni
 ## C#-Umsetzung
 
 `Traders.Core/Trade/TradeRules.cs` (Regeln, Teil 1), `TradeLayout.cs`, `TradeEvents.cs` (`ITradeHost`, `ITradeAi`);
-`Traders.Core/Rules/Countdown.cs`. Ablauf Bild für Bild (Teil 2) und Szene (Teil 3) folgen.
+`Traders.Core/Rules/Countdown.cs`. Ablauf Bild für Bild (Teil 2): `Trade.cs` (`Run` = `0002`, `Ware` = `0001`, `WareFrames` =
+`0046`, `Opening` = `0086`, `RoleChoice` = `015C`, `Bidding` = `01B7`, `Transition` = `080C`) als `IEnumerable<FieldWait>`,
+`TradeStep.cs` (Handler für Aufruf 23, nicht eingebunden; Bildladen über `ImageTable.RecordLoad`), `TradeHost.cs` (Steuerung
+`0E9E:037A`, Pause `21FD:0245`). Szene (Teil 3) folgt.
+
+**Bilder (Teil 2):** `21FD:051F` und `0665` wie `Planting.Flip`; `21FD:0185(n)` n Bilder; Blenden `0329`/`0353`/`03B4` je acht
+Stufen mit 3/1/2 Bildern plus einem Bild für `03EB` auf Karte 1 (`DS:090E`); `0A96:0C3F` blättert nur auf Karte 2/63h;
+`080C`: `21FD:0590` (zwei Bilder), auf Karte 1 je Zeile (100) ein Bild `0185(1)` und ab Zeile 49 jede siebte eine Palettenstufe
+`03EB` (ein Bild, also acht), zuletzt `051F`; `21FD:04F9` mit Pausenprüfung `0245` vor dem Takt.
+
+**Kernanteile der Zeichenroutinen:** `0635` (über `065C`/`0739` Schleife `37AA` → 4; über `0B1F` `2BE4` = `455A`), `0B1F`
+(`2BE4`), `0E01` (Schleife `37AA` → 4), `109F` in Bild 1 → `134D` (`0634`/`0642`), `2295:0062` (`DS:1126`, gelesen von
+`2295:0001` im Kern). Der Zahlenpuffer von `0E01` (`2295:0001` nach `[02A6]`) und die Seitennummer `082E` von `0C3F` gehören der
+Ausgabe.
 
 ## Prüfung
 
@@ -107,3 +120,11 @@ Kein Zufall im Handel selbst (nur in der KI `141D`). Ton `21A7:0054` als Ereigni
 (`TradeHarness`: Ton, Zeichenroutinen, Treiber, Steuerung und `141D` durch `retf` ersetzt und mit Argumenten bzw. gelesenen
 DS-Werten aufgezeichnet), Vergleich ganzes Datensegment, Zufallszustand, Aufruffolge, Rückgabe; Grenzfälle Positionen −3/0/63h/67h,
 Preis 999, Bargeld unter/gleich Preis, Vorrat 9/10/990, ohne Käufer/Verkäufer, Cursor außerhalb, Teiler 0 in `024A`.
+
+`TradeFlowDifferentialTests` (`TradeFlowHarness`): ganzer Handel `0B9F:0002` auf den Zuständen am Einsprung der Wochen 0–3
+einer echten Partie, je mit 0, 2 und 4 Menschen, Aktionen aller vier Spieler per Skript; Zeichen-, Bild- und Seitenroutinen,
+Ton, Steuerung, Pause und `141D` durch `retf` ersetzt und aufgezeichnet, die Zeichenroutinen mit DS-Schreibzugriffen (`0635`,
+`109F`, `1108`, `0E01`, `0B1F`) laufen mit ersetzten Grundroutinen; Vergleich ganzes Datensegment, Zufallszustand,
+Aufruffolge. Dazu eine Ware mit beiden Bildern auf Karte 1/2/63h. `TradeFrameDifferentialTests` (`TradeFrameHarness`):
+Gleichschritt Bild für Bild in der laufenden Partie (Woche 0 Computer, Woche 2 mit zwei Menschen und Tasten), `141D` beiderseits
+ersetzt; Gegenprobe mit doppelt verarbeitetem Bild.

@@ -33,6 +33,18 @@ public class TradeRealGameDifferentialTests
 
     private static readonly Lazy<List<Captured>> States = new(Capture);
 
+    private static readonly List<byte[]> EntryStates = [];
+
+    /// <summary>The data segment at the entry of 0B9F:0002 in weeks 0–3 of the same game (for the flow tests).</summary>
+    internal static IReadOnlyList<byte[]> Entries
+    {
+        get
+        {
+            _ = States.Value;
+            return EntryStates;
+        }
+    }
+
     private static List<Captured> Capture()
     {
         var p = OriginalProgram.StartGame(TestGameData.DosDir);
@@ -54,6 +66,7 @@ public class TradeRealGameDifferentialTests
         {
             Assert.True(p.RunToRoutine(0x0B9F, 0x0002, 1800), $"0B9F:0002 not reached (week {p.Week})");
             Assert.Equal(w, p.Week);
+            EntryStates.Add(p.DataSegment()[..L.Size]);
             week = w;
             Assert.True(p.RunToRoutine(0x1DEF, 0x000C, 1800), $"end of the trade of week {w} not reached");
             week = -1;

@@ -26,6 +26,69 @@ public enum TradeEventKind
     /// bought).
     /// </summary>
     DrawStockChange,
+
+    /// <summary>186C:0002(picture) – loads the picture of the trade ([08D6] V-AHANDE, [08D8] V-BHANDE).</summary>
+    LoadImage,
+
+    /// <summary>21FD:05DB(font) – text font of the driver.</summary>
+    SetFont,
+
+    /// <summary>2295:0062(c) – fill character of numbers DS:1126 (the core writes it too).</summary>
+    NumberFill,
+
+    /// <summary>0A96:001B – empties the drawing list.</summary>
+    ClearList,
+
+    /// <summary>0A96:06A8 – executes the drawing list.</summary>
+    RunList,
+
+    /// <summary>0A96:0C3F(page DS:082E) – copies the page; flips first on cards 2 and 63h (the core yields those frames).</summary>
+    ShowPage,
+
+    /// <summary>21FD:051F – page flip (frames in the core).</summary>
+    FlipPages,
+
+    /// <summary>21FD:0665 – last frame: flip, restore, list, objects (frames in the core).</summary>
+    LastFrame,
+
+    /// <summary>21FD:0185(low, high) – retraces (frames in the core).</summary>
+    Delay,
+
+    /// <summary>21FD:0329 – fade in, three retraces per stage (frames in the core).</summary>
+    FadeIn,
+
+    /// <summary>21FD:0353 – fade in, one retrace per stage (frames in the core).</summary>
+    FadeInFast,
+
+    /// <summary>21FD:03B4(rgb12) – fade out to the colour, two retraces per stage (frames in the core).</summary>
+    FadeOutFast,
+
+    /// <summary>0B9F:080C – opening transition of a ware (frames in the core).</summary>
+    Transition,
+
+    /// <summary>0C29:0635 – scale and frame of the picture with the base price (0C29:065C or 0739, 0B1F).</summary>
+    DrawBoard,
+
+    /// <summary>0C29:109F(player DS:37AA) – stock of the player (columns in picture A, bars 0C29:134D in picture B).</summary>
+    DrawStock,
+
+    /// <summary>0C29:0B60(player DS:37AA) – need bar of the player.</summary>
+    DrawNeed,
+
+    /// <summary>0C29:0E01 – markers and prices of all players on the scale.</summary>
+    DrawMarkers,
+
+    /// <summary>0C29:0B1F(base price) – base price on the scale (only when DS:455A ≠ DS:2BE4 in the bidding).</summary>
+    DrawBasePrice,
+
+    /// <summary>0C29:0CC1 – countdown bar.</summary>
+    DrawCountdown,
+
+    /// <summary>0C29:0D6A – one step of the countdown bar.</summary>
+    CountdownStep,
+
+    /// <summary>0C29:04BD – colours of the trade in the base palette.</summary>
+    TradePalette,
 }
 
 /// <summary>A request of the trade with its arguments in call order.</summary>
@@ -41,6 +104,9 @@ public interface ITradeHost
 
     /// <summary>0E9E:037A – reads the controls and writes the actions DS:3308 (ControlReader.ReadActions).</summary>
     void ReadControls(Dgroup d);
+
+    /// <summary>21FD:0245 – pause check, frame by frame (<see cref="Field.Planting.Pause"/> in the game).</summary>
+    IEnumerable<Field.FieldWait> PauseCheck(Dgroup d);
 }
 
 /// <summary>
