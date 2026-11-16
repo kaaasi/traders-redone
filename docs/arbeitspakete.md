@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md)).
 
-## Aktuelle Runde: 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (Plan Leitstelle 15.11.2026, F1 = B, Go Nutzer 15.11.2026)
+## Aktuelle Runde: 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (Plan Leitstelle 15.11.2026, F1 = B, Go Nutzer 15.11.2026; alle Spuren gemergt 16.11.2026, Gesamtreview offen)
 
 **Ziel:** Die Wochenschritte 4, 9, 11 und 16 laufen im Port statt im RefEmu: Katastrophen `111D:0009` mit Sternvorführung
 (`V-BERGE`, Aufruf 4, ab Woche 3 bei eingeschaltetem Schalter `DS:2F30`; der Wächter ist seit R5 portiert), Wochenereignisse
@@ -85,7 +85,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Vorratsgrenze ausgelassen, ein Bild doppelt verarbeitet → rot); Mehrrundenprobe ≥ 5 Wochen, in der nachweislich (Assert) mindestens ein Lauf von `111D:0112` mit einer Katastrophenart im Port
   verglichen wird (R6P-2: im R5-Tastenmuster Katastrophe in Woche 4; Woche bzw. Tastenmuster im Test festlegen); `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1, 2 und 3 (sonst `spur-wartet`, „wartet auf 1/2/3“).
-- **Status:** Alle Teile fertig (PR #152, Claude): Teil 1 Kern `22A3:02D3` mit Differenztests, Teil 2 Szene je Bild pixelgenau; Teil 3 Einbindung der Aufrufe 4, 9, 11, 16 (`Phases/WeekScreens.cs`), Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe (Woche 4) Bild für Bild, Host bis zur Ernte mit Halt an Aufruf 18; #135, #164, #170 mitgenommen (Fortsetzung 1, 16.11.2026). Fixlauf R6E-1/R6E-2 (#175, #176): schneller Test `WeekScreens.Incidents` mit Betrag `2295:0001` in Woche 2, Kommentare „4, 9, 11“ (16.11.2026).
+- **Status:** Alle Teile fertig (PR #152, Claude): Teil 1 Kern `22A3:02D3` mit Differenztests, Teil 2 Szene je Bild pixelgenau; Teil 3 Einbindung der Aufrufe 4, 9, 11, 16 (`Phases/WeekScreens.cs`), Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe (Woche 4) Bild für Bild, Host bis zur Ernte mit Halt an Aufruf 18; #135, #164, #170 mitgenommen (Fortsetzung 1, 16.11.2026). Fixlauf R6E-1/R6E-2 (#175, #176): schneller Test `WeekScreens.Incidents` mit Betrag `2295:0001` in Woche 2, Kommentare „4, 9, 11“ (16.11.2026). **Gemergt 16.11.2026** (Review `reviews/2026-11-16-r6-ernte.md` „Nein“ → Fixlauf R6E-1/-2, Delta-Prüfung Leitstelle).
 
 ## 1 `katastrophen` – Katastrophen und Sternvorführung `111D:0009`
 
@@ -109,7 +109,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Szene pixelgenau; Gegenprobe im Review (Katastrophenart vertauscht, eine Ziehung der Vorführung ausgelassen, falsches Feld
   getroffen → rot); `abdeckung.py --check` grün, `192D:1177` gezählt.
 - **Abhängigkeiten:** keine (Spur 0 bindet ein).
-- **Status:** Alle Teile fertig, #153 Ready for review: Teil 1a (Regelseite, #149) gemergt; Teil 1 Kern mit Sternvorführung auf der Regelseite, getippten Zeilen und Bildfolge im Gleichschritt mit dem RefEmu in laufenden Partien (Wochen 3–5, Computer und Mensch, keine/Art 0/1/2); Teil 2 Szene `DisasterScene` pixelgenau je Bild (VRAM, DAC, CRTC, Befehlsliste); Teil 3 fertig (Claude, Fortsetzung 2, 15.11.2026). Mitgenommen: #155, #156.
+- **Status:** Alle Teile fertig, #153 Ready for review: Teil 1a (Regelseite, #149) gemergt; Teil 1 Kern mit Sternvorführung auf der Regelseite, getippten Zeilen und Bildfolge im Gleichschritt mit dem RefEmu in laufenden Partien (Wochen 3–5, Computer und Mensch, keine/Art 0/1/2); Teil 2 Szene `DisasterScene` pixelgenau je Bild (VRAM, DAC, CRTC, Befehlsliste); Teil 3 fertig (Claude, Fortsetzung 2, 15.11.2026). Mitgenommen: #155, #156. **Gemergt 15.11.2026** (Review `reviews/2026-11-15-r6-katastrophen.md` „Ja“, Fixlauf nur Merge von `main`); offen P3 #165, #166.
 
 ## 2 `ereignisse` – Wochenereignisse `17CB:0005` und Leseregel
 
@@ -128,7 +128,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   pixelgenau; Gegenprobe im Review (Ereignisgruppen vertauscht, Betrag mit Vorzeichenfehler, eine Ziehung ausgelassen → rot; je
   neue Architekturregel eine Verletzung → rot).
 - **Abhängigkeiten:** keine; Teil 1 zuerst.
-- **Status:** PR #146 (Claude), alle Teile fertig, Review offen. Teil 1 ✅ (Leseregel #139, Rückrichtung #76 P3-1 mit Gegenproben), Teil 2 ✅ (Kern `17CB:0005`, 22 Differenzszenarien, Mehrrundenprobe), Teil 3 ✅ (Szene `IncidentScene` pixelgenau in 7 Szenarien; Schreibmaschine `0A69:0288` mit Takt und Betrag `2295:0001` im Kern).
+- **Status:** PR #146 (Claude), alle Teile fertig, Review offen. Teil 1 ✅ (Leseregel #139, Rückrichtung #76 P3-1 mit Gegenproben), Teil 2 ✅ (Kern `17CB:0005`, 22 Differenzszenarien, Mehrrundenprobe), Teil 3 ✅ (Szene `IncidentScene` pixelgenau in 7 Szenarien; Schreibmaschine `0A69:0288` mit Takt und Betrag `2295:0001` im Kern). **Gemergt 15.11.2026** (Review `reviews/2026-11-15-r6-ereignisse.md` „Ja“); offen P3 #162–#164 (#164 mit #152 erledigt).
 
 ## 3 `stationen` – Stationswahl, Raketenflug, Piraten, Stationsertrag `1B03:0009` (F1 = B)
 
@@ -151,7 +151,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Merge zuerst die pixelfreien Routinen, nie Dateien aus `Pixels/**` außer `Pixels/Stations*` übernehmen; ist sonst nichts mehr
   zu tun, `spur-wartet` mit „wartet auf Regelseite“.
   Größte Spur der Runde (0x1650 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** Teile 1–3 fertig (PR #151): Befund `1B03_0009_stationen.md` (44 Routinen), Kern aller Routinen; `1178`, `08ED`, `0BE7` über die Regelseite (`Pixels/StationsPage.cs`), ganze Phase `0009` im Bildgleichschritt mit dem RefEmu (16 Zufallszustände, Standardpartie Woche 0–2); Szene `Presentation/Stations/StationScene.cs` je Rücklauf pixelgenau (VRAM, DAC, Start, Befehlsliste; 12 Zustände mit Menschen, Woche 0), Handler `StationsStep` für Aufruf 11 (nicht eingebunden), tickt je Bild des Originals (Fixlauf R6S-1).
+- **Status:** Teile 1–3 fertig (PR #151): Befund `1B03_0009_stationen.md` (44 Routinen), Kern aller Routinen; `1178`, `08ED`, `0BE7` über die Regelseite (`Pixels/StationsPage.cs`), ganze Phase `0009` im Bildgleichschritt mit dem RefEmu (16 Zufallszustände, Standardpartie Woche 0–2); Szene `Presentation/Stations/StationScene.cs` je Rücklauf pixelgenau (VRAM, DAC, Start, Befehlsliste; 12 Zustände mit Menschen, Woche 0), Handler `StationsStep` für Aufruf 11 (nicht eingebunden), tickt je Bild des Originals (Fixlauf R6S-1). **Gemergt 16.11.2026** (Review „Nein“ R6S-1 P1 → Fixlauf → Nachprüfung `reviews/2026-11-16-r6-stationen-nachpruefung.md` „Ja“).
 
 ## Fixlauf `fix/anbau-figuren` – #147 (P2) aus dem Windows-Handtest R5, mit #113
 
