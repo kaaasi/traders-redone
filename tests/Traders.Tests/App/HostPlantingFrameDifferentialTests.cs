@@ -113,7 +113,9 @@ public class HostPlantingFrameDifferentialTests
             // the report's and the incidents' scenes are compared at their presenting routines (WeekReportSceneHarness,
             // EventsSceneHarness), not at every retrace: their drawing between two retraces may fall into a different frame than
             // in the original (hidden page only)
+            // there the shown page (from the display start) and the DAC are compared at every retrace (#157)
             if (step is not (WeekSteps.ReportCall or WeekSteps.IncidentsCall)) ComparePicture(p, host, where);
+            else CompareShown(p, host, where);
             if (!atRetrace) break;
             retraces++;
             frames[step] = frames.GetValueOrDefault(step) + 1;
@@ -182,6 +184,33 @@ public class HostPlantingFrameDifferentialTests
     }
 
     /// <summary>VRAM planes, DAC and CRTC start of the host against the original's (first difference named).</summary>
+    /// <summary>
+    /// The picture on the screen: display start, the shown page (16000 bytes per plane from the display start) and the DAC;
+    /// the hidden page is left out.
+    /// </summary>
+    private static void CompareShown(OriginalProgram o, ProgramHost host, string where)
+    {
+        var vga = o.Machine.Vga;
+        Assert.True(vga.StartAddress == host.Driver.DisplayStart,
+            $"{where}: display start original {vga.StartAddress:X4}, host {host.Driver.DisplayStart:X4}");
+        int start = vga.StartAddress;
+        for (int pl = 0; pl < 4; pl++)
+        {
+            var a = vga.Planes[pl].AsSpan(start, ShownBytes);
+            var b = host.Driver.Vram.Planes[pl].AsSpan(start, ShownBytes);
+            int k = a.CommonPrefixLength(b);
+            if (k < ShownBytes)
+                Assert.Fail($"{where}: shown page, plane {pl} offset {k:X4} (x {k % 80 * 4 + pl}, y {k / 80}) original {a[k]:X2} host {b[k]:X2}");
+        }
+        var dac = host.Layers.Dac.Registers;
+        int d = vga.Dac.AsSpan().CommonPrefixLength(dac);
+        if (d < dac.Length)
+            Assert.Fail($"{where}: DAC colour {d / 3} component {d % 3} original {vga.Dac[d]:X2} host {dac[d]:X2}");
+    }
+
+    /// <summary>Bytes of a page per plane (320 × 200 / 4).</summary>
+    private const int ShownBytes = 16000;
+
     private static void ComparePicture(OriginalProgram o, ProgramHost host, string where)
     {
         var vga = o.Machine.Vga;
