@@ -471,3 +471,38 @@ w = `45D0`. G = belegt durch Differenztest (`TradeAiDifferentialTests`), W = Bed
 | `2BB8` / `2BC0` | B s / B | `Sellers` / `BuyerFlag` | Divisor in `0A1D` (0 bzw. −1 → Divisionsfehler) / 1 schaltet die Höchstgebotsregel ein | G – `0A1D`; W |
 | `3780` / `2F16` / `2F18` | W s | `Countdown` / `CountdownA` / `CountdownB` | Handels-Countdown (`21FD:04E5`/`04F9`); `0397` handelt nur bei `2F18` = `2F16` | G – `0397`, `0BFD`; W |
 | `4106` / `44F2` | W s | `Buyer` / `Seller` | Käufer (10 = Laden, dann kein `0CCA`) / Verkäufer eines Abschlusses | G – `0CCA`, `0E67`; W – `0C29:03B2` |
+
+## Runde 7, Spur `handel` (Handel `0B9F:0002`, `0C29`)
+
+Befund [0B9F_0002_handel.md](../routines/0B9F_0002_handel.md), Countdown [21FD_04E5_countdown.md](../routines/21FD_04E5_countdown.md).
+G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert. Namen in `Traders.Core.Trade.TradeLayout`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `45D0` | W s | `Ware` | gehandelte Ware (1. Argument von `0C29:0001`) | G – `005C`, `0321`, `03B2` |
+| `2BC5` | B | `Variant` | Bild: 0 `V-AHANDE`, 1 `V-BHANDE` (2. Argument) | G – `051A`, `1108`; W |
+| `43B2` | B[4] u | `Role` | 0 Käufer, 1 Verkäufer, 6 ausgeschieden (ergänzt §14/§15) | G – `00FE`, `0321`, `0FB9` |
+| `43A2` | W[4] s | `Position` | Position auf der Leiter −3 … 67h; Preis = Position / 2 + `455A` | G – `0321`, `03B2` |
+| `43B6` | DW[4] s | `Need` | Bedarf der Ware (Anzeige) | G – `009E`; W |
+| `455A` | W s | `BasePrice` | Grundpreis (Position 0) | G – `005C`, `02BE`, `04FC` |
+| `2BC2` | W s | `StartPrice` | Grundpreis zu Beginn = `4898[Ware]` (ergänzt `AuctionStartPrice`) | G – `005C`, `02BE` |
+| `2BBE` | W s | `BestPrice` | höchster gezahlter Preis, 0 = keiner (bestätigt `AuctionBestBid`) | G – `03B2` |
+| `2BBC` | W s | `Sellers` | Zahl der Verkäufer; Bietphase endet bei 0 | G – `01E1`, `051A`, `0FB9` |
+| `439C` / `450C` | B | `NoHumanBuyer` / `NoHumanSeller` | 1 = kein Mensch kauft / verkauft | G – `01E1`; W |
+| `2BB8` / `2BC0` | B | `TopBuyers` / `NoHumanTopBuyer` | Käufer auf `3D1C` / 1 = keiner davon Mensch | G – `02BE` |
+| `2BC4` / `023E` | B | `Moved` / `MovedBefore` | jemand bewegte sich in diesem / im vorigen Bild | G – `0321`, `0549` |
+| `2BC6` | B[4] | `Leaving` | 1 = Verkäufer geht (Feuer oder Vorrat < 10) | G – `0321`, `0FB9` |
+| `3D1C` / `43EE` | W s | `HighestBuyer` / `LowestSeller` | höchste Käufer- / tiefste Verkäuferposition | G – `0586`, `060A` |
+| `3D18` | B s | `Settling` | Bilder ohne Handel nach Änderung der Extreme (3) | G – `0586`, `0323` |
+| `3CAE` / `3D46` | B s | `DealTimer` / `DealDelay` | Bilder bis zum nächsten Handel / Abstand (Eh, sinkt bis 5) | G – `0323` |
+| `2BCC` | B | `DealParties` | Spielerbits `08C6` der Parteien des letzten Handels | G – `0323`, `0FB9` |
+| `44F2` / `4106` | W s | `DealSeller` / `DealBuyer` | Parteien des Handels, Käufer 10 = keiner | G – `060A`, `03B2` |
+| `2BB4` / `2BB6` | W s | `SellerCursor` / `BuyerCursor` | Reihum-Zeiger der Suche | G – `060A` |
+| `023C` | W s | `PushCounter` | Stöße über 63h bis zum Anheben des Grundpreises (Startwert 2) | G – `04FC` |
+| `2BBA` | W s | `CountdownMark` | Countdown beim Start / beim letzten Handel | G – `024A`, `0695`; W |
+| `2BD0` / `2BDA` | W[4] | `PanelX` / `PanelY` | Lage der Spielertafeln | G – `051A` |
+| `2BCE` / `2BCA` / `2BD8` / `2BE2` | W | `ScaleX` / `CountdownX` / `LabelX` / `LabelY` | Lage von Leiter, Countdown, Beschriftung | G – `051A` |
+| `2BE4` | W | `ShownBasePrice` | zuletzt gezeichneter Grundpreis | W – `0B1F` |
+| `0634` / `0642` | W[4] / B | `ShownStock` / `BarColour` | gezeigter Vorrat / 10 in Bild 1; Balkenfarbe DAh auf Karte 1 | G – `134D` |
+| `0258` / `025A` | B[2] | `BuyerPanelY` / `SellerPanelY` | y der Tafeln je Bild (initialisiert 32h, 0 / 0, 63h) | G – `051A` |
+| `3780` / `2F16` / `2F18` | W | `Countdown.*` | Countdown, Takt, Takt-Rest | G – `21FD:04E5`, `04F9` |
