@@ -16,8 +16,8 @@ Zusatzphase `1DEF:000C` (Aufruf 24). Der Host hält seit R6 an Aufruf 18 (Robote
 Aufruf 19 (Endprüfung `20B3`, R10). **Wunsch des Nutzers (16.11.2026):** Im Remake den Roboterkampf vorerst überspringen, bis er
 portiert ist – bewusste, abschaltbare Abweichung vom Original, damit spätere Phasen vorher spielbar und testbar sind. Für den Plan
 R7: Schalter im Host (nicht im Kern-Ablauf der Originaltreue), Aufruf 18 als gekennzeichneter Leerlauf; Differenztests und
-Mehrrundenprobe laufen weiter mit Aufruf 18 aus dem Orakel (sonst weichen Zustand und Zufall ab). Offen für die Planung: Umgang
-mit Aufruf 19 (Endprüfung vorziehen oder ebenfalls vorläufig „Partie läuft weiter“). Pflichten aus R6:
+Mehrrundenprobe laufen weiter mit Aufruf 18 aus dem Orakel (sonst weichen Zustand und Zufall ab). **Entscheidung des Nutzers
+(16.11.2026):** Endprüfung `20B3:0005` (Aufruf 19) originalgetreu in R7 vorziehen, damit der Host danach bis zum Handel spielt. Pflichten aus R6:
 Testlücke Host-Seitenzustand (#180), `HostGame.Update` (#158), Wochenbericht im Host (#157). Offen: P3 #49, #75, #76, #162,
 #163, #165, #166.
 
