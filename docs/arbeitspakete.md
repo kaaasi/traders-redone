@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md)).
 
-## Aktuelle Runde: 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (Plan Leitstelle 16.11.2026, Go nötig)
+## Aktuelle Runde: 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (Plan Leitstelle 16.11.2026, F1 = B, F3 = A, Go Nutzer 16.11.2026)
 
 **Ziel:** Nach der Ernte läuft die Woche im Port weiter bis Fat Mike: Endprüfung `20B3:0005` (Aufruf 19, Entscheidung des
 Nutzers 16.11.2026), Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29` (Aufruf 23), Handels-KI `141D` und Zusatzphase
@@ -61,23 +61,21 @@ Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und
 - **Teile:** (1) **Endprüfung und Host:** Befund `20B3_0005_endpruefung.md`: Rangfolge `0825:06CB`, Vergleich jedes Vermögens mit
   dem Ziel, Taste mit Scancode 44h, Rückgabe `AL` 0/1, `DS:37AA`. Handler für Aufruf 19 im Kern (`src/Traders.Core/Ending/**`):
   ohne Ende Rückgabe 0 im Gleichschritt; bei Ende bleibt der Rest (Endbilder `008E`/`0525`/`0863`, `0825:07C4`, `0825:000A(0)`,
-  `27C6:00D2`, Wochenzähler `20B3:0071`) nach F1 ausstehend (Muster `CatastropheGuardStep(rest)`; Maschine hält mit Hinweis
-  „Partie zu Ende“) bzw. bei F1 = A in Teil 2 portiert. Differenztests über `Call(20B3:0005)` und Abbruchweg B
-  (`Exit_B_in_lockstep_with_the_original`, jetzt mit Port bis zur Entscheidung). **Roboter-Schalter** (F3): Host-seitiger
+  `27C6:00D2`, Wochenzähler `20B3:0071`) nach F1 = B ausstehend (Muster `CatastropheGuardStep(rest)`; Maschine hält mit Hinweis
+  „Partie zu Ende“). Differenztests über `Call(20B3:0005)` und Abbruchweg B
+  (`Exit_B_in_lockstep_with_the_original`, jetzt mit Port bis zur Entscheidung). **Roboter-Schalter** (F3 = A: Vorgabe an, `--original-roboter` hält an 18): Host-seitiger
   Leerlauf für Aufruf 18 in `src/Traders.App/Deviations/` (ändert kein Byte von `Dgroup`, zieht keinen Zufall, zeichnet nicht,
   endet im ersten Bild), gekennzeichnet `[APPROX] bewusste Abweichung, Nutzer 16.11.2026`; `WeekSteps` nimmt dafür einen optionalen
   Handler für Aufruf 18 (Vorgabe `null` = ausstehend). Host-Pflichten #157 (Wochenbericht im Host), #158 (Test `HostGame.Update`),
   #180 (Host-Seitenzustand bei Aufruf 4 mit Katastrophe und 9 mit Ereignis Bild für Bild gegen das Original).
-  (2) nur bei F1 = A: Endbilder `20B3` Kern und Szene (`V-ABEND`, `V-ENDE`, Zufall `069A` 35/12, Pixelleser über die Regelseite),
-  pixelgenau. (3) **Einbindung** (nach Merge von 1 und 3): Handler für Aufruf 23 (Spur 1) und 24 (Spur 3) in `WeekSteps`;
+  (2) entfällt (F1 = B). (3) **Einbindung** (nach Merge von 1 und 3): Handler für Aufruf 23 (Spur 1) und 24 (Spur 3) in `WeekSteps`;
   **Mehrrundenprobe** über ≥ 4 Wochen mit einem Menschen und drei Computerspielern, in der die Aufrufe 3, 4, 6, 8, 9, 11, 16, 19,
   21, 23, 24 im Port laufen (Aufruf 18 und 26–30 aus dem Orakel; Vergleich Datensegment und `DS:10D2` je Aufrufstelle, Bild für
   Bild für 23 und 24) und nachweislich (Assert) mindestens einmal die Zusatzphase eintritt (Woche bzw. Tastenmuster im Test
   festlegen); Host spielt mit Schalter die Woche bis Aufruf 24 und hält mit Hinweis an Aufruf 26, ohne Schalter weiter an 18.
 - **Dateigrenzen:** `src/Traders.Core/Ending/**`, `tests/Traders.Tests/Ending/**`, `docs/routines/20B3_*`,
   `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**`,
-  `src/Traders.RefEmu/OriginalProgram.cs` (additiv); bei F1 = A zusätzlich `src/Traders.Presentation/Ending/**`,
-  `tests/Traders.Tests/Presentation/Ending*`.
+  `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
 - **Abnahme:** alle drei Läufe grün; Endprüfung im Gleichschritt (beide Rückgaben, Taste 44h, Vermögen = Ziel und Ziel − 1, 16-Bit-
   Grenzen); Kern ohne Schalter hält an 18 (Test), Leerlauf ändert nachweislich nichts (Datensegment und `DS:10D2` vor/nach gleich);
   Gegenprobe im Review (Vergleich `>` statt `>=`, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
@@ -104,7 +102,7 @@ Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und
   Verkäufer vertauscht, Buchung mit Vorzeichenfehler, Gebot an der Grenze falsch geprüft, ein Bild doppelt verarbeitet → rot).
 - **Abhängigkeiten:** Spur 2 für alle Stellen, an denen `141D` gerufen wird: bis zu deren Merge Befund, pixelfreie und KI-freie
   Teile und Szene; ist sonst nichts mehr zu tun, `spur-wartet` mit „wartet auf handelski“. Größte Spur der Runde (≈ 0x1D00 Byte);
-  bis zu zwei Fortsetzungen über das Limit von 3 (F2).
+  bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
 - **Status:** –
 
 ## 2 `handelski` – Handels-KI `141D` und P3-Sammlung
@@ -148,8 +146,7 @@ Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und
 `OriginalProgram.cs`, legt sie sie additiv in eine eigene `partial`-Datei. `tools/check-architecture.py`: 2 (nur #163).
 `src/Traders.Core/`: `Ending/` 0, `Trade/` 1, `Ai/Trade*` 2, `Extra/` 3; übrige `Ai/`-, `Field/`-, `Week/`-, `Rules/`-,
 `Disasters/`-, `Events/`-, `Stations/`-, `Harvest/`-Klassen werden gerufen, nicht geändert (Ausnahme: Tests für #162/#165/#166 wie
-oben); braucht eine Spur dort eine Änderung, meldet sie `spur-wartet` mit Begründung. `src/Traders.Presentation/`: `Ending/` 0
-(nur F1 = A), `Trade/` 1, `Extra/` 3. `DgroupLayout.cs`, `GameState.cs` (`partial`), `GameStateMapper.cs`: nur additiv (alle), bei
+oben); braucht eine Spur dort eine Änderung, meldet sie `spur-wartet` mit Begründung. `src/Traders.Presentation/`: `Trade/` 1, `Extra/` 3. `DgroupLayout.cs`, `GameState.cs` (`partial`), `GameStateMapper.cs`: nur additiv (alle), bei
 Konflikt rebased die später gemergte Spur. `docs/analyse/DATENLAYOUT.md`: je Spur eigener Unterabschnitt. `STATUS.md`: nur der
 erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/prozess/**`, `docs/vorlagen/**`: Leitstelle.
 `TradersRedone.slnx`, `Directory.Build.props`, `global.json`: niemand.
@@ -159,16 +156,14 @@ erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/
 2 → 3 → 1 → 0 (Spur 0 Teil 1 darf vorher als eigener Merge kommen, wenn er fertig ist und 0 dafür einen eigenen PR
 `paket/ende-host` öffnet; Teil 3 erst nach Merge von 1 und 3). Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss.
 
-## Offene Fragen an den Nutzer (R7)
+## Entscheidungen des Nutzers (R7)
 
-- **G1:** Go für Runde 7 mit diesem Plan (vier Spuren, alle Opus)?
-- **F1 – Endbilder bei Partieende:** **A** Abend- und Endbilder `20B3` (`008E`/`0525`/`0863` mit 25 Unterroutinen, ≈ 0xD00 Byte,
-  Pixelleser und Zufall) jetzt in Spur 0 mit portieren; **B (Vorschlag)** nur die Prüfung bis zur Entscheidung jetzt, bei
-  Partieende hält die Maschine mit Hinweis „Partie zu Ende“, die Bilder kommen mit Ende/Abend und Ton (Fahrplan R9). B hält die
-  ohnehin größte Runde bisher kleiner; das Ende tritt erst beim Erreichen des Zielvermögens bzw. F10 ein.
-- **F2:** Darf Spur 1 `handel` bis zu zwei Fortsetzungen über das Limit von 3 hinaus bekommen (wie R6 Spur 3)?
-- **F3 – Roboter-Schalter:** **A (Vorschlag)** im Host standardmäßig an (Aufruf 18 übersprungen, Hinweis in der Statuszeile),
-  Startoption `--original-roboter` hält wie bisher an Aufruf 18; **B** standardmäßig aus, Startoption schaltet das Überspringen ein.
+- **G1 = Go** (Nutzer 16.11.2026): Runde 7 mit diesem Plan (vier Spuren, alle Opus).
+- **F1 = B** (Nutzer 16.11.2026): Endprüfung `20B3:0005` nur bis zur Entscheidung; bei Partieende hält die Maschine mit Hinweis
+  „Partie zu Ende“, Abend- und Endbilder kommen mit Ende/Abend und Ton (Fahrplan R9). Teil 2 der Spur 0 entfällt.
+- **F2 = ja** (Nutzer 16.11.2026): Spur 1 `handel` darf bis zu zwei Fortsetzungen über das Limit von 3 hinaus bekommen.
+- **F3 = A** (Nutzer 16.11.2026): Roboter-Schalter im Host standardmäßig an (Aufruf 18 übersprungen, Hinweis in der
+  Statuszeile); Startoption `--original-roboter` hält wie bisher an Aufruf 18.
 
 Offen und nicht in R7: P3 #49, #75, #76 (P3-2/-3).
 
