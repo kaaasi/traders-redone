@@ -173,18 +173,31 @@ public sealed class ReportScene
 
     /// <summary>
     /// 21FD:03EB(A, B) inside 0825:09C9: the wipe draws on to the column pair si = B·16 + B0h, the palette step runs after its
-    /// two lines are added and before they are executed.
+    /// two lines are added and before they are executed. 03EB waits for the retrace before it writes the DAC, so the DAC and
+    /// the execution of the last pair fall into the next frame (<see cref="Present"/>, issue #157: the host was one palette
+    /// step and one column pair ahead at the retraces of the wipe).
     /// </summary>
     private void WipeStep(WeekEvent e)
     {
         if (_wipe is not { } next) throw new InvalidOperationException("Palette step outside the opening wipe.");
         int si = e.B * 16 + 0xB0;
-        WipeColumns(next, si, () =>
-        {
-            Announce(e);
-            _gfx.Blend((ushort)e.A, (ushort)e.B); // [ORIGINAL] 21FD:03EB: working palette, retrace, DAC
-        });
+        WipeColumns(next, si - 1, null);
+        AddPair(si);
+        Announce(e);
         _wipe = si + 1;
+        Present(PaletteStepFrames(e, si));
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 21FD:03EB (VGA path 2295:00C5: retrace wait, then the DAC) and the rest of the column pair
+    /// <paramref name="si"/> after it, as frame steps: the frame ends at the retrace; the next one writes the DAC and executes
+    /// the pair.
+    /// </summary>
+    private IEnumerable<int> PaletteStepFrames(WeekEvent e, int si)
+    {
+        yield return 0;
+        _gfx.Blend((ushort)e.A, (ushort)e.B); // working palette, retrace (counted), DAC
+        FlushPair(si);
     }
 
     /// <summary>
@@ -197,18 +210,30 @@ public sealed class ReportScene
     {
         for (int si = from; si <= to; si++)
         {
-            int x2, y2;
-            if (si <= 0xC7) (x2, y2) = (0, si);
-            else (x2, y2) = (si - 0xC7, 0xC7);
-            _gfx.AddLine(W(si), 0, W(x2), W(y2), 0);
-            _gfx.AddLine(W(0x13F - si), 0xC7, W(0x13F - x2), W(0xC7 - y2), 0);
+            AddPair(si);
             if (si == to) beforeLast?.Invoke();
-            bool vga = (_gfx.Ds[GraphicsLayers.CardMode] | _gfx.Ds[GraphicsLayers.CardMode + 1] << 8) == 1;
-            if (vga || si % 3 == 0)
-            {
-                _gfx.ExecuteList();
-                _gfx.ClearList();
-            }
+            FlushPair(si);
+        }
+    }
+
+    /// <summary>The two lines of column pair <paramref name="si"/> of the wipe into the list.</summary>
+    private void AddPair(int si)
+    {
+        int x2, y2;
+        if (si <= 0xC7) (x2, y2) = (0, si);
+        else (x2, y2) = (si - 0xC7, 0xC7);
+        _gfx.AddLine(W(si), 0, W(x2), W(y2), 0);
+        _gfx.AddLine(W(0x13F - si), 0xC7, W(0x13F - x2), W(0xC7 - y2), 0);
+    }
+
+    /// <summary>After column pair <paramref name="si"/>: on VGA every pair, otherwise every third pair the list is executed and emptied.</summary>
+    private void FlushPair(int si)
+    {
+        bool vga = (_gfx.Ds[GraphicsLayers.CardMode] | _gfx.Ds[GraphicsLayers.CardMode + 1] << 8) == 1;
+        if (vga || si % 3 == 0)
+        {
+            _gfx.ExecuteList();
+            _gfx.ClearList();
         }
     }
 

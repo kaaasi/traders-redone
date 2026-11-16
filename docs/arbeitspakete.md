@@ -86,7 +86,10 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
   Gegenprobe im Review (Vergleich `>` statt `>=`, Vergleich vorzeichenbehaftet, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Teil 1 sofort; Teil 3 nach Merge von 1 und 3 (sonst `spur-wartet`, „wartet auf 1/3“).
-- **Status:** –
+- **Status:** Teil 1 fertig (Claude, Branch `paket/ende-host`, Base `006509f`; Review-PR siehe #188): Endprüfung bis zur
+  Entscheidung (`src/Traders.Core/Ending/EndCheck.cs`, Befund `20B3_0005_endpruefung.md`), Roboter-Schalter (`RobotPhaseSkip`,
+  `--original-roboter`), Host hält mit Schalter an Aufruf 23, #157, #158, #180. Neuer Befund aus #180: Stationsphase im Host
+  nach einem Wochenereignis abweichend (PR). Teil 3 wartet auf 1/3 (`paket/ende`, #185).
 
 ## 1 `handel` – Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29`
 
@@ -143,7 +146,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler), Szene pixelgenau;
   Gegenprobe im Review (Auslösung invertiert, eine Ziehung ausgelassen, Vorrat ohne Obergrenze → rot).
 - **Abhängigkeiten:** keine.
-- **Status:** –
+- **Status:** fertig, Review offen (Claude, PR #187): Teil 1 (Befund, Kern `Extra/`, Differenztests Wochen 0–3), Teil 2 (Szene `Extra/`, bildgenau im Gleichschritt mit Befehlsliste), Teil 3 (#162, Grenzwerttests `Events/IncidentsBoundaryTests.cs`).
 
 ## Zuständigkeit gemeinsamer Dateien in R7
 

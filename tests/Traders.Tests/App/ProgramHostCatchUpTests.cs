@@ -40,6 +40,47 @@ public class ProgramHostCatchUpTests
         Assert.Equal([17, 18], counts.Order());
     }
 
+    /// <summary>
+    /// Issue #158: the frame <see cref="HostGame.Update"/> hands to <see cref="ProgramHost.Frame"/> is the last completed one
+    /// of the host clock – none before the first frame is complete, frame n − 1 after n frames, also over a jump of
+    /// <see cref="HostGame.MaxStep"/>. Counter-check: <c>Frames</c> instead of <c>Frames - 1</c> (one frame ahead) → red.
+    /// </summary>
+    [Fact]
+    public void The_target_frame_is_the_last_frame_the_host_clock_completed()
+    {
+        var clock = new Traders.App.Timing.HostClock();
+        Assert.Equal(-1, HostGame.TargetFrame(clock));
+        clock.Advance(TimeSpan.FromSeconds(0.5 / 70));
+        Assert.Equal(0, clock.Frames);
+        Assert.Equal(-1, HostGame.TargetFrame(clock));
+        // 1/70 s takes 1193182 / 70 clocks; the period is FramePeriod = 17045 clocks, so one frame completes after 1/70 s
+        clock.Advance(TimeSpan.FromSeconds(0.5 / 70));
+        Assert.Equal(1, clock.Frames);
+        Assert.Equal(0, HostGame.TargetFrame(clock));
+        clock.Advance(HostGame.MaxStep);
+        Assert.Equal(clock.Frames - 1, HostGame.TargetFrame(clock));
+        Assert.InRange(HostGame.TargetFrame(clock), 17, 18);
+    }
+
+    /// <summary>
+    /// Issue #158 with the program: after updates of the host clock (single frames, a frame split over two updates and a
+    /// stall of <see cref="HostGame.MaxStep"/>) the program has processed exactly the completed frames 0 … n − 1, as
+    /// <see cref="HostGame.Update"/> drives it – one frame more or less than the clock is red.
+    /// </summary>
+    [GameDataFact]
+    public void The_program_processes_exactly_the_frames_of_the_host_clock()
+    {
+        var host = new ProgramHost(TestGameData.DosDir, new RecordedClock([Clock]));
+        var clock = new Traders.App.Timing.HostClock();
+        foreach (var step in new[] { 1.0 / 70, 1.0 / 70, 0.3 / 70, 0.9 / 70, 0.25, 1.0 / 60, 1.0 / 60, 0.25 })
+        {
+            var (_, frames) = clock.Advance(TimeSpan.FromSeconds(step));
+            if (frames > 0) host.Frame(HostGame.TargetFrame(clock), []);
+            Assert.Equal(clock.Frames - 1, host.LastFrame);
+        }
+        Assert.True(host.LastFrame > 30);
+    }
+
     [GameDataTheory]
     [MemberData(nameof(Jumps))]
     public void A_jump_over_several_frames_matches_processing_them_one_by_one(long[] reached)

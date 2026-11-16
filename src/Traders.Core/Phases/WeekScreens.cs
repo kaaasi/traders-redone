@@ -96,10 +96,12 @@ public sealed class WeekScreens
 
     /// <summary>
     /// The week steps with these handlers bound: everything up to call 16 runs in the core, call 18 (robot phase) is the
-    /// first pending call.
+    /// first pending call unless <paramref name="robots"/> stands in for it; then the week runs on through the end check
+    /// (call 19) to the trade (call 23).
     /// </summary>
-    public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null) =>
-        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest);
+    public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
+        IWeekStepHandler? robots = null) =>
+        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots);
 
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =
