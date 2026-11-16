@@ -22,7 +22,7 @@ internal enum TradeAiEntry : ushort
 /// Calls one entry of 141D with a prepared data segment in the original (T.EXE loaded with <see cref="OriginalProgram.LoadOnly"/>)
 /// and runs <see cref="TradeAi"/> on the same bytes; compares the whole data segment (including the random state DS:10D2) and
 /// the number and arguments of the random() draws. For 141D:0397 the uninitialised local [bp-2] is set to the given stale word
-/// after the frame is built (141D:039C). Records which of <see cref="Branches"/> the original passed. Expected values come only
+/// after the frame is built (141D:039C) and its final word read at 141D:0460 and compared with the port's return value. Records which of <see cref="Branches"/> the original passed. Expected values come only
 /// from the original run.
 /// </summary>
 internal sealed class TradeAiHarness
@@ -31,6 +31,9 @@ internal sealed class TradeAiHarness
 
     /// <summary>141D:039C: first instruction after `dec sp; dec sp` of 0397, the local [bp-2] is in place.</summary>
     public const ushort ChooseSideFrameReady = 0x039C;
+
+    /// <summary>141D:0460: `mov sp,bp` at the end of 0397; [bp-2] holds the final word of the local (R7H-1, #192).</summary>
+    public const ushort ChooseSideEnd = 0x0460;
 
     /// <summary>Instructions in 141D that mark one path each (offset, meaning).</summary>
     public static readonly (ushort Offset, string Path)[] Branches =
@@ -63,6 +66,7 @@ internal sealed class TradeAiHarness
     private readonly byte[] _initial;
     private readonly List<short> _draws = [];
     private short _stale;
+    private short? _finalLocal;
 
     public TradeAiHarness()
     {
@@ -71,6 +75,7 @@ internal sealed class TradeAiHarness
         m.AddCodeHook(_program.Segment(0x21FD), 0x01BA, _ => _draws.Add((short)_program.StackArgument(0)));
         ushort seg = _program.Segment(Seg);
         m.AddCodeHook(seg, ChooseSideFrameReady, _ => m.Mem.Write16(m.Cpu.Ss, (ushort)(m.Cpu.Bp - 2), unchecked((ushort)_stale)));
+        m.AddCodeHook(seg, ChooseSideEnd, _ => _finalLocal = (short)m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Bp - 2)));
         foreach (var (offset, _) in Branches) m.AddCodeHook(seg, offset, _ => Hits.Add(offset));
     }
 
@@ -98,6 +103,7 @@ internal sealed class TradeAiHarness
         int events = m.Log.Events.Count;
         _draws.Clear();
         _stale = stale;
+        _finalLocal = null;
         try
         {
             if (entry == TradeAiEntry.Bought) _program.Call(Seg, (ushort)entry, unchecked((ushort)argument));
@@ -109,7 +115,7 @@ internal sealed class TradeAiHarness
         }
         var original = _program.DataSegment();
 
-        var ported = Run(entry, input, argument, stale, out long calls);
+        var ported = Run(entry, input, argument, stale, out long calls, out short? returned);
 
         Assert.True(m.Log.Events.Count == events, $"{label}: original used a host service");
         Assert.Equal(_initial[DgroupLayout.Size..], original[DgroupLayout.Size..]);
@@ -120,6 +126,9 @@ internal sealed class TradeAiHarness
             .ToList();
         Assert.True(diff.Count == 0, $"{label} ({entry}): " + string.Join(", ", diff));
         Assert.True(_draws.Count == calls, $"{label}: original drew {_draws.Count} times, port {calls}");
+        // R7H-1 (#192): the word 0397 leaves in its local [bp-2] (read at 141D:0460) is what ChooseSide returns.
+        if (entry == TradeAiEntry.ChooseSide) Assert.True(_finalLocal is not null, $"{label}: original did not pass 141D:0460");
+        Assert.True(_finalLocal == returned, $"{label} ({entry}): final local original {_finalLocal:X4}, port returned {returned:X4}");
         short expected = entry == TradeAiEntry.ChooseSide ? (short)3 : (short)400;
         Assert.All(_draws, n => Assert.Equal(expected, n));
         Runs[entry] = Runs.GetValueOrDefault(entry) + 1;
@@ -129,15 +138,20 @@ internal sealed class TradeAiHarness
     }
 
     /// <summary>Runs the port of <paramref name="entry"/> on a copy of <paramref name="input"/>; DS:10D2 carries the random state.</summary>
-    public static Dgroup Run(TradeAiEntry entry, Dgroup input, short argument, short stale, out long draws)
+    public static Dgroup Run(TradeAiEntry entry, Dgroup input, short argument, short stale, out long draws) =>
+        Run(entry, input, argument, stale, out draws, out _);
+
+    /// <summary>As above; <paramref name="returned"/> is the value of <see cref="TradeAi.ChooseSide"/> (null for the other entries).</summary>
+    public static Dgroup Run(TradeAiEntry entry, Dgroup input, short argument, short stale, out long draws, out short? returned)
     {
+        returned = null;
         var d = new Dgroup((byte[])input.Bytes.Clone());
         var random = new OriginalRandom(new RecordedClock([]), d.U32(DgroupLayout.RandomSeed));
         switch (entry)
         {
             case TradeAiEntry.Budgets: TradeAi.Budgets(d); break;
             case TradeAiEntry.Demand: TradeAi.Demand(d); break;
-            case TradeAiEntry.ChooseSide: TradeAi.ChooseSide(d, random, stale); break;
+            case TradeAiEntry.ChooseSide: returned = TradeAi.ChooseSide(d, random, stale); break;
             case TradeAiEntry.PlanBids: TradeAi.PlanBids(d); break;
             case TradeAiEntry.Act: TradeAi.Act(d, random); break;
             case TradeAiEntry.Bought: TradeAi.Bought(d, argument); break;
