@@ -47,22 +47,26 @@ Disassembly, Differenztests; `zusammenarbeit.md` §5 „Modellwahl“). **Base:*
 Routinen mit `[ORIGINAL]`-Marker): `0B9F`: `0002`, `005C`, `009E`, `00FE`, `01E1`, `024A`, `02BE`, `0321`, `04FC`, `0549`, `0586`,
 `060A`, `0695`, `080C` (`06A0`/`078A` Warenpreise portiert) · `0C29`: `0001`, `0046`, `0086`, `015C`, `01B7`, `0323`, `03B2`, `04BD`,
 `051A`, `0635`, `065C`, `0739`, `09BB`, `0B1F`, `0B60`, `0BD9`, `0C8A`, `0CC1`, `0D6A`, `0E01`, `0F68`, `0FB9`, `1050`, `109F`,
-`1108`, `1163`, `127E`, `134D`, `146B` (Bilder `V-AHANDE`/`V-BHANDE`) · `21FD:04E5`, `21FD:04F9` (gerufen aus `0C29`, später auch
-aus `08CF`) · `141D`: `0008`, `0029`, `008C`, `021A`, `0397`, `0464`, `04A5`, `05A3`, `0806`, `09F3`, `0A1D`, `0BFD`, `0CCA`, `0E09`,
+`1108`, `1163`, `127E`, `134D`, `146B` (Bilder `V-AHANDE`/`V-BHANDE`) · `21FD:04E5`, `21FD:04F9` (Countdown `DS:3780`/`2F16`/`2F18`, gerufen aus `0C29`, in R8 auch aus
+`08CF`: neutral ablegen, z. B. `src/Traders.Core/Rules/Countdown*`, R7P-4) · `141D`: `0008`, `0029`, `008C`, `021A`, `0397`, `0464`, `04A5`, `05A3`, `0806`, `09F3`, `0A1D`, `0BFD`, `0CCA`, `0E09`,
 `0E67`, `0ED7`, `0F01` (Zufall `0397` 3/3, `0BFD` 400; Einsprünge von außen `0008`, `0397` aus `0B9F`, `021A`, `0464`, `09F3`,
 `0CCA`, `0E67` aus `0C29`) · `1DEF`: `000C`, `00DB`, `0105`, `0173`, `01AF`, `020E`, `0227`, `0308`, `03CD`, `04A9`, `0651`,
 `06F8`, `0751`, `07AD` (Zufall `00DB` 20, `0173` 6, `01AF` 41/3, `03CD` 5/6) · `20B3:0005` bis zur Entscheidung (`0825:06CB`,
 Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und gerufen u. a.: `0B9F:06A0`/`078A`, `0E9E:037A`,
 `2295:0001`/`0062`, `0A69:000B`/`002C`/`0288`, `0A96`-Schichten, `0B67`, `21FD:0004`/`0185`/`0245`/`051F`/`05DB`/`026C`,
-`0609`-Feldroutinen (`11E7`, `13C5`, `1912`, `1ED9`, `1F2D`, `1FCC`, `1FE0`, `215E`, `21BA`), `0825:06CB`/`07C4`/`000A`.
+`0609`-Feldroutinen (`11E7`, `13C5`, `1912`, `1ED9`, `1F2D`, `1FCC`, `1FE0`, `215E`, `21BA`), `0825:06CB`/`07C4`/`000A`, `23CD:06D4` (Sprung auf den portierten Blit `23CD:3A9A`, nur ohne Marker; aus `0C29:0E01`).
+Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 
 ## 0 `ende` – Endprüfung `20B3:0005`, Roboter-Schalter im Host, Einbindung, Host-Pflichten
 
 - **Teile:** (1) **Endprüfung und Host:** Befund `20B3_0005_endpruefung.md`: Rangfolge `0825:06CB`, Vergleich jedes Vermögens mit
   dem Ziel, Taste mit Scancode 44h, Rückgabe `AL` 0/1, `DS:37AA`. Handler für Aufruf 19 im Kern (`src/Traders.Core/Ending/**`):
   ohne Ende Rückgabe 0 im Gleichschritt; bei Ende bleibt der Rest (Endbilder `008E`/`0525`/`0863`, `0825:07C4`, `0825:000A(0)`,
-  `27C6:00D2`, Wochenzähler `20B3:0071`) nach F1 = B ausstehend (Muster `CatastropheGuardStep(rest)`; Maschine hält mit Hinweis
-  „Partie zu Ende“). Differenztests über `Call(20B3:0005)` und Abbruchweg B
+  `27C6:00D2`, `inc word [DS:4B9A]` bei `20B3:0071`) nach F1 = B ausstehend (Muster `CatastropheGuardStep(rest)`; Maschine hält
+  mit Hinweis „Partie zu Ende“). **Vorbedingung (R7P-2):** Die Entscheidung hängt an `DS:2F06`, das erst `0825:06CB` in `0005`
+  frisch schreibt – ein `IsPending`, das `2F06` direkt liest, entscheidet falsch. Entweder rechnet `IsPending` `06CB` auf einer
+  Kopie von `Dgroup`, oder der Teilhandler ruft `06CB` in `Begin` und übergibt erst danach an den Rest; der Rest aus dem Orakel
+  ruft `0005` vollständig (`06CB` ist bei gleichem Zustand idempotent, im Befund belegen). Differenztests über `Call(20B3:0005)` und Abbruchweg B
   (`Exit_B_in_lockstep_with_the_original`, jetzt mit Port bis zur Entscheidung). **Roboter-Schalter** (F3 = A: Vorgabe an, `--original-roboter` hält an 18): Host-seitiger
   Leerlauf für Aufruf 18 in `src/Traders.App/Deviations/` (ändert kein Byte von `Dgroup`, zieht keinen Zufall, zeichnet nicht,
   endet im ersten Bild), gekennzeichnet `[APPROX] bewusste Abweichung, Nutzer 16.11.2026`; `WeekSteps` nimmt dafür einen optionalen
@@ -76,9 +80,10 @@ Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und
 - **Dateigrenzen:** `src/Traders.Core/Ending/**`, `tests/Traders.Tests/Ending/**`, `docs/routines/20B3_*`,
   `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**`,
   `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
-- **Abnahme:** alle drei Läufe grün; Endprüfung im Gleichschritt (beide Rückgaben, Taste 44h, Vermögen = Ziel und Ziel − 1, 16-Bit-
-  Grenzen); Kern ohne Schalter hält an 18 (Test), Leerlauf ändert nachweislich nichts (Datensegment und `DS:10D2` vor/nach gleich);
-  Gegenprobe im Review (Vergleich `>` statt `>=`, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
+- **Abnahme:** alle drei Läufe grün; Endprüfung im Gleichschritt (beide Rückgaben, Taste 44h; Vergleich **32 Bit vorzeichenlos**, Hochwort
+  zuerst, R7P-1: Ziel und Ziel − 1 mit Übertrag ins Hochwort (Lowword 0000/FFFF), negatives Vermögen eines Spielers → Ende,
+  erster Spieler ≥ Ziel bestimmt `DS:37AA`); Kern ohne Schalter hält an 18 (Test), Leerlauf ändert nachweislich nichts (Datensegment und `DS:10D2` vor/nach gleich);
+  Gegenprobe im Review (Vergleich `>` statt `>=`, Vergleich vorzeichenbehaftet, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Teil 1 sofort; Teil 3 nach Merge von 1 und 3 (sonst `spur-wartet`, „wartet auf 1/3“).
 - **Status:** –
@@ -143,7 +148,8 @@ Vergleich Vermögen `DS:2F06` mit Ziel `DS:08F4`, Taste 44h). Schon portiert und
 ## Zuständigkeit gemeinsamer Dateien in R7
 
 `src/Traders.Core/Phases/**`, `src/Traders.App/**`, `OriginalProgram.cs` (additiv): 0; braucht eine andere Spur eine Hilfe in
-`OriginalProgram.cs`, legt sie sie additiv in eine eigene `partial`-Datei. `tools/check-architecture.py`: 2 (nur #163).
+`OriginalProgram.cs`, legt sie sie additiv in eine eigene `partial`-Datei; fehlt das Schlüsselwort `partial` (`OriginalProgram`,
+`GameState`), setzt es die erste Spur, die es braucht, als einzige Änderung an der Datei (R6P-3, R7P-3). `tools/check-architecture.py`: 2 (nur #163).
 `src/Traders.Core/`: `Ending/` 0, `Trade/` 1, `Ai/Trade*` 2, `Extra/` 3; übrige `Ai/`-, `Field/`-, `Week/`-, `Rules/`-,
 `Disasters/`-, `Events/`-, `Stations/`-, `Harvest/`-Klassen werden gerufen, nicht geändert (Ausnahme: Tests für #162/#165/#166 wie
 oben); braucht eine Spur dort eine Änderung, meldet sie `spur-wartet` mit Begründung. `src/Traders.Presentation/`: `Trade/` 1, `Extra/` 3. `DgroupLayout.cs`, `GameState.cs` (`partial`), `GameStateMapper.cs`: nur additiv (alle), bei
@@ -158,6 +164,7 @@ erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/
 
 ## Entscheidungen des Nutzers (R7)
 
+- **Plan-Review** `reviews/2026-11-16-r7-plan.md` „Ja“; P2 R7P-1–3 und P3 (hier R7P-4) eingearbeitet (Leitstelle 16.11.2026).
 - **G1 = Go** (Nutzer 16.11.2026): Runde 7 mit diesem Plan (vier Spuren, alle Opus).
 - **F1 = B** (Nutzer 16.11.2026): Endprüfung `20B3:0005` nur bis zur Entscheidung; bei Partieende hält die Maschine mit Hinweis
   „Partie zu Ende“, Abend- und Endbilder kommen mit Ende/Abend und Ton (Fahrplan R9). Teil 2 der Spur 0 entfällt.
