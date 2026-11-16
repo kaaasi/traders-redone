@@ -85,7 +85,22 @@ Rückrufe aus `0C29` nach `0B9F`: `0046` → `005C`, `009E`, `01E1`, `078A`; `00
 
 KI `141D` (Spur `handelski`, Vertrag `ITradeAi`): `0008` (einmal), `021A` (je Spieler in `0086`), `0397` (je Computer und Bild in
 `00FE`), `0464` (vor der Bietphase), `09F3` (je Computer und Bild in `01B7`), `0E67` (nach dem Verkauf, `37AA` = Verkäufer),
-`0CCA(Preis)` (nach dem Kauf, `37AA` = Käufer). Keine liefert einen Wert, der verwendet wird.
+`0CCA(Preis)` (nach dem Kauf, `37AA` = Käufer). Keine liefert einen Wert, der verwendet wird. Im Spiel: `TradeComputer`
+(Adapter auf `Traders.Core.Ai.TradeAi`).
+
+### Stapelwort unter der lokalen Variable von `141D:0397` (Fortsetzung 2)
+
+`0397` liest in einem Zweig seine nicht gesetzte lokale Variable (Befund `141D_0008_handelski.md`); sie liegt bei SP−8 von
+`00FE`. Im RefEmu über die Wochen 0–3 der Vorgabepartie an `141D:039C` gemessen, wer das Wort zuletzt schrieb (19 200 Aufrufe):
+`0E9E:037A` (dessen `[bp-2]` endet als Aktionswort von Spieler 3: FFFFh bei Computer, sonst 0, 1, 2, 3, Ah oder FFFFh), das
+Endwort des vorigen `0397`, und `0C29:0F68` (`push si` nach einem Rollenwechsel; die Rücksprungadresse von `21A7:0054` davor
+wird immer überschrieben). SI ändert zwischen `main` und `00FE` niemand (`1777:01F8`, `0B9F:0002`, `0C29:0001`…`015C` benutzen
+SI nicht): es ist der Argumentzähler von `main` `1777:000C` (`mov si,1`, `inc si` je Argument), ohne Argumente 1 – gemessen
+SI = 1 in allen vier Wochen. Der Port führt das Wort in `TradeRules.ChooseRoles` in dieser Reihenfolge mit
+(`MainArgumentCount` = 1). **Nicht nachgebildet (`[APPROX]`):** ein Interrupt zwischen `037A` und `039C` kann das Wort mit
+Flags, CS oder dem gesicherten AX überschreiben (8 der 19 200 Aufrufe, Werte 0001, 0002, 0046, 241D, FF02; keiner im Zweig, der
+das Wort verwendet) – das hängt vom Zeitpunkt des Interrupts ab. Der Gleichschritt-Test verfolgt das Wort im Original und bricht
+mit „not comparable“ ab, falls `0397` ein solches Wort verwendet.
 
 ## Zustand
 
@@ -102,7 +117,34 @@ Kein Zufall im Handel selbst (nur in der KI `141D`). Ton `21A7:0054` als Ereigni
 `Traders.Core/Rules/Countdown.cs`. Ablauf Bild für Bild (Teil 2): `Trade.cs` (`Run` = `0002`, `Ware` = `0001`, `WareFrames` =
 `0046`, `Opening` = `0086`, `RoleChoice` = `015C`, `Bidding` = `01B7`, `Transition` = `080C`) als `IEnumerable<FieldWait>`,
 `TradeStep.cs` (Handler für Aufruf 23, nicht eingebunden; Bildladen über `ImageTable.RecordLoad`), `TradeHost.cs` (Steuerung
-`0E9E:037A`, Pause `21FD:0245`). Szene (Teil 3) folgt.
+`0E9E:037A`, Pause `21FD:0245`), `TradeComputer.cs` (KI `141D`). Szene: `Traders.Presentation/Trade/TradeScene.cs`.
+
+## Szene (Teil 3)
+
+`TradeScene` spielt die `TradeEvent`s in der Reihenfolge des Kerns; sie liest den Kern nur, und zwar im Augenblick der
+Anforderung (jede Anforderung sofort anwenden). Gemeinsames (Bild `186C:0002`, Seiten, `0329`, `0185`, `0665`, `051F`,
+`0C3F`) über eine `FieldScene` auf denselben Schichten; eigene Bildfolgen: `0353`, `03B4`, Übergang `080C`.
+
+| Routine | Zeichenteil |
+|---|---|
+| `080C` | `21FD:0590`; 100-mal Liste leeren, schwarze Zeile i und C7h − i (`0A69:000B`), ab Zeile 31h jede siebte eine Stufe `03EB(3, n)`, auf Karte 1 `0185(1)`, Liste ausführen; `04DA(3)`, `051F` |
+| `04BD` | `21FD:026C`; Ware 2: Farben 1–5 aus `W[0248]`, Ware 3: Farben 1–3 aus `W[0252]` (`02C9`) |
+| `0635` | Liste leeren, `065C` (Bild 0) oder `0739` (Bild 1), `0B1F`, Liste ausführen |
+| `065C` | je Spieler Teil p an (`2BD0`, `2BDA`), Käufer Teil 8 (y 0), sonst Teil 6 (y 96h); Leiter Teil 4 an `2BCE`, Beschriftung Teil 9 und `1050` an (`2BD8`, `2BE2`), Teil 5 an (`2BCA`, 96h); Ränder `0C8A` bei `2BCE` − 4 (nur `2BCE` > 0) und + 40h |
+| `0BD9(Teil, x, y)` | Teil 4: schwarz 40h × C8h, Atlas (0, 96h) 40h × 8 nach y 5, Kachel (40h, C8h) 40h × 1 über 40h × 5, (0, A0h) 40h × 28h nach y A0h; sonst Atlas (`W[0262]`, `W[0276]`), 40h breit, `W[028A]` hoch (je + 2·Teil) |
+| `0C8A(x)` | vier Spalten C8h hoch in den Farben `B[029E + 4·Bild + i]` (`0A69:002C`) |
+| `1050(x, y)` | Warenzeichen mit ODER (`0A96:020E`) aus (`W[02AA + 2w]`, `B[02B2 + w]`), 30h × `B[02B6 + w]`, nach (x + `B[02BA + w]`, y + `B[02BE + w]`), Versatz mit Vorzeichen |
+| `0739` | je Spieler Käufer- oder Verkäuferspalte aus `V-BHANDE` (Kopf/Fuß, Spielerzeichen mit ODER, schwarzes Feld mit Spielerbild), Leiter schwarz mit Kopf (F0h, 0) und Fuß (F0h, 0Dh) nach y A1h, `1050`, Ränder |
+| `09BB` | Bargeld (5 Stellen, Farbe `B[0240 + 4·Bild + p]`) und Vorrat (3 Stellen, `B[025C + Bild]`) über `0A96:057A`; Bild 0 bei (x + 0Dh / 29h, y + 90h), Bild 1 Käufer (x + 17h, y + 4Ch) / (x + 1Ah, y + 44h), sonst y + 15h / 4Ah |
+| `0B1F` | Grundpreis 3 Stellen, Farbe `B[025E + Bild]`, bei (`2BCE` + 27h, `B[0260 + Bild]`) |
+| `0B60` | Bild 0, Bedarf > 0: schwarze Linie 8 breit bei (x + 18h, y + 89h − Bedarf / 10) |
+| `0CC1`, `0D6A` | Countdown: Bild 0 zwei Säulen zu höchstens 1Eh Zeilen aus dem Atlas (130h, 50h − n), ein Schritt stellt eine Zeile aus (4Ah, C1h − n) wieder her; Bild 1 Balken (`2BCA` + 4, 4) Farbe 0Dh, ein Schritt eine schwarze Spalte |
+| `0E01` | **direkt mit dem Treiber**, nicht über die Liste: Marke 10h × 28h (`23CD:06D4`) aus (10h·p [+ 40h Verkäufer] [+ 80h Partei des gezeigten Handels], C8h) bzw. (100h, C8h) nach (`2BCE` + 10h·p, 74h − Position [+ 2 Käufer]); auf der Leiter (0 ≤ Position < 64h, Rolle ≠ 6) der Preis (`2295:0001`, 3 Stellen nach `[02A6]`) in der Spielerfarbe (`23CD:05C3`, `05DD`) bei y 74h − Position + 23h |
+| `0F68` | schwarzes Feld 10h × 28h an der Marke |
+| `109F` | Bild 0: je Vorratszehner Liste leeren, `1163(i, 1)`, ausführen; dann `0B60` ebenso. Bild 1: `134D` |
+| `1108(Richtung)` | Bild 0: Zeile Vorrat / 10 − 1 dazu (Kauf) bzw. die darüber weg (Verkauf), `0B60`; Bild 1: `134D` |
+| `1163`, `127E` | Haufenzeile nach der Form des Spielers (Tabellen `02C2`, `0326`, `04B6`, `04DE`; Sprungtabelle `1276`): zwei Linien (Farben `B[0566 + p]`, `B[0240 + p]`) bzw. beim Wegnehmen die Zeile aus dem Atlas (40h·p + x1, 88h − Zeile) |
+| `134D`, `146B` | Bild 1: Linien von (x + 20h, y + 13h) nach (x + `B[056A + k]` + 4, y + `B[05CF + k]`) für den zuletzt gezeigten Vorrat (`0634`, Farbe `B[0640 + p]`, nach dem Schreiben von `0642`), Bedarf / 10 (`B[063C + p]`, nur Waren 0–2) und Vorrat / 10 (Farbe 3) |
 
 **Bilder (Teil 2):** `21FD:051F` und `0665` wie `Planting.Flip`; `21FD:0185(n)` n Bilder; Blenden `0329`/`0353`/`03B4` je acht
 Stufen mit 3/1/2 Bildern plus einem Bild für `03EB` auf Karte 1 (`DS:090E`); `0A96:0C3F` blättert nur auf Karte 2/63h;
@@ -128,3 +170,10 @@ Ton, Steuerung, Pause und `141D` durch `retf` ersetzt und aufgezeichnet, die Zei
 Aufruffolge. Dazu eine Ware mit beiden Bildern auf Karte 1/2/63h. `TradeFrameDifferentialTests` (`TradeFrameHarness`):
 Gleichschritt Bild für Bild in der laufenden Partie (Woche 0 Computer, Woche 2 mit zwei Menschen und Tasten), `141D` beiderseits
 ersetzt; Gegenprobe mit doppelt verarbeitetem Bild.
+
+Seit Fortsetzung 2 läuft der Gleichschritt mit der echten KI `141D` gegen `TradeComputer` (Woche 0 vier Computer; Woche 2
+Spieler 0 und 3 Mensch mit Tasten; dazu Woche 2 mit ersetzter KI) und vergleicht je Bild auch das Bild der `TradeScene`
+(vier Ebenen, DAC, Bildstart) sowie die Befehlslisten des Ablaufs (`0A96:06A8` aus `0C29:0046`…`01B7`, Zähler `15BE` und
+Einträge ab `15C0`). Belegt im Test: `0397` verwendet das Stapelwort aus allen drei Quellen (`0397`, `0F68` = 1, `037A`).
+Gegenproben: Stapelwort immer −1, SI = 0, Marken / Countdown-Schritt / Zahlen eines Spielers nicht gezeichnet → rot.
+`TradeAiHarness`/`TradeAiGame` prüfen den Rückgabewert von `ChooseSide` gegen `[bp-2]` bei `141D:0460` (R7H-1, #192).

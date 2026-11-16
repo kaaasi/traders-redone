@@ -521,3 +521,10 @@ G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert. Namen in
 | `0634` / `0642` | W[4] / B | `ShownStock` / `BarColour` | gezeigter Vorrat / 10 in Bild 1; Balkenfarbe DAh auf Karte 1 | G – `134D` |
 | `0258` / `025A` | B[2] | `BuyerPanelY` / `SellerPanelY` | y der Tafeln je Bild (initialisiert 32h, 0 / 0, 63h) | G – `051A` |
 | `3780` / `2F16` / `2F18` | W | `Countdown.*` | Countdown, Takt, Takt-Rest | G – `21FD:04E5`, `04F9` |
+
+**Szene (nur gelesen, Konstanten; Namen in `src/Traders.Presentation/Trade/TradeScene.cs`):** `0240` B[2][4] Zahlenfarbe je Bild
+und Spieler · `0248` W[5] / `0252` W[3] Farben der Waren 2 / 3 (`04BD`) · `025C`/`025E`/`0260` B[2] Farbe Vorrat, Farbe und y des
+Grundpreises · `0262`/`0276`/`028A` W[10] Atlas-x, -y, Höhe der Teile von `0BD9` · `029E` B[2][4] Randfarben `0C8A` ·
+`02AA` W[4], `02B2`/`02B6`/`02BA`/`02BE` B[4] Warenzeichen `1050` · `02C2` (4 × 19h), `0326` (4 × 64h), `04B6` (4 × 0Ah), `04DE`
+(4 × 22h) Haufenzeilen der Spieler 0–3 (`1163`) · `0566` B[4] Haufenfarbe · `056A`/`05CF` B[101] Endpunkte der Balken `146B` ·
+`063C`/`0640` B[4] Balkenfarben `134D` · `02A6` Fernzeiger auf den Zahlenpuffer `0644` (Ausgabe).
