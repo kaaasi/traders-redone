@@ -35,8 +35,8 @@ namespace Traders.App;
 // fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
 // and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
 // request are not shown; the week runs up to its first pending call step (call 18) and halts there with a notice (F1 = B, R6).
-// The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of the calls of round 6
-// (WeekScreenInputs.OutputPages); the driver's current font likewise for call 11.
+// The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of calls 4, 9 and 11
+// (WeekScreenInputs.OutputPages; the harvest, call 16, reads none of it); the driver's current font likewise for call 11.
 public sealed class ProgramHost
 {
     /// <summary>

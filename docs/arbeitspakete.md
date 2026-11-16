@@ -85,7 +85,7 @@ portierten Routinen): `111D`: `0112`, `0264`, `03B7`, `0519`, `0757`, `07E2` (`2
   Vorratsgrenze ausgelassen, ein Bild doppelt verarbeitet → rot); Mehrrundenprobe ≥ 5 Wochen, in der nachweislich (Assert) mindestens ein Lauf von `111D:0112` mit einer Katastrophenart im Port
   verglichen wird (R6P-2: im R5-Tastenmuster Katastrophe in Woche 4; Woche bzw. Tastenmuster im Test festlegen); `check-architecture.py` grün.
 - **Abhängigkeiten:** Teile 1–2 sofort; Teil 3 nach Merge von 1, 2 und 3 (sonst `spur-wartet`, „wartet auf 1/2/3“).
-- **Status:** Alle Teile fertig (PR #152, Claude): Teil 1 Kern `22A3:02D3` mit Differenztests, Teil 2 Szene je Bild pixelgenau; Teil 3 Einbindung der Aufrufe 4, 9, 11, 16 (`Phases/WeekScreens.cs`), Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe (Woche 4) Bild für Bild, Host bis zur Ernte mit Halt an Aufruf 18; #135, #164, #170 mitgenommen (Fortsetzung 1, 16.11.2026).
+- **Status:** Alle Teile fertig (PR #152, Claude): Teil 1 Kern `22A3:02D3` mit Differenztests, Teil 2 Szene je Bild pixelgenau; Teil 3 Einbindung der Aufrufe 4, 9, 11, 16 (`Phases/WeekScreens.cs`), Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe (Woche 4) Bild für Bild, Host bis zur Ernte mit Halt an Aufruf 18; #135, #164, #170 mitgenommen (Fortsetzung 1, 16.11.2026). Fixlauf R6E-1/R6E-2 (#175, #176): schneller Test `WeekScreens.Incidents` mit Betrag `2295:0001` in Woche 2, Kommentare „4, 9, 11“ (16.11.2026).
 
 ## 1 `katastrophen` – Katastrophen und Sternvorführung `111D:0009`
 

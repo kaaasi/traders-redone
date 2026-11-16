@@ -29,7 +29,7 @@ namespace Traders.Core.Phases;
 /// holds the output's page state (a test that takes over the original's data segment at the call site). The page state – page
 /// indices DS:082E/0830, page numbers DS:40DE…40E5 and the draw page number DS:4516 – belongs to the output layers (21FD:051F,
 /// 0590); the rule pages of calls 4 and 11 start on the draw page it names (R6P-1), so it is an input like the key table and
-/// the core mirrors it into its data segment at the start of each round-6 call.
+/// the core mirrors it into its data segment at the start of calls 4, 9 and 11 (the harvest, call 16, reads none of it).
 /// </param>
 public sealed record WeekScreenInputs(
     Func<int, ImageFileLengths> Files,
@@ -107,7 +107,7 @@ public sealed class WeekScreens
 
     /// <summary>Copies the output's page state (<see cref="PageState"/>) into the core's data segment.</summary>
     // [APPROX] Host input: the page state is the output layers' (21FD:051F/0590 run in Traders.Vga); the core takes it at the
-    // start of a round-6 call instead of following every flip of the earlier steps itself.
+    // start of calls 4, 9 and 11 instead of following every flip of the earlier steps itself.
     public static void MirrorPages(Dgroup d, ReadOnlySpan<byte> output)
     {
         foreach (var (offset, length) in PageState)
