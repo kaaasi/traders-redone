@@ -244,11 +244,11 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0B9F:0002` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
 | `0B9F:005C` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:009E` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
-| `0B9F:00FE` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
+| `0B9F:00FE` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRealGameDifferentialTests.cs`, `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:01E1` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:024A` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:02BE` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
-| `0B9F:0321` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
+| `0B9F:0321` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRealGameDifferentialTests.cs`, `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:04FC` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:0549` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:0586` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
@@ -262,8 +262,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0C29:0086` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
 | `0C29:015C` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
 | `0C29:01B7` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
-| `0C29:0323` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
-| `0C29:03B2` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
+| `0C29:0323` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRealGameDifferentialTests.cs`, `TradeRulesDifferentialTests.cs` | ✅ |
+| `0C29:03B2` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRealGameDifferentialTests.cs`, `TradeRulesDifferentialTests.cs` | ✅ |
 | `0C29:04BD` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
 | `0C29:051A` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0C29:0635` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | – | – | 🔍 |
