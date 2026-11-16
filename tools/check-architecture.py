@@ -142,6 +142,11 @@ def _locals(text, known_types):
 
 _STEP_HANDLERS = {'IWeekStepHandler', 'IProgramStepHandler'}
 
+# Writable game state outside the data segment (#163 R6E-2): the text memory behind the far text pointers. Its writes are
+# array stores or interface calls the body scan cannot see, so they are named here (instance members); callers through a
+# parameter, local or field of these types (IncidentText.FormatNumber) are found by the propagation.
+_STATE_WRITERS = {'ITextMemory.Write': False, 'TextBufferMemory.Write': False}
+
 
 def _step_handlers(texts):
     """Classes that implement a step handler interface of the phase machines, directly or through a base class (R5B-3)."""
@@ -194,7 +199,7 @@ def core_writers(sources):
         for start, end, cls in _types(text):
             fields.setdefault(cls, {}).update(_locals(text[start:end], classes))
     handlers = _step_handlers(texts)
-    writers = {}
+    writers = dict(_STATE_WRITERS)
     for cls, name, static, body, _ in members:
         if cls and (_DIRECT_WRITE.search(body) or cls in handlers):
             writers[f'{cls}.{name}'] = static
@@ -308,7 +313,14 @@ _core = ['public static class KeyTable { public static void Write(Dgroup state, 
          'public class A { public void Write(Dgroup d) { d.Set(0, (byte)1); } public int Read(Dgroup d) => d.U8(0); }',
          'public static class B { public static void Go(A a, Dgroup d) { a.Write(d); } public static int Look(Dgroup d) => d.U8(1); }',
          'public sealed class Holder { private readonly A _a = new(); public void Go(Dgroup d) { _a.Write(d); }'
-         ' public int Peek(Dgroup d) => _a.Read(d); }']
+         ' public int Peek(Dgroup d) => _a.Read(d); }',
+         # #163 R6E-2: the text memory outside the data segment and a routine that writes into it through a parameter
+         'public interface ITextMemory { byte Read(ushort segment, ushort offset); void Write(ushort segment, ushort offset, byte value); }',
+         'public sealed class TextBufferMemory(Dgroup state, Func<byte[]?> buffer) : ITextMemory {'
+         ' public byte Read(ushort s, ushort o) => buffer()![o]; public void Write(ushort s, ushort o, byte v) { var b = buffer()!; b[o] = v; } }',
+         'public static class IncidentText { public static void FormatNumber(Dgroup d, ITextMemory memory, uint n, short w, ushort o, ushort s)'
+         ' { for (int i = 0; i < w; i++) memory.Write(s, (ushort)(o + i), d.U8(1)); }'
+         ' public static ushort Length(ITextMemory memory, ushort o, ushort s) { ushort n = 0; while (memory.Read(s, (ushort)(o + n)) != 0) n++; return n; } }']
 _layers = {**{k: set(v) for k, v in _ALLOWED.items()}, 'Traders.RefEmu': {'Traders.Core', 'Traders.Assets'},
            'Traders.Viewer': {'Traders.Assets', 'Traders.Vga'}, 'Traders.Tools': {'Traders.Assets'}}
 _writers = core_writers(_core)
@@ -338,6 +350,13 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
                     (scene_violations('B.Go(a, _state);', _writers, _members), CATCH),
                     (scene_violations('Holder h = _h; h.Go(_state);', _writers, _members), CATCH),
                     (scene_violations('int c = B.Look(_state); Holder h = _h; int p = h.Peek(_state);', _writers, _members), CLEAN),
+                    # #163 R6E-2: writes into the text memory (interface, implementation, routine) and the reading forms
+                    (scene_violations('ITextMemory t = _texts; t.Write(1, 2, 3);', _writers, _members), CATCH),
+                    (scene_violations('IncidentText.FormatNumber(_d, _texts, 5, 4, 0, 0);', _writers, _members), CATCH),
+                    (scene_violations('TextBufferMemory t = _t; t.Write(1, 2, 3);', _writers, _members), CATCH),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { _texts.Write(1, 2, 3); }', _writers, _members), CATCH),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { byte b = _texts.Read(1, 2);'
+                                      ' ushort n = IncidentText.Length(_texts, 1, 2); }', _writers, _members), CLEAN),
                     # #76 P3-1: one violation per reference rule, and the real layering stays clean
                     (reference_violations({**_layers, 'Traders.Vga': {'Traders.Assets', 'Traders.Core'}}), CATCH),
                     (reference_violations({**_layers, 'Traders.Tools': {'Traders.App'}}), CATCH),

@@ -86,7 +86,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
   Gegenprobe im Review (Vergleich `>` statt `>=`, Vergleich vorzeichenbehaftet, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Teil 1 sofort; Teil 3 nach Merge von 1 und 3 (sonst `spur-wartet`, „wartet auf 1/3“).
-- **Status:** Teil 1 fertig (Claude, Branch `paket/ende-host`, Base `006509f`; Review-PR siehe #185): Endprüfung bis zur
+- **Status:** Teil 1 fertig (Claude, Branch `paket/ende-host`, Base `006509f`; Review-PR siehe #188): Endprüfung bis zur
   Entscheidung (`src/Traders.Core/Ending/EndCheck.cs`, Befund `20B3_0005_endpruefung.md`), Roboter-Schalter (`RobotPhaseSkip`,
   `--original-roboter`), Host hält mit Schalter an Aufruf 23, #157, #158, #180. Neuer Befund aus #180: Stationsphase im Host
   nach einem Wochenereignis abweichend (PR). Teil 3 wartet auf 1/3 (`paket/ende`, #185).
@@ -130,7 +130,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; jeder Einsprung im Gleichschritt (Ergebnis, Datensegment, `DS:10D2`); Gegenprobe im Review
   (Ziehung ausgelassen, Vergleich `<` statt `<=`, Spieler vertauscht → rot; neue Architekturregel mit Verletzung → rot).
 - **Abhängigkeiten:** keine. Früh mergen (Integrationsfolge), Spur 1 hängt daran.
-- **Status:** –
+- **Status:** Teile 1–3 fertig (Claude, PR #184, 16.11.2026): `141D` portiert (`TradeAi`, Vertrag im Befund), Gleichschritt Wochen 0–3, P3 #163/#165/#166; Review offen.
 
 ## 3 `zusatz` – Zusatzphase `1DEF:000C`
 
