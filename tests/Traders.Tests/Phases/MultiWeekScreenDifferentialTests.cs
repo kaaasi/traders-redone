@@ -19,9 +19,10 @@ namespace Traders.Tests.Phases;
 /// default game runs in the RefEmu with player 0 made human (control 4: arrows, Ins) and players 1–3 computers; the core's phase
 /// machine runs the handlers of <see cref="WeekSteps"/> – the rule steps, the week report (call 3), the guard of 111D:0009
 /// (call 4), the week planning (calls 6 and 21) and the planting phase with the computer turn and the wait loop (call 8) – in
-/// lockstep. Rule steps and calls 4, 6, 21 are compared at their return; calls 3 and 8 frame by frame: every frame of the port
+/// lockstep, with the end check (call 19, 20B3:0005 up to its decision, R7). Rule steps and calls 4, 6, 19 (with AL), 21 are
+/// compared at their return; calls 3 and 8 frame by frame: every frame of the port
 /// is a retrace of the original, the data segment (outside the bytes of the output layers and the interrupt handlers) and
-/// DS:10D2 are compared at every retrace and at the return. The not yet ported calls (9 ff., and 4 beyond its guard) are
+/// DS:10D2 are compared at every retrace and at the return. The other calls (9 ff. except 19 and 21, and 4 beyond its guard) are
 /// carried out by the RefEmu. The human presses a key every half second in the RefEmu (at a fixed phase of the frame); the port
 /// gets the key table the original holds at the end of each retrace. Expected values come only from the RefEmu.
 /// </summary>
@@ -52,7 +53,7 @@ public class MultiWeekScreenDifferentialTests
     ];
 
     /// <summary>
-    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009 (guard), 11A3:0000, 0609:0004, 135D:000E, 21FD:0004 – weeks 0..3 and
+    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009 (guard), 11A3:0000, 0609:0004, 135D:000E, 21FD:0004, 20B3:0005 – weeks 0..3 and
     /// call 1 of week 4 with one human and three computers: calls 3, 6, 8, 21 run in the port in every week, call 4 in the port
     /// while its guard holds; nothing differs at any call site, retrace or return; the human took part (key presses read in the
     /// planting phase) and the computers planted.
@@ -86,6 +87,7 @@ public class MultiWeekScreenDifferentialTests
             WeekSteps.PlantingCall => planting,
             CatastropheGuardStep.Call => new GuardOrOracle(oracle.PortHandler(core, ported.Handlers[s.Number]), oracle.Handler(core),
                 () => guardWeeks++),
+            WeekSteps.EndCall => oracle.PortHandler(core, ported.Handlers[s.Number], compareResult: true),
             _ when ported.Handlers.ContainsKey(s.Number) => oracle.PortHandler(core, ported.Handlers[s.Number]),
             _ => oracle.Handler(core),
         });
@@ -123,8 +125,8 @@ public class MultiWeekScreenDifferentialTests
         Assert.Equal(expected.Append(2), oracle.Passed.Select(site => WeekLoop.Steps.FirstOrDefault(s => s.Site == site)?.Number).OfType<int>());
         Assert.Equal(Enumerable.Range(1, Weeks), events.Where(e => e.Kind == PhaseEventKind.WeekAdvanced).Select(e => e.Value));
 
-        // calls 3, 6, 8, 21 (and every rule step) ran as port in every week, call 4 while its guard held (weeks 0..2 at least)
-        int[] screens = [WeekSteps.ReportCall, WeekPlanningStep.BeforePlantingCall, WeekSteps.PlantingCall, WeekPlanningStep.BeforeTradeCall];
+        // calls 3, 6, 8, 19, 21 (and every rule step) ran as port in every week, call 4 while its guard held (weeks 0..2 at least)
+        int[] screens = [WeekSteps.ReportCall, WeekPlanningStep.BeforePlantingCall, WeekSteps.PlantingCall, WeekSteps.EndCall, WeekPlanningStep.BeforeTradeCall];
         for (int week = 0; week < Weeks; week++)
         {
             var steps = oracle.PortedSteps.Where(x => x.Week == week).Select(x => x.Step).ToList();

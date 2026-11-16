@@ -77,7 +77,7 @@ public class HostPlantingFrameDifferentialTests
         ScheduleHuman(p);
 
         // the host up to the frame in which the week report waits its first retrace
-        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile());
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase: false);
         var holds = new List<(long From, long To, byte Key)>();
         int planned = 0;
         long f = 0;

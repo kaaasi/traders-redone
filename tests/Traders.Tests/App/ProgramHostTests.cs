@@ -98,19 +98,52 @@ public class ProgramHostTests
     }
 
     /// <summary>
-    /// [DIFFERENTIAL] 1777:01F8 – the whole host run without a window against the original (F1 = B of R6): start, main menu
-    /// (RETURN after the second pass, as in the RefEmu by the same pass), new game with four computers, then week 0 in the core
-    /// with its ported screen steps – week report, guard of call 4, week planning, planting phase, week incidents, stations,
-    /// harvest, each with its scene – up to the first pending call 18 (robot phase 1C68), where the host halts with a notice.
-    /// There the data segment (outside the bytes of the output layers and the interrupt handlers) and the picture shown equal
-    /// the original's at the call site of call 18. The scenes never write the core's data segment.
+    /// [DIFFERENTIAL] 1777:01F8 – the whole host run without a window against the original (F1 = B of R6), robot switch off
+    /// (<c>--original-roboter</c>): start, main menu (RETURN after the second pass, as in the RefEmu by the same pass), new game
+    /// with four computers, then week 0 in the core with its ported screen steps – week report, guard of call 4, week planning,
+    /// planting phase, week incidents, stations, harvest, each with its scene – up to the first pending call 18 (robot phase
+    /// 1C68), where the host halts with a notice. There the data segment (outside the bytes of the output layers and the
+    /// interrupt handlers) and the picture shown equal the original's at the call site of call 18. The scenes never write the
+    /// core's data segment.
     /// </summary>
     [GameDataFact]
     public void Host_plays_week_0_up_to_the_robot_phase_like_the_original()
     {
+        var host = PlayWeek0(skipRobotPhase: false);
+        var week = host.Machine.WeekMachine!;
+        Assert.Equal(WeekSteps.RobotCall, week.NextStep);
+        Assert.Contains("call 18 ", host.Halt);
+        Assert.Null(host.RobotSkip);
+        Assert.Null(host.Deviation);
+        AssertLikeOriginal(host, WeekSteps.RobotCall, skipRobotCall: false);
+    }
+
+    /// <summary>
+    /// [DIFFERENTIAL] 20B3:0005 – the host run with the robot switch on (default, F3 = A of R7): week 0 as above, then the
+    /// host's stand-in skips call 18 in its first frame, the end check (call 19) runs in the core and goes on (AL = 0), calls
+    /// 20 and 21 follow, and the host halts at the first pending call, the trade 0B9F:0002 (call 23). Expected values from the
+    /// original with its call 18 jumped over (IP set to the return address at the call site, the call takes no arguments):
+    /// data segment and picture shown at the call site of call 23 are equal.
+    /// </summary>
+    [GameDataFact]
+    public void Host_with_the_robot_switch_plays_week_0_up_to_the_trade_like_the_original_without_its_robot_phase()
+    {
+        var host = PlayWeek0(skipRobotPhase: true);
+        var week = host.Machine.WeekMachine!;
+        Assert.Equal(WeekSteps.TradeCall, week.NextStep);
+        Assert.Contains("call 23 ", host.Halt);
+        Assert.Equal(1, host.RobotSkip!.Skipped);
+        Assert.NotNull(host.Deviation);
+        Assert.False(host.Week.End.GameOver);
+        AssertLikeOriginal(host, WeekSteps.TradeCall, skipRobotCall: true);
+    }
+
+    /// <summary>Start, main menu with RETURN after the second pass, week 0 until the host halts; common checks.</summary>
+    private static ProgramHost PlayWeek0(bool skipRobotPhase)
+    {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
-        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile());
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase);
         long f = 0;
         for (; f < 2000 && Passes(host) < 2; f++) host.Frame(f, []);
         for (long until = f + 6; f < until; f++) host.Frame(f, [MenuKeys.Enter]);
@@ -118,10 +151,7 @@ public class ProgramHostTests
 
         Assert.Equal(ProgramStatus.InWeek, host.Machine.Status);
         Assert.True(host.Machine.IsBlocked);
-        var week = host.Machine.WeekMachine!;
-        Assert.Equal(0, week.Week);
-        Assert.Equal(WeekSteps.RobotCall, week.NextStep);
-        Assert.Contains("call 18 ", host.Halt);
+        Assert.Equal(0, host.Machine.WeekMachine!.Week);
         Assert.Equal(1, host.Core.U8(ProgramLoop.GameRunning));
         Assert.Equal(new byte[] { 1, 1, 1, 1 }, Enumerable.Range(0, 4).Select(i => host.Core.U8(DgroupLayout.IsComputer + i)));
         Assert.NotSame(host.Core.Bytes, host.Layers.Ds);
@@ -129,8 +159,16 @@ public class ProgramHostTests
         Assert.False(host.Report.Presenting);
         Assert.False(host.Stations.Presenting);
         Assert.False(host.Harvest.Presenting);
+        return host;
+    }
 
-        // the original with the same clock and the same key at the same menu pass, to the call site of call 18 in week 0
+    /// <summary>
+    /// The original with the same clock and the same key at the same menu pass, to the call site of <paramref name="call"/> in
+    /// week 0 (with <paramref name="skipRobotCall"/> its call 18 jumped over): data segment and picture shown equal the host's.
+    /// </summary>
+    private static void AssertLikeOriginal(ProgramHost host, int call, bool skipRobotCall)
+    {
+        var start = ProgramStartDifferentialTests.ReferenceStart;
         var p = OriginalProgram.Start(Dir, ProgramStartDifferentialTests.Options(start));
         int passes = 0;
         ushort menu = p.Segment(0x192D);
@@ -145,9 +183,15 @@ public class ProgramHostTests
         var image = ProgramSteps.InitialState(File.ReadAllBytes(TestGameData.Dos("T.EXE"))).Bytes;
         var atMain = p.DataSegment();
         var loaded = Enumerable.Range(0, DgroupLayout.Size).Where(i => image[i] != atMain[i]).ToHashSet();
-        ushort loop = p.Segment(WeekLoop.Segment), call18 = WeekLoop.Step(WeekSteps.RobotCall).Site;
+        ushort loop = p.Segment(WeekLoop.Segment), call18 = WeekLoop.Step(WeekSteps.RobotCall).Site, target = WeekLoop.Step(call).Site;
         p.Machine.Run(80_000_000_000, m => m.Cpu.Cs == loop && m.Cpu.IP == call18);
         Assert.True(p.Machine.Cpu.Cs == loop && p.Machine.Cpu.IP == call18, "original did not reach call 18");
+        if (skipRobotCall)
+        {
+            p.Machine.Cpu.IP = (ushort)(call18 + 5); // over the far call 1C68:000B (no arguments, nothing to pop)
+            p.Machine.Run(80_000_000_000, m => m.Cpu.Cs == loop && m.Cpu.IP == target);
+            Assert.True(p.Machine.Cpu.Cs == loop && p.Machine.Cpu.IP == target, $"original did not reach call {call}");
+        }
         Assert.Equal(0, p.Week);
 
         var original = p.DataSegment();
