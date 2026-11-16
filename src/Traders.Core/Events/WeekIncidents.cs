@@ -474,7 +474,8 @@ public sealed class WeekIncidents
 
 /// <summary>
 /// The week incidents as a step of the week loop (<see cref="IWeekStepHandler"/>, call 9 = 17CB:0005): <see cref="Begin"/> runs
-/// them to their first wait, every <see cref="Tick"/> one frame further. Not wired into the phase machine yet (lane 0, part 3).
+/// them to their first wait, every <see cref="Tick"/> one frame further. Bound into the
+/// phase machine by Phases.WeekScreens (lane ernte, part 3).
 /// </summary>
 public sealed class WeekIncidentsStep(ITextMemory texts, IControlDevices? devices = null) : IWeekStepHandler
 {

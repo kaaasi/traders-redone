@@ -434,3 +434,17 @@ W = Bedeutung aus dem Ablauf gefolgert.
 | `5422`, `5424`, `5426` | B, W, W | `ExplosionFrame`, `RocketX`, `RocketY` | Explosionsbild, Lage der bewegten Rakete | G – `0CCF`, `0B7A` |
 | `3376`, `330E + 1Ah·p` | W | `ObjectLayer` | Ebene 13 (Explosion, Objekt 4) / 15 (Zeiger) | G – `148B` |
 | `3786` / `302E` / `37C3` | L[4] / L[4] / B[4] | `ControlReader.MoveDelay` / `FireDelay` / `Bits` | Verzug 3p, 43 − 10·IQ bzw. 20; Feuerverzug 10000; Computereingabe | G – `0201`, `0413`, `04D4`, `05E7` |
+
+## 15. Runde 6, Spur `ernte` (Ernte `22A3:02D3`)
+
+Befund [22A3_02D3_ernte.md](../routines/22A3_02D3_ernte.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `57E8` | W[4] s | `Harvest.Counter` | Bilder der laufenden Sammlung eines Feldes; Balkenhöhe, laufender Vorrat + 2·Zähler; gebucht, sobald > Ertrag / 2 | G – `062E`, `0340`; W |
+| `57F4` | B[4] u | `Harvest.Automatic` | 1 = Cursor geht ohne Taste weiter (Computer `0840` = 1 oder nach Feuer 0Ah) | G – `0340`, `04B1`, `04DA` |
+| `43B2` | B[4] u | `FieldCursor.Mode` | in der Ernte: 7 warten, 8 sammeln, 6 fertig (ergänzt §14) | G – `0426`, `04F7`, `062E` |
+| `3BA4` | Fernzeiger[6][3] | `Harvest.WeatherLines` | Wetterhinweis: Zeilen F5h + 3·Wetter der Texttabelle `37D0` (0-basiert) | G – `08C1`; W |
+| `00C8` | W[4] | `Harvest.ColourOfPlayer` | Farbe des Erntebalkens je Spieler (initialisierte Daten) | G – `07C2` (nur Ausgabe) |
+| `45D0` | W s | `LoopWare` | nach `0340` 4, in `062E` Art des gesammelten Feldes (Index in `3CF4`) | G – `0340`, `062E` |
+| `0140` | B | – | Zeichenpuffer der Schreibmaschine `0A69:01AD` (Ausgabe) | G – `08C1` (ausgenommen) |
