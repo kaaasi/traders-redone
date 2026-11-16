@@ -12,9 +12,12 @@ Die nächste Leitstelle plant Runde 7 in einem neuen Chat (`vorlagen/leitstelle-
 ## Vorschau: Runde 7 (Plan folgt, Go nötig)
 
 Nach dem Fahrplan (Zeile R8, da R7 `1B03` in R6 vorgezogen wurde): Handel `0B9F:0002` (Aufruf 23) · Handels-KI `0C29`/`141D` ·
-Zusatzphase `1DEF:000C` (Aufruf 24). **Vorab zu klären (Frage an den Nutzer):** Der Host hält seit R6 an Aufruf 18 (Roboterphase
-`1C68`, Fahrplan R11–R12); davor liegt Aufruf 19 (Endprüfung `20B3`, R10). Ohne 18/19 erreicht der Host den Handel nicht –
-Reihenfolge des Fahrplans prüfen (z. B. Endprüfung vorziehen, Roboterphase als Orakel/Überspringen im Test). Pflichten aus R6:
+Zusatzphase `1DEF:000C` (Aufruf 24). Der Host hält seit R6 an Aufruf 18 (Roboterphase `1C68`, Fahrplan R11–R12); davor liegt
+Aufruf 19 (Endprüfung `20B3`, R10). **Wunsch des Nutzers (16.11.2026):** Im Remake den Roboterkampf vorerst überspringen, bis er
+portiert ist – bewusste, abschaltbare Abweichung vom Original, damit spätere Phasen vorher spielbar und testbar sind. Für den Plan
+R7: Schalter im Host (nicht im Kern-Ablauf der Originaltreue), Aufruf 18 als gekennzeichneter Leerlauf; Differenztests und
+Mehrrundenprobe laufen weiter mit Aufruf 18 aus dem Orakel (sonst weichen Zustand und Zufall ab). Offen für die Planung: Umgang
+mit Aufruf 19 (Endprüfung vorziehen oder ebenfalls vorläufig „Partie läuft weiter“). Pflichten aus R6:
 Testlücke Host-Seitenzustand (#180), `HostGame.Update` (#158), Wochenbericht im Host (#157). Offen: P3 #49, #75, #76, #162,
 #163, #165, #166.
 
