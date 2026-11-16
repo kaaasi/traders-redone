@@ -119,7 +119,7 @@ public class HostLoadedWeekFrameDifferentialTests
             string where = $"week frame {frame} (host frame {f}, call {step})";
             Assert.True(p.RandomState == host.Core.U32(DgroupLayout.RandomSeed),
                 $"{where}: random state original {p.RandomState:X8}, host {host.Core.U32(DgroupLayout.RandomSeed):X8}");
-            if (step == WeekSteps.StationsCall)
+            if (step == WeekSteps.StationsCall && frames.GetValueOrDefault(step) == 0)
             {
                 // first frame of the stations phase: the page state the core took over and the screen
                 var emu = p.DataSegment();
@@ -130,8 +130,8 @@ public class HostLoadedWeekFrameDifferentialTests
                         Assert.True(emu[i] == host.Core.U8(i), $"{where}: page state DS:{i:X4} original {emu[i]:X2} core {host.Core.U8(i):X2}");
                     }
                 HostPictures.CompareShown(p, host, where);
-                break;
             }
+            if (step == WeekSteps.HarvestCall && frames.GetValueOrDefault(step) >= 50) break;
             if (step is WeekSteps.ReportCall or WeekSteps.IncidentsCall) HostPictures.CompareShown(p, host, where);
             else HostPictures.Compare(p, host, where);
             frames[step] = frames.GetValueOrDefault(step) + 1;
