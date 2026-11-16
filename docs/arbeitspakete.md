@@ -146,7 +146,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler), Szene pixelgenau;
   Gegenprobe im Review (Auslösung invertiert, eine Ziehung ausgelassen, Vorrat ohne Obergrenze → rot).
 - **Abhängigkeiten:** keine.
-- **Status:** –
+- **Status:** fertig, Review offen (Claude, PR #187): Teil 1 (Befund, Kern `Extra/`, Differenztests Wochen 0–3), Teil 2 (Szene `Extra/`, bildgenau im Gleichschritt mit Befehlsliste), Teil 3 (#162, Grenzwerttests `Events/IncidentsBoundaryTests.cs`).
 
 ## Zuständigkeit gemeinsamer Dateien in R7
 

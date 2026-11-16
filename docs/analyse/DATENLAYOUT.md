@@ -471,3 +471,18 @@ w = `45D0`. G = belegt durch Differenztest (`TradeAiDifferentialTests`), W = Bed
 | `2BB8` / `2BC0` | B s / B | `Sellers` / `BuyerFlag` | Divisor in `0A1D` (0 bzw. −1 → Divisionsfehler) / 1 schaltet die Höchstgebotsregel ein | G – `0A1D`; W |
 | `3780` / `2F16` / `2F18` | W s | `Countdown` / `CountdownA` / `CountdownB` | Handels-Countdown (`21FD:04E5`/`04F9`); `0397` handelt nur bei `2F18` = `2F16` | G – `0397`, `0BFD`; W |
 | `4106` / `44F2` | W s | `Buyer` / `Seller` | Käufer (10 = Laden, dann kein `0CCA`) / Verkäufer eines Abschlusses | G – `0CCA`, `0E67`; W – `0C29:03B2` |
+
+## Runde 7, Spur `zusatz` (Zusatzphase `1DEF:000C`)
+
+Befund [1DEF_000C_zusatzphase.md](../routines/1DEF_000C_zusatzphase.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `54A6` / `547C` / `54A2` | Fernzeiger | `ExtraPhase.GroundPointer` / `GoodsPointer` / `ClaimsPointer` | auf die Stapelfelder von `000C`: Bodenkachel W[42], Ware W[42] (−1 = keine), Ziel B[42] (FFh = frei); Zelle = 6·Zeile + Spalte | G – `000C` (Zeiger), alle Routinen (Felder) |
+| `5480` | W s | `ExtraPhase.Collected` | aufgenommene Stücke; die Phase endet bei 25 | G – `000C`, `04A9`, `0651` |
+| `5482` | W[4][4] s | `ExtraPhase.Gains` | Gewinn je Spieler und Ware (Schritt 8), am Ende auf `3CF4` addiert ohne Obergrenze | G – `03CD`, `0651`, `0751` |
+| `0F22` / `0F2A` | W[4] | `ExtraPhase.TileX` / `TileY` | Atlaskoordinaten der vier Bodenkacheln (initialisierte Daten) | G – `0308` (nur Ausgabe) |
+| `3B5C` | Fernzeiger[2] | `ExtraPhase.NoticeLines` | Hinweis: Textzeilen 227/228 der Tabelle `37D0` (0-basiert) | G – `0105`; W |
+| `57F0` / `57F2` | W s | `ProductionIdle` / `ProductionActive` | Auslösung: 2·`57F2` < `57F0` (ergänzt §7) | G – `00DB` |
+| `2F26` | B s | `LimitLow` | Einheiten je Stück 2·`2F26` (ergänzt §7) | G – `0651` |
+| `304E` / `305A` | B[4] | `FieldCursor.CursorX` / `CursorY` | in der Zusatzphase Spalte 0…5 / Zeile 0…6 des Bretts | G – `03CD`, `04A9`, `0651`, `07AD` |
