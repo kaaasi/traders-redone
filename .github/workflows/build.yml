@@ -41,7 +41,7 @@ jobs:
   linux:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       # Read-only fine-grained token for the private repo kaaasi/traders-referenz (original files). Without the secret the
       # run is limited to the tests without original data and says so in the summary.
