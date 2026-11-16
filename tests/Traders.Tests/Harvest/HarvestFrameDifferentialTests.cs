@@ -80,6 +80,8 @@ public class HarvestFrameDifferentialTests
     [InlineData(nameof(Mutation.DoubleFrame), ".")]
     public void Mutations_are_detected(string mutation, string expected)
     {
+        // the original files must be there: a run that fails for want of them proves nothing (pflichtlauf without data)
+        Assert.True(TestGameData.Available, $"original files missing ({TestGameData.DosDir})");
         var e = Record.Exception(() => Run(new Script(0, [], [], []), Enum.Parse<Mutation>(mutation)));
         Assert.NotNull(e);
         string first = e.Message.Split('\n')[0];
