@@ -127,7 +127,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; jeder Einsprung im Gleichschritt (Ergebnis, Datensegment, `DS:10D2`); Gegenprobe im Review
   (Ziehung ausgelassen, Vergleich `<` statt `<=`, Spieler vertauscht → rot; neue Architekturregel mit Verletzung → rot).
 - **Abhängigkeiten:** keine. Früh mergen (Integrationsfolge), Spur 1 hängt daran.
-- **Status:** –
+- **Status:** in Arbeit (Claude, Draft-PR `paket/handelski`, Teil 1).
 
 ## 3 `zusatz` – Zusatzphase `1DEF:000C`
 
