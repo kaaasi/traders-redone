@@ -164,7 +164,7 @@ internal sealed class RefEmuWeekOracle
     /// frame of the port is one retrace of the original (entry of the retrace wait 0D73:00D3). Where the port waits a frame the
     /// RefEmu must stand at its next retrace, where the port returns the RefEmu must return to the loop; at both the data
     /// segment outside <see cref="InterruptOwned"/> and the output bytes, and the port's generator against DS:10D2, are
-    /// compared. Before the next frame the driver calls <see cref="EndRetrace"/> and gives the port the key table the
+    /// compared (the RefEmu runs each frame first, then the port). Before the next frame the driver calls <see cref="EndRetrace"/> and gives the port the key table the
     /// RefEmu holds then (<see cref="Held"/>).
     /// </summary>
     public sealed class FramedStep(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port, (int Offset, int Length)[] owned,
@@ -193,13 +193,30 @@ internal sealed class RefEmuWeekOracle
             o.TakeOver(core);
             _draws = context.Random.Calls;
             Runs.Add((_week, 0));
-            return Sync(context, port.Begin(context));
+            bool atRetrace = RunOriginal(context.Step);
+            return Sync(context, port.Begin(context), atRetrace);
         }
 
         public StepOutcome Tick(StepContext context)
         {
             if (AtRetrace) throw new InvalidOperationException("EndRetrace not called before the frame");
-            return Sync(context, port.Tick(context));
+            bool atRetrace = RunOriginal(context.Step);
+            return Sync(context, port.Tick(context), atRetrace);
+        }
+
+        /// <summary>
+        /// Runs the RefEmu to its next retrace entry (true) or the return of the step (false). The original runs its frame
+        /// before the port does, so a time() value it reads in that frame (random(0), hook of the test) is known to the port's
+        /// clock; the comparison follows when both have run.
+        /// </summary>
+        private bool RunOriginal(WeekStep step)
+        {
+            var m = o._p.Machine;
+            ushort retrace = o._p.Segment(RetraceSegment), ret = (ushort)(step.Site + 5);
+            m.Run(1);
+            m.Run(4_000_000_000, mm => (mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry) || (mm.Cpu.Cs == o._loopSegment && mm.Cpu.IP == ret));
+            if (m.Exited) throw new InvalidOperationException("original exited");
+            return m.Cpu.Cs == retrace && m.Cpu.IP == RetraceEntry;
         }
 
         /// <summary>Runs the RefEmu through the retrace wait it stands at.</summary>
@@ -219,15 +236,11 @@ internal sealed class RefEmuWeekOracle
             return [.. Enumerable.Range(0, keys.Length).Where(sc => keys[sc] != 0).Select(sc => (byte)sc)];
         }
 
-        private StepOutcome Sync(StepContext context, StepOutcome outcome)
+        private StepOutcome Sync(StepContext context, StepOutcome outcome, bool atRetrace)
         {
             var step = context.Step;
             var m = o._p.Machine;
-            ushort retrace = o._p.Segment(RetraceSegment), ret = (ushort)(step.Site + 5);
-            m.Run(1);
-            m.Run(4_000_000_000, mm => (mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry) || (mm.Cpu.Cs == o._loopSegment && mm.Cpu.IP == ret));
-            if (m.Exited) throw new InvalidOperationException("original exited");
-            bool atRetrace = m.Cpu.Cs == retrace && m.Cpu.IP == RetraceEntry;
+            ushort ret = (ushort)(step.Site + 5);
             string where = $"week {_week} {step} retrace {Runs[^1].Retraces}";
             if (outcome.Done == atRetrace)
                 throw new InvalidOperationException(outcome.Done

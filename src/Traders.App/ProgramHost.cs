@@ -1,12 +1,18 @@
 using Traders.Assets;
 using Traders.Assets.Loading;
 using Traders.Core;
+using Traders.Core.Events;
 using Traders.Core.Menus;
 using Traders.Core.Phases;
+using Traders.Core.Pixels;
 using Traders.Core.Startup;
 using Traders.Core.State;
+using Traders.Presentation.Disasters;
+using Traders.Presentation.Events;
 using Traders.Presentation.Field;
+using Traders.Presentation.Harvest;
 using Traders.Presentation.Menus;
+using Traders.Presentation.Stations;
 using Traders.Presentation.Week;
 using Traders.Vga;
 using Traders.Vga.Layers;
@@ -15,17 +21,22 @@ namespace Traders.App;
 
 /// <summary>
 /// The program as the host runs it, without a window: the core's program machine (main 1777:000C with all its call steps and
-/// the week loop with the ported steps of <see cref="WeekSteps"/>: rule steps, week report, guard of call 4, week planning,
-/// planting phase) and the scenes on the graphics layers – main menu, week report, planting field (decision F1 = A). Per
-/// display frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
-/// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The machine halts at the first call
-/// still pending (call 9, week events, in weeks 0–2; call 4 later with catastrophes on); <see cref="Halt"/> then names it.
-/// The scenes and the layers keep their own data segment image; they read the core's state and never write it.
+/// the week loop with the ported steps of <see cref="WeekSteps"/> and <see cref="WeekScreens"/>: rule steps, week report,
+/// catastrophes, week planning, planting phase, week incidents, stations, harvest) and the scenes on the graphics layers –
+/// main menu, week report, catastrophes, planting field, incidents, stations, harvest (decision F1 = B of R6). Per display
+/// frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
+/// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The week runs from the balance up to the
+/// harvest; the machine halts at the first call still pending, the robot phase 1C68 (call 18); <see cref="Halt"/> then names it.
+/// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
+/// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
+/// scene its numbers (2295:0001 is an output call there), and the core reads the texts from it.
 /// </summary>
 // [APPROX] Host parts of the program start: the heap addresses (text buffer, page buffer) and the segment value of DS are
 // fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
 // and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
-// request are not shown; the week runs up to its first pending call step and halts there with a notice (F1 = A, R5).
+// request are not shown; the week runs up to its first pending call step (call 18) and halts there with a notice (F1 = B, R6).
+// The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of the calls of round 6
+// (WeekScreenInputs.OutputPages); the driver's current font likewise for call 11.
 public sealed class ProgramHost
 {
     /// <summary>
@@ -55,7 +66,11 @@ public sealed class ProgramHost
         Core = ProgramSteps.InitialState(exe);
         Start = new ProgramStart(Lengths, new MenuTextPlaque(), new TextFile(Load(ResourceTable.EnglishText), TextBufferOffset, TextBufferSegment));
         Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
-        Week = new WeekSteps(e => Field!.Apply(e), Lengths);
+        var masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
+        Screens = new WeekScreens(
+            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => Layers!.Ds),
+            new WeekScreenOutputs(e => Disasters!.Apply(e), e => Stations!.Apply(e), e => Harvest!.Apply(e), e => Harvest!.Apply(e)));
+        Week = Screens.Week(e => Field!.Apply(e), Lengths);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
             Week.Handlers);
 
@@ -68,7 +83,7 @@ public sealed class ProgramHost
             new FontDescriptor(fonts, 0x5A0, 5, 6, 0x20), new FontDescriptor(fonts, 0, 12, 14, 0x20),
             new FontDescriptor(fonts, 0x7F8, 5, 5, 0x2F),
         ];
-        Driver.Masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
+        Driver.Masks = masks;
         var ds = new byte[0x10000];
         ProgramSteps.InitialState(exe).Bytes.CopyTo(ds, 0);
         ds[GraphicsLayers.CardMode] = (byte)ProgramInitialisation.Vga; // word as the initialisation 1777:04E4 leaves it (VGA only)
@@ -82,7 +97,26 @@ public sealed class ProgramHost
         Scene = new MenuScene(Layers, Core, texts, pictures);
         Report = new ReportScene(Layers, Core, texts, pictures);
         Field = new FieldScene(Layers, Core) { Pictures = pictures };
+        Disasters = new DisasterScene(Layers, Core) { Pictures = pictures };
+        Incidents = new IncidentScene(Layers, Core, new TextBufferMemory(Core, () => Start.TextBuffer));
+        Stations = new StationScene(Layers, Core, pictures);
+        Harvest = new HarvestScene(Layers, Core, pictures);
     }
+
+    /// <summary>The handlers of the calls 4, 9, 11 and 16 (round 6) and their inputs.</summary>
+    public WeekScreens Screens { get; }
+
+    /// <summary>Scene of the catastrophes (call 4 beyond its guard).</summary>
+    public DisasterScene Disasters { get; }
+
+    /// <summary>Scene of the week incidents (call 9); its events are drained after each frame.</summary>
+    public IncidentScene Incidents { get; }
+
+    /// <summary>Scene of the stations phase (call 11); the core's calls reach it while the frame is processed.</summary>
+    public StationScene Stations { get; }
+
+    /// <summary>Scene of the harvest (call 16); the core's events reach it while the frame is processed.</summary>
+    public HarvestScene Harvest { get; }
 
     /// <summary>The ported call steps of the week loop.</summary>
     public WeekSteps Week { get; }
@@ -130,10 +164,17 @@ public sealed class ProgramHost
     {
         while (Machine.LastFrame < frame && Machine.Status != ProgramStatus.Ended)
         {
-            Field.NextFrame(held); // the planting scene steps first; the core's field events reach it during Advance
+            // the scenes of the steps with retrace waits step first (a scene not presenting does nothing); the core's events
+            // of planting, catastrophes, stations and harvest reach them during Advance, those of the incidents after it
+            Field.NextFrame(held);
+            Disasters.NextFrame(held);
+            Incidents.NextFrame();
+            Stations.NextFrame(held);
+            Harvest.NextFrame(held);
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
             Machine.DrainEvents();
             Machine.DrainWeekEvents();
+            foreach (var e in Screens.DrainIncidentEvents()) Incidents.Apply(e);
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
             Report.NextFrame();
@@ -175,13 +216,36 @@ public sealed class ProgramHost
 
     private byte[] Load(string name) => File.ReadAllBytes(Path.Combine(_dir, name));
 
+    private readonly Dictionary<int, IndexedImage> _pictures = [];
+
+    /// <summary>Pixels of picture <paramref name="number"/> (input of the core's rule pages, R6P-1).</summary>
+    private IndexedImage Picture(int number)
+    {
+        if (!_pictures.TryGetValue(number, out var image))
+        {
+            var vga = VgaImage.Load(Path.Combine(_dir, ResourceTable.Pictures[number].Vga));
+            _pictures[number] = image = new IndexedImage(VgaImage.Width, VgaImage.Height, vga.Pixels);
+        }
+        return image;
+    }
+
+    /// <summary>The driver's current font as input of the stations phase (it types into its panel).</summary>
+    private TextFont CurrentFont()
+    {
+        var f = Driver.Fonts[Driver.Font];
+        return new TextFont(f.Data, f.Offset, f.Height, f.Advance, f.FirstChar);
+    }
+
     private ImageFileLengths Lengths(int number)
     {
         var (file, unpacked) = ImageFiles.Lengths(number, Load);
         return new ImageFileLengths(file, unpacked);
     }
 
-    /// <summary>The text buffer of the program start behind its far address (the scene reads the menu texts there).</summary>
+    /// <summary>
+    /// The text buffer of the program start behind its far address: the scenes read the texts there, the layers write the
+    /// numbers of the stations phase (2295:0001, an output call of 1B03) into it.
+    /// </summary>
     private sealed class TextMemory(ProgramStart start) : IFarMemory
     {
         private int Index(ushort seg, ushort off)
@@ -194,7 +258,7 @@ public sealed class ProgramHost
 
         public byte Read(ushort seg, ushort off) => start.TextBuffer![Index(seg, off)];
 
-        public void Write(ushort seg, ushort off, byte value) => throw new InvalidOperationException("The scene does not write texts.");
+        public void Write(ushort seg, ushort off, byte value) => start.TextBuffer![Index(seg, off)] = value;
     }
 
     private sealed class Pictures(string dir) : IPictureSource

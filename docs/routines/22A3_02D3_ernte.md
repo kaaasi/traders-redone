@@ -135,3 +135,27 @@ Computer) mit echter Grafik und Tastatur-Interrupts; Port `HarvestStep` in der P
 CRTC-Start; ebenso am Rücksprung (Maschine danach blockiert an Aufruf 18, 17 ist Marker 3). Läufe: vier Computer Woche 0,
 Mensch mit „rechts“ und Feuer und Vorräten bei 990 (Woche 0), zwei Menschen in Woche 2. Gegenproben (je rot): Balkenlinie
 ausgelassen, ein getipptes Zeichen ausgelassen (beide am Bild), ein Bild doppelt verarbeitet.
+
+## Einbindung in die Woche (Teil 3, R6)
+
+`src/Traders.Core/Phases/WeekScreens.cs` bindet die Bildschirmschritte der Runde 6 in `WeekSteps`: Aufruf 4 hinter dem Wächter
+(`CatastropheGuardStep(rest)` mit `CatastropheStep`), 9 (`WeekIncidentsStep`), 11 (`StationsStep`), 16 (`HarvestStep`); erster
+ausstehender Aufruf ist danach 18 (`1C68:000B`). Die Schritte entstehen je Aufruf neu (`DeferredStep`), weil ihre Eingaben vom
+Zeitpunkt abhängen: Regelseite auf der Zeichenseite `DS:40DE[DS:082E]`, Bild `DS:08D0`, Schrift des Treibers, Textpuffer
+`DS:4884` (eine gemeinsame Kopie; `2295:0001` schreibt die Beträge der Ereignisse im Kern, die Zahlen der Stationen als
+Ausgabeaufruf über die Schichten hinein). Seitenzustand `DS:082E/0830`, `40DE…40E5`, `4516` gehört den Ausgabeschichten; der
+Host gibt ihn zu Beginn jedes Aufrufs als Eingabe (`WeekScreenInputs.OutputPages`, `[APPROX]`).
+
+**Mehrrundenprobe** `tests/Traders.Tests/Phases/MultiWeekRound6DifferentialTests.cs`: Standardpartie, Spieler 0 Mensch
+(Steuerung 4, R5-Tastenmuster), Katastrophen an, Wochen 0–4 und Aufruf 1 von Woche 5. Aufrufe 3, 4, 8, 9, 11, 16 Bild für Bild
+(je Rücklauf DS ohne Ausgabebytes des Schritts, `10D2`; das Original rechnet sein Bild zuerst, damit ein `time()`-Wert für
+`random(0)` bekannt ist), 6, 21 und Regelschritte am Rücksprung, 18, 19, 23–30 im RefEmu. Textpuffer nach 4, 9, 11, 16 gleich
+(nach RefEmu-Schritten übernommen). Belegt (Lauf auf diesem Stand): Katastrophe Art 0 mit Sternvorführung `0112` in Woche 4
+(1402 Bilder im Port), Wochenereignis in Woche 3 (1096 Bilder), Stationen und Ernte jede Woche mit Handlungen des Menschen.
+Gegenprobe (lokal): ein Bild von Aufruf 4 doppelt verarbeitet → rot in Woche 4 (`DS:09C8`, Rücklauf 727).
+
+**Host** (`src/Traders.App/ProgramHost.cs`): spielt Woche 0 bis zur Ernte mit allen Szenen und hält an Aufruf 18;
+`HostPlantingFrameDifferentialTests` Bild für Bild gegen den RefEmu (VRAM, DAC, CRTC-Start, `10D2` je Rücklauf; Bericht und
+Ereignisse nur an ihren Darstellungsroutinen, siehe deren Harness), `ProgramHostTests` DS und Bild an der Aufrufstelle von 18.
+Gegenprobe (lokal): `HarvestScene.NextFrame` im Host ausgelassen → rot (DAC in der Ernte). Schneller Test für den Bildeintrag
+von Aufruf 3: `ReportPictureStepTests.cs` (#135).
