@@ -86,7 +86,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
   Gegenprobe im Review (Vergleich `>` statt `>=`, Vergleich vorzeichenbehaftet, Leerlauf zieht eine Zufallszahl, Handler 23 doppelt getaktet → rot);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Teil 1 sofort; Teil 3 nach Merge von 1 und 3 (sonst `spur-wartet`, „wartet auf 1/3“).
-- **Status:** –
+- **Status:** Teil 1 in Arbeit (Claude, Branch `paket/ende`, Base `006509f`).
 
 ## 1 `handel` – Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29`
 
