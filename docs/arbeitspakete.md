@@ -143,7 +143,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler), Szene pixelgenau;
   Gegenprobe im Review (Auslösung invertiert, eine Ziehung ausgelassen, Vorrat ohne Obergrenze → rot).
 - **Abhängigkeiten:** keine.
-- **Status:** –
+- **Status:** in Arbeit (Claude, Draft-PR `paket/zusatz`), Teil 1.
 
 ## Zuständigkeit gemeinsamer Dateien in R7
 
