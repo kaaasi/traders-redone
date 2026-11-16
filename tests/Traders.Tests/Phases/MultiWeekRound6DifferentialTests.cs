@@ -30,7 +30,8 @@ namespace Traders.Tests.Phases;
 /// catastrophes 111D:0009), 8 (planting), 9 (week incidents 17CB:0005), 11 (stations 1B03:0009) and 16 (harvest 22A3:02D3) frame
 /// by frame: every frame of the port is one retrace of the original (entry of 0D73:00D3); at every retrace and at the return the
 /// data segment (outside the bytes of the output layers of that step and of the interrupt handlers) and DS:10D2 are compared.
-/// Calls 18, 19 and the trade steps 23–30 are carried out by the RefEmu. The human presses a key every half second in the
+/// The end check (call 19, 20B3:0005 up to its decision, R7 lane ende) runs as port, compared at its return with AL; call
+/// 18 and the trade steps 23–30 are carried out by the RefEmu. The human presses a key every half second in the
 /// RefEmu (R5 key pattern); the port gets the key table the original holds at the end of each retrace, a time() value the
 /// original reads (random(0)) and, at the call site of call 11, the driver's current font. Expected values come only from the
 /// RefEmu.
@@ -85,7 +86,7 @@ public class MultiWeekRound6DifferentialTests
         })]);
 
     /// <summary>
-    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009, 11A3:0000, 0609:0004, 17CB:0005, 1B03:0009, 22A3:02D3 – weeks 0..4 and
+    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009, 11A3:0000, 0609:0004, 17CB:0005, 1B03:0009, 22A3:02D3, 20B3:0005 – weeks 0..4 and
     /// call 1 of week 5 with one human and three computers, catastrophes on: calls 3, 4, 6, 8, 9, 11, 16, 21 run in the port in
     /// every week (3, 4, 8, 9, 11, 16 frame by frame); nothing differs at any call site, retrace or return; at least one
     /// catastrophe (111D:0112 with one of 0264, 03B7, 0519) runs in the port; the human took part; the text buffer (amounts of
@@ -167,6 +168,7 @@ public class MultiWeekRound6DifferentialTests
             WeekSteps.IncidentsCall => new AfterStep(incidents, CompareTexts),
             WeekSteps.StationsCall => new AfterStep(stations, CompareTexts),
             WeekSteps.HarvestCall => new AfterStep(harvest, CompareTexts),
+            WeekSteps.EndCall => oracle.PortHandler(core, ported.Handlers[s.Number], compareResult: true),
             _ when ported.Handlers.ContainsKey(s.Number) => oracle.PortHandler(core, ported.Handlers[s.Number]),
             _ => new AfterStep(oracle.Handler(core), TakeOverTexts),
         });
@@ -209,11 +211,11 @@ public class MultiWeekRound6DifferentialTests
         Assert.Equal(expected.Append(2), events.Where(e => e.Kind is PhaseEventKind.StepStarted or PhaseEventKind.MarkerPassed).Select(e => e.Step));
         Assert.Equal(expected.Append(2), oracle.Passed.Select(site => WeekLoop.Steps.FirstOrDefault(s => s.Site == site)?.Number).OfType<int>());
 
-        // calls 3, 4, 6, 8, 9, 11, 16, 21 (and every rule step) ran as port in every week
+        // calls 3, 4, 6, 8, 9, 11, 16, 19, 21 (and every rule step) ran as port in every week
         int[] screenCalls =
         [
             WeekSteps.ReportCall, CatastropheGuardStep.Call, WeekPlanningStep.BeforePlantingCall, WeekSteps.PlantingCall,
-            WeekSteps.IncidentsCall, WeekSteps.StationsCall, WeekSteps.HarvestCall, WeekPlanningStep.BeforeTradeCall,
+            WeekSteps.IncidentsCall, WeekSteps.StationsCall, WeekSteps.HarvestCall, WeekSteps.EndCall, WeekPlanningStep.BeforeTradeCall,
         ];
         for (int week = 0; week < Weeks; week++)
         {

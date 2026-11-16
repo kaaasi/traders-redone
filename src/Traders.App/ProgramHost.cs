@@ -1,5 +1,6 @@
 using Traders.Assets;
 using Traders.Assets.Loading;
+using Traders.App.Deviations;
 using Traders.Core;
 using Traders.Core.Events;
 using Traders.Core.Menus;
@@ -26,7 +27,10 @@ namespace Traders.App;
 /// main menu, week report, catastrophes, planting field, incidents, stations, harvest (decision F1 = B of R6). Per display
 /// frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
 /// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The week runs from the balance up to the
-/// harvest; the machine halts at the first call still pending, the robot phase 1C68 (call 18); <see cref="Halt"/> then names it.
+/// harvest; with the robot switch on (default, decision F3 = A of R7) the host skips the robot phase 1C68 (call 18,
+/// <see cref="RobotPhaseSkip"/>) and the week goes on through the end check (call 19) to the first call still pending, the
+/// trade (call 23); without it the machine halts at call 18 as the core does. <see cref="Halt"/> then names the call, or
+/// tells that the game is over where the end check ends it (its end screens are pending, F1 = B of R7).
 /// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
 /// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
 /// scene its numbers (2295:0001 is an output call there), and the core reads the texts from it.
@@ -34,7 +38,7 @@ namespace Traders.App;
 // [APPROX] Host parts of the program start: the heap addresses (text buffer, page buffer) and the segment value of DS are
 // fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
 // and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
-// request are not shown; the week runs up to its first pending call step (call 18) and halts there with a notice (F1 = B, R6).
+// request are not shown; the week runs up to its first pending call step and halts there with a notice (F1 = B of R6 and R7).
 // The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of calls 4, 9 and 11
 // (WeekScreenInputs.OutputPages; the harvest, call 16, reads none of it); the driver's current font likewise for call 11.
 public sealed class ProgramHost
@@ -59,7 +63,13 @@ public sealed class ProgramHost
 
     private readonly string _dir;
 
-    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null)
+    /// <param name="dosDirectory">Directory of the original files.</param>
+    /// <param name="clock">Clock values for random(0).</param>
+    /// <param name="menuHost">Save file and calibration of the disk menu (SAVEGAME.DAT in the directory if null).</param>
+    /// <param name="skipRobotPhase">
+    /// Robot switch: true (default) skips call 18 (<see cref="RobotPhaseSkip"/>), false halts there (<c>--original-roboter</c>).
+    /// </param>
+    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true)
     {
         _dir = dosDirectory;
         var exe = Load("T.EXE");
@@ -70,7 +80,8 @@ public sealed class ProgramHost
         Screens = new WeekScreens(
             new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => Layers!.Ds),
             new WeekScreenOutputs(e => Disasters!.Apply(e), e => Stations!.Apply(e), e => Harvest!.Apply(e), e => Harvest!.Apply(e)));
-        Week = Screens.Week(e => Field!.Apply(e), Lengths);
+        RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
+        Week = Screens.Week(e => Field!.Apply(e), Lengths, robots: RobotSkip);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
             Week.Handlers);
 
@@ -132,8 +143,16 @@ public sealed class ProgramHost
     /// the week.
     /// </summary>
     public string? Halt => Machine.WeekMachine is { Status: PhaseStatus.Blocked } w
-        ? $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
+        ? w.NextStep == WeekSteps.EndCall
+            ? $"week {w.Week}: game over (end check {WeekLoop.Step(w.NextStep)}); the end screens are not ported yet - halted"
+            : $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
         : null;
+
+    /// <summary>The host's stand-in for the robot phase (call 18) when the robot switch is on, else null.</summary>
+    public RobotPhaseSkip? RobotSkip { get; }
+
+    /// <summary>Note for the status line while the robot switch is on (null when it is off).</summary>
+    public string? Deviation => RobotSkip is null ? null : "robot phase skipped (deviation, --original-roboter turns it off)";
 
     public Dgroup Core { get; }
 

@@ -147,7 +147,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         return new Case($"seed {seed}", seed, weeks[seed % 5], g.C, g.R, (byte)(seed / 3 % 2), (uint)(seed * 0x9E3779B9u + 7));
     }
 
-    /// <summary>The cases of <see cref="StarShowDifferentialTests.Catastrophe_with_star_show_matches_the_original"/> reach none and the kinds 0, 1 and 2 (random(2) is 0…2), and week 15/30 strikes.</summary>
+    /// <summary>The cases of <see cref="StarShowDifferentialTests.Catastrophe_with_star_show_matches_the_original"/> reach none and the kinds 0, 1 and 2 (random(2) is 0…2), week 15/30 strikes and strikes by random(10) = 0 in other weeks.</summary>
     [GameDataFact]
     public void Every_branch_of_0009_is_covered()
     {
@@ -161,7 +161,10 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
             int kind = !star ? -1 : h.Calls.Contains("BasePalette(1952)") ? 0 : h.Calls.Contains("DrawOnShownPage()") ? 2 : 1;
             bool tenth = h.RandomArgs.Count > 0 && h.RandomArgs[0] == 10;
             seen.Add($"kind {kind}");
+            Assert.True(tenth, $"{c}: 111D:001E did not draw random(10) first");
             if (star && c.Week % 15 == 0) seen.Add("week multiple of 15");
+            // outside the weeks 15/30 only random(10) = 0 leads to a strike (111D:0022 jz 003C, #165 R6K-2)
+            if (star && c.Week % 15 != 0) seen.Add("random(10) = 0");
             output.WriteLine($"{c}: kind {kind}, randoms {h.RandomArgs.Count}, first {(tenth ? 10 : -1)}");
         }
         Assert.Contains("kind -1", seen);
@@ -169,6 +172,7 @@ public class CatastropheDifferentialTests(ITestOutputHelper output)
         Assert.Contains("kind 1", seen);
         Assert.Contains("kind 2", seen);
         Assert.Contains("week multiple of 15", seen);
+        Assert.Contains("random(10) = 0", seen);
     }
 
     /// <summary>

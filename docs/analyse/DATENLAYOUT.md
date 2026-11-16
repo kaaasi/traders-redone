@@ -449,6 +449,29 @@ Befund [22A3_02D3_ernte.md](../routines/22A3_02D3_ernte.md). G = belegt durch Di
 | `45D0` | W s | `LoopWare` | nach `0340` 4, in `062E` Art des gesammelten Feldes (Index in `3CF4`) | G – `0340`, `062E` |
 | `0140` | B | – | Zeichenpuffer der Schreibmaschine `0A69:01AD` (Ausgabe) | G – `08C1` (ausgenommen) |
 
+## Runde 7, Spur `handelski` (Handels-KI `141D`)
+
+Befund [141D_0008_handelski.md](../routines/141D_0008_handelski.md); Namen in `src/Traders.Core/Ai/TradeAiLayout.cs`. p = `37AA`,
+w = `45D0`. G = belegt durch Differenztest (`TradeAiDifferentialTests`), W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `2D3E` | L[4] s | `Budget` | Bargeld / (150 − (10000 − Bargeld) / 83); unteres Wort = Grundgebot der Stufen | G – `0029`; W |
+| `2D78` / `2D64` / `2D80` | W[4] s | `Need` / `Reserve` / `Surplus` | Bedarf ≥ 0 / Preisgrenze bzw. 30, 0 bei Überschuss / Überschuss ≥ 0 der Ware w | G – `021A` |
+| `2D88` | L[4][4] s, Stride 16 | `WareBudget` | Bargeldanteil je Ware; `0CCA` zieht den Preis ab | G – `008C`, `05A3`, `0CCA` |
+| `2C7E` | L[4][4] s, Stride 16 | `BidLevel` | Gebotsstufen Grund+Schritt, Grund, Grund−Schritt, Warenpreis | G – `04A5` |
+| `2CFE` | W[4][4] s, Stride 8 | `BidUnits` | Einheiten je Stufe (Schritte von 10) | G – `05A3`, `0CCA` |
+| `2D6C` / `2D50` | W[4] / L[4] | `CurrentLevel` / `CurrentBid` | erste Stufe mit Einheiten (4 = keine) / deren Gebot (0 = keins) | G – `05A3`, `0CCA` |
+| `2CBE` / `2D1E` | L[16] / W[16] | `SortedBid` / `SortedUnits` | Stufen aller Käufer nach Rang; Verkäufer 0 | G – `0806`, `0E67` |
+| `2D74` / `2D60` | W / L | `SortedIndex` / `AskFloor` | erster Listeneintrag mit Einheiten (16 = keiner) / dessen Gebot, 1 dahinter | G – `0806`, `0ED7`, `0BFD`, `0E67` |
+| `2D76` / `2DC8` | W / L | `SellerSurplus` / `HighestBid` | Σ Überschuss der Verkäufer / größtes Gebot der Computer-Käufer | G – `0F01`, `0E09` |
+| `2BBA` | W s | `LastSale` | Countdownstand beim letzten erzwungenen Schritt eines Verkäufers | G – `0BFD` |
+| `43B2` | B[4] u | `Side` | im Handel: 0 Käufer, 1 Verkäufer (ergänzt §14/§15) | G – `09F3`, `0E09`, `0F01`; W – `0B9F:00FE` |
+| `43A2` / `455A` / `3D1C` | W[4] / W / W s | `Position` / `MarketPrice` / `Spread` | Lage auf dem Handelsbild (−3 Käufer, 103 Verkäufer beim Seitenwechsel) / Startpreis / Spanne | G – `0A1D`, `0BFD`; W |
+| `2BB8` / `2BC0` | B s / B | `Sellers` / `BuyerFlag` | Divisor in `0A1D` (0 bzw. −1 → Divisionsfehler) / 1 schaltet die Höchstgebotsregel ein | G – `0A1D`; W |
+| `3780` / `2F16` / `2F18` | W s | `Countdown` / `CountdownA` / `CountdownB` | Handels-Countdown (`21FD:04E5`/`04F9`); `0397` handelt nur bei `2F18` = `2F16` | G – `0397`, `0BFD`; W |
+| `4106` / `44F2` | W s | `Buyer` / `Seller` | Käufer (10 = Laden, dann kein `0CCA`) / Verkäufer eines Abschlusses | G – `0CCA`, `0E67`; W – `0C29:03B2` |
+
 ## Runde 7, Spur `zusatz` (Zusatzphase `1DEF:000C`)
 
 Befund [1DEF_000C_zusatzphase.md](../routines/1DEF_000C_zusatzphase.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf gefolgert.

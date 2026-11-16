@@ -178,19 +178,22 @@ internal static class CatastropheFrameHarness
 
     /// <summary>
     /// A random state from which 111D:001E chooses <paramref name="kind"/> (−1: none) in the snapshot's week, found with the
-    /// port's generator (input choice only; the test asserts the kind the original took).
+    /// port's generator (input choice only; the test asserts the kind the original took). The search is bounded (#166 R6K-3):
+    /// a port error that makes a kind unreachable fails the test instead of hanging it.
     /// </summary>
     public static uint RandomFor(int week, int kind)
     {
+        const uint Tries = 100_000; // every kind needs about 11 tries on average (random(10) = 0, then random(2))
         var d = new Dgroup(new byte[L.Size]);
         d.Set(L.Week, (short)week);
-        for (uint s = 1; ; s++)
+        for (uint s = 1; s <= Tries; s++)
         {
             uint seed = s * 0x9E3779B9u;
             var r = new OriginalRandom(new RecordedClock([]), seed);
             short? k = Catastrophes.Choose(d, r);
             if ((k ?? -1) == kind) return seed;
         }
+        throw new InvalidOperationException($"no random state for kind {kind} in week {week} within {Tries} tries");
     }
 
     public static Result Run(Script script, bool picture = false)

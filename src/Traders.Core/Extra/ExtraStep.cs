@@ -20,7 +20,8 @@ public sealed class ExtraStep(IExtraHost host, Func<int, ImageFileLengths> files
     /// <summary>
     /// The frame of 1DEF:000C when the week loop calls it: BP = 0FD8h in the stack segment, which lies right behind DGROUP
     /// (SS = DGROUP + 58Ah, written relative to <see cref="DgroupLayout.Segment"/>). Measured in the original in weeks 0–3 of a
-    /// running game (test Frame_in_real_games_is_the_game_frame, docs/routines/1DEF_000C_zusatzphase.md).
+    /// running game (test ExtraDifferentialTests.Phase_in_real_games_matches_the_original,
+    /// docs/routines/1DEF_000C_zusatzphase.md).
     /// </summary>
     // [ORIGINAL] 1DEF:000C – SS:SP = DGROUP + 58Ah : 0FDAh at the entry from the week loop (RefEmu probe)
     // [APPROX] The port has no load address: SS is given relative to the image's DGROUP (DgroupLayout.Segment), as the

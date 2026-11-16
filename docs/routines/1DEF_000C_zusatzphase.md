@@ -2,7 +2,7 @@
 
 - **Ladebild-Adresse:** Segment `1DEF` (Dateioffset `0x214F0`, Größe `0x8F0`); `000C` bei `0x214FC`. Die ersten zwölf Bytes
   des Segments sind der Schluss der Routine davor. `07AD` läuft über das Segmentende hinaus: `mov sp,bp`/`pop bp`/`retf`
-  liegen bei `1F63:0000`. Hinter `04A9` steht bei `0647` die Sprungtabelle (fünf Wörter `0612`, `056C`, `0533`, `05A4`, `05DB`).
+  liegen bei `1E7E:0000`. Hinter `04A9` steht bei `0647` die Sprungtabelle (fünf Wörter `0612`, `056C`, `0533`, `05A4`, `05DB`).
 - **Aufgabe:** Aufruf 24 der Wochenschleife `1777:01F8` (nach dem Handel). Fällt die Phase, zeigt ein Hinweis (Textzeilen 227/228
   der Texttabelle, 0-basiert: Fat Mike verschenkt Waren), dann liegen 25 Warenstücke auf einem Brett aus 6 × 7 Zellen. Alle vier
   Spieler laufen gleichzeitig – Menschen mit der Steuerung, Computer zum nächsten freien Stück – und nehmen auf, was auf ihrer

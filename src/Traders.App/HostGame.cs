@@ -96,7 +96,7 @@ public sealed class HostGame : Game
             _held.Clear();
             for (int sc = 0; sc < KeyStateTable.Size; sc++)
                 if (Keys.IsDown((byte)sc)) _held.Add((byte)sc);
-            _program.Frame(_clock.Frames - 1, _held);
+            _program.Frame(TargetFrame(_clock), _held);
             if (_program.Machine.Status == Traders.Core.Phases.ProgramStatus.Ended) Exit();
             DisplayStart = _program.Driver.DisplayStart;
         }
@@ -110,7 +110,8 @@ public sealed class HostGame : Game
             ? $"Traders – frame {_clock.Frames}, tick {_clock.Ticks}, last make {Keys.LastMake:X2}"
             : _program.Halt is { } halt
                 ? $"Traders – {halt}"
-                : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}";
+                : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}"
+                  + (_program.Deviation is { } deviation ? $" – {deviation}" : "");
         if (_options.MaxFrames is long max && _clock.Frames >= max) Exit();
         base.Update(gameTime);
     }
@@ -126,6 +127,13 @@ public sealed class HostGame : Game
         _batch.End();
         base.Draw(gameTime);
     }
+
+    /// <summary>
+    /// Last frame the program has to have processed when the host clock stands at <paramref name="clock"/>: frames are
+    /// numbered from 0, so after <see cref="HostClock.Frames"/> completed frames it is the one before (−1 before the first).
+    /// <see cref="Update"/> hands it to <see cref="ProgramHost.Frame"/>, which catches up frame by frame (issue #158).
+    /// </summary>
+    public static long TargetFrame(HostClock clock) => clock.Frames - 1;
 
     /// <summary>
     /// Largest rectangle for the picture inside a window of the given size, centred: integer multiples of 320 × 200
