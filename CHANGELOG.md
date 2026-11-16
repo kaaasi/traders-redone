@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (15.–16.11.2026) · letzte Spur `ebaddee`
+## Runde 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (15.–16.11.2026) · letzte Spur `ebaddee`, Abschluss nach Gesamtreview
 
 - Regelseite des Kerns (PR #149, Spur 1 Teil 1a): `src/Traders.Core/Pixels/` für regelrelevante Pixel ohne Projektreferenz
   (R6P-1, `AGENTS.md` §4); #155/#156.
@@ -13,7 +13,7 @@
 - Spur 0 `ernte` (PR #152): Ernte `22A3:02D3` mit Szene; Einbindung der Aufrufe 4, 9, 11, 16; Mehrrundenprobe Wochen 0–4 mit
   Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18; #135.
 - Prozess: Plan (PR #143, #148), CI-Zeitlimit 30 min (PR #172, #167). 1041 Tests grün mit Originaldaten.
-- Gesamtreview offen.
+- Gesamtreview (Codex, zwei Teile) „Ja“: keine Fehler, eine Testlücke (Host-Seitenzustand, #180). M6, M9, M10 abgeschlossen.
 
 ## Runde 5 – Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI (13.–14.11.2026) · letzte Spur `96b01bf`, Abschluss `9c7c564`
 
