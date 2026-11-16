@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI) abgeschlossen ([archiv/runde-5.md](docs/archiv/runde-5.md)); nächste: Runde 6
+Stand: 16.11.2026 · Runde 6 (Katastrophen, Wochenereignisse, Stationen, Ernte) abgeschlossen ([archiv/runde-6.md](docs/archiv/runde-6.md)); nächste: Runde 7
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -15,11 +15,11 @@ Stand: 14.11.2026 · Runde 5 (Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI) a
 | M3 | Kern-Fundament | ✅ | RNG ✅, 16-Bit-Arithmetik, Spielzustand/DS-Layout + Spielstand; VGA-Treiber `23CD` (R2) und Grafikschichten `0A96`/`0A69`/`0B67`/`21AF`/Paletten (R3); Phasenmaschine mit Takt und Zufall je Bild, Wochenregeln ohne Bildschirm mit Differenztests und Mehrrundenprobe über vier Wochen (R3); Host `Traders.App` ohne Szenen (R3). Gesamtreview R3 „Ja“ |
 | M4 | Menü & Setup | ✅ | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene und holt Bilder bildweise nach (#111); Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview R4 nach Fix R4G-1 erledigt; Windows-Start per Hand bestätigt (Nutzer 13.11.2026), Menü-Neuzeichnen #126 behoben (#127) |
 | M5 | Anbau | ✅ | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 „Ja“ |
-| M6 | Produktion & Wetter | ⬜ | |
+| M6 | Produktion & Wetter | ✅ | Wetter `21FD:021F`, Produktion `22A3:0003`, Schwund `22A3:026B` (R3); Ernte zeigen und einsammeln `22A3:02D3` im Kern und als Szene Bild für Bild gegen den RefEmu (R6 Spur 0). Gesamtreview R6 „Ja“ |
 | M7 | Fat Mike / Schnecken | ⬜ | |
 | M8 | Auktion / Handel | ⬜ | |
-| M9 | Rakete & Stationen / Piraten | ⬜ | |
-| M10 | Ereignisse & Katastrophen | ⬜ | |
+| M9 | Rakete & Stationen / Piraten | ✅ | Stationswahl, Raketenflug, Piraten, Stationsertrag `1B03:0009` (44 Routinen) im Kern Bild für Bild, Pixel über die Regelseite `Pixels/`, Szene pixelgenau (R6 Spur 3, F1 = B). Gesamtreview R6 „Ja“ |
+| M10 | Ereignisse & Katastrophen | ✅ | Katastrophen mit Sternvorführung `111D:0009` (Regelseite) und Wochenereignisse `17CB:0005` im Kern und als Szene (R6 Spuren 1/2); Aufrufe 4, 9, 11, 16 eingebunden, Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18. Gesamtreview R6 „Ja“ |
 | M11 | Wochenbilanz & Einkauf | 🟡 | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf offen |
 | M12 | Roboterkampf | ⬜ | |
 | M13 | Ende / Rang | ⬜ | |
@@ -63,18 +63,18 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `0E31` | 0x6D0 | Neue Partie: Land, Stationen, Startwerte | ✅ alle sieben Routinen mit Differenztest (R4 Spur 2) |
 | `0E9E` | 0x400 | Eingabe je Spieler nach Steuerungsart | ✅ Befehlsquelle im Kern, alle sechs Steuerungsarten (R4 Spur 3) |
 | `0EDE` | 0x23F0 | Roboterkampf: Ablauf, Bewegung, Treffer, Beute | 🔍 |
-| `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | 🟡 Wächter `000D–001B` (Woche ≤ 2 bzw. `DS:2F30` = 0, R5 Spur 0); Katastrophen offen (R6) |
+| `111D` | 0x860 | Katastrophen und Wochenereignis-Einblendung | ✅ Wächter `000D–001B` (R5 Spur 0); Katastrophen `0009` mit Sternvorführung `0112` auf der Regelseite `Pixels/`, Arten `0264`/`03B7`/`0519`, Fenster `0757`/`07E2`, Szene (R6 Spur 1) |
 | `11A3` | 0x1250 | Computerspieler: Wochenplanung (zwei Durchgänge) | ✅ Wochenplanung `0000` mit allen 15 Routinen, beide Durchgänge (R5 Spur 2) |
 | `12C8` | 0x950 | Computerspieler: Roboter-Aufstellung | ⬜ |
 | `135D` | 0xC00 | Computerspieler: Anbau | ✅ Computerzug `000E` mit `0935`/`0AB3` und allen 14 Routinen (R5 Spur 1) |
 | `141D` | 0xF20 | Computerspieler: Handel | ⬜ |
 | `150F` | 0x1C70 | Computerspieler: Roboterkampf | ⬜ |
 | `16D6` | 0xA10 | Computerspieler: Roboterkauf | ⬜ |
-| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟡 `000C` als Programmphasen mit Gleichschritt, `04E4` (R4 Spur 0); `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3) |
-| `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ⬜ |
+| `1777` | 0x540 | Hauptprogramm: `main` `000C`, Wochenschleife `01F8`, Wochenpreise `02DC` (ohne Uhr, BESTAND B1), Initialisierung `04E4` | 🟡 `000C` als Programmphasen mit Gleichschritt, `04E4` (R4 Spur 0); `01F8` als Phasenmaschine mit Mehrrundenprobe, `02DC` portiert (R3); Aufrufe 4, 9, 11, 16 eingebunden, Host bis Aufruf 18 (R6 Spur 0) |
+| `17CB` | 0xA10 | Wochenereignisse (Geld, Felder) mit Fenster | ✅ `0005` mit allen Routinen im Kern und als Szene (R6 Spur 2) |
 | `186C` | 0xC10 | Ressourcenlader: Bild *i* laden (`0002`), entpacken, Dateien | 🟡 Bildtabelle `0002`/`0997` im Kern (R4 Spur 0) |
 | `192D` | 0x1D60 | Menüs (Haupt, Stufe, Einstellungen, Diskette, Steuerung), Texttabelle | ✅ Menülogik im Kern, Menüszene in `Traders.Presentation` (R4 Spur 1) |
-| `1B03` | 0x1650 | Stationswahl, Raketenflug, Piraten, Stationsertrag | ⬜ |
+| `1B03` | 0x1650 | Stationswahl, Raketenflug, Piraten, Stationsertrag | ✅ `0009` mit allen 44 Routinen im Kern Bild für Bild, Pixel über die Regelseite (`Pixels/StationsPage.cs`), Szene (R6 Spur 3) |
 | `1C68` | 0x1870 | Roboterphase: Steuerung und Roboterkauf-Bildschirm | 🔍 |
 | `1DEF` | 0x8F0 | Zufällige Zusatzphase nach dem Handel (Regel offen) | ⬜ |
 | `1E7E` | 0xE50 | Roboterkampf: Kampffeld erzeugen (Raster `DS:48F4`) | ⬜ |
@@ -85,7 +85,7 @@ die Zahlen „×n“ dort zählen nur Far-Aufrufe, Aufrufe innerhalb eines Segme
 | `21AF` | 0x4E0 | Grafik: bewegte Objekte (8 Sätze ab `DS:330C`) | 🟢 bewegte Objekte (R3 Spur 2) |
 | `21FD` | 0x980 | Hilfen: Zufall ✅, Wetter `021F`, Warten, Paletten/Blenden, Seitenwechsel, Code-Abfrage `0687`, leere Marke `0977` | 🟡 Zufall ✅, Wetter `021F`, Paletten/Blenden `026C…04DA`, Seitenwechsel `051F` (R3); Code-Abfrage `0687` (R4 Spur 0); Warteschleife `0004` mit `060D`/`0665`/`0590` (R5 Spur 3) |
 | `2295` | 0xE0 | Zahl → Text, Einzelfarbe, Palette an die Karte | 🟢 portiert (R3 Spur 2) |
-| `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | 🟡 Produktion `0003`, Schwund `026B` portiert (R3 Spur 1); Ernte offen |
+| `22A3` | 0x930 | Produktion (`0003`), Wochenschwund der Vorräte (`026B`), Erntedarstellung (`02D3`) (BESTAND B4) | ✅ Produktion `0003`, Schwund `026B` (R3 Spur 1); Ernte `02D3` mit allen Routinen im Kern und als Szene (R6 Spur 0) |
 | `2336` | 0x970 | Spielstand speichern/laden (`000A`, `0539`) | 🟢 |
 | `23CD` | 0x3F90 | Grafiktreiber in Assembler; portiert wird nur der VGA-Teil (Mode X), Objekte `06E9/071C`, Atlas `166A/3079` | ✅ VGA-Teil (29 Adressen mit Differenztest, Randfälle laut Gesamtreview R2 behoben, #59; #60 statisch nicht erreichbar, GRAFIK.md §8) |
 | `27C6` | 0x5B0 | Interrupt-Handler (Timer, Tastatur, DOS), Joystick, Farbregister | 🟡 Eingabe/Zeitgeber mit Differenztests, Host-Ersatz in `Traders.App` (R3 Spur 3) |

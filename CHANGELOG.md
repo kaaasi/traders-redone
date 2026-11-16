@@ -1,5 +1,20 @@
 # Zwischenstände
 
+## Runde 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (15.–16.11.2026) · letzte Spur `ebaddee`, Abschluss nach Gesamtreview
+
+- Regelseite des Kerns (PR #149, Spur 1 Teil 1a): `src/Traders.Core/Pixels/` für regelrelevante Pixel ohne Projektreferenz
+  (R6P-1, `AGENTS.md` §4); #155/#156.
+- Fix #147 (PR #150): Host setzt die Heap-Zeiger von Atlas und Masken; Host-Test Bild für Bild durch den Anbau; #113.
+- Spur 2 `ereignisse` (PR #146): Wochenereignisse `17CB:0005` im Kern und als Szene; Leseregel über Methodenparameter (#139),
+  Rückrichtung für alle Projekte (#76 P3-1).
+- Spur 1 `katastrophen` (PR #153): Katastrophen `111D:0009` mit Sternvorführung `0112` auf der Regelseite, alle Arten im
+  Gleichschritt, Szene pixelgenau; #140, #131.
+- Spur 3 `stationen` (PR #151, F1 = B): Stationen, Raketenflug, Piraten `1B03:0009` (44 Routinen), Takt je Bild nach R6S-1.
+- Spur 0 `ernte` (PR #152): Ernte `22A3:02D3` mit Szene; Einbindung der Aufrufe 4, 9, 11, 16; Mehrrundenprobe Wochen 0–4 mit
+  Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18; #135.
+- Prozess: Plan (PR #143, #148), CI-Zeitlimit 30 min (PR #172, #167). 1041 Tests grün mit Originaldaten.
+- Gesamtreview (Codex, zwei Teile) „Ja“: keine Fehler, eine Testlücke (Host-Seitenzustand, #180). M6, M9, M10 abgeschlossen.
+
 ## Runde 5 – Wochenbilanz, Wochenplanung, Anbau mit Anbau-KI (13.–14.11.2026) · letzte Spur `96b01bf`, Abschluss `9c7c564`
 
 - Spur 2 `planung` (PR #123): Wochenplanung der Computerspieler `11A3` (15 Routinen, beide Durchgänge) mit Differenztests über vier
