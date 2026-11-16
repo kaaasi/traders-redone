@@ -83,6 +83,11 @@ Aufruf 24; eingebunden von Spur `ende`). Gerufen statt nachgebaut: `0609:1F2D`/`
 (`Planting`, `FieldCursor`), `0609:215E` (`FieldCursor.Idle`), Schreibmaschine `0A69:0288` (`Harvest.TypeLines`), Blenden,
 Seitenwechsel und `0185` (`Planting.Fade`/`Flip`/`Retraces`), `21FD:0004` (`Week.WaitLoop`).
 
+Szene: `src/Traders.Presentation/Extra/ExtraScene.cs` auf `V-ANBAU` – die gemeinsamen Anforderungen spielt `FieldScene`
+(Bild, Hintergrund, Rahmen, Rand, Kacheln, Objekte, Blenden, Seiten, Warten), die eigenen (`ExtraEvent`: Schreibmaschine,
+Warensymbole `0609:1912`, maskierte Ware `0A96:013B`, Gewinnzahlen `0A96:057A`) hängen Einträge an die Befehlsliste `0A96`.
+Das Brett `0227` legt mehr als 91 Einträge in die Liste (bis 100, `DS:15C0` + 64h·1Ch).
+
 ## Prüfung
 
 `tests/Traders.Tests/Extra/ExtraDifferentialTests.cs` gegen den RefEmu (Zeichnen, Ton, Steuerung, Pause und Warteschleife
@@ -92,3 +97,10 @@ mit Datensegment und Stapelfeldern, `000C` ganz aus LoadOnly-Zuständen (fällt 
 Wochen 0–3 (Menschen und Computer). Verglichen: Datensegment, Stapelfelder, `DS:10D2`, Zahl der `random()`-Aufrufe, Aufruffolge.
 Gegenproben (je rot): Auslösung invertiert, eine Ziehung in `0173` ausgelassen, Vorrat bei 999 gekappt, Gleichstand der KI
 andersherum, Rand unten bei Zeile 5.
+
+Bildgenau: `ExtraFrameDifferentialTests.cs` (Harness `ExtraFrameHarness.cs`) – `ExtraStep` als Aufruf 24 der Phasenmaschine im
+Gleichschritt mit dem Original in einer laufenden Partie (Woche 0 mit vier Computern und mit einem Menschen, Woche 2 erzwungen
+mit zwei Menschen und `2F26` = 30, Woche 2 ohne Phase): je Rücklauf des Originals ein Bild des Ports; Datensegment, `DS:10D2`,
+Zahl der Ziehungen, Befehlsliste und Bild (VRAM, DAC, Anzeigestart) gleich, ebenso beim Rücksprung; danach hält die Maschine
+an Aufruf 26. Gegenproben: ein Warensymbol oder ein getipptes Zeichen ausgelassen, ein Bild doppelt verarbeitet → rot.
+

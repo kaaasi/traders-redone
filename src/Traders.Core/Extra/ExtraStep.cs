@@ -23,6 +23,8 @@ public sealed class ExtraStep(IExtraHost host, Func<int, ImageFileLengths> files
     /// running game (test Frame_in_real_games_is_the_game_frame, docs/routines/1DEF_000C_zusatzphase.md).
     /// </summary>
     // [ORIGINAL] 1DEF:000C – SS:SP = DGROUP + 58Ah : 0FDAh at the entry from the week loop (RefEmu probe)
+    // [APPROX] The port has no load address: SS is given relative to the image's DGROUP (DgroupLayout.Segment), as the
+    // host numbers segments differently (its text buffer, for example); a host that mirrors the original's memory passes its frame.
     public static readonly ExtraFrame GameFrame = new(0x0FD8, (ushort)(DgroupLayout.Segment + 0x058A));
 
     private IEnumerator<FieldWait>? _run;
