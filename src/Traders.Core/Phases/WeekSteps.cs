@@ -1,4 +1,5 @@
 using Traders.Core.Ai;
+using Traders.Core.Ending;
 using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Startup;
@@ -14,7 +15,10 @@ namespace Traders.Core.Phases;
 /// of lane anbau-ki and the wait loop of lane bilanz). With the handlers of round 6 given (lane ernte part 3) also call 4
 /// beyond its guard (111D:0009, lane katastrophen), the week incidents (call 9, 17CB:0005, lane ereignisse), the stations
 /// phase (call 11, 1B03:0009, lane stationen) and the harvest (call 16, 22A3:02D3); the first call step still pending is then
-/// call 18 (robot phase 1C68:000B). A handler left out stays pending: the machine stops at its call.
+/// call 18 (robot phase 1C68:000B). The end check (call 19, 20B3:0005, round 7 lane ende) is always bound up to its decision;
+/// where the game ends it is pending unless its rest is given. With a handler for call 18 (the host's deviation that skips
+/// the robot phase, or an oracle) the week runs on through calls 19–21 to the trade (call 23). A handler left out stays
+/// pending: the machine stops at its call.
 /// </summary>
 public sealed class WeekSteps
 {
@@ -33,8 +37,14 @@ public sealed class WeekSteps
     /// <summary>Call number of the harvest 22A3:02D3.</summary>
     public const int HarvestCall = 16;
 
-    /// <summary>First call step not ported in round 6: the robot phase 1C68:000B.</summary>
+    /// <summary>First call step not ported in round 6: the robot phase 1C68:000B (ported in R10–R11).</summary>
     public const int RobotCall = 18;
+
+    /// <summary>Call number of the end check 20B3:0005.</summary>
+    public const int EndCall = EndCheckStep.Call;
+
+    /// <summary>Call number of the trade 0B9F:0002 (round 7 lane handel).</summary>
+    public const int TradeCall = 23;
 
     /// <param name="planting">Output of the planting phase (scene and sound) and its controls.</param>
     /// <param name="files">Lengths of the picture files (picture table of 186C:0002).</param>
@@ -43,9 +53,11 @@ public sealed class WeekSteps
     /// <param name="incidents">Handler for call 9 (null = pending).</param>
     /// <param name="stations">Handler for call 11 (null = pending).</param>
     /// <param name="harvest">Handler for call 16 (null = pending).</param>
+    /// <param name="robots">Handler for call 18 (null = pending; the core has no port of 1C68 yet).</param>
+    /// <param name="endRest">Handler of the whole call 19 where the game ends (null = pending, "game over").</param>
     public WeekSteps(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
         IWeekStepHandler? catastrophes = null, IWeekStepHandler? incidents = null, IWeekStepHandler? stations = null,
-        IWeekStepHandler? harvest = null)
+        IWeekStepHandler? harvest = null, IWeekStepHandler? robots = null, IWeekStepHandler? endRest = null)
     {
         devices ??= KeyboardOnlyDevices.Instance;
         Report = new ReportStep(devices);
@@ -60,7 +72,13 @@ public sealed class WeekSteps
         if (incidents is not null) Handlers[IncidentsCall] = incidents;
         if (stations is not null) Handlers[StationsCall] = stations;
         if (harvest is not null) Handlers[HarvestCall] = harvest;
+        if (robots is not null) Handlers[RobotCall] = robots;
+        End = new EndCheckStep(endRest);
+        Handlers[EndCall] = End;
     }
+
+    /// <summary>Call 19, the end check; <see cref="EndCheckStep.GameOver"/> tells whether its last call ended the game.</summary>
+    public EndCheckStep End { get; }
 
     /// <summary>
     /// The report of call 3; <see cref="ReportStep.Report"/> holds the running report and its <see cref="WeekEvent"/>s. The
@@ -76,10 +94,11 @@ public sealed class WeekSteps
 
     /// <summary>
     /// Call numbers with a handler that run in every week (call 4 only up to week 2 or without catastrophes, unless its rest
-    /// is given), without the optional handlers of calls 9, 11, 16.
+    /// is given; call 19 only where the game goes on, unless its rest is given), without the optional handlers of calls 9,
+    /// 11, 16 and 18.
     /// </summary>
     public static IReadOnlyList<int> ScreenCalls { get; } =
-        [ReportCall, CatastropheGuardStep.Call, WeekPlanningStep.BeforePlantingCall, PlantingCall, WeekPlanningStep.BeforeTradeCall];
+        [ReportCall, CatastropheGuardStep.Call, WeekPlanningStep.BeforePlantingCall, PlantingCall, EndCall, WeekPlanningStep.BeforeTradeCall];
 
     /// <summary>Call numbers of the screen steps of round 6 that the constructor binds when their handler is given.</summary>
     public static IReadOnlyList<int> OptionalCalls { get; } = [IncidentsCall, StationsCall, HarvestCall];

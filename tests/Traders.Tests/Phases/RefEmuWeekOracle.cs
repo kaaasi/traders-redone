@@ -115,8 +115,11 @@ internal sealed class RefEmuWeekOracle
     /// </summary>
     /// <remarks><paramref name="atCallSite"/> runs at the call site after the comparison and before the take-over (for example
     /// to set a state in the RefEmu that both sides then start the step from).</remarks>
-    public IWeekStepHandler PortHandler(Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite = null) =>
-        new PortStepHandler(this, core, port, atCallSite);
+    /// <remarks>With <paramref name="compareResult"/> the port's AL is compared with the original's at the return as well (only
+    /// for steps whose AL the loop uses: the end check 20B3:0005).</remarks>
+    public IWeekStepHandler PortHandler(Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite = null,
+        bool compareResult = false) =>
+        new PortStepHandler(this, core, port, atCallSite, compareResult);
 
     /// <summary>Ported steps compared at their return, in order (week, call number, random draws of the port).</summary>
     public List<(int Week, int Step, long Draws)> PortedSteps { get; } = [];
@@ -282,8 +285,8 @@ internal sealed class RefEmuWeekOracle
         public StepOutcome Tick(StepContext context) => throw new InvalidOperationException("oracle steps finish at once");
     }
 
-    private sealed class PortStepHandler(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite)
-        : IWeekStepHandler
+    private sealed class PortStepHandler(RefEmuWeekOracle o, Dgroup core, IWeekStepHandler port, Action<OriginalProgram>? atCallSite,
+        bool compareResult) : IWeekStepHandler
     {
         public StepOutcome Begin(StepContext context)
         {
@@ -305,6 +308,9 @@ internal sealed class RefEmuWeekOracle
             uint emuSeed = BitConverter.ToUInt32(o._p.DataSegment(), DgroupLayout.RandomSeed);
             if (context.Random.Seed != emuSeed)
                 o.Differences.Add($"week {week} after {step} (port): random state core {context.Random.Seed:X8} RefEmu {emuSeed:X8}");
+            byte al = (byte)o._p.Machine.Cpu.Ax;
+            if (compareResult && outcome.Result != al)
+                o.Differences.Add($"week {week} after {step} (port): AL core {outcome.Result:X2} RefEmu {al:X2}");
             // a wrong port fails at once instead of after the remaining weeks
             if (o.Differences.Count != known) throw new InvalidOperationException(o.Differences[^1]);
             o.TakeOverInterruptOwned(core);

@@ -1,4 +1,5 @@
 using Traders.Core;
+using Traders.Core.Ending;
 using Traders.Core.Phases;
 using Traders.Core.State;
 using Traders.RefEmu;
@@ -19,8 +20,12 @@ public class PhaseMachineDifferentialTests
 
     private sealed record Lockstep(PhaseMachine Machine, Dgroup Core, RefEmuWeekOracle Oracle, OriginalProgram Program, List<PhaseEvent> Events);
 
+    /// <param name="beforeWeek">Runs on the RefEmu at the start of week 0.</param>
+    /// <param name="atCallSite">Hooks of the oracle at the call sites, by call number.</param>
+    /// <param name="handler">Makes the core's handler of a call from its oracle handler (null = the oracle handler).</param>
     private static Lockstep Start(Action<OriginalProgram>? beforeWeek = null,
-        IReadOnlyDictionary<int, Action<OriginalProgram>>? atCallSite = null)
+        IReadOnlyDictionary<int, Action<OriginalProgram>>? atCallSite = null,
+        Func<WeekStep, IWeekStepHandler, RefEmuWeekOracle, Dgroup, IWeekStepHandler>? handler = null)
     {
         var p = OriginalProgram.StartGame(Dir);
         Assert.True(p.RunToWeekStart(0, 5), "week 0 did not start within 5 s after the menu");
@@ -28,7 +33,11 @@ public class PhaseMachineDifferentialTests
         // The RefEmu is now at 1777:02DC (entry of call 1); the tests run it to the return of call 1 and start the core at call 2.
         var core = new Dgroup(p.DataSegment().AsSpan(0, DgroupLayout.Size).ToArray());
         var oracle = new RefEmuWeekOracle(p);
-        var handlers = WeekLoop.Steps.Where(s => s.Kind == WeekStepKind.Call).ToDictionary(s => s.Number, s => oracle.Handler(core, atCallSite?.GetValueOrDefault(s.Number)));
+        var handlers = WeekLoop.Steps.Where(s => s.Kind == WeekStepKind.Call).ToDictionary(s => s.Number, s =>
+        {
+            var h = oracle.Handler(core, atCallSite?.GetValueOrDefault(s.Number));
+            return handler is null ? h : handler(s, h, oracle, core);
+        });
         var machine = new PhaseMachine(core, new OriginalRandom(new RecordedClock([])), handlers, nextStep: 2);
         return new Lockstep(machine, core, oracle, p, []);
     }
@@ -55,11 +64,14 @@ public class PhaseMachineDifferentialTests
     /// Week 0 of the default game (four computer players) from call 2 to call 1 of week 1: both take the same 30 calls with the
     /// markers at the same places, the core increments the counter to 1 exactly where the original does (the data segment at
     /// call 1 of week 1 is equal), and no frame consumes random numbers in the core (all draws are inside the RefEmu steps).
+    /// The end check (call 19) runs in the port up to its decision and returns AL = 0 like the original (compared with the data
+    /// segment at its return).
     /// </summary>
+    // [DIFFERENTIAL] 20B3:0005 – in the week loop, no end in week 0
     [GameDataFact]
     public void Week_0_in_lockstep_with_the_original()
     {
-        var l = Start();
+        var l = Start(handler: (s, h, o, core) => s.Number == EndCheckStep.Call ? o.PortHandler(core, new EndCheckStep(), compareResult: true) : h);
         // the RefEmu stopped at the entry of call 1 (1777:02DC); the core starts with call 2 after the return of call 1
         Assert.True(l.Oracle.RunToNextStop() && l.Oracle.IsAtLoop((ushort)(WeekLoop.Step(1).Site + 5)), "return of call 1");
         l.Program.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(l.Core.Bytes);
@@ -78,6 +90,7 @@ public class PhaseMachineDifferentialTests
         Assert.Equal(1, advanced.Value);
         Assert.Equal(1, l.Program.Week);
         Assert.All(l.Events.Where(e => e.Kind == PhaseEventKind.Frame), e => Assert.Equal(0, e.Value));
+        Assert.Equal([(0, EndCheckStep.Call, 0L)], l.Oracle.PortedSteps);
     }
 
     /// <summary>
@@ -111,8 +124,11 @@ public class PhaseMachineDifferentialTests
     /// Exit B by a set state: the target wealth DS:08F4 (dword, compared at 20B3:0026) is set to 0 before week 0, so the end
     /// check of week 0 finds player 0 at or above it, shows the end screens and returns AL = 1. The core exits after call 19
     /// with AL = 1, without markers 4..6 and without its own counter step; the original returns into main with AL = 1.
+    /// The core's end check decides in the port that the game ends (R7 lane ende, F1 = B) and hands the whole call to the
+    /// RefEmu from the unchanged state (rest of <see cref="EndCheckStep"/>).
     /// Counter-check (local): target left as it is → the end check returns 0 and the test fails.
     /// </summary>
+    // [DIFFERENTIAL] 20B3:0005 – decision "end" in the week loop, rest from the RefEmu (exit B)
     [GameDataFact]
     public void Exit_B_in_lockstep_with_the_original()
     {
@@ -124,11 +140,12 @@ public class PhaseMachineDifferentialTests
                 for (int k = 1; k <= 30; k++) p.Press(Scancodes.Enter, delay: 10 * k);
             },
         };
+        EndCheckStep? end = null;
         var l = Start(p =>
         {
             p.WriteWord(DgroupLayout.Target, 0);
             p.WriteWord(DgroupLayout.Target + 2, 0);
-        }, keys);
+        }, keys, (s, h, _, _) => s.Number == EndCheckStep.Call ? end = new EndCheckStep(h) : h);
         Assert.True(l.Oracle.RunToNextStop() && l.Oracle.IsAtLoop((ushort)(WeekLoop.Step(1).Site + 5)), "return of call 1");
         l.Program.DataSegment().AsSpan(0, DgroupLayout.Size).CopyTo(l.Core.Bytes);
         l.Oracle.ResetPassed();
@@ -150,5 +167,6 @@ public class PhaseMachineDifferentialTests
         Assert.Equal(expected, EmuCalls(l.Oracle));
         // the end check increments DS:4B9A itself (20B3:0071); the core has that from the RefEmu, not from its counter step
         Assert.Equal(l.Program.Week, l.Machine.Week);
+        Assert.True(end!.GameOver, "the port's decision did not end the game");
     }
 }

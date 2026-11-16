@@ -77,7 +77,7 @@ public class HostPlantingFrameDifferentialTests
         ScheduleHuman(p);
 
         // the host up to the frame in which the week report waits its first retrace
-        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile());
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase: false);
         var holds = new List<(long From, long To, byte Key)>();
         int planned = 0;
         long f = 0;
@@ -113,7 +113,9 @@ public class HostPlantingFrameDifferentialTests
             // the report's and the incidents' scenes are compared at their presenting routines (WeekReportSceneHarness,
             // EventsSceneHarness), not at every retrace: their drawing between two retraces may fall into a different frame than
             // in the original (hidden page only)
-            if (step is not (WeekSteps.ReportCall or WeekSteps.IncidentsCall)) ComparePicture(p, host, where);
+            // there the shown page (from the display start) and the DAC are compared at every retrace (#157)
+            if (step is not (WeekSteps.ReportCall or WeekSteps.IncidentsCall)) HostPictures.Compare(p, host, where);
+            else HostPictures.CompareShown(p, host, where);
             if (!atRetrace) break;
             retraces++;
             frames[step] = frames.GetValueOrDefault(step) + 1;
@@ -179,27 +181,6 @@ public class HostPlantingFrameDifferentialTests
             m.ScheduleScancode(Time(k * KeyEvery), key);
             m.ScheduleScancode(Time(k * KeyEvery + KeyHold), (byte)(key | 0x80));
         }
-    }
-
-    /// <summary>VRAM planes, DAC and CRTC start of the host against the original's (first difference named).</summary>
-    private static void ComparePicture(OriginalProgram o, ProgramHost host, string where)
-    {
-        var vga = o.Machine.Vga;
-        Assert.True(vga.StartAddress == host.Driver.DisplayStart,
-            $"{where}: display start original {vga.StartAddress:X4}, host {host.Driver.DisplayStart:X4}");
-        for (int pl = 0; pl < 4; pl++)
-        {
-            var a = vga.Planes[pl].AsSpan();
-            var b = host.Driver.Vram.Planes[pl].AsSpan();
-            int k = a.CommonPrefixLength(b);
-            if (k < Math.Min(a.Length, b.Length))
-                Assert.Fail($"{where}: plane {pl} offset {k:X4} (page {k / 0x4000}, x {k % 0x4000 % 80 * 4 + pl}, y {k % 0x4000 / 80}) " +
-                            $"original {a[k]:X2} host {b[k]:X2}");
-        }
-        var dac = host.Layers.Dac.Registers;
-        int d = vga.Dac.AsSpan().CommonPrefixLength(dac);
-        if (d < dac.Length)
-            Assert.Fail($"{where}: DAC colour {d / 3} component {d % 3} original {vga.Dac[d]:X2} host {dac[d]:X2}");
     }
 
     private sealed class NoSaveFile : IMenuHost
