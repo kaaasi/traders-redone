@@ -13,7 +13,7 @@ namespace Traders.Core.Trade;
 /// Bound into the machine by lane ende.
 /// </summary>
 /// <param name="host">Controls, pause and the outputs (scene, sound).</param>
-/// <param name="ai">The trading computer 141D (lane handelski).</param>
+/// <param name="ai">The trading computer 141D (<see cref="TradeComputer"/> in the game).</param>
 /// <param name="files">Lengths of the picture files (as for the main menu).</param>
 public sealed class TradeStep(ITradeHost host, ITradeAi ai, Func<int, ImageFileLengths> files) : IWeekStepHandler
 {

@@ -181,7 +181,11 @@ internal sealed class TradeHarness
 
         public void Prepare(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.Prepare"));
         public void EnterTrade(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.EnterTrade"));
-        public void ChooseRole(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.ChooseRole"));
+        public short ChooseRole(Dgroup d, OriginalRandom random, short stackWord)
+        {
+            Calls.Add(Format("Ai.ChooseRole"));
+            return stackWord; // the retf in the original leaves the stack word as it is
+        }
         public void StartBidding(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.StartBidding"));
         public void Bid(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.Bid"));
         public void AfterSale(Dgroup d, OriginalRandom random) => Calls.Add(Format("Ai.AfterSale"));

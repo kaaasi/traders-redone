@@ -73,17 +73,39 @@ public static class TradeRules
     }
 
     /// <summary>
+    /// SI of main 1777:000C while the week loop runs: its argument counter after the scan of the command line, argc (1 for a
+    /// start without arguments; no routine between main and 0B9F:00FE changes SI). 0C29:0F68 saves it on the stack where
+    /// 141D:0397 later finds its uninitialised local (<see cref="ChooseRoles"/>).
+    /// </summary>
+    // [ORIGINAL] 1777:000C – mov si,1 at 1777:0014, inc si per argument (1777:0110); the port starts without arguments
+    public const short MainArgumentCount = 1;
+
+    /// <summary>
     /// 0B9F:00FE – one frame of the role choice: controls, the computer's choice (141D:0397), then per player: up makes a
     /// player with at least ten units a seller at 67h (sound 1, 18h), down makes him a buyer at −3 (sound 0, 19h); the old
     /// marker is cleared first.
+    /// <para>
+    /// 141D:0397 has an uninitialised local at SP−8 of this routine's stack (finding 141D_0008_handelski.md, "Uninitialised
+    /// local") and in one branch stores what it finds there as the computer's action. The routines called here leave in that
+    /// word: 0E9E:037A its local [bp-2], which ends as the action word of player 3 (−1 for a computer); 141D:0397 the final
+    /// value of its local; 0C29:0F68 the saved SI (<paramref name="si"/>; the return address 0154/01AF that 21A7:0054 leaves
+    /// there before is always overwritten by it). The word is carried along in that order.
+    /// </para>
     /// </summary>
+    /// <param name="si">Register SI of the caller chain up to main (<see cref="MainArgumentCount"/> in the game).</param>
     // [ORIGINAL] 0B9F:00FE
-    public static void ChooseRoles(Dgroup d, OriginalRandom random, ITradeHost host, ITradeAi ai)
+    // [APPROX] 0B9F:00FE – stack word under 141D:0397's local: an interrupt (timer, keyboard) between 0E9E:037A and 141D:039C
+    // can overwrite it with its flags, CS or the handler's saved AX (measured in the RefEmu: 8 of 19 200 calls in weeks 0–3,
+    // none of them in the branch that uses the word); this depends on interrupt timing and is not reproduced.
+    public static void ChooseRoles(Dgroup d, OriginalRandom random, ITradeHost host, ITradeAi ai, short si = MainArgumentCount)
     {
         host.ReadControls(d);
+        // 0E9E:037A – mov al,[bp-2]; mov [si+3308],al for the last player: the local is the action byte sign-extended
+        // (FFFFh, 0, 1, 2, 3 or Ah).
+        short stackWord = d.S8(T.Byte(T.Action, 3));
         ForPlayers(d, d =>
         {
-            if (IsComputer(d, P(d))) ai.ChooseRole(d, random);
+            if (IsComputer(d, P(d))) stackWord = ai.ChooseRole(d, random, stackWord);
             int p = P(d);
             switch ((ControlAction)d.S8(T.Byte(T.Action, p)))
             {
@@ -91,6 +113,7 @@ public static class TradeRules
                     if (Role(d, p) == T.Buyer) break;
                     Emit(host, TradeEventKind.Sound, 0, 0x19);
                     ClearMarker(d, host);
+                    stackWord = si; // 0C29:0F68 – push si at SP−8
                     p = P(d);
                     d.Set(T.Byte(T.Role, p), T.Buyer);
                     d.Set(T.Word(T.Position, p), T.BuyerFloor);
@@ -100,6 +123,7 @@ public static class TradeRules
                     if (Stock(d, p) < T.Lot) break;
                     Emit(host, TradeEventKind.Sound, 1, 0x18);
                     ClearMarker(d, host);
+                    stackWord = si; // 0C29:0F68 – push si at SP−8
                     p = P(d);
                     d.Set(T.Byte(T.Role, p), T.Seller);
                     d.Set(T.Word(T.Position, p), T.SellerStart);

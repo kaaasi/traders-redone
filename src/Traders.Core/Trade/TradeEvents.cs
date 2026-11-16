@@ -111,8 +111,9 @@ public interface ITradeHost
 
 /// <summary>
 /// The trading computer 141D (lane handelski, finding docs/routines/141D_0008_handelski.md): the entry points the trade calls,
-/// each with the caller's random generator. All of them return nothing; their results are in the data segment. The player
-/// concerned is DS:37AA where the trade calls them inside a player loop.
+/// each with the caller's random generator. Their results are in the data segment; only 141D:0397 also leaves a word on the
+/// stack that its next call may read (<see cref="ChooseRole"/>). The player concerned is DS:37AA where the trade calls them
+/// inside a player loop. In the game: <see cref="TradeComputer"/>.
 /// </summary>
 public interface ITradeAi
 {
@@ -122,8 +123,12 @@ public interface ITradeAi
     /// <summary>141D:021A – per player while the panels are drawn (0C29:0086).</summary>
     void EnterTrade(Dgroup d, OriginalRandom random);
 
-    /// <summary>141D:0397 – per computer and frame of the role choice (0B9F:00FE).</summary>
-    void ChooseRole(Dgroup d, OriginalRandom random);
+    /// <summary>
+    /// 141D:0397 – per computer and frame of the role choice (0B9F:00FE). <paramref name="stackWord"/> is the word the routine
+    /// finds under its uninitialised local (<see cref="TradeRules.ChooseRoles"/>); returns the word it leaves there (the same
+    /// word if it does not write the local).
+    /// </summary>
+    short ChooseRole(Dgroup d, OriginalRandom random, short stackWord);
 
     /// <summary>141D:0464 – once before the bidding if there is a seller (0C29:0046).</summary>
     void StartBidding(Dgroup d, OriginalRandom random);
