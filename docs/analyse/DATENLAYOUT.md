@@ -406,3 +406,31 @@ Befund [17CB_0005_wochenereignisse.md](../routines/17CB_0005_wochenereignisse.md
 | `082E` | W | `PageCopyArgument` | Argument der Seitenkopie `0A96:0C3F` im Fenster `0986` | G |
 | `0140` | B | `TypewriterChar` | Zeichen der Schreibmaschine `0A69:01AD` (vom Kern geschrieben, `0141` = 0) | G |
 | `1126` | B | `IncidentText.NumberFill` | Füllzeichen für führende Leerzeichen/Nullen in `2295:0001` (gelesen) | G |
+
+## Runde 6, Spur `stationen` (Stationen `1B03`)
+
+Befund [1B03_0009_stationen.md](../routines/1B03_0009_stationen.md), im Code `StationsLayout`. G = belegt durch Differenztest,
+W = Bedeutung aus dem Ablauf gefolgert.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `0C84` / `0C9C` | W[12] / B[12] u | `StationX` / `StationY` | Lage der Stationen auf `V-RAKETE` | G – `1617`, `0153`, `0CCF` |
+| `0CA8` / `0D08` | far[12] / far[3] | `StationName` / `KindName` | Texte Stationsname / Art | G – `0548` |
+| `0CF8` / `0D00` | W[4] | `RocketColor` / `PlayerColor` | Farbe von Raketenpunkt und Bestätigung / Textfarbe | G – `02C0`, `0548` |
+| `0D14` | B[] u | `PirateChance` | Startchance 1/n des Piratenschiffs je Ort | G – `0A62` |
+| `0D17` | W[90] | `FlightCurve` | Flugkurve (ungerade Adresse), Index Fortschritt 0…59h | G – `0CCF` |
+| `0DCD`, `0DD9`, `0DDC`…`0DE4` | B[] | `StationPicture`, `StarColor`, `Pirate*` | Bildspalten, Sternfarben, Schiffsteile | W – `1178`, G – `128D` |
+| `0E3E` / `0E40` | Text | `StationMarkText` / `ConfirmMarkText` | Marke an der Station / Bestätigung | G – `0153`, `02C0` |
+| `08D0` / `0CD8` | W / Palette | `Picture` / `Palette` | Bild `V-RAKETE`, Palette | G – `0009` (Teile) |
+| `4888` | W[4] s | `Cursor` | Station unter dem Zeiger je Spieler | G – `0201`, `0413`, `0632` |
+| `5428` | B[12] u | `Taken` | 0 frei, 1 gehalten, 2 bestätigt | G – `0201`, `02C0`, `0413`, `04D4` |
+| `546A` | B[4] u | `Occupied` | Wert der eigenen Station nennt einen anderen Spieler | G – `0763`, `0B7A` |
+| `546E` / `546F` | B s | `PiratePosition` / `Flash` | Piratenort (−1 keine) / Blitzschritte | G – `01C3`, `0A62`, `0C89` |
+| `5338` / `5336` / `5337` | B | `PirateState` / `ExplosionVisible` / `LightFrame` | Zustand des Schiffs / Explosion sichtbar / Lichtbild 0…3 | G – `0A62`, `12D7`; W – `0BE7` |
+| `53AA` / `53B1` | W / B | `LightCounter` / `ShipMoved` | Zähler der Lichter / Schiff an Platz 1 | G – `12D7`, `1345` |
+| `53A6` / `53AD` | B[4] | `Launched` / `Lost` | Raketen eingeplant / an Piraten verloren | G – `07C4`, `0849`, `0E11`, `0DC0` |
+| `53AC`, `53B2`, `53B3`, `53B4`, `53B5` | B | `RocketIndex`, `RocketTotal`, `PiratesReady`, `Flying`, `Attacked` | Flugzustand | G – `0740`, `0849`, `0B7A` |
+| `53B6` / `533A` / `5434` | W[54] / W[54] / B[54] | `Progress` / `Target` / `Owner` | je Rakete Fortschritt (negativ = Startverzug), Ziel-x, Besitzer | G – `0849` |
+| `5422`, `5424`, `5426` | B, W, W | `ExplosionFrame`, `RocketX`, `RocketY` | Explosionsbild, Lage der bewegten Rakete | G – `0CCF`, `0B7A` |
+| `3376`, `330E + 1Ah·p` | W | `ObjectLayer` | Ebene 13 (Explosion, Objekt 4) / 15 (Zeiger) | G – `148B` |
+| `3786` / `302E` / `37C3` | L[4] / L[4] / B[4] | `ControlReader.MoveDelay` / `FireDelay` / `Bits` | Verzug 3p, 43 − 10·IQ bzw. 20; Feuerverzug 10000; Computereingabe | G – `0201`, `0413`, `04D4`, `05E7` |
