@@ -85,7 +85,7 @@ for fn in glob.glob(sys.argv[1] + "/*.trx"):
     for e in ET.parse(fn).iter():
         if e.tag.endswith("Counters"):
             p += int(e.get("passed", 0)); f += int(e.get("failed", 0)) + int(e.get("error", 0)) + int(e.get("timeout", 0)) + int(e.get("aborted", 0))
-            s += int(e.get("notExecuted", 0)); n += 1
+            s += int(e.get("total", 0)) - int(e.get("executed", 0)); n += 1   # skipped = total - executed
 print(p, f, s, n)
 PY
 )
