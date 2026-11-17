@@ -78,8 +78,9 @@ public sealed class ProgramHost
         Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
         var masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
         Screens = new WeekScreens(
-            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => Layers!.Ds),
-            new WeekScreenOutputs(e => Disasters!.Apply(e), e => Stations!.Apply(e), e => Harvest!.Apply(e), e => Harvest!.Apply(e)));
+            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => IncidentsPlayed().Ds),
+            new WeekScreenOutputs(e => IncidentsPlayed(Disasters!).Apply(e), e => IncidentsPlayed(Stations!).Apply(e),
+                e => IncidentsPlayed(Harvest!).Apply(e), e => IncidentsPlayed(Harvest!).Apply(e)));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
         Week = Screens.Week(e => Field!.Apply(e), Lengths, robots: RobotSkip);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
@@ -184,7 +185,8 @@ public sealed class ProgramHost
         while (Machine.LastFrame < frame && Machine.Status != ProgramStatus.Ended)
         {
             // the scenes of the steps with retrace waits step first (a scene not presenting does nothing); the core's events
-            // of planting, catastrophes, stations and harvest reach them during Advance, those of the incidents after it
+            // of planting, catastrophes, stations and harvest reach them during Advance, those of the incidents before the
+            // first event of a later step in the same frame and after Advance (PlayIncidents)
             Field.NextFrame(held);
             Disasters.NextFrame(held);
             Incidents.NextFrame();
@@ -193,13 +195,36 @@ public sealed class ProgramHost
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
             Machine.DrainEvents();
             Machine.DrainWeekEvents();
-            foreach (var e in Screens.DrainIncidentEvents()) Incidents.Apply(e);
+            PlayIncidents();
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
             Report.NextFrame();
             if (Week.Report.Report is { } report)
                 foreach (var e in report.DrainEvents()) Report.Apply(e);
         }
+    }
+
+    /// <summary>
+    /// Plays the events of the week incidents (call 9) the core reported since the last time. The core collects them, the
+    /// other screen steps report theirs while the core advances; a step that follows call 9 in the same frame (stations,
+    /// harvest, the catastrophes of the next week) therefore plays the rest of the incidents first, as the original runs
+    /// them: the last pass of the wait loop 21FD:0004(0) still restores and draws the objects of the field, and only then
+    /// 1B03:148B gives the objects their save buffers in the atlas (finding #189: played afterwards, the wait loop saved the
+    /// window under the rockets of the stations into the picture just loaded and drew them on the hidden page).
+    /// </summary>
+    private void PlayIncidents()
+    {
+        foreach (var e in Screens.DrainIncidentEvents()) Incidents.Apply(e);
+    }
+
+    /// <summary>The layers once the incidents reported so far are played (page state for the core at calls 4, 9 and 11).</summary>
+    private GraphicsLayers IncidentsPlayed() => IncidentsPlayed(Layers!);
+
+    /// <summary><paramref name="receiver"/> once the incidents reported so far are played (<see cref="PlayIncidents"/>).</summary>
+    private T IncidentsPlayed<T>(T receiver)
+    {
+        PlayIncidents();
+        return receiver;
     }
 
     /// <summary>
