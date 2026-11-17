@@ -154,7 +154,7 @@ public sealed class WaitLoop
     /// [ORIGINAL] 1F63:113E – indicator: a positive countdown DS:54B0 is decremented and switches the indicator off (state 1)
     /// when it reaches 0; otherwise random(200) = 0 switches it on (state 0) and sets the countdown to 8.
     /// </summary>
-    private void Indicator()
+    public void Indicator()
     {
         sbyte n = _d.S8(WaitLoopLayout.IndicatorCountdown);
         if (n > 0)
