@@ -39,11 +39,11 @@ public static class PurchaseRules
     private static void OwnEmblem(Dgroup d, IPurchaseOutput o) => Emblem(d, o, d.U8(At(L.Rank + Pl(d))));
 
     /// <summary>08CF:16F5 – clears the ticket of the player DS:37AA.</summary>
-    // [ORIGINAL] 08CF:16F5 – 0A96:0267(F0h, B0h, 20h, 16h, p·40h + 1Ah, 35h, 2Ch, 0Ah); drawing only
+    // Drawn in part 3 (scene): 08CF:16F5 – 0A96:0267(F0h, B0h, 20h, 16h, p·40h + 1Ah, 35h, 2Ch, 0Ah); drawing only
     private static void ClearTicket(Dgroup d, IPurchaseOutput o) => Emit(o, K.ClearTicket, (short)Pl(d));
 
     /// <summary>08CF:16B4(slot, number) – one number of the ticket of the player DS:37AA.</summary>
-    // [ORIGINAL] 08CF:16B4 – 0A96:0030(number·0Ah + F0h, CFh, 0Ah, 0Ah, p·40h + slot·0Bh + 1Ah, 35h); drawing only
+    // Drawn in part 3 (scene): 08CF:16B4 – 0A96:0030(number·0Ah + F0h, CFh, 0Ah, 0Ah, p·40h + slot·0Bh + 1Ah, 35h); drawing only
     private static void DrawTicket(Dgroup d, IPurchaseOutput o, short slot, short number) =>
         Emit(o, K.DrawTicket, slot, number, (short)Pl(d));
 
@@ -575,7 +575,7 @@ public static class PurchaseRules
     /// string DS:0136 instead of the prize), else it waits (FFh) with the prize DS:34A2 shown.
     /// </summary>
     // [ORIGINAL] 08CF:161F
-    // [ORIGINAL] 08CF:1688 – 0A96:0267(A0h, 0, 20h, 16h, 20h, A8h, 80h, 16h); drawing only
+    // Drawn in part 3 (scene): 08CF:1688 – 0A96:0267(A0h, 0, 20h, 16h, 20h, A8h, 80h, 16h); drawing only
     public static void NewDraw(Dgroup d, IPurchaseOutput o)
     {
         Emit(o, K.ClearBalls);
@@ -601,7 +601,7 @@ public static class PurchaseRules
     /// (08CF:1543) for lotto, oil, rockets and gems; then the list runs and the page is shown.
     /// </summary>
     // [ORIGINAL] 08CF:1348
-    // [ORIGINAL] 08CF:15F5, 08CF:15C6 – 0A96:0030 from the atlas; drawing only
+    // Drawn in part 3 (scene): 08CF:15F5, 08CF:15C6 – 0A96:0030 from the atlas; drawing only
     public static void Setup(Dgroup d, OriginalRandom random, IPurchaseOutput o)
     {
         Emit(o, K.ClearList);
@@ -681,11 +681,11 @@ public static class PurchaseRules
     private static short GemY(short slot) => Int16Math.S((Int16Math.Div(slot, 5) << 3) + 0x14);
 
     /// <summary>08CF:172A – the gems of the player DS:37AA, one 7 × 7 picture per gem.</summary>
-    // [ORIGINAL] 08CF:172A – 0A96:0030(109h, C6h, 7, 7, x, y) per gem; drawing only
+    // Drawn in part 3 (scene): 08CF:172A – 0A96:0030(109h, C6h, 7, 7, x, y) per gem; drawing only
     private static void DrawGems(Dgroup d, IPurchaseOutput o) => Emit(o, K.DrawGems, (short)Pl(d), d.S8(At(L.Gems + Pl(d))));
 
     /// <summary>08CF:1859 – the gem account of the player DS:37AA.</summary>
-    // [ORIGINAL] 08CF:1859 – 0A96:0525(p·40h + 26h, 2Ah, DS:013C, 0Dh, 5), 0A96:057A(p·40h + 34h, 2Ah, account, 4, 0, 5)
+    // Drawn in part 3 (scene): 08CF:1859 – 0A96:0525(p·40h + 26h, 2Ah, DS:013C, 0Dh, 5), 0A96:057A(p·40h + 34h, 2Ah, account, 4, 0, 5)
     private static void DrawGemCredit(Dgroup d, IPurchaseOutput o) =>
         Emit(o, K.DrawGemCredit, (short)Pl(d), d.S16(At(L.GemCredit + 2 * Pl(d))));
 
