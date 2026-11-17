@@ -77,15 +77,26 @@ lauf() {   # lauf <id> <name> <must_fail 0|1> <env...>   (TRX results in $LOG/tr
   env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --logger "console;verbosity=normal" \
     --blame-hang-timeout "${TR_HANG_TIMEOUT:-20m}" --blame-hang-dump-type none \
     --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
-  local zeilen; zeilen=$(grep -E "^(Passed|Failed)! " "$log" || true)
-  summe() { printf '%s\n' "$zeilen" | grep -oE "$1: +[0-9]+" | grep -oE "[0-9]+" | awk '{s+=$1} END {print s+0}'; }
+  # Table source is the TRX (Counters of every test project), not the console output.
+  local trx; trx=$(python3 - "$LOG/trx-$id" <<'PY'
+import glob, sys, xml.etree.ElementTree as ET
+p = f = s = n = 0
+for fn in glob.glob(sys.argv[1] + "/*.trx"):
+    for e in ET.parse(fn).iter():
+        if e.tag.endswith("Counters"):
+            p += int(e.get("passed", 0)); f += int(e.get("failed", 0)) + int(e.get("error", 0)) + int(e.get("timeout", 0)) + int(e.get("aborted", 0))
+            s += int(e.get("notExecuted", 0)); n += 1
+print(p, f, s, n)
+PY
+)
+  local np nf ns nt; read -r np nf ns nt <<<"$trx"
   if [ "$soll" -eq 1 ]; then
     [ "$rc" -ne 0 ] || fehler "$name lief grün – Originaldaten-Tests laufen ohne Daten still leer"
   else
-    [ "$rc" -eq 0 ] || { grep -E "^\s*Failed [A-Za-z]|[Hh]ang|[Bb]lame" "$log" | head -20; fehler "$name"; }
-    [ "$(printf '%s\n' "$zeilen" | grep -c .)" -eq "$PROJEKTE" ] || { tail -20 "$log"; fehler "$name: Ergebnisse für weniger als $PROJEKTE Testprojekte"; }
+    [ "$rc" -eq 0 ] || { grep -E -A1 "^\s*Failed [A-Za-z]|The test running when|hang timeout|inactivity time" "$log" | head -30; fehler "$name"; }
+    [ "$nt" -eq "$PROJEKTE" ] || { tail -20 "$log"; fehler "$name: Ergebnisse für $nt von $PROJEKTE Testprojekten"; }
   fi
-  ZEILEN_TAB+=("| $name | $(summe Passed) | $(summe Failed) | $(summe Skipped) |")
+  ZEILEN_TAB+=("| $name | $np | $nf | $ns |")
 }
 if [ "$DATA" -eq 1 ]; then lauf mit "Mit Originaldaten (TR_REQUIRE_GAMEDATA=1)" 0 TR_REQUIRE_GAMEDATA=1; fi
 if [ "$QUICK" -eq 0 ] || [ "$DATA" -eq 0 ]; then lauf ohne "Ohne Originaldaten (TR_SKIP_GAMEDATA=1)" 0 TR_SKIP_GAMEDATA=1 TRADERS_GAMEDATA="$LOG/keine-originaldaten"; fi
