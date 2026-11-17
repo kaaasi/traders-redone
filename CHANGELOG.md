@@ -1,5 +1,17 @@
 # Zwischenstände
 
+## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview
+
+- Spur 2 `handelski` (PR #184): Handels-KI `141D` (17 Routinen) mit Vertrag für den Handel, Gleichschritt Wochen 0–3; #163,
+  #165, #166.
+- Spur 0 `ende` Teil 1 (PR #188): Endprüfung `20B3:0005` bis zur Entscheidung (32 Bit vorzeichenlos, R7P-1/-2), Host-Schalter
+  `RobotPhaseSkip` für Aufruf 18 (abschaltbar `--original-roboter`, Nutzer 16.11.2026); #157, #158, #180.
+- Spur 3 `zusatz` (PR #187): Zusatzphase `1DEF:000C` im Kern und als Szene; #162.
+- Fix #189 (PR #199): Reihenfolge Wochenereignis → Stationsphase im Host.
+- Spur 1 `handel` (PR #186): Handel `0B9F:0002`/`0C29` Bild für Bild mit KI-Anbindung (Stapelwort von `0397`), Szene pixelgenau; #192.
+- Spur 0 `ende` Teil 3 (PR #206): Aufrufe 23/24 eingebunden, Mehrrundenprobe Wochen 0–4, Host bis Fat Mike; #194, #201.
+- Prozess: Plan (PR #182, Plan-Review „Ja“ mit R7P-1–4). 1141 Tests grün mit Originaldaten.
+
 ## Runde 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (15.–16.11.2026) · letzte Spur `ebaddee`, Abschluss nach Gesamtreview
 
 - Regelseite des Kerns (PR #149, Spur 1 Teil 1a): `src/Traders.Core/Pixels/` für regelrelevante Pixel ohne Projektreferenz

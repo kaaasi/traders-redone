@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md)).
 
-## Aktuelle Runde: 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (Plan Leitstelle 16.11.2026, F1 = B, F3 = A, Go Nutzer 16.11.2026)
+## Aktuelle Runde: 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (Plan Leitstelle 16.11.2026, F1 = B, F3 = A, Go Nutzer 16.11.2026; alle Spuren gemergt 17.11.2026, Gesamtreview offen)
 
 **Ziel:** Nach der Ernte läuft die Woche im Port weiter bis Fat Mike: Endprüfung `20B3:0005` (Aufruf 19, Entscheidung des
 Nutzers 16.11.2026), Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29` (Aufruf 23), Handels-KI `141D` und Zusatzphase
@@ -89,9 +89,9 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Status:** Teil 1 fertig (Claude, Branch `paket/ende-host`, Base `006509f`; Review-PR siehe #188): Endprüfung bis zur
   Entscheidung (`src/Traders.Core/Ending/EndCheck.cs`, Befund `20B3_0005_endpruefung.md`), Roboter-Schalter (`RobotPhaseSkip`,
   `--original-roboter`), Host hält mit Schalter an Aufruf 23, #157, #158, #180. Neuer Befund aus #180: Stationsphase im Host
-  nach einem Wochenereignis abweichend (PR). Teil 3 fertig, Review offen (Claude, PR #206, Branch `paket/ende-einbindung`,
+  nach einem Wochenereignis abweichend (PR). Teil 3 fertig (Claude, PR #206, Branch `paket/ende-einbindung`,
   Base `3d79195`): Aufrufe 23/24 in `WeekSteps`/`WeekScreens`, `TradeScene`/`ExtraScene` im Host (hält mit Schalter an 26),
-  Mehrrundenprobe `MultiWeekRound7DifferentialTests` (Wochen 0–4, Zusatzphase Woche 2 erzwungen), #194, #201.
+  Mehrrundenprobe `MultiWeekRound7DifferentialTests` (Wochen 0–4, Zusatzphase Woche 2 erzwungen), #194, #201. **Gemergt:** Teil 1 #188 (16.11.2026, Review `reviews/2026-11-16-r7-ende-host.md` „Ja“, Merge von `main` per Fixlauf), Teil 3 #206 (17.11.2026, Review `reviews/2026-11-17-r7-ende-einbindung.md` „Ja“); #157, #158, #180, #194, #201 erledigt; offen P3 #208.
 
 ## 1 `handel` – Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29`
 
@@ -113,7 +113,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abhängigkeiten:** Spur 2 für alle Stellen, an denen `141D` gerufen wird: bis zu deren Merge Befund, pixelfreie und KI-freie
   Teile und Szene; ist sonst nichts mehr zu tun, `spur-wartet` mit „wartet auf handelski“. Größte Spur der Runde (≈ 0x1D00 Byte);
   bis zu zwei Fortsetzungen über das Limit von 3 (F2 = ja).
-- **Status:** Teile 1–3 fertig (Claude, PR #186, 16.11.2026): Regeln, Ablauf Bild für Bild mit Handler Aufruf 23, KI über `TradeComputer` (Stapelwort von `0397` nachgeführt, Interrupt-Fall `[APPROX]`), Szene `TradeScene`; Gleichschritt Woche 0 und 2 mit echter KI samt Bild und Befehlslisten; P3 #192 erledigt; Review offen.
+- **Status:** Teile 1–3 fertig (Claude, PR #186, 16.11.2026): Regeln, Ablauf Bild für Bild mit Handler Aufruf 23, KI über `TradeComputer` (Stapelwort von `0397` nachgeführt, Interrupt-Fall `[APPROX]`), Szene `TradeScene`; Gleichschritt Woche 0 und 2 mit echter KI samt Bild und Befehlslisten; P3 #192 erledigt. **Gemergt 17.11.2026** (Review `reviews/2026-11-17-r7-handel.md` „Nein“ R7H-2/-3 P2 → Fixlauf mit R7H-4/-5, Delta-Prüfung Leitstelle); #192, #203, #204 erledigt; offen P3 #205.
 
 ## 2 `handelski` – Handels-KI `141D` und P3-Sammlung
 
@@ -132,7 +132,7 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; jeder Einsprung im Gleichschritt (Ergebnis, Datensegment, `DS:10D2`); Gegenprobe im Review
   (Ziehung ausgelassen, Vergleich `<` statt `<=`, Spieler vertauscht → rot; neue Architekturregel mit Verletzung → rot).
 - **Abhängigkeiten:** keine. Früh mergen (Integrationsfolge), Spur 1 hängt daran.
-- **Status:** Teile 1–3 fertig (Claude, PR #184, 16.11.2026): `141D` portiert (`TradeAi`, Vertrag im Befund), Gleichschritt Wochen 0–3, P3 #163/#165/#166; Review offen.
+- **Status:** Teile 1–3 fertig (Claude, PR #184, 16.11.2026): `141D` portiert (`TradeAi`, Vertrag im Befund), Gleichschritt Wochen 0–3, P3 #163/#165/#166. **Gemergt 16.11.2026** (Review `reviews/2026-11-16-r7-handelski.md` „Ja“); offen P3 #193.
 
 ## 3 `zusatz` – Zusatzphase `1DEF:000C`
 
@@ -148,7 +148,13 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Abnahme:** alle drei Läufe grün; Phase im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler), Szene pixelgenau;
   Gegenprobe im Review (Auslösung invertiert, eine Ziehung ausgelassen, Vorrat ohne Obergrenze → rot).
 - **Abhängigkeiten:** keine.
-- **Status:** fertig, Review offen (Claude, PR #187): Teil 1 (Befund, Kern `Extra/`, Differenztests Wochen 0–3), Teil 2 (Szene `Extra/`, bildgenau im Gleichschritt mit Befehlsliste), Teil 3 (#162, Grenzwerttests `Events/IncidentsBoundaryTests.cs`).
+- **Status:** fertig (Claude, PR #187): Teil 1 (Befund, Kern `Extra/`, Differenztests Wochen 0–3), Teil 2 (Szene `Extra/`, bildgenau im Gleichschritt mit Befehlsliste), Teil 3 (#162, Grenzwerttests `Events/IncidentsBoundaryTests.cs`). **Gemergt 16.11.2026** (Review `reviews/2026-11-16-r7-zusatz.md` „Ja“, Fixlauf Merge `main` mit R7Z-1/-2, Delta-Prüfung Leitstelle); #162 erledigt.
+
+## Fixlauf `fix/stationen-host` – #189 (P2) aus Spur 0 Teil 1
+
+- **Status:** PR #199 (Claude), **gemergt 17.11.2026** (Review `reviews/2026-11-16-fix-stationen-host.md` „Ja“, Integrationslauf
+  `--schnell` der Leitstelle auf `main` + PR grün): Host spielte den Rest von Aufruf 9 erst nach den ersten Ausgaben der
+  Stationsphase ab; Test bis ins 50. Erntebild. P3 R7E-2/-3 → #201 (mit #206 erledigt).
 
 ## Zuständigkeit gemeinsamer Dateien in R7
 

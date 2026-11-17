@@ -91,9 +91,11 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      Label beim Auswerten.
   9. **Länge:** Review-Bericht höchstens 120 Zeilen (Urteil, Befunde mit Beleg, Prüftabelle); PR-Beschreibungen ebenso knapp.
 
-  **Modellwahl:** Claude Opus überall, wo es Nacharbeit vermeidet – Disassembly, Spielkern, RefEmu, Differenztests, Erstreviews
-  und Nachprüfungen von Code. Claude Sonnet nur für Mechanisches: reine Doku, Kommentarumstellung, einfache Testergänzungen. Im
-  Zweifel Opus. Die Leitstelle setzt das Modell ([anhang.md](anhang.md) F).
+  **Modellwahl** (Nutzer 17.11.2026): je Lauf das Modell mit dem geringsten Tokenverbrauch für ein brauchbares Ergebnis.
+  Claude Haiku für rein Mechanisches (Merge von `main`, erzeugten Block neu schreiben, Konflikte nur in Doku, Tippfehler); Claude
+  Sonnet für einfache Testergänzungen, Doku-Befunde und kleine Fixes mit klarem Befund; Claude Opus für Disassembly, Spielkern,
+  Zufall, KI, RefEmu, Differenztests, Erstreviews und Nachprüfungen von Code; Claude Fable nur in Ausnahmen (z. B. Opus scheitert
+  zweimal an derselben Stelle), mit Begründung. Die Leitstelle setzt das Modell ([anhang.md](anhang.md) F).
 - **Befunde als Issues:** je Befund ein Issue `<ID>: <Kurzbeschreibung>`, Labels `befund` und `P0`–`P3`, Link auf die
   Review-Datei; der behebende PR schließt es (`Fixes #<nr>`). Ohne Zugriff auf Issues Befunde im PR nennen; die Leitstelle legt an.
 

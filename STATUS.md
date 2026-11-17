@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 16.11.2026 · Runde 6 (Katastrophen, Wochenereignisse, Stationen, Ernte) abgeschlossen ([archiv/runde-6.md](docs/archiv/runde-6.md)); nächste: Runde 7
+Stand: 17.11.2026 · Runde 7 (Endprüfung, Handel, Handels-KI, Zusatzphase) – alle Spuren gemergt, Gesamtreview offen ([arbeitspakete.md](docs/arbeitspakete.md)); Runde 6: [archiv/runde-6.md](docs/archiv/runde-6.md)
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -17,12 +17,12 @@ Stand: 16.11.2026 · Runde 6 (Katastrophen, Wochenereignisse, Stationen, Ernte) 
 | M5 | Anbau | ✅ | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 „Ja“ |
 | M6 | Produktion & Wetter | ✅ | Wetter `21FD:021F`, Produktion `22A3:0003`, Schwund `22A3:026B` (R3); Ernte zeigen und einsammeln `22A3:02D3` im Kern und als Szene Bild für Bild gegen den RefEmu (R6 Spur 0). Gesamtreview R6 „Ja“ |
 | M7 | Fat Mike / Schnecken | ⬜ | |
-| M8 | Auktion / Handel | ⬜ | |
+| M8 | Auktion / Handel | 🟢 | Handel `0B9F:0002` mit Bildschirm `0C29` und Handels-KI `141D` im Kern Bild für Bild, Szene pixelgenau (R7 Spuren 1/2); Aufrufe 19 (Endprüfung `20B3:0005` bis zur Entscheidung), 23, 24 (Zusatzphase `1DEF:000C`, Spur 3) eingebunden, Mehrrundenprobe Wochen 0–4; Host überspringt Aufruf 18 (abschaltbare Abweichung, Nutzer 16.11.2026) und spielt bis Fat Mike. ✅ nach Gesamtreview R7 |
 | M9 | Rakete & Stationen / Piraten | ✅ | Stationswahl, Raketenflug, Piraten, Stationsertrag `1B03:0009` (44 Routinen) im Kern Bild für Bild, Pixel über die Regelseite `Pixels/`, Szene pixelgenau (R6 Spur 3, F1 = B). Gesamtreview R6 „Ja“ |
 | M10 | Ereignisse & Katastrophen | ✅ | Katastrophen mit Sternvorführung `111D:0009` (Regelseite) und Wochenereignisse `17CB:0005` im Kern und als Szene (R6 Spuren 1/2); Aufrufe 4, 9, 11, 16 eingebunden, Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18. Gesamtreview R6 „Ja“ |
 | M11 | Wochenbilanz & Einkauf | 🟡 | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf offen |
 | M12 | Roboterkampf | ⬜ | |
-| M13 | Ende / Rang | ⬜ | |
+| M13 | Ende / Rang | 🟡 | Endprüfung `20B3:0005` bis zur Entscheidung (R7); Abend-/Endbilder offen (F1 = B, R9) |
 | M14 | Ton | ⬜ | |
 | M15 | Gesamtpartie = v1.0 | ⬜ | |
 | E1–E7 | Erweiterungen | ⬜ | nach v1.0, siehe Plan |
