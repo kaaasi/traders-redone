@@ -10,10 +10,12 @@ using Traders.Core.Startup;
 using Traders.Core.State;
 using Traders.Presentation.Disasters;
 using Traders.Presentation.Events;
+using Traders.Presentation.Extra;
 using Traders.Presentation.Field;
 using Traders.Presentation.Harvest;
 using Traders.Presentation.Menus;
 using Traders.Presentation.Stations;
+using Traders.Presentation.Trade;
 using Traders.Presentation.Week;
 using Traders.Vga;
 using Traders.Vga.Layers;
@@ -23,13 +25,14 @@ namespace Traders.App;
 /// <summary>
 /// The program as the host runs it, without a window: the core's program machine (main 1777:000C with all its call steps and
 /// the week loop with the ported steps of <see cref="WeekSteps"/> and <see cref="WeekScreens"/>: rule steps, week report,
-/// catastrophes, week planning, planting phase, week incidents, stations, harvest) and the scenes on the graphics layers –
-/// main menu, week report, catastrophes, planting field, incidents, stations, harvest (decision F1 = B of R6). Per display
-/// frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
-/// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The week runs from the balance up to the
-/// harvest; with the robot switch on (default, decision F3 = A of R7) the host skips the robot phase 1C68 (call 18,
-/// <see cref="RobotPhaseSkip"/>) and the week goes on through the end check (call 19) to the first call still pending, the
-/// trade (call 23); without it the machine halts at call 18 as the core does. <see cref="Halt"/> then names the call, or
+/// catastrophes, week planning, planting phase, week incidents, stations, harvest, trade, extra phase) and the scenes on the
+/// graphics layers – main menu, week report, catastrophes, planting field, incidents, stations, harvest, trade, extra phase
+/// (decisions F1 = B of R6 and R7). Per display frame the host calls <see cref="Frame"/> with the held keys; the core
+/// processes the frame exactly once (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The week
+/// runs from the balance up to the harvest; with the robot switch on (default, decision F3 = A of R7) the host skips the robot
+/// phase 1C68 (call 18, <see cref="RobotPhaseSkip"/>) and the week goes on through the end check (call 19), the trade (call
+/// 23) and the extra phase (call 24) to the first call still pending, Fat Mike (call 26, 1F63:000F); without it the machine
+/// halts at call 18 as the core does. <see cref="Halt"/> then names the call, or
 /// tells that the game is over where the end check ends it (its end screens are pending, F1 = B of R7).
 /// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
 /// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
@@ -40,7 +43,9 @@ namespace Traders.App;
 // and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
 // request are not shown; the week runs up to its first pending call step and halts there with a notice (F1 = B of R6 and R7).
 // The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of calls 4, 9 and 11
-// (WeekScreenInputs.OutputPages; the harvest, call 16, reads none of it); the driver's current font likewise for call 11.
+// (WeekScreenInputs.OutputPages; the harvest, trade and extra phase read none of it); the driver's current font likewise for
+// call 11. The extra phase stores far pointers into its stack frame; the host gives the frame of the game relative to its
+// DS value (ExtraStep.GameFrame), so their segment words are host values.
 public sealed class ProgramHost
 {
     /// <summary>
@@ -78,11 +83,13 @@ public sealed class ProgramHost
         Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
         var masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
         Screens = new WeekScreens(
-            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => IncidentsPlayed().Ds),
-            new WeekScreenOutputs(e => IncidentsPlayed(Disasters!).Apply(e), e => IncidentsPlayed(Stations!).Apply(e),
-                e => IncidentsPlayed(Harvest!).Apply(e), e => IncidentsPlayed(Harvest!).Apply(e)));
+            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => EarlierPlayed(Layers!).Ds),
+            new WeekScreenOutputs(Output<Core.Disasters.DisasterEvent>(e => Disasters!.Apply(e)),
+                Output<Core.Stations.StationEvent>(e => Stations!.Apply(e)), Output<Core.Field.FieldEvent>(e => Harvest!.Apply(e)),
+                Output<Core.Harvest.HarvestEvent>(e => Harvest!.Apply(e)), Output<Core.Trade.TradeEvent>(e => Trade!.Apply(e)),
+                Output<Core.Field.FieldEvent>(e => Extra!.Apply(e)), Output<Core.Extra.ExtraEvent>(e => Extra!.Apply(e))));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
-        Week = Screens.Week(e => Field!.Apply(e), Lengths, robots: RobotSkip);
+        Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
             Week.Handlers);
 
@@ -113,9 +120,11 @@ public sealed class ProgramHost
         Incidents = new IncidentScene(Layers, Core, new TextBufferMemory(Core, () => Start.TextBuffer));
         Stations = new StationScene(Layers, Core, pictures);
         Harvest = new HarvestScene(Layers, Core, pictures);
+        Trade = new TradeScene(Layers, Core, pictures);
+        Extra = new ExtraScene(Layers, Core, pictures);
     }
 
-    /// <summary>The handlers of the calls 4, 9, 11 and 16 (round 6) and their inputs.</summary>
+    /// <summary>The handlers of the calls 4, 9, 11, 16 (round 6), 23 and 24 (round 7) and their inputs.</summary>
     public WeekScreens Screens { get; }
 
     /// <summary>Scene of the catastrophes (call 4 beyond its guard).</summary>
@@ -129,6 +138,15 @@ public sealed class ProgramHost
 
     /// <summary>Scene of the harvest (call 16); the core's events reach it while the frame is processed.</summary>
     public HarvestScene Harvest { get; }
+
+    /// <summary>
+    /// Scene of the trade (call 23); the core's events reach it while the frame is processed and are applied at once (the scene
+    /// reads the core's data segment when it applies a request).
+    /// </summary>
+    public TradeScene Trade { get; }
+
+    /// <summary>Scene of the extra phase (call 24); the core's events reach it while the frame is processed.</summary>
+    public ExtraScene Extra { get; }
 
     /// <summary>The ported call steps of the week loop.</summary>
     public WeekSteps Week { get; }
@@ -185,47 +203,78 @@ public sealed class ProgramHost
         while (Machine.LastFrame < frame && Machine.Status != ProgramStatus.Ended)
         {
             // the scenes of the steps with retrace waits step first (a scene not presenting does nothing); the core's events
-            // of planting, catastrophes, stations and harvest reach them during Advance, those of the incidents before the
-            // first event of a later step in the same frame and after Advance (PlayIncidents)
+            // of planting, catastrophes, stations, harvest, trade and extra phase reach them during Advance, those of the
+            // week report and the incidents before the first event of a later step in the same frame and after Advance
+            // (PlayEarlier)
             Field.NextFrame(held);
             Disasters.NextFrame(held);
             Incidents.NextFrame();
             Stations.NextFrame(held);
             Harvest.NextFrame(held);
+            Trade.NextFrame(held);
+            Extra.NextFrame(held);
+            Report.NextFrame();
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
             Machine.DrainEvents();
             Machine.DrainWeekEvents();
-            PlayIncidents();
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
-            Report.NextFrame();
-            if (Week.Report.Report is { } report)
-                foreach (var e in report.DrainEvents()) Report.Apply(e);
+            PlayEarlier();
         }
     }
 
     /// <summary>
-    /// Plays the events of the week incidents (call 9) the core reported since the last time. The core collects them, the
-    /// other screen steps report theirs while the core advances; a step that follows call 9 in the same frame (stations,
-    /// harvest, the catastrophes of the next week) therefore plays the rest of the incidents first, as the original runs
-    /// them: the last pass of the wait loop 21FD:0004(0) still restores and draws the objects of the field, and only then
-    /// 1B03:148B gives the objects their save buffers in the atlas (finding #189: played afterwards, the wait loop saved the
-    /// window under the rockets of the stations into the picture just loaded and drew them on the hidden page).
+    /// Plays the events of the week report (call 3) and of the week incidents (call 9) the core reported since the last time.
+    /// The core collects them, the other screen steps report theirs while the core advances; a step that follows call 3 or 9
+    /// in the same frame therefore plays the rest of the report or the incidents first, as the original runs them: the last
+    /// pass of the wait loop 21FD:0004 returns before the next call starts. After the incidents the last pass still restores
+    /// and draws the objects of the field, and only then 1B03:148B gives the objects their save buffers in the atlas (finding
+    /// #189: played afterwards, the wait loop saved the window under the rockets of the stations into the picture just loaded
+    /// and drew them on the hidden page); after the report its last pass comes before the first outputs of 0609:0004 (call 8)
+    /// or 111D:0009 (call 4) (R7E-2, #201).
     /// </summary>
-    private void PlayIncidents()
+    /// <remarks>
+    /// Where it takes effect (R7E-3): the page state for the core (<see cref="WeekScreenInputs.OutputPages"/>), read when the
+    /// handler of call 4, 9 or 11 is made, plays them before that step's first event – for the incidents this is what puts
+    /// them in front of the stations; and the wrapper of the planting output, the first output after the report in week 0.
+    /// The wrappers of the other outputs only guard a step that starts without reading the page state (the harvest, trade
+    /// and extra phase never follow call 3 or 9 in the same frame).
+    /// </remarks>
+    private void PlayEarlier()
     {
-        foreach (var e in Screens.DrainIncidentEvents()) Incidents.Apply(e);
+        if (Week?.Report.Report is { } report)
+            foreach (var e in report.DrainEvents())
+            {
+                Played?.Invoke(e);
+                Report.Apply(e);
+            }
+        foreach (var e in Screens.DrainIncidentEvents())
+        {
+            Played?.Invoke(e);
+            Incidents.Apply(e);
+        }
     }
 
-    /// <summary>The layers once the incidents reported so far are played (page state for the core at calls 4, 9 and 11).</summary>
-    private GraphicsLayers IncidentsPlayed() => IncidentsPlayed(Layers!);
-
-    /// <summary><paramref name="receiver"/> once the incidents reported so far are played (<see cref="PlayIncidents"/>).</summary>
-    private T IncidentsPlayed<T>(T receiver)
+    /// <summary><paramref name="receiver"/> once the report and incidents reported so far are played (<see cref="PlayEarlier"/>).</summary>
+    private T EarlierPlayed<T>(T receiver)
     {
-        PlayIncidents();
+        PlayEarlier();
         return receiver;
     }
+
+    /// <summary>Receiver of a screen step's events: plays the report and incidents first (<see cref="PlayEarlier"/>).</summary>
+    private Action<T> Output<T>(Action<T> apply) where T : notnull => e =>
+    {
+        PlayEarlier();
+        Played?.Invoke(e);
+        apply(e);
+    };
+
+    /// <summary>
+    /// Diagnostics: every event of a week step in the order the scenes get it (week report, incidents and the outputs of the
+    /// other screen steps; not the menus). Read-only observation for tests of the order (R7E-2); null by default.
+    /// </summary>
+    public Action<object>? Played { get; set; }
 
     /// <summary>
     /// [ORIGINAL] 0DFD:0074 (page part) and 0DFD:0132 (flip part) on the layers' data segment: page numbers DS:40DE…40E5 =

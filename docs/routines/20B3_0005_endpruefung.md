@@ -64,5 +64,6 @@ Bild; bei Ende ausstehend (Maschine hält an 19, `ProgramHost.Halt` meldet „ga
   Ende. Verglichen: Entscheidung, ganzes Datensegment, `DS:10D2` unverändert, AL = 0 und Lauf in der Phasenmaschine.
 - `EndCheckStepTests.cs` (ohne Daten): Entscheidung und `37AA`, Halt an 19 ohne Änderung, Rest vom unveränderten Zustand.
 - `PhaseMachineDifferentialTests`: Woche 0 mit Port für Aufruf 19 (AL verglichen), Abbruchweg B mit Port-Entscheidung „Ende“ und
-  Rest aus dem RefEmu. Mehrrundenproben `MultiWeekScreenDifferentialTests` (Wochen 0–3) und `MultiWeekRound6DifferentialTests`
-  (Wochen 0–4): Aufruf 19 im Port, AL und Datensegment am Rücksprung verglichen.
+  Rest aus dem RefEmu. Mehrrundenproben `MultiWeekScreenDifferentialTests` (Wochen 0–3) und `MultiWeekRound7DifferentialTests`
+  (Wochen 0–4, bis R7 Teil 3 `MultiWeekRound6DifferentialTests`; jetzt mit Handel und Zusatzphase im Port): Aufruf 19 im
+  Port, AL und Datensegment am Rücksprung verglichen.
