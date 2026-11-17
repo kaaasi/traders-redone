@@ -76,33 +76,33 @@ public class TradeFrameDifferentialTests
     }
 
     // Counter-tests of the scene: a request not drawn → the picture differs.
-    [GameDataFact]
+    [Fact]
     public void Markers_not_drawn_are_found() =>
         Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipMarkers)));
 
-    [GameDataFact]
+    [Fact]
     public void A_countdown_step_not_drawn_is_found() =>
         Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipCountdownStep)));
 
-    [GameDataFact]
+    [Fact]
     public void Numbers_of_a_player_not_drawn_are_found() =>
         Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipNumbers)));
 
-    [GameDataFact]
+    [Fact]
     public void A_frame_processed_twice_is_found()
     {
         var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.DoubleFrame));
         Assert.NotNull(e);
     }
 
-    [GameDataFact]
+    [Fact]
     public void A_lost_stack_word_of_the_role_choice_is_found()
     {
         var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.StackWordLost));
         Assert.NotNull(e);
     }
 
-    [GameDataFact]
+    [Fact]
     public void A_wrong_register_SI_in_the_role_choice_is_found()
     {
         var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.SiZero));
