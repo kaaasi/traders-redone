@@ -17,3 +17,7 @@ Zufall, Uhr, Grafik, Eingabe, Ton.
 
 ## Prüfung
 Differenztest(s), Grenzfälle, Videovergleich.
+
+Endet das Original nur unter einer Bedingung oder „zieht endlos“ (17.11.2026, Quelle: Leitstelle R8, Erfahrung #217): Der
+Differenztest braucht eine Machbarkeitsprüfung im Testaufbau (verwirft den Fall mit klarer Meldung oder scheitert) oder einen
+Abbruchzähler im Harness; Empfehlung: eigener Zufallsstartwert je Testfall (`new Random(seed + n)`), keine fortlaufende Folge.

@@ -107,7 +107,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet restore TradersRedone.slnx --locked-mode
       - run: dotnet build TradersRedone.slnx -c Release --no-restore -warnaserror
-      - run: dotnet test TradersRedone.slnx -c Release --no-build
+      - run: dotnet test TradersRedone.slnx -c Release --no-build --blame-hang-timeout "${TR_HANG_TIMEOUT:-15m}" --blame-hang-dump-type none --logger "console;verbosity=normal"
 
   # By hand only: runnable viewer for download (Actions -> run -> Artifacts), short retention.
   downloads:

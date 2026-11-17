@@ -12,6 +12,7 @@
 #   3. mandatory run without data (TR_REQUIRE_GAMEDATA=1, TRADERS_GAMEDATA pointing nowhere) - MUST fail; otherwise
 #      original-data tests silently run empty. Every test that passes here must also pass in run 2: a test that passes
 #      without data but is skipped in run 2 carries [GameDataFact]/[GameDataTheory] needlessly and would no longer run in CI
+# Hang limit per test run: TR_HANG_TIMEOUT (default 20m, dotnet test --blame-hang-timeout); a hang counts as an error.
 # The original files come from the private repo kaaasi/traders-referenz (tools/claude/fetch-reference.sh original).
 # Prints the table for PR and handoff at the end. Exit code 0 only if every step is green and run 3 fails.
 set -uo pipefail
@@ -71,13 +72,17 @@ lauf() {   # lauf <id> <name> <must_fail 0|1> <env...>   (TRX results in $LOG/tr
   local id="$1" name="$2" soll="$3"; shift 3
   local log="$LOG/test-$id.txt" rc=0
   schritt "Tests: $name"
-  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
+  # --blame-hang-timeout: a hanging test aborts the run as an error naming the test (TR_HANG_TIMEOUT, default 20m);
+  # console logger "normal": the log shows during the run which tests have finished (the table still comes from the TRX).
+  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --logger "console;verbosity=normal" \
+    --blame-hang-timeout "${TR_HANG_TIMEOUT:-20m}" --blame-hang-dump-type none \
+    --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
   local zeilen; zeilen=$(grep -E "^(Passed|Failed)! " "$log" || true)
   summe() { printf '%s\n' "$zeilen" | grep -oE "$1: +[0-9]+" | grep -oE "[0-9]+" | awk '{s+=$1} END {print s+0}'; }
   if [ "$soll" -eq 1 ]; then
     [ "$rc" -ne 0 ] || fehler "$name lief grün – Originaldaten-Tests laufen ohne Daten still leer"
   else
-    [ "$rc" -eq 0 ] || { grep -E "^\s*Failed [A-Za-z]" "$log" | head -20; fehler "$name"; }
+    [ "$rc" -eq 0 ] || { grep -E "^\s*Failed [A-Za-z]|[Hh]ang|[Bb]lame" "$log" | head -20; fehler "$name"; }
     [ "$(printf '%s\n' "$zeilen" | grep -c .)" -eq "$PROJEKTE" ] || { tail -20 "$log"; fehler "$name: Ergebnisse für weniger als $PROJEKTE Testprojekte"; }
   fi
   ZEILEN_TAB+=("| $name | $(summe Passed) | $(summe Failed) | $(summe Skipped) |")
