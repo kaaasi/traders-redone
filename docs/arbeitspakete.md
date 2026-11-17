@@ -145,6 +145,7 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Abnahme:** alle drei Läufe grün (Änderung an der Test-Infrastruktur); neue Regel meldet die Alias-Verletzung (Gegenprobe rot);
   #193, #205, #208 geschlossen (`Fixes #…`).
 - **Abhängigkeiten:** keine. Früh mergen (Spur 0 baut in `tests/Traders.Tests/App/**` darauf).
+- **Status (Claude Sonnet, 17.11.2026):** alle drei Teile fertig, PR #216 (Ready for review), alle drei Läufe von `pruefen.sh` grün; #193, #205, #208 per `Fixes`. Neue Tests: `Week_1_computers_in_lock_step`, `Week_3_with_two_humans_in_lock_step` (`Trade/TradeFrameDifferentialTests.cs`), `HostExtraPhaseFrameDifferentialTests` (`App/`). Kein Produktivcode.
 
 ## Zuständigkeit gemeinsamer Dateien in R8
 

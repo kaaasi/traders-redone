@@ -42,6 +42,26 @@ public class TradeFrameDifferentialTests
         Assert.Contains(r.StackWordUses.Keys, k => k == ("0F68", Traders.Core.Trade.TradeRules.MainArgumentCount));
     }
 
+    // #205 R7H-6: weeks 1 and 3 with the real trading computer 141D and the picture, as weeks 0 and 2 above
+    // [DIFFERENTIAL] 0B9F:0002, 0C29:0046, 0C29:0086, 0C29:015C, 0C29:01B7, 0B9F:00FE
+    [GameDataFact]
+    public void Week_1_computers_in_lock_step()
+    {
+        var r = Run(new Script(1, [], []));
+        Assert.True(r.Retraces > 0);
+        Assert.True(r.Deals > 0 && r.Biddings > 0, $"deals {r.Deals}, biddings {r.Biddings}");
+        Scene(r);
+    }
+
+    // [DIFFERENTIAL] 0B9F:0002, 0C29:015C, 0C29:01B7, 0B9F:00FE
+    [GameDataFact]
+    public void Week_3_with_two_humans_in_lock_step()
+    {
+        var r = Run(new Script(3, [0, 3], Keys));
+        Assert.True(r.Retraces > 0);
+        Scene(r);
+    }
+
     // [DIFFERENTIAL] 0B9F:0002, 0C29:015C, 0C29:01B7, 0B9F:00FE
     [GameDataFact]
     public void Week_2_with_two_humans_in_lock_step()

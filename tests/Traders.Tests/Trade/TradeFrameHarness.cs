@@ -68,7 +68,9 @@ internal static class TradeFrameHarness
     private static readonly Dictionary<int, Lazy<MachineSnapshot>> AtTrade = new()
     {
         [0] = new(() => Snapshot(0)),
+        [1] = new(() => Snapshot(1)),
         [2] = new(() => Snapshot(2)),
+        [3] = new(() => Snapshot(3)),
     };
 
     private static MachineSnapshot Snapshot(int week)
