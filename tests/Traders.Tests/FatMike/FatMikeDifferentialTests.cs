@@ -72,7 +72,7 @@ public class FatMikeDifferentialTests
 
     /// <summary>
     /// A consistent field (columns 4…9, rows 3…6): owners −1…3 with at most one HQ (kind 4) per player, kinds −2 or 0…3, and the
-    /// counters DS:2F05, DS:4BA8, DS:2EE7 as 0609:10D2 keeps them; the verdicts fit the counts (no endless draw in 08DA).
+    /// counters DS:2F05, DS:4BA8, DS:2EE7 as 0609:10D2 keeps them; the verdicts fit the counts and DS:54C8 (no endless draw in 08DA).
     /// </summary>
     internal static void ArrangeField(FatMikeHarness h, Random r)
     {
@@ -109,7 +109,8 @@ public class FatMikeDifferentialTests
         {
             p.WriteByte((ushort)(F.OwnedFields + i), (byte)fields[i]);
             for (int k = 0; k < 4; k++) p.WriteByte((ushort)(F.OwnedKinds + 4 * i + k), (byte)kinds[i, k]);
-            if (p.ReadByte(M.NobodyPaid) == 1 && p.ReadByte((ushort)(M.Verdict + i)) == 1) p.WriteByte((ushort)(M.Verdict + i), 2);
+            // nobody paid: 0711 gives every player verdict 2 (a 0 or 1 there would make 08DA draw for crops it may not find)
+            if (p.ReadByte(M.NobodyPaid) == 1) p.WriteByte((ushort)(M.Verdict + i), 2);
         }
     }
 
