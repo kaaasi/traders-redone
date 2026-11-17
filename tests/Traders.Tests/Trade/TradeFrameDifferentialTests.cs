@@ -1,3 +1,4 @@
+using Xunit.Abstractions;
 using static Traders.Tests.Trade.TradeFrameHarness;
 using Kind = Traders.Core.Trade.TradeEventKind;
 
@@ -11,6 +12,10 @@ namespace Traders.Tests.Trade;
 /// </summary>
 public class TradeFrameDifferentialTests
 {
+    private readonly ITestOutputHelper _out;
+
+    public TradeFrameDifferentialTests(ITestOutputHelper output) => _out = output;
+
     // scancodes: up 48h, down 50h, Ins 52h (control 4)
     private const byte Up = 0x48, Down = 0x50, Fire = 0x52;
 
@@ -48,6 +53,17 @@ public class TradeFrameDifferentialTests
         Assert.Contains(r.StackWordUses.Keys, k => k.Source == "037A");
     }
 
+    // [DIFFERENTIAL] 0B9F:00FE
+    [GameDataFact]
+    public void Week_2_with_a_human_holding_up_in_lock_step()
+    {
+        // both humans hold up from frame 100 on: 0E9E:037A leaves player 3's action 2, and 0397 of player 1 stores it
+        Press[] keys = [new(100, 1200, Up), .. Keys.Skip(4)];
+        var r = Run(new Script(2, [0, 3], keys));
+        Assert.True(r.Retraces > 0);
+        Assert.Contains(r.StackWordUses.Keys, k => k.Source == "037A" && k.Word != -1);
+    }
+
     // [DIFFERENTIAL] 0B9F:0002, 0C29:015C, 0C29:01B7
     [GameDataFact]
     public void Week_2_with_two_humans_and_the_computer_replaced_in_lock_step()
@@ -75,37 +91,25 @@ public class TradeFrameDifferentialTests
             Assert.True(r.Kinds.GetValueOrDefault(kind) > 0, $"no request {kind}");
     }
 
-    // Counter-tests of the scene: a request not drawn → the picture differs.
-    [Fact]
-    public void Markers_not_drawn_are_found() =>
-        Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipMarkers)));
-
-    [Fact]
-    public void A_countdown_step_not_drawn_is_found() =>
-        Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipCountdownStep)));
-
-    [Fact]
-    public void Numbers_of_a_player_not_drawn_are_found() =>
-        Assert.NotNull(Record.Exception(() => Run(new Script(0, [], []), Mutation.SkipNumbers)));
-
-    [Fact]
-    public void A_frame_processed_twice_is_found()
+    /// <summary>
+    /// Counter-tests (four computers, week 0), each with the first line of the failure it must cause: a frame processed
+    /// twice, a lost stack word or a wrong SI in the role choice 141D:0397, requests the scene does not draw.
+    /// </summary>
+    [GameDataTheory]
+    [InlineData(nameof(Mutation.DoubleFrame), "the port executes list 361 of the flow, the original has none there")]
+    [InlineData(nameof(Mutation.StackWordLost), "DS:330B original 03, port FF")]
+    [InlineData(nameof(Mutation.SiZero), "DS:330B original 01, port 00")]
+    [InlineData(nameof(Mutation.SkipMarkers), "plane 0 offset 4415")]
+    [InlineData(nameof(Mutation.SkipCountdownStep), "list 124 of the flow: original 1 entries, port 0")]
+    [InlineData(nameof(Mutation.SkipNumbers), "list 853 of the flow: original 2 entries, port 0")]
+    public void Mutations_are_detected(string mutation, string expected)
     {
-        var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.DoubleFrame));
+        // the original files must be there: a run that fails for want of them proves nothing (pflichtlauf without data)
+        Assert.True(TestGameData.Available, $"original files missing ({TestGameData.DosDir})");
+        var e = Record.Exception(() => Run(new Script(0, [], []), Enum.Parse<Mutation>(mutation)));
         Assert.NotNull(e);
-    }
-
-    [Fact]
-    public void A_lost_stack_word_of_the_role_choice_is_found()
-    {
-        var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.StackWordLost));
-        Assert.NotNull(e);
-    }
-
-    [Fact]
-    public void A_wrong_register_SI_in_the_role_choice_is_found()
-    {
-        var e = Record.Exception(() => Run(new Script(0, [], []), Mutation.SiZero));
-        Assert.NotNull(e);
+        string first = e.Message.Split('\n')[0];
+        _out.WriteLine(first);
+        Assert.Contains(expected, first);
     }
 }

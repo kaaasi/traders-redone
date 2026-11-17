@@ -149,7 +149,17 @@ public class TradeRulesDifferentialTests
     public void Step_of_a_player() =>
         Each(0x0321, (d, i) =>
         {
-            d.Set(T.Player, (sbyte)(i % 4));
+            int p = i % 4;
+            d.Set(T.Player, (sbyte)p);
+            if (i % 2 == 1)
+            {
+                // the edge of the bid (0B9F:0341): a buyer whose cash is the price of his position, one below or one above
+                d.Set(T.Role + p, T.Buyer);
+                short position = d.S16(T.Position + 2 * p);
+                int price = Int16Math.S(Int16Math.Div(position, 2) + d.S16(T.BasePrice));
+                d.Set(L.Cash + 4 * p, price + (i / 2 % 3 - 1));
+                if (i % 8 != 7) d.Set(Int16Math.U(L.Stock + Int16Math.S(8 * p + 2 * d.S16(T.Ware))), (short)(i % 989)); // below 990
+            }
             H.AssertSame(d, 0x0B9F, 0x0321, (p, _) => Void(() => R.Step(p)), $"case {i}");
         });
 

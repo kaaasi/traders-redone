@@ -397,10 +397,18 @@ internal static class TradeFrameHarness
             string source = "";
             bool drew = false, assigned = false, noise = false;
             ushort Slot() => m.Mem.Read16(m.Cpu.Ss, slot);
-            m.AddCodeHook(trade, 0x0101, _ => slot = (ushort)(m.Cpu.Sp - 8));
-            m.AddCodeHook(trade, 0x0106, _ => (left, source) = (Slot(), "037A"));
-            m.AddCodeHook(trade, 0x015B, _ => (left, source) = (Slot(), "0F68"));
-            m.AddCodeHook(trade, 0x01B6, _ => (left, source) = (Slot(), "0F68"));
+            static ushort Expect(ushort? word, string where) =>
+                word ?? throw new InvalidOperationException($"the stack word was not read at {where}");
+            ushort flow = _o.Segment(0x0C29), control = _o.Segment(0x0E9E);
+            ushort? left037A = null, left0F68 = null;
+            m.AddCodeHook(trade, 0x0101, _ => (slot, left037A, left0F68) = ((ushort)(m.Cpu.Sp - 8), null, null));
+            // read while the word is still inside the callee's frame (at or above SP), so that an interrupt after the
+            // return counts as noise: 0E9E:0405 (mov sp,bp; [bp-2] = SP), 0C29:0FB6 (pop si; the pushed SI = SP)
+            m.AddCodeHook(control, 0x0405, _ => { if ((ushort)(m.Cpu.Bp - 2) == slot) left037A = Slot(); });
+            m.AddCodeHook(flow, 0x0FB6, _ => { if (m.Cpu.Sp == slot) left0F68 = Slot(); });
+            m.AddCodeHook(trade, 0x0106, _ => (left, source) = (Expect(left037A, "0E9E:0405"), "037A"));
+            m.AddCodeHook(trade, 0x015B, _ => (left, source) = (Expect(left0F68, "0C29:0FB6"), "0F68"));
+            m.AddCodeHook(trade, 0x01B6, _ => (left, source) = (Expect(left0F68, "0C29:0FB6"), "0F68"));
             m.AddCodeHook(ai, 0x039C, _ =>
             {
                 Assert.Equal(slot, (ushort)(m.Cpu.Bp - 2));
