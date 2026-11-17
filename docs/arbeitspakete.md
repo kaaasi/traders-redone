@@ -114,7 +114,7 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   pixelgenau; Gegenprobe im Review (eine Ziehung ausgelassen oder vertauscht, Buchung mit Vorzeichenfehler, Merker `4BC2` nie
   gesetzt, ein Bild doppelt verarbeitet, zweite Feldrunde ohne `1582` = 1 bzw. ohne Tippbilder → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0x1400 Byte; bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
-- **Status:** Teile 1 und 2 fertig (Kern `1F63:000F` mit allen 23 Routinen, Handler `FatMikeStep`; Wettbewerb `0B03`/`11AD`, zweite Feldrunde `0609:0080` samt `1582`-Zweig von `0204`, Handler `ContestStep`; Differenztests; PR #217, Draft); Teil 3 (Szene) offen.
+- **Status:** Teile 1 und 2 fertig (Kern `1F63:000F` mit allen 23 Routinen, Handler `FatMikeStep`; Wettbewerb `0B03`/`11AD`, zweite Feldrunde `0609:0080` samt `1582`-Zweig von `0204`, Handler `ContestStep`; Differenztests; PR #217). Teil 3 fertig: Szene `FatMikeScene` (`1F63:104B` neu belegt), Aufrufe 26 und 30 Bild für Bild im Gleichschritt mit dem Original (Bildzähler, Datensegment, Bild); Spur fertig – Review.
 
 ## 2 `einkauf` – Einkauf `08CF:0004`
 

@@ -1,4 +1,4 @@
-# 1F63:000F / 1F63:01B2 / 1F63:0305 / 1F63:0390 / 1F63:04D8 / 1F63:064A / 1F63:0711 / 1F63:079A / 1F63:08DA / 1F63:0A8A / 1F63:0C82 / 1F63:0D24 / 1F63:0E5C / 1F63:0E8F / 1F63:0EC7 / 1F63:0F46 / 1F63:0F84 / 1F63:0FDF / 1F63:1185 / 1F63:1247 / 1F63:13FE / 1F63:143E / 1F63:147B – Fat Mike (Schutzgeld)
+# 1F63:000F / 1F63:01B2 / 1F63:0305 / 1F63:0390 / 1F63:04D8 / 1F63:064A / 1F63:0711 / 1F63:079A / 1F63:08DA / 1F63:0A8A / 1F63:0C82 / 1F63:0D24 / 1F63:0E5C / 1F63:0E8F / 1F63:0EC7 / 1F63:0F46 / 1F63:0F84 / 1F63:0FDF / 1F63:1185 / 1F63:1247 / 1F63:13FE / 1F63:143E / 1F63:147B / 1F63:104B – Fat Mike (Schutzgeld)
 
 - **Ladebild-Adresse:** Segment `1F63` (Dateioffset `0x22C30`, Größe `0x1500`); `000F` bei `0x22C3F`. Die ersten 15 Bytes sind der
   Schluss der Routine davor. `147B` läuft über das Segmentende hinaus: `pop si`/`mov sp,bp`/`pop bp`/`retf` liegen bei `20B3:0000`.
@@ -100,7 +100,15 @@ statt nachgebaut: `1F63:113E` (`Week.WaitLoop.Indicator`, dafür öffentlich), `
 `13C5`/`1FCC`-Kern (`Planting`), Schreibmaschine `0A69:0288` (`Harvest.TypeLines`), Blenden, Seitenwechsel, `0185`.
 `15BE` > 0 in `04D8`: der Kern zählt die Listeneinträge, die er seit `0A96:001B` angefordert hat (jede Zeichenanforderung legt im
 Original mindestens einen Eintrag an); `15BE` selbst gehört der Liste von `Traders.Vga`. `104B`, `1879`, `0A69:002C/004D/011B` und
-die `0A96`-Befehle sind Zeichenereignisse für die Szene (Teil 3).
+die `0A96`-Befehle sind Zeichenereignisse für die Szene.
+
+**Szene (Teil 3):** `src/Traders.Presentation/FatMike/FatMikeScene.cs` spielt die Ereignisse über `Traders.Vga` ab; gemeinsame
+Anforderungen (Bild, Objekte, Paletten, Blenden, Seiten, Liste, Wartebilder, Spielfeld der Strafe) über eine `FieldScene` auf
+denselben Ebenen, eigene als Einträge der Befehlsliste `0A96` (`0089`, `00E2`, `0267`, `0030`, `0A69:002C/004D/011B`, `0525`),
+Schrift `21FD:05DB`, Schreibmaschine `0A69:01AD` (Lage aus `0288`/`0243`), `21AF:0472`. Neu belegt aus dem Disassembly:
+**`1F63:104B(Maske, Zustand)`** – je Bit 0 (x `D0h`, Atlas-x `38h`) bzw. Bit 1 (x `F4h`, Atlas-x `58h`) ein `0A96:0030`; Zustand
+(Low-Byte) 1: Atlas (x, `6Ah`) `20h`·`28h` nach y `32h`, 2: Atlas (Atlas-x, `43h`) `20h`·`28h` nach y `32h`, sonst Atlas (Atlas-x,
+`6Bh`) `20h`·`1Fh` nach y `3Bh`. Liest und schreibt kein `DS`; keine neuen `[APPROX]`.
 
 ## Prüfung
 
@@ -110,4 +118,13 @@ Mindestpreis 10, 999, Einheit bis 400), `0C82` (Gleichstand, Wettbewerb), `01B2`
 `0A8A` (alle drei Urteile), `04D8` mit Skript (Menschen und Computer, IQ 0–3, Zahlung bei Vorrat knapp über/unter dem Preis),
 `0305`, `0D24`, `0F84`, `1247`, `13FE`, `147B` (auch negative und große Preise), `08DA`/`079A` auf stimmigen Feldern, `000F` ganz aus
 LoadOnly-Zuständen und aus echten Partien in den Wochen 0–3 (Menschen per Skript, `4BC2` und Vorräte verändert). Verglichen:
-Datensegment, `DS:10D2`, Zahl der `random()`-Aufrufe, Aufruffolge mit Argumenten. Bildgenau (Bildzähler, Szene): Teil 3.
+Datensegment, `DS:10D2`, Zahl der `random()`-Aufrufe, Aufruffolge mit Argumenten.
+
+Bildgenau und Bildzähler: `tests/Traders.Tests/FatMike/FatMikeFrameDifferentialTests.cs` (Harness `FatMikeFrameHarness.cs`):
+`FatMikeStep` (Aufruf 26) in der Phasenmaschine im Gleichschritt mit dem Original einer echten Partie (Schnappschuss am Einsprung,
+lebende Grafik, Tasten als Interrupts) – je Rücklauf des Originals ein Bild des Ports; dort Datensegment, `DS:10D2`, Zahl der
+`random()`-Aufrufe, Rücklaufwarten der Szene und Bild (vier VRAM-Ebenen, DAC, CRTC-Start), bei der Rückkehr erneut. Fälle: Woche 0
+vier Computer; Woche 1 zahlende Menschen mit Blinken `0305` (Startwert gewählt); Woche 3 ein Mensch bestraft (Ernte vernichtet
+bzw. Felder verloren, Brett, Wappen, Tafel, Textzeilen, Warteschleife Modus 0); Woche 3 niemand zahlt (Warnbild `3B74`, Hinweis
+`3B94`, vier Strafen). Machbarkeitsprüfung der Strafe im Testaufbau (`08DA` endet nur bei erreichbarer Zahl). Gegenproben (rot):
+Anzeige `104B` ausgelassen, ein getipptes Zeichen ausgelassen, Vorrat ohne Schatten, ein Bild doppelt verarbeitet.

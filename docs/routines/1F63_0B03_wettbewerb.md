@@ -67,4 +67,12 @@ LoadOnly-Zuständen (Wochen mit/ohne Wettbewerb, negative und große Wochen mit 
 verglichen). Aus echten Partien (`FatMikeDifferentialTests.Fat_Mike_in_real_games_matches_the_original`, Woche 2): `0B03` ganz
 mit der zweiten Feldrunde (Computer und Feldhelfer im Port aus Spur `anbau-ki`, im Original `135D`), Menschen per Skript,
 Vorräte und `4BC2` verändert; Feldschleife nach höchstens 400 Durchgängen beidseitig beendet. Verglichen: Datensegment, `DS:10D2`,
-Zahl der `random()`-Aufrufe, Aufruffolge mit Argumenten. Bildgenau (Bildzähler, Szene): Teil 3.
+Zahl der `random()`-Aufrufe, Aufruffolge mit Argumenten.
+
+Bildgenau und Bildzähler (Szene `src/Traders.Presentation/FatMike/FatMikeScene.cs`: `0A69:0243`-Zeile, `0A96:05FB`, `0A96:0525`,
+`2295:006D`; zweite Feldrunde über die `FieldScene` samt Hinweis `NoticeSteps` und `0609:0204` bei `1582` = 1):
+`tests/Traders.Tests/FatMike/FatMikeFrameDifferentialTests.cs` – `ContestStep` (Aufruf 30) in der Phasenmaschine im Gleichschritt
+mit dem Original einer echten Partie (Woche 2), je Rücklauf Datensegment, `DS:10D2`, `random()`-Zahl und Bild; Fälle: vier
+Computer mit Geldpreis, Feldpreis mit ganzer zweiter Feldrunde (Computer `anbau-ki`), Menschen bestätigen die Warteschleife
+(Modus 4). Nach Aufruf 30 erhöht die Phasenmaschine `DS:4B9A` (im Original nach der Rückkehr, `1777:02D3`); der Vergleich bei der
+Rückkehr rechnet das ein. Gegenprobe (rot): helle Farbe des Blinkens `11AD` ausgelassen.
