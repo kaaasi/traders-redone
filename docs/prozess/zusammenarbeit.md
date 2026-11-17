@@ -64,6 +64,9 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 - **Sparsame Kette:**
   1. **Erstreview** (Spur- oder Integrations-PR): vollständig (Claude Opus) – alle drei Läufe von `tools/pruefen.sh`, Mutationen der neuen Tests,
      Differenztests gegen RefEmu nachvollzogen, Fehlerfälle, Fundstellen in `T.EXE`.
+     Endet das Original laut Befund nur unter einer Bedingung oder „zieht endlos“ (17.11.2026, Leitstelle R8, Erfahrung #217), prüft das
+     Erstreview, ob der Differenztest eine Machbarkeitsprüfung im Testaufbau (verwirft den Fall mit klarer Meldung oder scheitert)
+     oder einen Abbruchzähler im Harness hat; Empfehlung: eigener Zufallsstartwert je Testfall (`new Random(seed + n)`).
   2. **Fixlauf:** behebt die Befunde, `tools/pruefen.sh --schnell`.
   3. **Nachprüfung** nur, wenn der Fixlauf **P0/P1** behebt: nur Delta, Gegenbeispiele und Rückmutationen dieser Befunde.
   4. **Delta-Prüfung der Leitstelle** statt Nachprüfung, wenn das Delta **nur P2/P3** behebt oder nur Rebase ohne Konflikt ist
