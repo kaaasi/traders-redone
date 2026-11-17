@@ -91,7 +91,7 @@ kein Zufall (auch nicht in den Computerentscheidungen).
 | `0082`, `03E5`, `0455`, `05F1`, `0813`, `084F`, `0914`, `0AF0`, `0DEF` | ganz | – |
 | `029A`, `039C`, `0492`, `04BA`, `066D`, `069F`, `0886`, `09C4`, `09F1`, `0BE1`, `0CD5`, `0E53`, `0F4D`, `115C`, `161F`, `178D` | Regeln, Buchungen, Zufall | Ton und Zeichnen als Ereignis |
 | `1348`, `1543` | Zufall, `15B6`, `159A`, `15A2` | Ereignisse |
-| `0004`, `00CD`, `01BD` | Teil 2 (Bild für Bild) | Teil 2/3 |
+| `0004`, `00CD`, `01BD` | ganz, Bild für Bild (`Purchase`) | Ereignisse (Teil 3 zeichnet) |
 | `15C6`, `15F5`, `1688`, `16B4`, `16F5`, `172A`, `1859`, `18B5`, `1935`, `193E`, `1981` | – | Teil 3 |
 
 Gerufen, nicht nachgebaut: `0609:1FE0` (`Planting.Move`), `0609:1B72` (`FieldCursor.TimeBar`), `0609:13C5` (`Planting.Border`),
@@ -112,7 +112,12 @@ als Ereignis; keine Uhr, keine Dateien.
 ## C#-Umsetzung
 
 `Traders.Core/Purchase/PurchaseRules.cs` (Teil 1), `PurchaseLayout.cs`, `PurchaseEvents.cs` (`IPurchaseOutput` : `IFieldOutput`,
-Texte über `ITextMemory`). Ablauf Bild für Bild (Teil 2) und Szene `Traders.Presentation/Purchase/` (Teil 3) folgen.
+Texte über `ITextMemory`). Teil 2: `Purchase.cs` – `0004`, `00CD`, `01BD` als Folge von `FieldWait` (je Rückgabe ein Bild):
+Blende `037D` (8 × (1 + 4)), `0329` (8 × (1 + 3)), Seitenwechsel `051F`, `060D` je Spieler in `00CD`, `0185(2)` je Durchlauf,
+Pausenprüfung vor dem Countdown-Takt, `0665` am Ende; `0A96:0C3F` am Ende von `1348` wechselt nur auf Karte 2/63h die Seite.
+Gemeinsame Rahmenroutinen als `FieldEvent` (wie Anbau/Ernte), die eigenen als `PurchaseEvent`. `IPurchaseHost` (Steuerung
+`0E9E:037A`, Pause `21FD:0245`), `PurchaseHost` (Spiel), `PurchaseStep` (Handler für Aufruf 29, Einbindung durch Spur `woche`).
+Szene `Traders.Presentation/Purchase/` folgt (Teil 3).
 
 ## Prüfung
 
@@ -124,3 +129,11 @@ jedem Zustand, Vorgaben `08ED`, 16-/32-Bit-Grenzen): Datensegment, Zufallszustan
 wie erfasst, mit Mensch für Spieler 0 und 2 und mit beiden Schaltern aus. In den Wochen 0–3 nicht erreicht: `084F`, `09C4`,
 `09F1` (kein Computer betritt den Raketenladen oder kauft vom Konto). Gegenprobe: ohne Geldprüfung beim Öl, ohne
 Raketenobergrenze, mit falscher Kugel oder falscher Dekorationsziehung → rot.
+
+`tests/Traders.Tests/Purchase/PurchaseFrameDifferentialTests.cs` (`PurchaseFrameHarness`, Teil 2): Gleichschritt ab dem Einsprung
+`08CF:0004` der laufenden Vorgabepartie – Original mit Grafik und Ton, Tasten als Tastaturinterrupts; Port `PurchaseStep` mit
+`PurchaseHost` in der `PhaseMachine`. Je Bild (Rücksprung-Eintritt `0D73:00D3`) Datensegment (ohne die Bytes der Ausgabe wie beim
+Anbau), `DS:10D2`, Zahl der Ziehungen; am Ende erneut, Bildzahl gleich, Phasenmaschine bei Aufruf 30. Fälle: Woche 0 vier
+Computer; Woche 2 Spieler 0 und 2 als Mensch (Lotto, Öl- und Raketenkauf); Woche 0 Spieler 0 und 2 im Edelsteinladen (Konto 500:
+aufs Konto, zurückkaufen, gegen Bargeld). Je Lauf `DS:08F8` · 28h Durchläufe, Uhr je Countdown-Schritt, vier Kugeln. Gegenprobe:
+ein Bild doppelt verarbeitet, ein Countdown-Takt verloren → rot (Meldung im Test festgehalten).

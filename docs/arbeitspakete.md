@@ -133,7 +133,8 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   Geldprüfung, Vorrat ohne Obergrenze, Countdown nicht abgezogen, ein Bild doppelt verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
 - **Status:** PR #218 (Draft, Claude Opus). Teil 1 fertig (17.11.2026): Befund `08CF_0004_einkauf.md` mit allen 41 Routinen,
-  Regeln in `Purchase/PurchaseRules.cs`, Differenztests auf erzeugten Zuständen und Wochen 0–3. Offen: Teil 2, Teil 3.
+  Regeln in `Purchase/PurchaseRules.cs`, Differenztests auf erzeugten Zuständen und Wochen 0–3. Teil 2 fertig (17.11.2026):
+  `Purchase/Purchase.cs` Bild für Bild, `PurchaseStep` (Aufruf 29), Gleichschritt Woche 0 und 2 mit Menschen. Offen: Teil 3.
 
 ## 3 `sammel` – P3-Sammlung aus R7 (Sonnet)
 
