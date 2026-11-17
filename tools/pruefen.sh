@@ -90,13 +90,24 @@ print(p, f, s, n)
 PY
 )
   local np nf ns nt; read -r np nf ns nt <<<"$trx"
-  if [ "$soll" -eq 1 ]; then
+  # An aborted run (hang limit, test host crash, "Test Run Aborted", missing TRX) is an error in EVERY run, the mandatory
+  # run included, and shows in the table row: the hanging test never reaches the TRX counters, so the row would look green.
+  local abgebrochen=0
+  if grep -q -E "^\s*Test Run Aborted" "$log" || [ "$nt" -ne "$PROJEKTE" ]; then abgebrochen=1; fi
+  if [ "$abgebrochen" -eq 1 ]; then
+    # all tests running at the abort (the block ends at the first empty line)
+    sed -n '/The test running when/,/^\s*$/p' "$log" | head -40
+    grep -E "hang timeout|inactivity time|Test Run Aborted" "$log" | head -5
+    [ "$nt" -eq "$PROJEKTE" ] || echo "  Ergebnisse für $nt von $PROJEKTE Testprojekten"
+    fehler "$name abgebrochen (Hang-Limit, Testhost-Absturz oder fehlende Ergebnisse)"
+    [ "$nf" -ge 1 ] || nf=1   # never an all-green row for an aborted run
+  elif [ "$soll" -eq 1 ]; then
     [ "$rc" -ne 0 ] || fehler "$name lief grün – Originaldaten-Tests laufen ohne Daten still leer"
   else
-    [ "$rc" -eq 0 ] || { grep -E -A1 "^\s*Failed [A-Za-z]|The test running when|hang timeout|inactivity time" "$log" | head -30; fehler "$name"; }
-    [ "$nt" -eq "$PROJEKTE" ] || { tail -20 "$log"; fehler "$name: Ergebnisse für $nt von $PROJEKTE Testprojekten"; }
+    [ "$rc" -eq 0 ] || { grep -E -A1 "^\s*Failed [A-Za-z]" "$log" | head -30; fehler "$name"; }
   fi
-  ZEILEN_TAB+=("| $name | $np | $nf | $ns |")
+  local marke=""; [ "$abgebrochen" -eq 1 ] && marke=" – **abgebrochen**"
+  ZEILEN_TAB+=("| $name$marke | $np | $nf | $ns |")
 }
 if [ "$DATA" -eq 1 ]; then lauf mit "Mit Originaldaten (TR_REQUIRE_GAMEDATA=1)" 0 TR_REQUIRE_GAMEDATA=1; fi
 if [ "$QUICK" -eq 0 ] || [ "$DATA" -eq 0 ]; then lauf ohne "Ohne Originaldaten (TR_SKIP_GAMEDATA=1)" 0 TR_SKIP_GAMEDATA=1 TRADERS_GAMEDATA="$LOG/keine-originaldaten"; fi

@@ -41,7 +41,7 @@ jobs:
   linux:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60   # above the hang limit (TR_HANG_TIMEOUT 20m per run, full run about 25 min): the hang limit fires first and names the test
     env:
       # Read-only fine-grained token for the private repo kaaasi/traders-referenz (original files). Without the secret the
       # run is limited to the tests without original data and says so in the summary.
@@ -94,7 +94,7 @@ jobs:
   windows:
     if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 30   # above the hang limit of 20m
     defaults:
       run:
         shell: bash
@@ -107,7 +107,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet restore TradersRedone.slnx --locked-mode
       - run: dotnet build TradersRedone.slnx -c Release --no-restore -warnaserror
-      - run: dotnet test TradersRedone.slnx -c Release --no-build --blame-hang-timeout "${TR_HANG_TIMEOUT:-15m}" --blame-hang-dump-type none --logger "console;verbosity=normal"
+      - run: dotnet test TradersRedone.slnx -c Release --no-build --blame-hang-timeout "${TR_HANG_TIMEOUT:-20m}" --blame-hang-dump-type none --logger "console;verbosity=normal"
 
   # By hand only: runnable viewer for download (Actions -> run -> Artifacts), short retention.
   downloads:
