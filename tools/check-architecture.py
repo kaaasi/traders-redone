@@ -137,6 +137,14 @@ def _locals(text, known_types):
     for m in re.finditer(r'\bvar\s+(\w+)\s*=\s*new\s+([A-Z]\w*)\s*\(', text):
         if m.group(2) in known_types:
             found[m.group(1)] = m.group(2)
+    # #193 R7H-3: `var t = _texts;` / `var a = this._a!;` aliases a known variable; chains resolve by repeating until stable.
+    changed = True
+    while changed:
+        changed = False
+        for m in re.finditer(r'\bvar\s+(\w+)\s*=\s*(?:this\s*\.\s*)?(\w+)\s*!?\s*(?=[;,)])', text):
+            if m.group(2) in found and m.group(1) not in found:
+                found[m.group(1)] = found[m.group(2)]
+                changed = True
     return found
 
 
@@ -355,6 +363,11 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
                     (scene_violations('IncidentText.FormatNumber(_d, _texts, 5, 4, 0, 0);', _writers, _members), CATCH),
                     (scene_violations('TextBufferMemory t = _t; t.Write(1, 2, 3);', _writers, _members), CATCH),
                     (scene_violations('private readonly ITextMemory _texts; void F() { _texts.Write(1, 2, 3); }', _writers, _members), CATCH),
+                    # #193 R7H-3: writes through a `var` alias of a field, a local or a parameter (also chained) are writes too
+                    (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; t.Write(1, 2, 3); }', _writers, _members), CATCH),
+                    (scene_violations('void F(TextBufferMemory m) { var a = m; var b = a; b.Write(1, 2, 3); }', _writers, _members), CATCH),
+                    (scene_violations('private readonly Holder _h; void F() { var h = this._h!; h.Go(_state); }', _writers, _members), CATCH),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; byte b = t.Read(1, 2); }', _writers, _members), CLEAN),
                     (scene_violations('private readonly ITextMemory _texts; void F() { byte b = _texts.Read(1, 2);'
                                       ' ushort n = IncidentText.Length(_texts, 1, 2); }', _writers, _members), CLEAN),
                     # #76 P3-1: one violation per reference rule, and the real layering stays clean
