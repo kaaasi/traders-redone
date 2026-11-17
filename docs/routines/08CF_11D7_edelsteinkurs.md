@@ -38,3 +38,8 @@ Keine Uhr, keine Ausgabe.
 `tests/Traders.Tests/Rules/RandomRulesDifferentialTests.cs`: Faktoren an allen Schwellen (W(40), 45, 100, 155, 160 ± 1)
 für fünf Wochen und je vier Zufallszustände, Extremwerte (Faktor `MinValue`/`MaxValue`, negative und überlaufende Wochen,
 Überlauf der Bargeldsumme, 16-Bit-Neusatz), 60 Wochen in Folge; Ziehungen gegen die Aufrufe von `21FD:01BA`.
+
+## Nachtrag (R8, Spur `einkauf`)
+
+Gelesen von `08CF:0004`: der Einkauf liest Kursfaktor `4436` und Grundeinheit `3CF0` (Edelsteinladen `0886`, `069F`,
+Computerwunsch `0914`, Preiszeile `1348`); er ändert beide nicht. Befund [08CF_0004_einkauf.md](08CF_0004_einkauf.md).

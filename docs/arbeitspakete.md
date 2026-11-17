@@ -115,6 +115,7 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   pixelgenau; Gegenprobe im Review (eine Ziehung ausgelassen oder vertauscht, Buchung mit Vorzeichenfehler, Merker `4BC2` nie
   gesetzt, ein Bild doppelt verarbeitet, zweite Feldrunde ohne `1582` = 1 bzw. ohne Tippbilder → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0x1400 Byte; bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
+- **Status:** Teile 1 und 2 fertig (Kern `1F63:000F` mit allen 23 Routinen, Handler `FatMikeStep`; Wettbewerb `0B03`/`11AD`, zweite Feldrunde `0609:0080` samt `1582`-Zweig von `0204`, Handler `ContestStep`; Differenztests; PR #217). Teil 3 fertig: Szene `FatMikeScene` (`1F63:104B` neu belegt), Aufrufe 26 und 30 Bild für Bild im Gleichschritt mit dem Original (Bildzähler, Datensegment, Bild); Spur fertig – Review.
 
 ## 2 `einkauf` – Einkauf `08CF:0004`
 
@@ -133,6 +134,11 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Abnahme:** alle drei Läufe grün; Einkauf im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Kauf ohne
   Geldprüfung, Vorrat ohne Obergrenze, Countdown nicht abgezogen, ein Bild doppelt verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
+- **Status:** PR #218 (Draft, Claude Opus). Teil 1 fertig (17.11.2026): Befund `08CF_0004_einkauf.md` mit allen 41 Routinen,
+  Regeln in `Purchase/PurchaseRules.cs`, Differenztests auf erzeugten Zuständen und Wochen 0–3. Teil 2 fertig (17.11.2026):
+  `Purchase/Purchase.cs` Bild für Bild, `PurchaseStep` (Aufruf 29), Gleichschritt Woche 0 und 2 mit Menschen. Teil 3 fertig
+  (17.11.2026): Szene `Presentation/Purchase/PurchaseScene.cs`, im Gleichschritt je Bild pixelgenau (VRAM, DAC, Bildstart) und
+  jede Befehlsliste des Ablaufs gleich, Gegenproben der Szene. Alle Teile fertig, Review.
 
 ## 3 `sammel` – P3-Sammlung aus R7 (Sonnet)
 
