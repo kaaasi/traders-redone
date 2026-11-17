@@ -55,6 +55,10 @@ Transitiv gerufen und noch nicht portiert: nur `21A7:0054` (Ton, R10) – als Er
 Pause), Ereignisse `WaitLoopEvents.cs` (`WeekEvent`). Zustand und Zufall im Kern; Zeichnen, Ton und Objekte meldet der Kern als
 Ereignisse, die Szene führt sie aus.
 
+**Aufruf aus `1F63:04D8` (R8, Spur `fatmike`):** Fat Mikes Angebot ruft die Anzeige `1F63:113E` direkt, je Bild in den Runden 0 und
+1. Der Port ruft dafür `WaitLoop.Indicator()` (nur dafür öffentlich gemacht) auf einer eigenen `WaitLoop`-Instanz im Modus 4 und
+gibt deren Ereignis `Indicator` als `FatMikeEventKind.Indicator` weiter; Beleg `FatMikeDifferentialTests.Offer_matches_the_original`.
+
 ## Prüfung
 `tests/Traders.Tests/Week/WaitLoopDifferentialTests.cs` (`[DIFFERENTIAL] 21FD:0004`, Harness `WaitLoopHarness`): Original mit
 gestubbten Schichten (`0A96`, `0A69`, `21A7`, `23CD`, `0609:1FCC`, `21FD:051F`), Rahmen wie im Menü-Harness; verglichen werden das
