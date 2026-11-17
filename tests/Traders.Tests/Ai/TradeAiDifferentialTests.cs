@@ -33,7 +33,7 @@ public class TradeAiDifferentialTests
     /// <summary>
     /// [DIFFERENTIAL] 141D:0008 / 021A / 0397 / 0464 / 09F3 / 0CCA / 0E67 – the game states with random variations of
     /// everything 141D reads (seats, sides, cash, stocks, needs, limits, prices, positions, countdown, deals, bid tables,
-    /// random state, stale word); every listed path (<see cref="TradeAiHarness.Branches"/>) is passed, 0397 and 09F3 draw in
+    /// random state, stale word), with the final word of 0397's local against the port's return value (R7H-1); every listed path (<see cref="TradeAiHarness.Branches"/>) is passed, 0397 and 09F3 draw in
     /// some runs and not in others. Counter-checks (local): a draw of 0397 left out, `&lt;` instead of `&lt;=` in 05A3, buyer
     /// and seller swapped in 0CCA → red.
     /// </summary>
@@ -89,6 +89,8 @@ public class TradeAiDifferentialTests
             foreach (var entry in Enum.GetValues<TradeAiEntry>().Where(e => e != TradeAiEntry.Bought || week > 0))
                 Assert.True(game.Compared.GetValueOrDefault((entry, week)) > 0, $"{entry} not compared in week {week}");
         Assert.Contains(game.StaleWords.Keys, w => w != -1);
+        // R7H-1 (#192): every 0397 call's final local word equals the port's return value.
+        Assert.Equal(Enumerable.Range(0, TradeAiGame.Weeks).Sum(w => game.Counts[(TradeAiEntry.ChooseSide, w)]), game.ReturnsCompared);
         if (humans > 0)
             Assert.Contains(game.Samples, c => c.Entry == TradeAiEntry.Demand && c.External && c.Data[L.IsComputer + c.Player] == 0);
     }

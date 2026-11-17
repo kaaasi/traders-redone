@@ -37,3 +37,5 @@ nur die Routinen.
 ## Prüfung
 `tests/Traders.Tests/Rules/RandomRulesDifferentialTests.cs`: zehn Bargeldmuster × neun Wochen mit beliebigen Startpreisen
 (einschließlich Divisor 0), Versteigerung für sechs Waren (auch −1 und 4), 22 Startpreise × 7 Gebote; jeweils keine Ziehung.
+
+**Aufruf aus `0B9F:0002`** (Spur `handel`, R7): `06A0` zu Beginn des Handels, `078A` am Ende jeder Ware mit Verkäufer (`0C29:0046`); Port `Trade.Run` / `Trade.WareFrames`, geprüft in `TradeFlowDifferentialTests`.

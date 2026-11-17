@@ -41,7 +41,7 @@ internal sealed class TradeAiGame
         public override string ToString() => $"{Entry} week {Week} player {Player}{(External ? "" : " (inner)")}";
     }
 
-    private sealed record Pending(TradeAiEntry Entry, ushort Cs, ushort Ip, ushort Sp, byte[]? Expected, string Label);
+    private sealed record Pending(TradeAiEntry Entry, ushort Cs, ushort Ip, ushort Sp, byte[]? Expected, short? Returned, string Label);
 
     public static readonly Lazy<TradeAiGame> Default = new(() => new TradeAiGame(0));
 
@@ -57,6 +57,9 @@ internal sealed class TradeAiGame
     public Dictionary<(TradeAiEntry, int), int> Compared { get; } = [];
 
     public List<string> Differences { get; } = [];
+
+    /// <summary>Calls of 0397 whose final local word was compared with the port's return value.</summary>
+    public int ReturnsCompared { get; private set; }
 
     /// <summary>Stale words found under 0397's local in the game (value, count).</summary>
     public Dictionary<short, int> StaleWords { get; } = [];
@@ -98,15 +101,16 @@ internal sealed class TradeAiGame
             if ((n - 1) % SampleEvery.GetValueOrDefault(entry, 1) == 0) Samples.Add(call);
             if (!external) return;
             byte[]? expected = null;
+            short? returned = null;
             try
             {
-                expected = TradeAiHarness.Run(entry, call.Copy(), argument, stale, out _).Bytes;
+                expected = TradeAiHarness.Run(entry, call.Copy(), argument, stale, out _, out returned).Bytes;
             }
             catch (Exception e)
             {
                 Differences.Add($"{call}: port threw {e.GetType().Name}: {e.Message}");
             }
-            pending.Add(new Pending(entry, cs, ip, (ushort)(entrySp + 4), expected, $"{call} #{n}"));
+            pending.Add(new Pending(entry, cs, ip, (ushort)(entrySp + 4), expected, returned, $"{call} #{n}"));
         }
 
         foreach (var entry in Enum.GetValues<TradeAiEntry>().Where(e => e != TradeAiEntry.ChooseSide))
@@ -117,6 +121,17 @@ internal sealed class TradeAiGame
             short stale = (short)m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Bp - 2));
             StaleWords[stale] = StaleWords.GetValueOrDefault(stale) + 1;
             Enter(TradeAiEntry.ChooseSide, (ushort)(m.Cpu.Bp + 2), stale);
+        });
+
+        // R7H-1 (#192): the final word of 0397's local (141D:0460, before the frame is released) is ChooseSide's return value.
+        m.AddCodeHook(seg, TradeAiHarness.ChooseSideEnd, _ =>
+        {
+            short final = (short)m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Bp - 2));
+            var c = pending.FindLast(x => x.Entry == TradeAiEntry.ChooseSide && x.Sp == (ushort)(m.Cpu.Bp + 6));
+            if (c is null) Differences.Add($"141D:0460 without a pending call of 0397 (week {p.Week})");
+            else if (c.Expected is not null && c.Returned != final)
+                Differences.Add($"{c.Label}: final local original {final:X4}, port returned {c.Returned:X4}");
+            else ReturnsCompared++;
         });
 
         foreach (var (entry, (s, o)) in CallSites)
