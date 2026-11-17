@@ -140,17 +140,92 @@ public sealed partial class FieldScene
 
     /// <summary>
     /// [ORIGINAL] 0609:0204 as steps (the whole call, event <see cref="FieldEventKind.DrawStatus"/>): the status lines
-    /// (<see cref="Status"/>), then 21FD:060D. In the second round (DS:1582 = 1) 21FD:0185(50) comes first and the lines are
-    /// the empty interior.
+    /// (<see cref="Status"/>), then 21FD:060D. In the second round (DS:1582 = 1, 0609:0080 from 1F63:0B03) the free-field
+    /// notice comes first (<see cref="NoticeSteps"/>) and the lines are the empty interior.
     /// </summary>
-    // [APPROX] Second round (DS:1582 = 1, 0609:0080 from 1F63, lane R9): the typed notice 0A69:0288 with its fonts 21FD:05DB and
-    // its own flips is not drawn, as in the core's frames (Planting.StatusFrames).
     private IEnumerable<int> StatusSteps()
     {
         if (_state.U8(Planting.NoTime) == 1)
-            foreach (int s in RetraceSteps(50, 0)) yield return s;
+            foreach (int s in NoticeSteps()) yield return s;
         Status();
         foreach (int s in ListOnBothPagesSteps()) yield return s;
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 0609:0204 with DS:1582 = 1, up to its 0A96:001B: font 1 (21FD:05DB), 0A69:0288(0, 1Bh, 140h, DS:37E0, 2, 9, 5)
+    /// – per line 0243 at 1Bh + i·([34A4] + [34A4]/5), centred, per character 01AD: DS:0140, list emptied, text, 21FD:060D, the key
+    /// click 21A7:0054(1, 16h) except for blanks (<see cref="GraphicsLayers.Effects"/>), 21FD:0245, 21FD:0185(5) –, font 0 and
+    /// 21FD:0185(50).
+    /// </summary>
+    private IEnumerable<int> NoticeSteps()
+    {
+        Font(1);
+        for (short i = 0; i < 2; i++)
+        {
+            short height = (short)LayerU16(GraphicsLayers.FontLineHeight);
+            ushort y = W(0x1B + (short)(height + height / 5) * i);
+            ushort at = W(Planting.SecondRoundLines + (i << 2));
+            ushort offset = U16(at), segment = U16(at + 2);
+            if (offset == 0 && segment == 0) continue;
+            if (segment == DgroupLayout.Segment) segment = _gfx.DataSegment;
+            int length = Length(segment, offset);
+            ushort x = W(1 + (W(0x140 - length * (short)LayerU16(GraphicsLayers.FontAdvance)) >> 1));
+            for (ushort k = 0; Length(segment, offset) > k; k++)
+            {
+                _gfx.Ds[GraphicsLayers.TypewriterChar] = ReadFar(segment, W(offset + k));
+                _gfx.ClearList();
+                _gfx.AddText(W(x + k * (short)LayerU16(GraphicsLayers.FontAdvance)), y, GraphicsLayers.TypewriterChar,
+                    _gfx.DataSegment, 9, 0xFFFF);
+                foreach (int s in ListOnBothPagesSteps()) yield return s;
+                if (_gfx.Ds[GraphicsLayers.TypewriterChar] != (byte)' ') _gfx.Effects?.PlaySound(1, 0x16);
+                foreach (int s in PauseSteps()) yield return s;
+                foreach (int s in RetraceSteps(5, 0)) yield return s;
+            }
+        }
+        Font(0);
+        foreach (int s in RetraceSteps(50, 0)) yield return s;
+    }
+
+    /// <summary>
+    /// [ORIGINAL] 21FD:05DB(font): driver font (23CD:05B6), DS:3CA8 = advance B[10DA + font], DS:34A4 = line height
+    /// B[10DD + font], text shadow 0A96:000A(advance, height).
+    /// </summary>
+    private void Font(int font)
+    {
+        _gfx.Driver.Font = (ushort)font;
+        ushort advance = _gfx.Ds[0x10DA + font], height = _gfx.Ds[0x10DD + font];
+        SetLayerU16(GraphicsLayers.FontAdvance, advance);
+        SetLayerU16(GraphicsLayers.FontLineHeight, height);
+        _gfx.SetTextShadow(advance, height);
+    }
+
+    /// <summary>[ORIGINAL] 21FD:0245 as steps: with P held (DS:3D60) wait for its release, the next press and that release.</summary>
+    private IEnumerable<int> PauseSteps()
+    {
+        const int pauseKey = DgroupLayout.KeyState + 0x19;
+        if (_gfx.Ds[pauseKey] == 0) yield break;
+        while (_gfx.Ds[pauseKey] != 0) yield return 0;
+        while (_gfx.Ds[pauseKey] == 0) yield return 0;
+        while (_gfx.Ds[pauseKey] != 0) yield return 0;
+    }
+
+    private ushort LayerU16(int at) => (ushort)(_gfx.Ds[at] | _gfx.Ds[at + 1] << 8);
+
+    private void SetLayerU16(int at, ushort v)
+    {
+        _gfx.Ds[at] = (byte)v;
+        _gfx.Ds[at + 1] = (byte)(v >> 8);
+    }
+
+    private byte ReadFar(ushort segment, ushort offset) =>
+        segment == _gfx.DataSegment ? _gfx.Ds[offset]
+        : (_gfx.OtherMemory ?? throw new InvalidOperationException("No far memory for the texts.")).Read(segment, offset);
+
+    private int Length(ushort segment, ushort offset)
+    {
+        int n = 0;
+        while (ReadFar(segment, W(offset + n)) != 0) n++;
+        return n;
     }
 
     /// <summary>[ORIGINAL] 21FD:060D as steps: 0A96:06A8, 21FD:051F, 0A96:06A8.</summary>

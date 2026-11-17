@@ -559,3 +559,32 @@ gefolgert. Namen in `Traders.Core.Purchase.PurchaseLayout`. Indizierte Ziele aus
 | `4520` / `4B98` | W[4] s / W s | `Oil` / `ShopOil` | Öl (max. 28h) / Ölvorrat des Ladens | G – `04BA`, `05F1` |
 | `4BAC` / `37AF` / `300E` | W[4] / B[4] / W[4] | `Rockets` / `Gems` / `GemCredit` | Raketen (max. 10), Edelsteine (max. 10), Edelsteinkonto (max. 2000) | G – `09F1`, `178D`, `0886` |
 | `4BC2` | B[4] | `FatMikeFlag` | = 1: Computer kauft Raketen wie bei < 3 Raketen + Basen | G – `0AF0` |
+
+## Runde 8, Spur `fatmike` (Fat Mike `1F63:000F`, Wettbewerb `1F63:0B03`)
+
+Befunde [`1F63_000F_fatmike.md`](../routines/1F63_000F_fatmike.md), [`1F63_0B03_wettbewerb.md`](../routines/1F63_0B03_wettbewerb.md);
+Namen in `src/Traders.Core/FatMike/FatMikePhase.cs` und `ContestPhase.cs`. Belege: Differenztests
+`tests/Traders.Tests/FatMike/FatMikeDifferentialTests.cs`, `ContestDifferentialTests.cs`.
+
+| Offset | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `08D4` | W | `PictureNumber` | Bildnummer `V-FATMIK` (initialisiert 3) | G – `000F` |
+| `08ED` | B[4] u | `Lamps` | Masken 1/2 der Blinkfolge (`0305`) | G – `0305` |
+| `4890` | B[4] u | `Bidders` | 1 = größter Vorrat 3 und `4BC2` = 0 (`0C82`); im Wettbewerb die Gewinner (Preis, Blinken, Modus 5) | G – `0C82`, `0B03` |
+| `4BC2` | B[4] u | `FatMikeFlag` | 1 = hat zuletzt nicht gezahlt; präzisiert §2 Nr. 9 | G – `0711` |
+| `54B1` | B u | `Contest` | 0 Fat Mike, 1 Wettbewerb `0B03` | G – `000F` |
+| `54B2` / `54B4` / `54B8` | W s | `Unit` / `Base` / `Price` | Leitereinheit max/120 + 1 / Grundpreis ≤ 30 / laufender Preis | G – `01B2`, `0390` |
+| `54BA` | W[4] s | `Paid` | 1 = hat gezahlt | G – `04D8`, `0711` |
+| `54C2` / `54CC` / `54D2` | W[3] / W / W s | `Lots` / `Lot` / `Cheapest` | Preise der Runden / Runde / billigste Runde | G – `0390` |
+| `54C8` | B u | `NobodyPaid` | 1 = in keiner Runde gezahlt | G – `000F` |
+| `54CA` | W s | `Slide` | x der Objektreihe | G – `13FE`, `147B` |
+| `54CE` | B[4] u | `Verdict` | 0 nichts, 1 Ernte vernichtet, 2 Felder verloren | G – `0711`, `08DA` |
+| `1020` / `101C` / `103C` | B[4] / B[4] / Text | `Patience` / `Colour` / `PaidText` | Angebotsdauer je IQ (6, 5, 4, 2 Runden zu 31 Bildern) / Textfarbe 0Ch…0Fh / „OK“ | G – `04D8` |
+| `102E` / `1035` | B[7] | `RowX` / `RowY` | Versatz der sieben Objekte | G – `143E` |
+| `1024` / `1026` / `1028` / `102C` | B[2] / B[2] / W[2] / B[2] | `LampX` … | Atlaslagen der Lampen `0FDF` | G – `0FDF` |
+| `3B64` / `3B74` / `3B94` / `3BA0` | Fernzeiger | `NoticeLines` … | Texte der Tabelle `37CC` (Hinweis, Feldhinweise, Ausschluss) | G – `000F`, `079A`, `0F46` |
+| `15BE` | W s | `ListCount` | Listeneinträge `0A96`; `04D8` liest > 0 (im Port zählt der Kern) | G – `04D8` |
+| `3B6C` / `3B70` | Fernzeiger | `HeadingText` / `FieldText` | Wettbewerb: Überschrift (`0A69:0243`) / Text statt Preis, wenn ein Feld gewonnen wird | G – `0B03` |
+| `1014` | W[4] | `PlayerColours` | rgb12 der Spielerfarben 0Ch…0Fh, mit denen `11AD` nach dem Blinken zurücksetzt | G – `11AD` |
+| `37E0` | Fernzeiger[2] | `SecondRoundLines` (`Planting`) | Zeilen des Hinweises der zweiten Feldrunde (Tabelle `37CC`, Einträge 5 und 6) | G – `0609:0204` |
+| `43B2` / `43FA` / `1582` | B[4] / B[4] / B | – | `0609:0080`: Gewinner Modus 5 und Kaufmerker 1, übrige Modus 6; `1582` = 1 | G – `0609:0080` |

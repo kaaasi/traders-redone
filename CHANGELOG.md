@@ -1,5 +1,11 @@
 # Zwischenstände
 
+## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (ab 17.11.2026) · läuft
+
+- Prozess: Plan (PR #214, Plan-Review „Nein“ R8PL-1–5 eingearbeitet, Delta-Prüfung Leitstelle).
+- Spur 3 `sammel` (PR #216): Alias-Regel im Architekturcheck (#193), Handel Wochen 1/3 Bild für Bild (#205), Host-Bildtest
+  mit Roboter-Schalter und Zusatzphase (#208).
+
 ## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview „Ja“
 
 - Spur 2 `handelski` (PR #184): Handels-KI `141D` (17 Routinen) mit Vertrag für den Handel, Gleichschritt Wochen 0–3; #163,
