@@ -146,7 +146,7 @@ Zeitpunkt abhängen: Regelseite auf der Zeichenseite `DS:40DE[DS:082E]`, Bild `D
 Ausgabeaufruf über die Schichten hinein). Seitenzustand `DS:082E/0830`, `40DE…40E5`, `4516` gehört den Ausgabeschichten; der
 Host gibt ihn zu Beginn jedes Aufrufs als Eingabe (`WeekScreenInputs.OutputPages`, `[APPROX]`).
 
-**Mehrrundenprobe** `tests/Traders.Tests/Phases/MultiWeekRound6DifferentialTests.cs`: Standardpartie, Spieler 0 Mensch
+**Mehrrundenprobe** `tests/Traders.Tests/Phases/MultiWeekRound7DifferentialTests.cs` (frühere `MultiWeekRound6DifferentialTests.cs` entfernt): Standardpartie, Spieler 0 Mensch
 (Steuerung 4, R5-Tastenmuster), Katastrophen an, Wochen 0–4 und Aufruf 1 von Woche 5. Aufrufe 3, 4, 8, 9, 11, 16 Bild für Bild
 (je Rücklauf DS ohne Ausgabebytes des Schritts, `10D2`; das Original rechnet sein Bild zuerst, damit ein `time()`-Wert für
 `random(0)` bekannt ist), 6, 21 und Regelschritte am Rücksprung, 18, 19, 23–30 im RefEmu. Textpuffer nach 4, 9, 11, 16 gleich
