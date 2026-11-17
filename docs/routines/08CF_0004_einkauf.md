@@ -92,11 +92,33 @@ kein Zufall (auch nicht in den Computerentscheidungen).
 | `029A`, `039C`, `0492`, `04BA`, `066D`, `069F`, `0886`, `09C4`, `09F1`, `0BE1`, `0CD5`, `0E53`, `0F4D`, `115C`, `161F`, `178D` | Regeln, Buchungen, Zufall | Ton und Zeichnen als Ereignis |
 | `1348`, `1543` | Zufall, `15B6`, `159A`, `15A2` | Ereignisse |
 | `0004`, `00CD`, `01BD` | ganz, Bild für Bild (`Purchase`) | Ereignisse (Teil 3 zeichnet) |
-| `15C6`, `15F5`, `1688`, `16B4`, `16F5`, `172A`, `1859`, `18B5`, `1935`, `193E`, `1981` | – | Teil 3 |
+| `15C6`, `15F5`, `1688`, `16B4`, `16F5`, `172A`, `1859`, `18B5`, `1935`, `193E`, `1981` | – | Teil 3 (`PurchaseScene`) |
 
 Gerufen, nicht nachgebaut: `0609:1FE0` (`Planting.Move`), `0609:1B72` (`FieldCursor.TimeBar`), `0609:13C5` (`Planting.Border`),
 `0825:06CB` (`Ranking.Apply`), Countdown `21FD:04E5`/`04F9` (`Rules/Countdown`, Teil 2). Gelesen aus Aufruf 27: Kursfaktor
 `4436` und Grundeinheit `3CF0` (`08CF:11D7`, unverändert).
+
+## Szene (Teil 3)
+
+`PurchaseScene` spielt die `PurchaseEvent`s und `FieldEvent`s in der Reihenfolge des Kerns; sie liest den Kern nur, im
+Augenblick der Anforderung. Gemeinsames (Bild `186C:0002`, Seiten, Blenden, Objekte, `0185`, `060D`, `0665`, `0C3F`) und die
+Zeichenroutinen aus `0609` (`1879`, `18E5`, `1978`, `1AC0`, `1ED9`, `1256`, `13C5`, `1B72`) spielt eine `FieldScene` auf
+denselben Schichten; die Aufrufe `0A96:0030`/`0267`/`0433`/`04D7`/`0525`/`057A`/`05FB` und `0A69:004D`/`0164`, die der Kern
+mit ihren Argumenten meldet, gehen unverändert in die Befehlsliste (Textsegment 0 = DS). Alle eigenen Routinen hängen nur an
+die Liste an:
+
+| Routine | Zeichenteil |
+|---|---|
+| `15C6(Laden, x)` | Atlas (`B[00EC + Laden]`, `B[00F0 + Laden]`) 40h × 2Ch nach (x, 50h) |
+| `15F5(x, y, Kugel)` | Atlas (0, 16h · Kugel + 58h) 20h × 16h nach (x, y) |
+| `1688` | (20h, A8h) 80h × 16h mit der Kachel (A0h, 0) 20h × 16h |
+| `16B4(Platz, Zahl)` | Atlas (0Ah · Zahl + F0h, CFh) 0Ah × 0Ah nach (40h · p + 0Bh · Platz + 1Ah, 35h) |
+| `16F5` | (40h · p + 1Ah, 35h) 2Ch × 0Ah mit der Kachel (F0h, B0h) 20h × 16h |
+| `172A` | je Edelstein i < `37AF[p]` Atlas (109h, C6h) 7 × 7 nach (40h · p + 8 · (i mod 5) + 26h, 8 · (i / 5) + 14h) |
+| `1859` | Text DS:013C (Farbe 0Dh, Schatten 5) bei (40h · p + 26h, 2Ah), Konto `300E[p]` 4 Stellen (Farbe 0, Schatten 5) bei 40h · p + 34h |
+| `18B5`, `1935` | Zifferblatt (110h, B0h) 20h × 20h nach (110h, 6); n = min(`3780`, 1Eh), Zeiger (11Fh, 16h) – (10Fh + `B[00F4 + n]`, 7 + `B[0113 + n]`) Farbe 0Fh und (120h, 15h) – (110h + …, 6 + …) Farbe 5 (Tabellen mit Vorzeichen) |
+| `193E` | Bargeld `3CD2[p]` mit „$“, 5 Stellen, Farbe `B[0132 + p]` (mit Vorzeichen), Schatten 5, bei (40h · p + 26h, 11h) |
+| `1981` | Ölvorrat `4B98` 3 Stellen, Farbe 5, Schatten 0Ah, bei (`15B0` + 2Bh, 77h) |
 
 ## Zustand
 
@@ -117,7 +139,7 @@ Blende `037D` (8 × (1 + 4)), `0329` (8 × (1 + 3)), Seitenwechsel `051F`, `060D
 Pausenprüfung vor dem Countdown-Takt, `0665` am Ende; `0A96:0C3F` am Ende von `1348` wechselt nur auf Karte 2/63h die Seite.
 Gemeinsame Rahmenroutinen als `FieldEvent` (wie Anbau/Ernte), die eigenen als `PurchaseEvent`. `IPurchaseHost` (Steuerung
 `0E9E:037A`, Pause `21FD:0245`), `PurchaseHost` (Spiel), `PurchaseStep` (Handler für Aufruf 29, Einbindung durch Spur `woche`).
-Szene `Traders.Presentation/Purchase/` folgt (Teil 3).
+Szene (Teil 3): `Traders.Presentation/Purchase/PurchaseScene.cs`.
 
 ## Prüfung
 
@@ -135,5 +157,11 @@ Raketenobergrenze, mit falscher Kugel oder falscher Dekorationsziehung → rot.
 `PurchaseHost` in der `PhaseMachine`. Je Bild (Rücksprung-Eintritt `0D73:00D3`) Datensegment (ohne die Bytes der Ausgabe wie beim
 Anbau), `DS:10D2`, Zahl der Ziehungen; am Ende erneut, Bildzahl gleich, Phasenmaschine bei Aufruf 30. Fälle: Woche 0 vier
 Computer; Woche 2 Spieler 0 und 2 als Mensch (Lotto, Öl- und Raketenkauf); Woche 0 Spieler 0 und 2 im Edelsteinladen (Konto 500:
-aufs Konto, zurückkaufen, gegen Bargeld). Je Lauf `DS:08F8` · 28h Durchläufe, Uhr je Countdown-Schritt, vier Kugeln. Gegenprobe:
-ein Bild doppelt verarbeitet, ein Countdown-Takt verloren → rot (Meldung im Test festgehalten).
+aufs Konto, zurückkaufen, gegen Bargeld). Je Lauf `DS:08F8` · 28h Durchläufe, Uhr je Countdown-Schritt, vier Kugeln.
+
+Szene (Teil 3) im selben Gleichschritt: `PurchaseScene` auf eigenen Grafikschichten (Treiber, DAC und Datensegment aus dem
+Einsprung); je Bild und am Ende VRAM aller vier Ebenen, DAC und Bildstart gleich, die Zahl der Rücksprung-Warten der Szene gleich
+der des Kerns, und jede Befehlsliste, die der Ablauf ausführt (`0A96:06A8` aus Segment `08CF`), vor dem Ausführen gleich der des
+Originals. Alle drei Fälle: 1683 Bilder verglichen (303–411 verschiedene), 801 Listen. Gegenprobe (im Test festgehalten): ein
+Bild doppelt verarbeitet, ein Countdown-Takt verloren, eine Uhr, ein Bargeld bzw. eine Lottozahl nicht gezeichnet → rot (die
+Listenprüfung schlägt jeweils vor der Datensegmentprüfung an).

@@ -6,8 +6,9 @@ namespace Traders.Tests.Purchase;
 
 /// <summary>
 /// Lock step of the purchase 08CF:0004 with the original in a running game (<see cref="PurchaseFrameHarness"/>): data segment,
-/// DS:10D2, random() calls and the frame count per frame, for week 0 (four computers; two humans in the gem shop) and week 2
-/// (two humans in the lotto, oil and rocket shops); counter-tests with a frame processed twice and a countdown tick lost.
+/// DS:10D2, random() calls, the frame count, the picture of the scene and the command lists per frame, for week 0 (four
+/// computers; two humans in the gem shop) and week 2 (two humans in the lotto, oil and rocket shops); counter-tests with a
+/// frame processed twice, a countdown tick lost and drawing requests of the scene left out.
 /// </summary>
 public class PurchaseFrameDifferentialTests
 {
@@ -17,13 +18,16 @@ public class PurchaseFrameDifferentialTests
 
     private void Report(Result r)
     {
-        _out.WriteLine($"retraces {r.Retraces}, passes {r.Passes}, random {r.RandomCalls}");
+        _out.WriteLine($"retraces {r.Retraces}, passes {r.Passes}, random {r.RandomCalls}, pictures {r.PicturesCompared} " +
+                       $"({r.DistinctPictures} distinct), lists {r.ListsCompared} ({r.NonEmptyLists} with entries)");
         _out.WriteLine(string.Join(" ", r.Sounds.OrderBy(s => s.Key).Select(s => $"({s.Key.Channel},{s.Key.Sound:X2})x{s.Value}")));
         _out.WriteLine(string.Join(" ", r.Log));
         _out.WriteLine(string.Join(" ", r.Kinds.OrderBy(k => k.Key).Select(k => $"{k.Key}x{k.Value}")));
     }
 
     // [DIFFERENTIAL] 08CF:0004, 08CF:00CD, 08CF:01BD
+    // [DIFFERENTIAL] 08CF:15C6, 08CF:15F5, 08CF:1688, 08CF:16B4, 08CF:16F5, 08CF:172A, 08CF:1859, 08CF:18B5, 08CF:1935
+    // [DIFFERENTIAL] 08CF:193E, 08CF:1981 (scene: picture and command lists per frame)
     [GameDataFact]
     public void Week_0_computers_in_lock_step()
     {
@@ -93,10 +97,14 @@ public class PurchaseFrameDifferentialTests
 
     /// <summary>
     /// Every run: the shop loop 08CF:01BD runs DS:08F8 · 28h passes (the countdown), the clock is redrawn at each of its steps
-    /// (and once in the set-up), all four balls of a draw fall.
+    /// (and once in the set-up), all four balls of a draw fall; the picture was compared in every frame and at the return, and
+    /// the original showed many different pictures.
     /// </summary>
     private static void Common(Result r)
     {
+        Assert.Equal(r.Retraces + 1, r.PicturesCompared);
+        Assert.True(r.DistinctPictures > r.Passes / 2, $"only {r.DistinctPictures} distinct pictures");
+        Assert.True(r.NonEmptyLists >= r.Kinds.GetValueOrDefault("DrawClock"), $"only {r.NonEmptyLists} lists with entries");
         int limit = r.Entry[DgroupLayout.TimeLimit];
         Assert.Equal(limit * 0x28, r.Passes);
         Assert.Equal(limit + 1, r.Kinds.GetValueOrDefault("DrawClock"));
@@ -107,11 +115,14 @@ public class PurchaseFrameDifferentialTests
 
     /// <summary>
     /// Counter-tests (four computers, week 0), each with the first line of the failure it must cause: a frame processed twice,
-    /// a countdown tick that does not count.
+    /// a countdown tick that does not count; scene: a clock, a cash display and a lotto number left out.
     /// </summary>
     [GameDataTheory]
-    [InlineData(nameof(Mutation.DoubleFrame), "retrace 303 (port frame 303, pass 57): DS:15B4 original 05, port 04")]
-    [InlineData(nameof(Mutation.CountdownHeld), "retrace 880 (port frame 880, pass 201): DS:2F18 original 28, port 01")]
+    [InlineData(nameof(Mutation.DoubleFrame), "after retrace 300 (port frame 301, pass 56): the port executes list 111 of the flow, the original has none there")]
+    [InlineData(nameof(Mutation.CountdownHeld), "after retrace 879 (port frame 880, pass 200): list 400 of the flow: original 3 entries, port 0")]
+    [InlineData(nameof(Mutation.SkipClock), "after retrace 399 (port frame 400, pass 80): list 160 of the flow: original 3 entries, port 0")]
+    [InlineData(nameof(Mutation.SkipCash), "after retrace 83 (port frame 84, pass 1): list 2 of the flow: original 33 entries, port 32")]
+    [InlineData(nameof(Mutation.SkipTicket), "after retrace 83 (port frame 84, pass 1): list 2 of the flow: original 33 entries, port 32")]
     public void Mutations_are_detected(string mutation, string expected)
     {
         // the original files must be there: a run that fails for want of them proves nothing (pflichtlauf without data)

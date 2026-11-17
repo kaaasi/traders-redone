@@ -171,7 +171,7 @@ public static class Purchase
         if (d.S8(P.DrawState) == 3) R.Blink(d, host);
         R.Draw(d, random, host);
         foreach (var w in host.PauseCheck(d)) yield return w;
-        // Drawn in part 3 (scene): 08CF:1935 – 08CF:18B5 (the clock); drawing only
+        // 08CF:1935 – 08CF:18B5 (the clock), drawn by the scene (PurchaseScene)
         if (Countdown.Tick(d)) Emit(host, K.DrawClock, d.S16(P.Remaining));
         Emit(host, FieldEventKind.RunList);
         Emit(host, FieldEventKind.DrawObjects);

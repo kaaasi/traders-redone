@@ -223,19 +223,19 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `08CF:11D7` | [08CF_11D7_edelsteinkurs.md](docs/routines/08CF_11D7_edelsteinkurs.md) | `src/Traders.Core/Rules/GemPrice.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
 | `08CF:1348` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRealGameDifferentialTests.cs`, `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:1543` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
-| `08CF:15C6` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:15F5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
+| `08CF:15C6` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:15F5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
 | `08CF:161F` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
-| `08CF:1688` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:16B4` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:16F5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:172A` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
+| `08CF:1688` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:16B4` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:16F5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:172A` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
 | `08CF:178D` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
-| `08CF:1859` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:18B5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:1935` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:193E` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
-| `08CF:1981` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | – | – | 🔍 |
+| `08CF:1859` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:18B5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:1935` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:193E` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:1981` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Presentation/Purchase/PurchaseScene.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
 | `0A69:000B` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:002C` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:004D` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
@@ -652,7 +652,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
 | `0609` | 0x21C0 | 56 | 56 | 56 | 56 |
 | `0825` | 0xAA0 | 16 | 16 | 16 | 16 |
-| `08CF` | 0x19A0 | 42 | 42 | 31 | 31 |
+| `08CF` | 0x19A0 | 42 | 42 | 42 | 42 |
 | `0A69` | 0x2D0 | 9 | 10 | 10 | 10 |
 | `0A96` | 0xD10 | 24 | 27 | 27 | 27 |
 | `0B67` | 0x380 | 8 | 9 | 9 | 9 |
@@ -693,7 +693,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **508** | **484** | **484** |
+| **Summe** | **0x28DC0** | **891** | **508** | **495** | **495** |
 
 <!-- abdeckung:ende -->
 
