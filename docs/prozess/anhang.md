@@ -66,8 +66,8 @@ Ist das nicht erbracht, gilt der Stand als „unverifiziert“: Läufe daran sin
   mit (Code-Repo mit Schreibzugriff, Referenz-Repo mindestens lesend). Fehlt ein Repo, versucht der Lauf den `add_repo`-Rückfall
   aus dem Startaufruf; fehlt das Werkzeug oder lehnt die Freigabe ab, meldet er sich blockiert (Spur 0 in R2, 11.11.2026).
   `git ls-remote` belegt nur Leserecht; Schreibrecht zeigt erst der erste Push.
-- **Modell:** nach dem Anlegen mit `update_trigger` setzen, wenn es von Opus abweicht (nur für Mechanisches nach
-  `zusammenarbeit.md` §5 „Modellwahl“ oder auf Wunsch des Nutzers).
+- **Modell:** nach `zusammenarbeit.md` §5 „Modellwahl“ (Haiku, Sonnet, Opus, Fable nur Ausnahme) wählen, im Startaufruf
+  nennen und nach dem Anlegen mit `update_trigger` setzen, wenn es von Opus (Vorgabe von `create_trigger`) abweicht.
 - **Nur die Leitstelle legt Aufgaben an** (Nutzer 12.11.2026): Fortsetzungen, Fixläufe, Erst- und Nachprüfungen; kein Startaufruf
   erlaubt einem Lauf `create_trigger`.
 - **`spur-wartet` durchsehen:** „Fortsetzung anlegen – Leitstelle“ bzw. „Nachprüfung anlegen – Leitstelle“ heißt, die Aufgabe mit dem Prompt aus der Übergabe anlegen –
