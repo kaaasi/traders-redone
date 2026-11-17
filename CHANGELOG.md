@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview
+## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview „Ja“
 
 - Spur 2 `handelski` (PR #184): Handels-KI `141D` (17 Routinen) mit Vertrag für den Handel, Gleichschritt Wochen 0–3; #163,
   #165, #166.
@@ -10,7 +10,8 @@
 - Fix #189 (PR #199): Reihenfolge Wochenereignis → Stationsphase im Host.
 - Spur 1 `handel` (PR #186): Handel `0B9F:0002`/`0C29` Bild für Bild mit KI-Anbindung (Stapelwort von `0397`), Szene pixelgenau; #192.
 - Spur 0 `ende` Teil 3 (PR #206): Aufrufe 23/24 eingebunden, Mehrrundenprobe Wochen 0–4, Host bis Fat Mike; #194, #201.
-- Prozess: Plan (PR #182, Plan-Review „Ja“ mit R7P-1–4). 1141 Tests grün mit Originaldaten.
+- Prozess: Plan (PR #182, Plan-Review „Ja“ mit R7P-1–4), Status (PR #209), Modellwahl Haiku–Fable. 1141 Tests grün mit Originaldaten.
+- Gesamtreview (Codex) „Ja“: keine neuen Fehler oder Testlücken. M8 abgeschlossen.
 
 ## Runde 6 – Katastrophen, Wochenereignisse, Stationen, Ernte (15.–16.11.2026) · letzte Spur `ebaddee`, Abschluss nach Gesamtreview
 
