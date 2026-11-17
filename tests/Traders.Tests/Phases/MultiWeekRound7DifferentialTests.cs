@@ -3,6 +3,7 @@ using Traders.Core;
 using Traders.Core.Ai;
 using Traders.Core.Disasters;
 using Traders.Core.Events;
+using Traders.Core.Extra;
 using Traders.Core.Field;
 using Traders.Core.Input;
 using Traders.Core.Menus;
@@ -11,41 +12,50 @@ using Traders.Core.Pixels;
 using Traders.Core.Rules;
 using Traders.Core.State;
 using Traders.Core.Stations;
+using Traders.Core.Trade;
 using Traders.RefEmu;
 using Traders.RefEmu.Hardware;
 using Traders.Tests.Disasters;
+using Traders.Tests.Extra;
 using Traders.Tests.Field;
 using Traders.Tests.Harvest;
 using Traders.Tests.Startup;
 using Traders.Tests.Stations;
+using Traders.Tests.Trade;
 using Xunit.Abstractions;
 
 namespace Traders.Tests.Phases;
 
 /// <summary>
-/// Multi-round probe of round 6 (AGENTS.md §5, docs/arbeitspakete.md R6 lane ernte part 3): the default game runs in the RefEmu
+/// Multi-round probe of rounds 6 and 7 (AGENTS.md §5, docs/arbeitspakete.md R6 lane ernte part 3, R7 lane ende part 3): the
+/// default game runs in the RefEmu
 /// with player 0 made human (control 4: arrows, Ins), players 1–3 computers and the catastrophes switched on (DS:2F30 = 1); the
 /// core's phase machine runs the handlers of <see cref="WeekScreens"/> bound into <see cref="WeekSteps"/> in lockstep: besides
 /// the rule steps and the week planning (calls 6, 21, compared at their return) the screen steps 3 (week report), 4 (guard and
-/// catastrophes 111D:0009), 8 (planting), 9 (week incidents 17CB:0005), 11 (stations 1B03:0009) and 16 (harvest 22A3:02D3) frame
-/// by frame: every frame of the port is one retrace of the original (entry of 0D73:00D3); at every retrace and at the return the
+/// catastrophes 111D:0009), 8 (planting), 9 (week incidents 17CB:0005), 11 (stations 1B03:0009), 16 (harvest 22A3:02D3),
+/// 23 (trade 0B9F:0002 with the trading computer 141D) and 24 (extra phase 1DEF:000C) frame by frame: every frame of the port is one retrace of the original (entry of 0D73:00D3); at every retrace and at the return the
 /// data segment (outside the bytes of the output layers of that step and of the interrupt handlers) and DS:10D2 are compared.
 /// The end check (call 19, 20B3:0005 up to its decision, R7 lane ende) runs as port, compared at its return with AL; call
-/// 18 and the trade steps 23–30 are carried out by the RefEmu. The human presses a key every half second in the
+/// 18 (robot phase, R10–R11) and the steps 26–30 (Fat Mike, purchase, R8) are carried out by the RefEmu. In week
+/// <see cref="ExtraWeek"/> the extra phase is made to fall: at its call site DS:57F0 (fields without production) is set above
+/// twice DS:57F2 in the RefEmu, from which both sides start (1DEF:00DB). The human presses a key every half second in the
 /// RefEmu (R5 key pattern); the port gets the key table the original holds at the end of each retrace, a time() value the
-/// original reads (random(0)) and, at the call site of call 11, the driver's current font. Expected values come only from the
-/// RefEmu.
+/// original reads (random(0)), at the call site of call 11 the driver's current font and at the call site of call 24 the
+/// stack frame of 1DEF:000C (its far pointers into the frame are stored in DS). Expected values come only from the RefEmu.
 /// </summary>
-public class MultiWeekRound6DifferentialTests
+public class MultiWeekRound7DifferentialTests
 {
     /// <summary>Weeks 0..4 run in full (call 4 beyond its guard from week 3 on); the probe ends at call 2 of week 5.</summary>
     private const int Weeks = 5;
 
     private const ushort Seg111D = 0x111D, Driver = 0x23CD, DriverFont = 0x0586;
 
+    /// <summary>Week in which the extra phase is made to fall (if it does not fall by itself before).</summary>
+    private const int ExtraWeek = 2;
+
     private readonly ITestOutputHelper _out;
 
-    public MultiWeekRound6DifferentialTests(ITestOutputHelper output) => _out = output;
+    public MultiWeekRound7DifferentialTests(ITestOutputHelper output) => _out = output;
 
     /// <summary>What the human presses (control 4), one key every 35 frames, held 6 frames (the R5 pattern).</summary>
     private static readonly byte[] HumanCycle = [0x4D, 0x52, 0x4D, 0x52, 0x50, 0x52, 0x4B, 0x52, 0x50, 0x52, 0x48, 0x52];
@@ -78,6 +88,10 @@ public class MultiWeekRound6DifferentialTests
 
     private static readonly (int Offset, int Length)[] HarvestOwned = Ranges(HarvestFrameHarness.Owned);
 
+    private static readonly (int Offset, int Length)[] TradeOwned = Ranges(TradeFrameHarness.Owned);
+
+    private static readonly (int Offset, int Length)[] ExtraOwned = Ranges(ExtraFrameHarness.Owned);
+
     private static readonly Lazy<IndexedImage[]> Pictures = new(() =>
         [.. ResourceTable.Pictures.OrderBy(e => (int)e.Id).Select(e =>
         {
@@ -86,14 +100,19 @@ public class MultiWeekRound6DifferentialTests
         })]);
 
     /// <summary>
-    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009, 11A3:0000, 0609:0004, 17CB:0005, 1B03:0009, 22A3:02D3, 20B3:0005 – weeks 0..4 and
-    /// call 1 of week 5 with one human and three computers, catastrophes on: calls 3, 4, 6, 8, 9, 11, 16, 21 run in the port in
-    /// every week (3, 4, 8, 9, 11, 16 frame by frame); nothing differs at any call site, retrace or return; at least one
-    /// catastrophe (111D:0112 with one of 0264, 03B7, 0519) runs in the port; the human took part; the text buffer (amounts of
-    /// 2295:0001) equals the original's after every ported step of round 6 (taken over from the RefEmu after its steps).
+    /// [DIFFERENTIAL] 1777:01F8 with 0825:000A, 111D:0009, 11A3:0000, 0609:0004, 17CB:0005, 1B03:0009, 22A3:02D3, 20B3:0005, 0B9F:0002, 1DEF:000C – weeks 0..4 and
+    /// call 1 of week 5 with one human and three computers, catastrophes on: calls 3, 4, 6, 8, 9, 11, 16, 19, 21, 23, 24 run in
+    /// the port in every week (3, 4, 8, 9, 11, 16, 23, 24 frame by frame); nothing differs at any call site, retrace or return;
+    /// at least one catastrophe (111D:0112 with one of 0264, 03B7, 0519) runs in the port; the extra phase falls at least once
+    /// and runs in the port frame by frame; the human took part; the text buffer (amounts of 2295:0001) equals the original's
+    /// after every ported screen step (taken over from the RefEmu after its steps).
     /// </summary>
+    /// <remarks>
+    /// Counter-checks (local): the trade ticked twice in one frame, a draw of 1DEF:00DB left out → red at the first retrace
+    /// concerned.
+    /// </remarks>
     [GameDataFact]
-    public void Five_weeks_with_the_steps_of_round_6_and_a_human_match_the_original()
+    public void Five_weeks_with_the_steps_of_rounds_6_and_7_and_a_human_match_the_original()
     {
         var p = OriginalProgram.StartGame(TestGameData.DosDir);
         Assert.True(p.RunToWeekStart(0, 5), "week 0 did not start within 5 s after the menu");
@@ -119,10 +138,12 @@ public class MultiWeekRound6DifferentialTests
         ushort textOff = core.U16(MenuLayout.TextBuffer), textSeg = core.U16(MenuLayout.TextBuffer + 2);
         var texts = m.Mem.ReadBlock(textSeg, textOff, 0x8000);
         int font = -1;
+        ExtraFrame? extraFrame = null;
         var masks = StationsLockstep.Masks.Value;
         var screens = new WeekScreens(
             new WeekScreenInputs(ProgramStartDifferentialTests.Files, n => Pictures.Value[n], masks,
-                () => StationsLockstep.Font(font), () => texts),
+                () => StationsLockstep.Font(font), () => texts,
+                ExtraFrame: () => extraFrame ?? throw new InvalidOperationException("frame of 1DEF:000C not read")),
             new WeekScreenOutputs(_ => { }, e => NumberIntoText(core, e, texts), _ => { }, _ => { }));
 
         // Call 1 of week 0: the RefEmu stands at the entry of 1777:02DC (same data segment as at its call site).
@@ -147,7 +168,18 @@ public class MultiWeekRound6DifferentialTests
             font = o.Machine.Mem.Read16(o.Segment(Driver), DriverFont); // the driver's current font: input of the stations phase
         });
         var harvest = oracle.FramedPortHandler(core, new HumanProbe(ported.Handlers[WeekSteps.HarvestCall], humanHarvest), HarvestOwned, ClearClock);
-        RefEmuWeekOracle.FramedStep[] framed = [report, catastrophes, planting, incidents, stations, harvest];
+        var humanTrade = new List<string>();
+        var trade = oracle.FramedPortHandler(core, new HumanProbe(ported.Handlers[WeekSteps.TradeCall], humanTrade), TradeOwned, ClearClock);
+        var extraFell = new List<int>();
+        var extra = oracle.FramedPortHandler(core, ported.Handlers[WeekSteps.ExtraCall], ExtraOwned, o =>
+        {
+            clock.Clear();
+            // at the call site: the far call pushes CS:IP, 1DEF:000C pushes BP, so BP = SP − 6 (ExtraStep.GameFrame)
+            extraFrame = new ExtraFrame((ushort)(o.Machine.Cpu.Sp - 6), o.Machine.Cpu.Ss);
+            if (o.Week == ExtraWeek && extraFell.Count == 0)
+                o.WriteWord(DgroupLayout.ProductionIdle, (ushort)(2 * o.ReadWord(DgroupLayout.ProductionActive) + 1));
+        });
+        RefEmuWeekOracle.FramedStep[] framed = [report, catastrophes, planting, incidents, stations, harvest, trade, extra];
         // the text buffer outside DS: compared after every ported step, taken over after every step of the RefEmu (the trade
         // phases also write amounts into it)
         var textChecks = new List<string>();
@@ -168,6 +200,12 @@ public class MultiWeekRound6DifferentialTests
             WeekSteps.IncidentsCall => new AfterStep(incidents, CompareTexts),
             WeekSteps.StationsCall => new AfterStep(stations, CompareTexts),
             WeekSteps.HarvestCall => new AfterStep(harvest, CompareTexts),
+            WeekSteps.TradeCall => new AfterStep(trade, CompareTexts),
+            WeekSteps.ExtraCall => new AfterStep(extra, s =>
+            {
+                if (screens.Extra.Current is ExtraStep { Retraces: > 0 }) extraFell.Add(p.Week);
+                CompareTexts(s);
+            }),
             WeekSteps.EndCall => oracle.PortHandler(core, ported.Handlers[s.Number], compareResult: true),
             _ when ported.Handlers.ContainsKey(s.Number) => oracle.PortHandler(core, ported.Handlers[s.Number]),
             _ => new AfterStep(oracle.Handler(core), TakeOverTexts),
@@ -196,9 +234,10 @@ public class MultiWeekRound6DifferentialTests
                     File.AppendAllText(progress, $"{e} emulated {p.Machine.Seconds:F1} s\n");
         }
         _out.WriteLine($"frames {machine.LastFrame + 1}; struck {string.Join(", ", struck)}; catastrophes in port {string.Join(", ", catastrophesInPort)}");
-        foreach (var (name, step) in new[] { ("report", report), ("call 4", catastrophes), ("planting", planting), ("incidents", incidents), ("stations", stations), ("harvest", harvest) })
+        foreach (var (name, step) in new[] { ("report", report), ("call 4", catastrophes), ("planting", planting), ("incidents", incidents), ("stations", stations), ("harvest", harvest), ("trade", trade), ("extra", extra) })
             _out.WriteLine($"{name}: {string.Join(", ", step.Runs)}");
-        _out.WriteLine($"human actions: planting {human.Count}, stations {humanStations.Count}, harvest {humanHarvest.Count}");
+        _out.WriteLine($"extra phase fell in weeks {string.Join(", ", extraFell)}");
+        _out.WriteLine($"human actions: planting {human.Count}, stations {humanStations.Count}, harvest {humanHarvest.Count}, trade {humanTrade.Count}");
         _out.WriteLine(string.Join("; ", human.Take(40)));
 
         Assert.Empty(oracle.Differences);
@@ -211,18 +250,19 @@ public class MultiWeekRound6DifferentialTests
         Assert.Equal(expected.Append(2), events.Where(e => e.Kind is PhaseEventKind.StepStarted or PhaseEventKind.MarkerPassed).Select(e => e.Step));
         Assert.Equal(expected.Append(2), oracle.Passed.Select(site => WeekLoop.Steps.FirstOrDefault(s => s.Site == site)?.Number).OfType<int>());
 
-        // calls 3, 4, 6, 8, 9, 11, 16, 19, 21 (and every rule step) ran as port in every week
+        // calls 3, 4, 6, 8, 9, 11, 16, 19, 21, 23, 24 (and every rule step) ran as port in every week
         int[] screenCalls =
         [
             WeekSteps.ReportCall, CatastropheGuardStep.Call, WeekPlanningStep.BeforePlantingCall, WeekSteps.PlantingCall,
             WeekSteps.IncidentsCall, WeekSteps.StationsCall, WeekSteps.HarvestCall, WeekSteps.EndCall, WeekPlanningStep.BeforeTradeCall,
+            WeekSteps.TradeCall, WeekSteps.ExtraCall,
         ];
         for (int week = 0; week < Weeks; week++)
         {
             var steps = oracle.PortedSteps.Where(x => x.Week == week).Select(x => x.Step).ToList();
             Assert.All(screenCalls.Concat(WeekRuleSteps.Rules.Keys.Where(n => week > 0 || n != 1)), n => Assert.Contains(n, steps));
         }
-        foreach (var step in new[] { report, planting, stations, harvest })
+        foreach (var step in new[] { report, planting, stations, harvest, trade })
         {
             Assert.Equal(Weeks, step.Runs.Count);
             Assert.All(step.Runs, r => Assert.True(r.Retraces > 100, $"week {r.Week}: only {r.Retraces} frames"));
@@ -231,6 +271,10 @@ public class MultiWeekRound6DifferentialTests
         Assert.Equal(Weeks, incidents.Runs.Count);
         Assert.Contains(incidents.Runs, r => r.Retraces > 100);
         Assert.Equal(Weeks, catastrophes.Runs.Count);
+        // the extra phase returns at once where it does not fall; it fell at least once and ran frame by frame in the port
+        Assert.Equal(Weeks, extra.Runs.Count);
+        Assert.NotEmpty(extraFell);
+        Assert.All(extraFell, w => Assert.Contains(extra.Runs, r => r.Week == w && r.Retraces > 100));
 
         // R6P-2: at least one catastrophe (star show 0112 and a kind) ran in the port frame by frame and was compared
         var weeksStruck = struck.Where(s => s.What != "0112" && struck.Contains((s.Week, "0112"))).Select(s => s.Week).ToHashSet();
@@ -242,7 +286,8 @@ public class MultiWeekRound6DifferentialTests
         Assert.NotEmpty(human);
         Assert.NotEmpty(humanStations);
         Assert.NotEmpty(humanHarvest);
-        Assert.Equal(4 * Weeks, textChecks.Count); // text buffer equal after calls 4, 9, 11, 16 of every week
+        Assert.NotEmpty(humanTrade);
+        Assert.Equal(6 * Weeks, textChecks.Count); // text buffer equal after calls 4, 9, 11, 16, 23, 24 of every week
     }
 
     /// <summary>Key presses of the human in the RefEmu: every <see cref="KeyEvery"/> frames from the next frame on.</summary>

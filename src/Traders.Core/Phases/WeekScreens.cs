@@ -1,5 +1,6 @@
 using Traders.Core.Disasters;
 using Traders.Core.Events;
+using Traders.Core.Extra;
 using Traders.Core.Field;
 using Traders.Core.Harvest;
 using Traders.Core.Input;
@@ -8,11 +9,12 @@ using Traders.Core.Pixels;
 using Traders.Core.Startup;
 using Traders.Core.State;
 using Traders.Core.Stations;
+using Traders.Core.Trade;
 
 namespace Traders.Core.Phases;
 
 /// <summary>
-/// Explicit inputs of the screen steps of round 6 (calls 4, 9, 11, 16), filled by the host and the tests from Traders.Assets
+/// Explicit inputs of the screen steps of rounds 6 and 7 (calls 4, 9, 11, 16, 23, 24), filled by the host and the tests from Traders.Assets
 /// and the program start: the core reads no file and no output state itself (AGENTS.md §4, R6P-1).
 /// </summary>
 /// <param name="Files">Lengths of the picture files (picture table of 186C:0002).</param>
@@ -29,7 +31,12 @@ namespace Traders.Core.Phases;
 /// holds the output's page state (a test that takes over the original's data segment at the call site). The page state – page
 /// indices DS:082E/0830, page numbers DS:40DE…40E5 and the draw page number DS:4516 – belongs to the output layers (21FD:051F,
 /// 0590); the rule pages of calls 4 and 11 start on the draw page it names (R6P-1), so it is an input like the key table and
-/// the core mirrors it into its data segment at the start of calls 4, 9 and 11 (the harvest, call 16, reads none of it).
+/// the core mirrors it into its data segment at the start of calls 4, 9 and 11 (the harvest, call 16, the trade, call 23,
+/// and the extra phase, call 24, read none of it).
+/// </param>
+/// <param name="ExtraFrame">
+/// Stack frame of 1DEF:000C when call 24 starts (its far pointers into the stack arrays are stored in DS:547C…5480); null =
+/// <see cref="ExtraStep.GameFrame"/>, the frame of the game relative to the image's DGROUP (the host's segment numbering).
 /// </param>
 public sealed record WeekScreenInputs(
     Func<int, ImageFileLengths> Files,
@@ -38,14 +45,21 @@ public sealed record WeekScreenInputs(
     Func<TextFont> Font,
     Func<byte[]?> TextBuffer,
     IControlDevices? Devices = null,
-    Func<ReadOnlyMemory<byte>>? OutputPages = null);
+    Func<ReadOnlyMemory<byte>>? OutputPages = null,
+    Func<ExtraFrame>? ExtraFrame = null);
 
-/// <summary>Receivers of the output events of the screen steps of round 6 (scenes, sound); the incidents are drained.</summary>
+/// <summary>
+/// Receivers of the output events of the screen steps of rounds 6 and 7 (scenes, sound); the incidents are drained. A receiver
+/// of the trade (call 23) or the extra phase (call 24) left out discards that step's events (the step still runs in the core).
+/// </summary>
 public sealed record WeekScreenOutputs(
     Action<DisasterEvent> Disasters,
     Action<StationEvent> Stations,
     Action<FieldEvent> HarvestField,
-    Action<HarvestEvent> Harvest);
+    Action<HarvestEvent> Harvest,
+    Action<TradeEvent>? Trade = null,
+    Action<FieldEvent>? ExtraField = null,
+    Action<ExtraEvent>? Extra = null);
 
 /// <summary>
 /// The handlers of the screen steps of round 6 for <see cref="WeekSteps"/> (lane ernte part 3): call 4 beyond its guard
@@ -53,7 +67,9 @@ public sealed record WeekScreenOutputs(
 /// (<see cref="WeekIncidentsStep"/> of lane ereignisse), call 11 (<see cref="StationsStep"/> of lane stationen) and call 16
 /// (<see cref="HarvestStep"/>). The steps whose inputs depend on the moment of the call – the rule page of 111D:0009 on the
 /// draw page DS:40DE[DS:082E] of that moment, the stations' picture DS:08D0, font and text buffer – are made anew at every
-/// call (<see cref="DeferredStep"/>).
+/// call (<see cref="DeferredStep"/>). Round 7 (lane ende part 3) adds call 23 (<see cref="TradeStep"/> of lane handel with the
+/// trading computer <see cref="TradeComputer"/> of lane handelski) and call 24 (<see cref="ExtraStep"/> of lane zusatz), also
+/// made anew at every call (the frame of 1DEF:000C and the text buffer are those of the moment).
 /// </summary>
 public sealed class WeekScreens
 {
@@ -76,6 +92,12 @@ public sealed class WeekScreens
             devices, outputs.Stations, inputs.Files));
         Harvest = new DeferredStep(c => new HarvestStep(new HarvestHost(outputs.HarvestField, outputs.Harvest,
             (offset, segment) => FarString(c.State, Texts(), offset, segment), devices), inputs.Files));
+        var trade = outputs.Trade ?? (_ => { });
+        Trade = new DeferredStep(_ => new TradeStep(new TradeHost(trade, devices), TradeComputer.Instance, inputs.Files));
+        var extraField = outputs.ExtraField ?? (_ => { });
+        var extra = outputs.Extra ?? (_ => { });
+        Extra = new DeferredStep(c => new ExtraStep(new ExtraHost(extraField, extra,
+            (offset, segment) => FarString(c.State, Texts(), offset, segment), devices), inputs.Files, inputs.ExtraFrame?.Invoke()));
     }
 
     /// <summary>Rest of call 4 behind its guard (a <see cref="CatastropheStep"/> per call).</summary>
@@ -90,6 +112,12 @@ public sealed class WeekScreens
     /// <summary>Call 16 (a <see cref="HarvestStep"/> per call).</summary>
     public DeferredStep Harvest { get; }
 
+    /// <summary>Call 23, the trade 0B9F:0002 (a <see cref="TradeStep"/> per call).</summary>
+    public DeferredStep Trade { get; }
+
+    /// <summary>Call 24, the extra phase 1DEF:000C (an <see cref="ExtraStep"/> per call).</summary>
+    public DeferredStep Extra { get; }
+
     /// <summary>Events of the running or last week incidents since the last drain (empty before the first call).</summary>
     public List<IncidentEvent> DrainIncidentEvents() =>
         (Incidents.Current as WeekIncidentsStep)?.Incidents?.DrainEvents() ?? [];
@@ -97,11 +125,11 @@ public sealed class WeekScreens
     /// <summary>
     /// The week steps with these handlers bound: everything up to call 16 runs in the core, call 18 (robot phase) is the
     /// first pending call unless <paramref name="robots"/> stands in for it; then the week runs on through the end check
-    /// (call 19) to the trade (call 23).
+    /// (call 19), the trade (call 23) and the extra phase (call 24) to Fat Mike (call 26, the first call still pending).
     /// </summary>
     public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
         IWeekStepHandler? robots = null) =>
-        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots);
+        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots, trade: Trade, extra: Extra);
 
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =

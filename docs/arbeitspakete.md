@@ -89,7 +89,9 @@ Ton unter `21A7`: auch `27C6:041B`, `2850:00CC` (nur Ereignis, R7P-4).
 - **Status:** Teil 1 fertig (Claude, Branch `paket/ende-host`, Base `006509f`; Review-PR siehe #188): Endprüfung bis zur
   Entscheidung (`src/Traders.Core/Ending/EndCheck.cs`, Befund `20B3_0005_endpruefung.md`), Roboter-Schalter (`RobotPhaseSkip`,
   `--original-roboter`), Host hält mit Schalter an Aufruf 23, #157, #158, #180. Neuer Befund aus #180: Stationsphase im Host
-  nach einem Wochenereignis abweichend (PR). Teil 3 wartet auf 1/3 (`paket/ende`, #185).
+  nach einem Wochenereignis abweichend (PR). Teil 3 fertig, Review offen (Claude, PR #206, Branch `paket/ende-einbindung`,
+  Base `3d79195`): Aufrufe 23/24 in `WeekSteps`/`WeekScreens`, `TradeScene`/`ExtraScene` im Host (hält mit Schalter an 26),
+  Mehrrundenprobe `MultiWeekRound7DifferentialTests` (Wochen 0–4, Zusatzphase Woche 2 erzwungen), #194, #201.
 
 ## 1 `handel` – Handel `0B9F:0002` mit Bildschirm und Bedienung `0C29`
 

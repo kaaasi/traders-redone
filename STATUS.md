@@ -241,7 +241,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0B67:0238` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/Pages.cs` | `PageLayerTests.cs` | ✅ |
 | `0B67:028F` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/Pages.cs` | `PageLayerTests.cs` | ✅ |
 | `0B67:0299` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Vga/Layers/Pages.cs` | `PageLayerTests.cs` | ✅ |
-| `0B9F:0002` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/Trade.cs` | `TradeFlowDifferentialTests.cs`, `TradeFrameDifferentialTests.cs` | ✅ |
+| `0B9F:0002` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/Trade.cs` | `ProgramHostTests.cs`, `TradeFlowDifferentialTests.cs`, `TradeFrameDifferentialTests.cs` | ✅ |
 | `0B9F:005C` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:009E` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `0B9F:00FE` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Core/Trade/TradeRules.cs` | `TradeFrameDifferentialTests.cs`, `TradeRealGameDifferentialTests.cs`, `TradeRulesDifferentialTests.cs` | ✅ |
@@ -359,7 +359,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `141D:0ED7` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `141D:0F01` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Trade/TradeRules.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
-| `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekRound6DifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
+| `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekRound7DifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `1777:04E4` | [1777_04E4_initialisierung.md](docs/routines/1777_04E4_initialisierung.md) | `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramMachineDifferentialTests.cs` | ✅ |
 | `17CB:0005` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `HostLoadedWeekFrameDifferentialTests.cs`, `IncidentsBoundaryTests.cs`, `IncidentsDifferentialTests.cs`, `IncidentsMultiWeekTests.cs`, `WeekScreensIncidentsDifferentialTests.cs`, `EventsSceneDifferentialTests.cs` | ✅ |
@@ -489,7 +489,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1B03:148B` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:15D7` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:1617` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
-| `1DEF:000C` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs`, `src/Traders.Core/Extra/ExtraStep.cs` | `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
+| `1DEF:000C` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs`, `src/Traders.Core/Extra/ExtraStep.cs` | `ProgramHostTests.cs`, `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
 | `1DEF:00DB` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:0105` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
 | `1DEF:0173` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |

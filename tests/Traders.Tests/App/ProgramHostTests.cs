@@ -119,35 +119,81 @@ public class ProgramHostTests
     }
 
     /// <summary>
-    /// [DIFFERENTIAL] 20B3:0005 – the host run with the robot switch on (default, F3 = A of R7): week 0 as above, then the
-    /// host's stand-in skips call 18 in its first frame, the end check (call 19) runs in the core and goes on (AL = 0), calls
-    /// 20 and 21 follow, and the host halts at the first pending call, the trade 0B9F:0002 (call 23). Expected values from the
-    /// original with its call 18 jumped over (IP set to the return address at the call site, the call takes no arguments):
-    /// data segment and picture shown at the call site of call 23 are equal.
+    /// [DIFFERENTIAL] 20B3:0005, 0B9F:0002, 1DEF:000C – the host run with the robot switch on (default, F3 = A of R7): week 0 as
+    /// above, then the host's stand-in skips call 18 in its first frame, the end check (call 19) runs in the core and goes on
+    /// (AL = 0), calls 20 and 21 follow, the trade (call 23) and the extra phase (call 24) run in the core with their scenes,
+    /// and the host halts at the first pending call, Fat Mike 1F63:000F (call 26). Expected values from the original with its
+    /// call 18 jumped over (IP set to the return address at the call site, the call takes no arguments): data segment and
+    /// picture shown at the call site of call 26 are equal.
     /// </summary>
     [GameDataFact]
-    public void Host_with_the_robot_switch_plays_week_0_up_to_the_trade_like_the_original_without_its_robot_phase()
+    public void Host_with_the_robot_switch_plays_week_0_up_to_Fat_Mike_like_the_original_without_its_robot_phase()
     {
         var host = PlayWeek0(skipRobotPhase: true);
         var week = host.Machine.WeekMachine!;
-        Assert.Equal(WeekSteps.TradeCall, week.NextStep);
-        Assert.Contains("call 23 ", host.Halt);
+        Assert.Equal(WeekSteps.FatMikeCall, week.NextStep);
+        Assert.Contains("call 26 ", host.Halt);
         Assert.Equal(1, host.RobotSkip!.Skipped);
         Assert.NotNull(host.Deviation);
         Assert.False(host.Week.End.GameOver);
-        AssertLikeOriginal(host, WeekSteps.TradeCall, skipRobotCall: true);
+        Assert.False(host.Trade.Presenting);
+        Assert.False(host.Extra.Presenting);
+        var trade = Assert.IsType<Traders.Core.Trade.TradeStep>(host.Screens.Trade.Current);
+        Assert.True(trade.Retraces > 100, $"trade ran {trade.Retraces} frames");
+        Assert.IsType<Traders.Core.Extra.ExtraStep>(host.Screens.Extra.Current);
+        AssertLikeOriginal(host, WeekSteps.FatMikeCall, skipRobotCall: true);
+    }
+
+    /// <summary>
+    /// R7E-2 (#201): in a frame in which a step ends and the next one starts, the scenes get the rest of the week report
+    /// (call 3) and of the incidents (call 9) before the first event of the next step, as the original returns from its wait
+    /// loop 21FD:0004 before the next call starts. Week 0 with the robot switch on runs through all ported steps; it has the
+    /// change from call 3 to call 8 in one frame (finding of review fix-stationen-host) and the end of call 9.
+    /// Counter-check (local): the planting output without <c>PlayEarlier</c> → red (report after field events in that frame).
+    /// </summary>
+    [GameDataFact]
+    public void Report_and_incidents_are_played_before_the_next_step_in_the_same_frame()
+    {
+        var log = new List<(long Frame, object Event)>();
+        long current = -1;
+        var host = PlayWeek0(skipRobotPhase: true, (h, f) =>
+        {
+            current = f;
+            h.Played ??= e => log.Add((current, e));
+        });
+        Assert.Equal(WeekSteps.FatMikeCall, host.Machine.WeekMachine!.NextStep);
+        static bool Earlier(object e) => e is Traders.Core.Week.WeekEvent or Traders.Core.Events.IncidentEvent;
+        int mixed = 0;
+        foreach (var frame in log.GroupBy(x => x.Frame))
+        {
+            var events = frame.Select(x => x.Event).ToList();
+            int firstOther = events.FindIndex(e => !Earlier(e));
+            int lastEarlier = events.FindLastIndex(Earlier);
+            if (firstOther < 0 || lastEarlier < 0) continue;
+            mixed++;
+            Assert.True(lastEarlier < firstOther,
+                $"frame {frame.Key}: {events[lastEarlier]} played after {events[firstOther]} of the next step");
+        }
+        Assert.True(mixed >= 1, "no frame with the end of call 3 or 9 and the start of the next step");
+        Assert.Contains(log, x => x.Event is Traders.Core.Trade.TradeEvent);
+        Assert.Contains(log, x => x.Event is Traders.Core.Field.FieldEvent);
     }
 
     /// <summary>Start, main menu with RETURN after the second pass, week 0 until the host halts; common checks.</summary>
-    private static ProgramHost PlayWeek0(bool skipRobotPhase)
+    private static ProgramHost PlayWeek0(bool skipRobotPhase, Action<ProgramHost, long>? beforeFrame = null)
     {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
         var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase);
+        void Frame(long frame, IReadOnlyCollection<byte> held)
+        {
+            beforeFrame?.Invoke(host, frame);
+            host.Frame(frame, held);
+        }
         long f = 0;
-        for (; f < 2000 && Passes(host) < 2; f++) host.Frame(f, []);
-        for (long until = f + 6; f < until; f++) host.Frame(f, [MenuKeys.Enter]);
-        for (long until = f + 60_000; f < until && host.Halt is null; f++) host.Frame(f, []);
+        for (; f < 2000 && Passes(host) < 2; f++) Frame(f, []);
+        for (long until = f + 6; f < until; f++) Frame(f, [MenuKeys.Enter]);
+        for (long until = f + 150_000; f < until && host.Halt is null; f++) Frame(f, []);
 
         Assert.Equal(ProgramStatus.InWeek, host.Machine.Status);
         Assert.True(host.Machine.IsBlocked);
@@ -159,6 +205,8 @@ public class ProgramHostTests
         Assert.False(host.Report.Presenting);
         Assert.False(host.Stations.Presenting);
         Assert.False(host.Harvest.Presenting);
+        Assert.False(host.Trade.Presenting);
+        Assert.False(host.Extra.Presenting);
         return host;
     }
 
@@ -206,6 +254,13 @@ public class ProgramHostTests
             .Concat(Traders.Tests.Disasters.CatastropheFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.Stations.StationsLockstep.OutputOwned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.Harvest.HarvestFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Trade.TradeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Extra.ExtraFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+            // segment words of the far pointers of 1DEF:000C into its stack frame: the host gives the game's frame relative
+            // to its DS value (ExtraStep.GameFrame), the original's SS is relocated; the offsets are compared
+            .Append((Traders.Core.Extra.ExtraPhase.GoodsPointer + 2, 2))
+            .Append((Traders.Core.Extra.ExtraPhase.ClaimsPointer + 2, 2))
+            .Append((Traders.Core.Extra.ExtraPhase.GroundPointer + 2, 2))
             .Append((0x023A, 2)) // 0B67:01D4/0206 draw on the shown or the hidden page (Vga pages)
             .Append((0x37CC, 0x3C90 - 0x37CC)) // text table 192D:18B6: far pointers into the host's text buffer (6000:0000)
             .Append((0x4884, 4)) // far pointer of the text buffer (host heap)

@@ -3,34 +3,21 @@ using Traders.App.Rendering;
 using Traders.Assets;
 using Traders.Vga;
 
-// Usage: traders [path-to-gamedata/dos] [--scale n] [--aspect] [--frames n] [--original-roboter]
+// Usage: traders [path-to-gamedata/dos] [--scale n] [--aspect] [--frames n] [--original-roboter] (HostArguments)
 // With the original files the host runs the program (start, main menu, new game, week loop of the core); without them it
 // shows colour bars. The host skips the robot phase (call 18) unless --original-roboter is given (decision F3 = A of R7).
-string? dir = null;
-bool skipRobotPhase = true;
-var options = new HostOptions();
-for (int i = 0; i < args.Length; i++)
-{
-    switch (args[i])
-    {
-        case "--scale" when i + 1 < args.Length: options = options with { Scale = Math.Clamp(int.Parse(args[++i]), 1, 8) }; break;
-        case "--aspect": options = options with { AspectCorrection = true }; break;
-        case "--original-roboter": skipRobotPhase = false; break;
-        case "--frames" when i + 1 < args.Length: options = options with { MaxFrames = long.Parse(args[++i]) }; break;
-        default: dir = args[i]; break;
-    }
-}
-dir ??= AssetLibrary.FindOriginalDos() ?? AssetLibrary.FindOriginalDos(Environment.CurrentDirectory);
+var arguments = HostArguments.Parse(args);
+string? dir = arguments.Directory ?? AssetLibrary.FindOriginalDos() ?? AssetLibrary.FindOriginalDos(Environment.CurrentDirectory);
 
 if (dir is not null)
 {
-    using var program = new HostGame(options, new ProgramHost(dir, Traders.App.Timing.BorlandClock.Host, skipRobotPhase: skipRobotPhase));
+    using var program = new HostGame(arguments.Options, arguments.CreateProgram(dir, Traders.App.Timing.BorlandClock.Host));
     program.Run();
     return 0;
 }
 
 var vram = new ModeXMemory();
 var dac = DemoPicture.ColourBars(vram);
-using var game = new HostGame(options, vram, dac);
+using var game = new HostGame(arguments.Options, vram, dac);
 game.Run();
 return 0;
