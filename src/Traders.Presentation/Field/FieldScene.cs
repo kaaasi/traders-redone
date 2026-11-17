@@ -362,9 +362,8 @@ public sealed partial class FieldScene
     /// [ORIGINAL] 0609:0204 (drawing part, before its 21FD:060D): the list is emptied, then the weather line (text at the far
     /// pointer DS:37E8, colour 5, shadow 0Bh at offset (−1, 1)) at (112h, 11h) with DS:48A2 (2 digits, colour 2, shadow
     /// 0Ah) at (118h, 18h), and the limit line (DS:37EC) at (112h, 1Fh) with DS:2F26 at (118h, 26h). In the second round
-    /// (DS:1582 = 1) the area (10h, 6, 120h, 2Ch) is cleared with 0609:1F04 instead.
-    /// [APPROX] Second round only (0609:0080, lane R9): the typed notice before it (21FD:05DB, 0A69:0288 from DS:37E0,
-    /// 21FD:0185(50)) is not drawn.
+    /// (DS:1582 = 1) the area (10h, 6, 120h, 2Ch) is cleared with 0609:1F04 instead (the typed notice before it is part of the
+    /// steps of the whole call, FieldScene.Output.cs).
     /// </summary>
     public void Status()
     {

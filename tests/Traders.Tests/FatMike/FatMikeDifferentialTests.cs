@@ -27,7 +27,7 @@ public class FatMikeDifferentialTests
     private static ushort W(int v) => unchecked((ushort)v);
 
     /// <summary>A random state of the routines' inputs; with <paramref name="keepGame"/> the game's own values mostly stay.</summary>
-    private static void Arrange(FatMikeHarness h, Random r, bool keepGame = false)
+    internal static void Arrange(FatMikeHarness h, Random r, bool keepGame = false)
     {
         var p = h.Program;
         if (!keepGame) p.Machine.Mem.WriteBlock(Traders.RefEmu.Cpu.Memory.Linear(p.Dgroup, 0), h.Initial);
@@ -74,7 +74,7 @@ public class FatMikeDifferentialTests
     /// A consistent field (columns 4…9, rows 3…6): owners −1…3 with at most one HQ (kind 4) per player, kinds −2 or 0…3, and the
     /// counters DS:2F05, DS:4BA8, DS:2EE7 as 0609:10D2 keeps them; the verdicts fit the counts (no endless draw in 08DA).
     /// </summary>
-    private static void ArrangeField(FatMikeHarness h, Random r)
+    internal static void ArrangeField(FatMikeHarness h, Random r)
     {
         var p = h.Program;
         int cols = r.Next(4, 10), rows = r.Next(3, 7);
@@ -114,7 +114,7 @@ public class FatMikeDifferentialTests
     }
 
     /// <summary>Runs the port on a copy of the RefEmu's state, then the original; compares everything.</summary>
-    private static (ushort Ax, ushort Dx) AssertSame(FatMikeHarness h, string label, ushort off,
+    internal static (ushort Ax, ushort Dx) AssertSame(FatMikeHarness h, string label, ushort off,
         Action<Dgroup, OriginalRandom, FatMikeRecorder> port, params ushort[] args)
     {
         var d = new Dgroup(h.Program.DataSegment());
@@ -125,6 +125,7 @@ public class FatMikeDifferentialTests
         h.Calls.Clear();
         h.RandomArgs.Clear();
         h.ControlReads = 0;
+        h.Passes = 0;
         var result = h.Program.Call(Seg, off, args);
         FatMikeHarness.Compare(label, h.Program.DataSegment(), d);
         Assert.True(h.Calls.SequenceEqual(rec.Calls),
@@ -133,7 +134,7 @@ public class FatMikeDifferentialTests
         return result;
     }
 
-    private static void Drain(IEnumerable<FieldWait> frames)
+    internal static void Drain(IEnumerable<FieldWait> frames)
     {
         foreach (var _ in frames) { }
     }
@@ -334,6 +335,7 @@ public class FatMikeDifferentialTests
     /// <summary>
     /// Fat Mike in real games: the original (four computers) is run to the entry of 1F63:000F in weeks 0 to 3; there the state is
     /// taken as it is and, in further runs, players are made human (with scripted fire), the flag DS:4BC2 and the stocks varied.
+    /// Then the same game runs on to the contest 1F63:0B03 of the week (<see cref="Contest"/>).
     /// </summary>
     // [DIFFERENTIAL] 1F63:000F
     [GameDataFact]
@@ -341,7 +343,7 @@ public class FatMikeDifferentialTests
     {
         var game = OriginalProgram.StartGame(TestGameData.DosDir);
         var r = new Random(0x26);
-        int paid = 0, punished = 0, typed = 0;
+        int paid = 0, punished = 0, typed = 0, prizes = 0, rounds = 0, passes = 0;
         for (int week = 0; week < 4; week++)
         {
             Assert.True(game.RunToRoutine(Seg, 0x000F, 900), $"1F63:000F not reached (week {game.Week})");
@@ -375,7 +377,45 @@ public class FatMikeDifferentialTests
                 typed += h.Calls.Count(c => c.StartsWith(nameof(FatMikeEventKind.TypeCharacter), StringComparison.Ordinal));
             }
             game.Machine.RunFor(0.05);
+            Contest(game, week, r, ref prizes, ref rounds, ref passes);
+            game.Machine.RunFor(0.05);
         }
         Assert.True(paid > 4 && punished > 2 && typed > 0, $"paid {paid}, punished {punished}, typed {typed}");
+        Assert.True(prizes > 0 && rounds > 1 && passes > rounds, $"contest prizes {prizes}, second rounds {rounds}, field passes {passes}");
+    }
+
+    /// <summary>
+    /// The contest 1F63:0B03 of the same week (call 30), whole with its second field round 0609:0080 (computers and helpers of
+    /// lane anbau-ki in the port, the original's in the RefEmu): the state as it is, then with humans (scripted fire), stocks
+    /// around the field prize limit 70 and the flag DS:4BC2 varied. Only week 2 of weeks 0–3 has a contest.
+    /// </summary>
+    // [DIFFERENTIAL] 1F63:0B03
+    // [DIFFERENTIAL] 0609:0080
+    private static void Contest(OriginalProgram game, int week, Random r, ref int prizes, ref int rounds, ref int passes)
+    {
+        Assert.True(game.RunToRoutine(Seg, 0x0B03, 900), $"1F63:0B03 not reached (week {game.Week})");
+        Assert.Equal(week, game.Week);
+        var snapshot = game.Snapshot();
+        for (int run = 0; run < (week % 3 == 2 ? 6 : 1); run++)
+        {
+            var h = new FatMikeHarness(OriginalProgram.Resume(TestGameData.DosDir, snapshot), stubSecondRound: false);
+            if (run > 0)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (r.Next(2) == 0) h.Program.WriteByte((ushort)(L.IsComputer + i), 0);
+                    if (r.Next(3) == 0) h.Program.WriteByte((ushort)(L.FatMikeFlag + i), (byte)r.Next(2));
+                    // odd runs: some stocks of 70 and more (field prize); even runs: all below 70 (cash prize)
+                    if (run % 2 == 0) h.Program.WriteWord((ushort)(Stock3 + 8 * i), (ushort)r.Next(0, 70));
+                    else if (r.Next(2) == 0) h.Program.WriteWord((ushort)(Stock3 + 8 * i), (ushort)r.Next(70, 400));
+                }
+                if (run == 5) h.Program.WriteDword(OriginalProgram.RandomStateOffset, (uint)r.Next() * 2654435761u);
+            }
+            h.Script = Script(r.Next(), true);
+            AssertSame(h, $"contest week {week} run {run}", 0x0B03, (d, random, rec) => Drain(ContestPhase.Run(d, random, rec)));
+            prizes += h.Calls.Count(c => c.StartsWith(nameof(FatMikeEventKind.Number), StringComparison.Ordinal));
+            rounds += h.Calls.Count(c => c == nameof(FieldEventKind.DrawStatus) + "()");
+            passes += h.Passes;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using Traders.Core;
+using Traders.Core.Ai;
 using Traders.Core.FatMike;
 using Traders.Core.Field;
 using Traders.Core.State;
@@ -61,7 +62,21 @@ internal sealed class FatMikeHarness
         (0x0E9E, 0x037A, 0, "ReadControls", false),
         (0x21FD, 0x0245, 0, "PauseCheck", false),
         (0x21FD, 0x0004, 1, "WaitLoop", false),
+        // contest 1F63:0B03 and its second field round 0609:0080 (the field's drawing as in the planting tests)
+        (0x0A96, 0x05FB, 7, nameof(FatMikeEventKind.Number), true),
+        (0x2295, 0x006D, 2, nameof(FatMikeEventKind.DacColour), false),
+        (0x0609, 0x0C73, 0, nameof(FieldEventKind.DrawSelection), true),
+        (0x0609, 0x1854, 2, nameof(FieldEventKind.DrawRank), true),
+        (0x0609, 0x1A03, 0, nameof(FieldEventKind.DrawPanel), true),
+        (0x0609, 0x1A97, 0, nameof(FieldEventKind.DrawPurchaseUsed), true),
+        (0x0609, 0x1AC0, 0, nameof(FieldEventKind.DrawPlayer), true),
+        (0x0609, 0x0204, 0, nameof(FieldEventKind.DrawStatus), false),
+        (0x21FD, 0x0665, 0, nameof(FieldEventKind.LastFrame), false),
     ];
+
+    /// <summary>The second field round 0609:0080, replaced and recorded as <c>SecondRound()</c> when the harness is built so.</summary>
+    private static readonly (ushort Seg, ushort Off, int Args, string Name, bool List) SecondRoundStub =
+        (0x0609, 0x0080, 0, "SecondRound", false);
 
     /// <summary>Calls that run in the original and are only recorded.</summary>
     private static readonly (ushort Seg, ushort Off, int Args, string Name)[] Traced =
@@ -102,12 +117,21 @@ internal sealed class FatMikeHarness
 
     private bool _muted;
 
-    public FatMikeHarness(OriginalProgram? program = null)
+    /// <summary>True when 0609:0080 is replaced (the port's recorder then records the call instead of running the round).</summary>
+    public bool StubSecondRound { get; }
+
+    /// <summary>Passes of the second round's field loop after which both sides end it (DS:3CE6 = 0; endless humans).</summary>
+    public int PassLimit { get; set; } = 400;
+
+    public int Passes { get; set; }
+
+    public FatMikeHarness(OriginalProgram? program = null, bool stubSecondRound = true)
     {
         Program = program ?? OriginalProgram.LoadOnly(TestGameData.DosDir);
         Initial = Program.DataSegment();
+        StubSecondRound = stubSecondRound;
         var m = Program.Machine;
-        foreach (var (seg, off, args, name, list) in Stubs)
+        foreach (var (seg, off, args, name, list) in stubSecondRound ? [.. Stubs, SecondRoundStub] : Stubs)
         {
             ushort s = Program.Segment(seg);
             m.AddCodeHook(s, off, _ =>
@@ -133,6 +157,19 @@ internal sealed class FatMikeHarness
                     .Select(i => (short)Program.StackArgument(i));
                 Calls.Add($"{name}({string.Join(", ", values)})");
             });
+        // 0A69:0243 called by the contest itself (not by 0288): one typed line
+        m.AddCodeHook(Program.Segment(0x0A69), 0x0243, _ =>
+        {
+            if (_muted || m.Mem.Read16(m.Cpu.Ss, (ushort)(m.Cpu.Sp + 2)) != Program.Segment(Seg)) return;
+            var values = Enumerable.Range(0, 8).Select(i => (short)Program.StackArgument(i)).ToList();
+            if ((ushort)values[4] == Program.Dgroup) values[4] = unchecked((short)L.Segment);
+            Calls.Add($"{nameof(FatMikeEventKind.TypeLine)}({string.Join(", ", values)})");
+        });
+        // the second round's field loop test 0609:046A: counts the passes, ends the loop after PassLimit of them
+        m.AddCodeHook(Program.Segment(0x0609), 0x046A, _ =>
+        {
+            if (Passes++ >= PassLimit) Program.WriteByte(Planting.Players, 0);
+        });
         // The drawing calls of the border 13C5 are not recorded (the scene draws the border from DrawBorder).
         m.AddCodeHook(Program.Segment(0x0609), 0x13C8, _ => _muted = true);
         m.AddCodeHook(Program.Segment(0x0609), 0x153A, _ => _muted = false);
@@ -141,8 +178,16 @@ internal sealed class FatMikeHarness
 
     private string Record(string name, int args)
     {
-        if (name == nameof(FatMikeEventKind.TypeCharacter)) return $"{name}({Program.ReadByte(0x0140)})";
+        if (name == nameof(FatMikeEventKind.TypeCharacter))
+        {
+            if (Program.StackArgument(2) == 0x0140 && Program.StackArgument(3) == Program.Dgroup)
+                return $"{name}({Program.ReadByte(0x0140)})";
+            // 0A96:0525 with another text: the contest's text DS:3B70
+            name = nameof(FatMikeEventKind.Text);
+            args = 6;
+        }
         var values = Enumerable.Range(0, args).Select(i => (short)Program.StackArgument(i)).ToList();
+        if (name == nameof(FatMikeEventKind.Text) && (ushort)values[3] == Program.Dgroup) values[3] = unchecked((short)L.Segment);
         if (name == nameof(FatMikeEventKind.ShadowText) && (ushort)values[3] == Program.Dgroup) values[3] = unchecked((short)L.Segment);
         if (name == nameof(FatMikeEventKind.Emblem)) values.Add((sbyte)Program.ReadByte(L.ActivePlayer));
         return $"{name}({string.Join(", ", values)})";
@@ -170,6 +215,7 @@ internal sealed class FatMikeHarness
             .. Enumerable.Range(0, 3).Select(i => FatMikePhase.PunishLines + 4 * i),
             .. Enumerable.Range(0, 3).Select(i => FatMikePhase.TextTable + 4 * (0xEC + i)),
             .. Enumerable.Range(0, 3).Select(i => FatMikePhase.TextTable + 4 * (0xEF + i)),
+            ContestPhase.HeadingText, ContestPhase.FieldText, Planting.SecondRoundLines, Planting.SecondRoundLines + 4,
         ];
         foreach (int ptr in pointers)
         {
@@ -197,7 +243,7 @@ internal sealed class FatMikeHarness
 }
 
 /// <summary>The port's side: records the same calls as <see cref="FatMikeHarness"/> and answers controls from the same script.</summary>
-internal sealed class FatMikeRecorder(FatMikeHarness h) : IFatMikeHost
+internal sealed class FatMikeRecorder(FatMikeHarness h) : IContestHost, IPlantingHost, IFieldTexts
 {
     public List<string> Calls { get; } = [];
     public int ControlReads { get; private set; }
@@ -234,4 +280,41 @@ internal sealed class FatMikeRecorder(FatMikeHarness h) : IFatMikeHost
 
     public byte[] FarString(ushort offset, ushort segment) =>
         h.FarString(offset, segment == L.Segment ? h.Program.Dgroup : segment);
+
+    public int Passes { get; private set; }
+
+    /// <summary>
+    /// 0609:0080: recorded when the harness replaces it; else the core's round with this recorder as the field's host (the
+    /// computer and the helpers of lane anbau-ki as in the game), its field loop ended after the harness's pass limit.
+    /// </summary>
+    public IEnumerable<FieldWait> SecondRound(Dgroup d, OriginalRandom random)
+    {
+        if (h.StubSecondRound)
+        {
+            Calls.Add("SecondRound()");
+            return [];
+        }
+        return Round(d, random);
+    }
+
+    private IEnumerable<FieldWait> Round(Dgroup d, OriginalRandom random)
+    {
+        ContestPhase.PrepareSecondRound(d, this);
+        foreach (var w in Planting.SetupFrames(d, random, this)) yield return w;
+        while (Planting.Running(d) && Passes < h.PassLimit)
+        {
+            foreach (var w in Planting.PassFrames(d, random, this)) yield return w;
+            Passes++;
+        }
+        if (Planting.Running(d)) d.Set(Planting.Players, (byte)0);
+        Emit(new FieldEvent(FieldEventKind.LastFrame));
+        foreach (var w in Planting.Flip(d)) yield return w;
+    }
+
+    // the field's host of the second round: lane anbau-ki's computer and helpers, as PlantingHost
+    public void ComputerTurn(Dgroup d, short x, short y) => PlantingAi.ComputerTurn(d, x, y);
+    public bool CanPlaceHq(Dgroup d) => PlantingAiHelpers.CanPlant(d);
+    public bool HasOwnNeighbour(Dgroup d, short x, short y) => PlantingAiHelpers.HasOwnNeighbour(d, x, y);
+    public void ComputerPlacedHq(Dgroup d) => PlantingAi.ChooseWantKind(d);
+    public void ComputerBoughtField(Dgroup d) => PlantingAi.CommitCandidate(d);
 }

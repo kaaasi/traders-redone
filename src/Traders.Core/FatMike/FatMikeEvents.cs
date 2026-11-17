@@ -47,6 +47,21 @@ public enum FatMikeEventKind
 
     /// <summary>21AF:0472 – all eight objects hidden (the core clears their visible bytes).</summary>
     HideObjects,
+
+    /// <summary>
+    /// 0A69:0243(x, y, w, text offset, text segment, colour, wait, final wait) – one typed line centred in w (contest heading);
+    /// the characters follow as <see cref="TypeCharacter"/> with line 0.
+    /// </summary>
+    TypeLine,
+
+    /// <summary>0A96:05FB(x, y, value low, value high, digits, colour, background) – number with a leading "$" (contest prize).</summary>
+    Number,
+
+    /// <summary>0A96:0525(x, y, text offset, text segment, colour, background) – text at a far address.</summary>
+    Text,
+
+    /// <summary>2295:006D(index, rgb12) – one DAC colour set at once (the flashing 1F63:11AD).</summary>
+    DacColour,
 }
 
 /// <summary>A drawing request of segment 1F63 with the original's arguments in call order.</summary>
@@ -75,4 +90,14 @@ public interface IFatMikeHost
 
     /// <summary>Zero-terminated string at a far address, without the terminator (typed texts of the text table).</summary>
     byte[] FarString(ushort offset, ushort segment);
+}
+
+/// <summary>What the contest 1F63:0B03 needs besides Fat Mike's host: the second field round 0609:0080.</summary>
+public interface IContestHost : IFatMikeHost
+{
+    /// <summary>
+    /// 0609:0080, frame by frame: the core's <see cref="ContestPhase.SecondRoundFrames"/> on the field's host (computer turn,
+    /// helpers, controls, pause and the notice's texts); a test host may record the call instead.
+    /// </summary>
+    IEnumerable<FieldWait> SecondRound(Dgroup d, OriginalRandom random);
 }

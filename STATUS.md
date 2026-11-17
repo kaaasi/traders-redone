@@ -123,7 +123,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 |---|---|---|---|---|
 | `0000:5101` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
 | `0609:0004` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `HostPlantingFrameDifferentialTests.cs`, `PlantingDifferentialTests.cs`, `PlantingFrameDifferentialTests.cs` | ✅ |
-| `0609:00D6` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
+| `0609:0080` | [1F63_0B03_wettbewerb.md](docs/routines/1F63_0B03_wettbewerb.md) | `src/Traders.Core/FatMike/ContestPhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
+| `0609:00D6` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/FatMike/ContestPhase.cs`, `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:0160` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `0609:0204` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Field/FieldScene.cs` | `PlantingFrameDifferentialTests.cs`, `PlantingSceneDifferentialTests.cs` | ✅ |
 | `0609:032A` | [0609_0004_anbau.md](docs/routines/0609_0004_anbau.md) | `src/Traders.Core/Field/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
@@ -202,8 +203,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0A69:00D3` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:011B` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
 | `0A69:0164` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Vga/Layers/DrawHelpers.cs` | `CommandListTests.cs` | ✅ |
-| `0A69:01AD` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Extra/ExtraScene.cs`, `src/Traders.Presentation/Harvest/HarvestScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `HarvestDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
-| `0A69:0243` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `HarvestDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
+| `0A69:01AD` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/FatMike/ContestPhase.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Extra/ExtraScene.cs`, `src/Traders.Presentation/Harvest/HarvestScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `HarvestDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
+| `0A69:0243` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/FatMike/ContestPhase.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `HarvestDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A69:0288` | [0A69_000B_hilfen.md](docs/routines/0A69_000B_hilfen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/DrawHelpers.cs` | `CatastropheFrameDifferentialTests.cs`, `HarvestDifferentialTests.cs`, `HarvestFrameDifferentialTests.cs`, `EventsSceneDifferentialTests.cs`, `CommandListTests.cs` | ✅ |
 | `0A96:000A` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
 | `0A96:001B` | [0A96_06A8_befehlsliste.md](docs/routines/0A96_06A8_befehlsliste.md) | `src/Traders.Vga/Layers/CommandList.cs` | `CommandListTests.cs` | ✅ |
@@ -371,7 +372,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `17CB:0736` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs` | ✅ |
 | `17CB:0986` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs`, `EventsSceneDifferentialTests.cs` | ✅ |
 | `17CB:09E0` | [17CB_0005_wochenereignisse.md](docs/routines/17CB_0005_wochenereignisse.md) | `src/Traders.Core/Events/WeekIncidents.cs` | `IncidentsDifferentialTests.cs`, `EventsSceneDifferentialTests.cs` | ✅ |
-| `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Disasters/CatastropheStep.cs`, `src/Traders.Core/Extra/ExtraStep.cs`, `src/Traders.Core/FatMike/FatMikeStep.cs`, `src/Traders.Core/Field/PlantingStep.cs`, `src/Traders.Core/Harvest/HarvestStep.cs`, `src/Traders.Core/Phases/WeekSteps.cs`, `src/Traders.Core/Startup/ImageTable.cs`, `src/Traders.Core/Stations/StationsStep.cs`, `src/Traders.Core/Trade/TradeStep.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `186C:0002` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Disasters/CatastropheStep.cs`, `src/Traders.Core/Extra/ExtraStep.cs`, `src/Traders.Core/FatMike/ContestFieldHost.cs`, `src/Traders.Core/FatMike/ContestStep.cs`, `src/Traders.Core/FatMike/FatMikeStep.cs`, `src/Traders.Core/Field/PlantingStep.cs`, `src/Traders.Core/Harvest/HarvestStep.cs`, `src/Traders.Core/Phases/WeekSteps.cs`, `src/Traders.Core/Startup/ImageTable.cs`, `src/Traders.Core/Stations/StationsStep.cs`, `src/Traders.Core/Trade/TradeStep.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `186C:01A9` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:021E` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:02C6` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
@@ -513,6 +514,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1F63:079A` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:08DA` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0A8A` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
+| `1F63:0B03` | [1F63_0B03_wettbewerb.md](docs/routines/1F63_0B03_wettbewerb.md) | `src/Traders.Core/FatMike/ContestPhase.cs` | `ContestDifferentialTests.cs`, `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0C82` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0D24` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0E5C` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
@@ -524,6 +526,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1F63:104B` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Week/WaitLoop.cs` | `WaitLoopDifferentialTests.cs` | ✅ |
 | `1F63:113E` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/FatMike/FatMikePhase.cs`, `src/Traders.Core/Week/WaitLoop.cs` | `WaitLoopDifferentialTests.cs` | ✅ |
 | `1F63:1185` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
+| `1F63:11AD` | [1F63_0B03_wettbewerb.md](docs/routines/1F63_0B03_wettbewerb.md) | `src/Traders.Core/FatMike/ContestPhase.cs` | `ContestDifferentialTests.cs` | ✅ |
 | `1F63:1247` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:13FE` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:143E` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
@@ -541,7 +544,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:0185` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PlantingFrameDifferentialTests.cs`, `PaletteLayerTests.cs` | ✅ |
 | `21FD:01BA` | [21FD_01BA_random.md](docs/routines/21FD_01BA_random.md) | `src/Traders.Core/OriginalRandom.cs` | `ProgramHostTests.cs`, `RandomDifferentialTests.cs` | ✅ |
 | `21FD:021F` | [21FD_021F_wetter.md](docs/routines/21FD_021F_wetter.md) | `src/Traders.Core/Rules/WeatherRule.cs` | `RandomRulesDifferentialTests.cs` | ✅ |
-| `21FD:0245` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Stations/StationScene.cs` | `MainMenuDifferentialTests.cs`, `MenuFrameDifferentialTests.cs` | ✅ |
+| `21FD:0245` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Stations/StationScene.cs` | `MainMenuDifferentialTests.cs`, `MenuFrameDifferentialTests.cs` | ✅ |
 | `21FD:026C` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Stations/StationScene.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:02C9` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Vga/Layers/Palettes.cs` | `PaletteLayerTests.cs` | ✅ |
 | `21FD:0329` | [21FD_026C_paletten.md](docs/routines/21FD_026C_paletten.md) | `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Palettes.cs` | `FrameStepsTests.cs`, `PaletteLayerTests.cs` | ✅ |
@@ -554,8 +557,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `21FD:04F9` | [21FD_04E5_countdown.md](docs/routines/21FD_04E5_countdown.md) | `src/Traders.Core/Rules/Countdown.cs` | `TradeRulesDifferentialTests.cs` | ✅ |
 | `21FD:051F` | [21FD_051F_seitenwechsel.md](docs/routines/21FD_051F_seitenwechsel.md) | `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Week/Report.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/Pages.cs` | `MenuFrameDifferentialTests.cs`, `FrameStepsTests.cs`, `PageLayerTests.cs` | ✅ |
 | `21FD:0590` | [21FD_0590_anzeigeseite.md](docs/routines/21FD_0590_anzeigeseite.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Pixels/RulePage.cs`, `src/Traders.Core/Trade/Trade.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Trade/TradeScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `CatastropheFrameDifferentialTests.cs`, `WeekReportSceneDifferentialTests.cs` | ✅ |
-| `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Harvest/HarvestScene.cs`, `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Trade/TradeScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
-| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/FatMike/FatMikePhase.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Stations/StationScene.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
+| `21FD:05DB` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Presentation/Events/IncidentScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Harvest/HarvestScene.cs`, `src/Traders.Presentation/Menus/MenuScene.cs`, `src/Traders.Presentation/Trade/TradeScene.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `MenuSceneDifferentialTests.cs` | ✅ |
+| `21FD:060D` | [21FD_0004_warteschleife.md](docs/routines/21FD_0004_warteschleife.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Events/WeekIncidents.cs`, `src/Traders.Core/FatMike/ContestPhase.cs`, `src/Traders.Core/FatMike/FatMikePhase.cs`, `src/Traders.Core/Field/Planting.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Week/WaitLoop.cs`, `src/Traders.Presentation/Disasters/DisasterScene.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Stations/StationScene.cs` | `PlantingFrameDifferentialTests.cs`, `WaitLoopDifferentialTests.cs` | ✅ |
 | `21FD:0665` | [0609_0C73_anbauszene.md](docs/routines/0609_0C73_anbauszene.md) | `src/Traders.Core/Extra/ExtraPhase.cs`, `src/Traders.Core/Harvest/Harvest.cs`, `src/Traders.Core/Pixels/StationsPage.cs`, `src/Traders.Core/Stations/StationPhase.cs`, `src/Traders.Core/Trade/Trade.cs`, `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Presentation/Stations/StationScene.cs` | `PlantingFrameDifferentialTests.cs` | ✅ |
 | `21FD:0687` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `21FD:081D` | [21FD_0687_codeabfrage.md](docs/routines/21FD_0687_codeabfrage.md) | `src/Traders.Core/Startup/CodeQuery.cs` | `CodeQueryDifferentialTests.cs` | ✅ |
@@ -632,7 +635,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 |---|---:|---:|---:|---:|---:|
 | `0000` | 0x5350 | 76 | 1 | 1 | 1 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
-| `0609` | 0x21C0 | 56 | 56 | 56 | 56 |
+| `0609` | 0x21C0 | 56 | 57 | 57 | 57 |
 | `0825` | 0xAA0 | 16 | 16 | 16 | 16 |
 | `08CF` | 0x19A0 | 42 | 1 | 1 | 1 |
 | `0A69` | 0x2D0 | 9 | 10 | 10 | 10 |
@@ -660,7 +663,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
 | `1DEF` | 0x8F0 | 14 | 14 | 14 | 14 |
 | `1E7E` | 0xE50 | 19 | 0 | 0 | 0 |
-| `1F63` | 0x1500 | 27 | 25 | 25 | 25 |
+| `1F63` | 0x1500 | 27 | 27 | 27 | 27 |
 | `20B3` | 0xD80 | 27 | 1 | 1 | 1 |
 | `218B` | 0x1C0 | 5 | 0 | 0 | 0 |
 | `21A7` | 0x80 | 3 | 0 | 0 | 0 |
@@ -675,7 +678,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **490** | **477** | **477** |
+| **Summe** | **0x28DC0** | **891** | **493** | **480** | **480** |
 
 <!-- abdeckung:ende -->
 

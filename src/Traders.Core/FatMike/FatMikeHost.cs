@@ -16,10 +16,18 @@ namespace Traders.Core.FatMike;
 /// <param name="fatMike">Receiver of the segment's own drawing requests (the scene).</param>
 /// <param name="farString">Zero-terminated string at a far address, without the terminator.</param>
 /// <param name="devices">Control devices besides the key table (joystick, mouse); keyboard only if null.</param>
+/// <param name="secondRound">
+/// The field's host for the contest's second field round 0609:0080 (<see cref="ContestFieldHost"/>); only the contest needs it.
+/// </param>
 public sealed class FatMikeHost(Action<FieldEvent> field, Action<FatMikeEvent> fatMike, Func<ushort, ushort, byte[]> farString,
-    IControlDevices? devices = null) : IFatMikeHost
+    IControlDevices? devices = null, IPlantingHost? secondRound = null) : IContestHost
 {
     private readonly IControlDevices _devices = devices ?? KeyboardOnlyDevices.Instance;
+
+    // 0609:0080 – ContestPhase.SecondRoundFrames on the field's host
+    public IEnumerable<FieldWait> SecondRound(Dgroup d, OriginalRandom random) =>
+        ContestPhase.SecondRoundFrames(d, random,
+            secondRound ?? throw new InvalidOperationException("The second field round needs the field's host."));
 
     public void Emit(FieldEvent e) => field(e);
 
@@ -38,7 +46,7 @@ public sealed class FatMikeHost(Action<FieldEvent> field, Action<FatMikeEvent> f
     /// the frame ends, so the scene draws them in the same frame), then the wait is passed on – a page flip or retrace as
     /// <see cref="FieldWait.Retrace"/>, a poll of the pause key as <see cref="FieldWait.Poll"/>.
     /// </summary>
-    // 21FD:0004 – Week.WaitLoop (lane bilanz), called from 1F63:08D1 with mode 0
+    // 21FD:0004 – Week.WaitLoop (lane bilanz), called from 1F63:08D1 with mode 0 and from 1F63:0C67 with mode 4
     public IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode)
     {
         var loop = new WaitLoop(d, random, _devices, mode);
@@ -50,7 +58,7 @@ public sealed class FatMikeHost(Action<FieldEvent> field, Action<FatMikeEvent> f
         Play(loop.DrainEvents());
     }
 
-    /// <summary>The wait loop's events in mode 0 (no confirmation drawing) as field events.</summary>
+    /// <summary>The wait loop's events in modes 0 and 4 (no confirmation drawing; the indicator 1F63:104B in mode 4).</summary>
     private void Play(List<WeekEvent> events)
     {
         foreach (var e in events)
@@ -63,6 +71,7 @@ public sealed class FatMikeHost(Action<FieldEvent> field, Action<FatMikeEvent> f
                 case WeekEventKind.RestoreObjects: Emit(new FieldEvent(FieldEventKind.RestoreObjects)); break;
                 case WeekEventKind.DrawObjects: Emit(new FieldEvent(FieldEventKind.DrawObjects)); break;
                 case WeekEventKind.Sound: Emit(new FieldEvent(FieldEventKind.Sound, (short)e.A, (short)e.B)); break;
+                case WeekEventKind.Indicator: Emit(new FatMikeEvent(FatMikeEventKind.Indicator, (short)e.A, (short)e.B)); break;
                 default: throw new InvalidOperationException($"wait loop event {e.Kind} is not part of Fat Mike");
             }
         }

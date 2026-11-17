@@ -35,6 +35,16 @@ public interface IPlantingHost : IFieldOutput
     IEnumerable<FieldWait> WaitLoop(Dgroup d, OriginalRandom random, short mode);
 }
 
+/// <summary>
+/// The texts of the second field round's notice (0609:0204 with DS:1582 = 1, from 0609:0080): zero-terminated strings in the
+/// far text buffer, an explicit input like the text file of the program start. Only asked for non-null pointers.
+/// </summary>
+public interface IFieldTexts
+{
+    /// <summary>The bytes of the zero-terminated string at the far address (without the terminator).</summary>
+    byte[] FarString(ushort offset, ushort segment);
+}
+
 /// <summary>What the planting phase waits for before it continues: a retrace (one frame) or a poll of the key table.</summary>
 public enum FieldWait
 {
@@ -192,22 +202,39 @@ public static class Planting
     }
 
     /// <summary>
-    /// 0609:0204, its frames: the status lines are drawn (event <see cref="FieldEventKind.DrawStatus"/>), then 21FD:060D flips
-    /// the pages. In the second round (DS:1582 = 1) the free-field notice is typed first (0A69:0288, one flip and
-    /// 21FD:0185(2) per character) and followed by 21FD:0185(50).
+    /// 0609:0204, its frames: the status lines are drawn (event <see cref="FieldEventKind.DrawStatus"/>, the whole call is the
+    /// scene's), then 21FD:060D flips the pages. In the second round (DS:1582 = 1) the free-field notice is typed first: font 1,
+    /// 0A69:0288(0, 1Bh, 140h, DS:37E0, 2 lines, colour 9, wait 5) – per character of a non-null line 21FD:060D (a flip),
+    /// 21FD:0245 and 21FD:0185(5) –, font 0, 21FD:0185(50); then the area (10h, 6, 120h, 2Ch) instead of the lines.
     /// </summary>
-    // [ORIGINAL] 0609:0204 – frames only (21FD:0185(50) and 21FD:060D); the drawing is the scene's
+    // [ORIGINAL] 0609:0204 – frames only; the drawing, the key click 21A7:0054(1, 16h) and the fonts are the scene's
     public static IEnumerable<FieldWait> StatusFrames(Dgroup d, IFieldOutput output)
     {
         Emit(output, FieldEventKind.DrawStatus);
         if (d.U8(NoTime) == 1)
         {
-            // [APPROX] Second round only (0609:0080 from 1F63:0B03, lane R9): the typed notice 0A69:0288 waits per character
-            // (text from DS:37E0, not modelled here); only the pause of 50 retraces is yielded.
+            for (short i = 0; i < 2; i++)
+            {
+                int at = At(SecondRoundLines + (i << 2));
+                ushort offset = d.U16(at), segment = d.U16(At(at + 2));
+                if (offset == 0 && segment == 0) continue;
+                var texts = output as IFieldTexts
+                    ?? throw new InvalidOperationException("0609:0204 in the second round needs the texts (IFieldTexts).");
+                int length = texts.FarString(offset, segment).Length;
+                for (int k = 0; k < length; k++)
+                {
+                    foreach (var w in Flip(d)) yield return w;
+                    foreach (var w in Pause(d)) yield return w;
+                    foreach (var w in Retraces(5, 0)) yield return w;
+                }
+            }
             foreach (var w in Retraces(50, 0)) yield return w;
         }
         foreach (var w in Flip(d)) yield return w;
     }
+
+    /// <summary>DS:37E0 – far pointers to the two lines of the second round's notice (text table DS:37CC, entries 5 and 6).</summary>
+    public const int SecondRoundLines = 0x37E0;
 
     /// <summary>21FD:0185(n) – n retraces, n a long (low, high); none when n ≤ 0 (signed compare of the high word).</summary>
     // [ORIGINAL] 21FD:0185
