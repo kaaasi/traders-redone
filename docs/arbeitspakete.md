@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md)).
 
-## Aktuelle Runde: 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (Plan Leitstelle 17.11.2026, Go offen)
+## Aktuelle Runde: 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (Plan Leitstelle 17.11.2026, Go Nutzer 17.11.2026)
 
 **Ziel:** Die Woche läuft im Port vollständig durch: Fat Mike `1F63:000F` (Aufruf 26), Einkauf `08CF:0004` (29) und
 Wettbewerb/Auswertung `1F63:0B03` (30); Aufruf 27 (Edelsteinkurs `08CF:11D7`) liegt seit R3 vor, der Wochenzähler `DS:4B9A`++
@@ -99,7 +99,7 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
 - **Abnahme:** alle drei Läufe grün; 26 und 30 im Gleichschritt mit dem RefEmu (Datensegment, `DS:10D2`, Bildzähler), Szene
   pixelgenau; Gegenprobe im Review (eine Ziehung ausgelassen oder vertauscht, Buchung mit Vorzeichenfehler, Merker `4BC2` nie
   gesetzt, ein Bild doppelt verarbeitet → rot).
-- **Abhängigkeiten:** keine. Größe ≈ 0x1400 Byte; Fortsetzungen über das Limit von 3 siehe F1.
+- **Abhängigkeiten:** keine. Größe ≈ 0x1400 Byte; bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
 
 ## 2 `einkauf` – Einkauf `08CF:0004`
 
@@ -117,7 +117,7 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   `08CF:0004`“); `Rules/Countdown*` wird gerufen, nicht geändert.
 - **Abnahme:** alle drei Läufe grün; Einkauf im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Kauf ohne
   Geldprüfung, Vorrat ohne Obergrenze, Countdown nicht abgezogen, ein Bild doppelt verarbeitet → rot).
-- **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); Fortsetzungen über das Limit von 3 siehe F1.
+- **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
 
 ## 3 `sammel` – P3-Sammlung aus R7 (Sonnet)
 
@@ -147,11 +147,12 @@ erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/
 
 3 → 1 / 2 (in der Reihenfolge der Freigabe) → 0. Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss.
 
-## Offene Fragen an den Nutzer (R8)
+## Entscheidungen des Nutzers (R8)
 
-- **G1:** Go für Runde 8 mit diesem Plan (vier Spuren; 0–2 Opus, 3 Sonnet)?
-- **F1:** Dürfen die Spuren 1 `fatmike` und 2 `einkauf` je bis zu zwei Fortsetzungen über das Limit von 3 hinaus bekommen
-  (wie `handel` in R7)? Vorschlag: ja für beide.
+- **G1 = Go** (Nutzer 17.11.2026): Runde 8 mit diesem Plan, sobald das Plan-Review vorliegt (Befunde arbeitet die Leitstelle ein).
+- **F1 = ja** (Nutzer 17.11.2026): Spuren 1 `fatmike` und 2 `einkauf` dürfen je bis zu zwei Fortsetzungen über das Limit von 3
+  hinaus bekommen.
+- Plan-Review als geplanter Lauf `Traders R8 plan-review` (Opus), Ablage `reviews/2026-11-17-r8-plan.md`.
 
 ## Fahrplan
 
