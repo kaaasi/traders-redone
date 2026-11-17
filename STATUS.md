@@ -212,7 +212,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `08CF:0886` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:0914` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:09C4` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
-| `08CF:09F1` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRealGameDifferentialTests.cs`, `PurchaseRulesDifferentialTests.cs` | ✅ |
+| `08CF:09F1` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:0AF0` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRealGameDifferentialTests.cs`, `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:0BE1` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:0CD5` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRealGameDifferentialTests.cs`, `PurchaseRulesDifferentialTests.cs` | ✅ |

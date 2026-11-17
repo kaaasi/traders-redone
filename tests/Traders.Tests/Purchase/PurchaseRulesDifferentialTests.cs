@@ -203,6 +203,41 @@ public class PurchaseRulesDifferentialTests
     [GameDataFact]
     public void Rocket_shop_frame() => Each(0x09F1, 0x09F1, (d, _, o) => R.RocketShop(d, o));
 
+    // [DIFFERENTIAL] 08CF:09F1, 08CF:04BA, 08CF:0E53
+    [GameDataFact]
+    public void Cash_at_the_price_of_a_rocket_oil_and_a_ticket()
+    {
+        // Own random start value per case; the acting player's cash is the price or one off it (edge of the 32-bit compare).
+        (ushort Off, ushort Price, Action<Dgroup, PurchaseHarness.Recorder> Port, ushort[] Args)[] shops =
+        [
+            (0x09F1, L.RocketPrice, (d, o) => R.RocketShop(d, o), []),
+            (0x04BA, L.OilPrice, (d, o) => R.OilShop(d, o), []),
+            (0x0E53, L.LottoPrice, (d, o) => R.Pick(d, 1, o), [1]),
+        ];
+        int n = 0;
+        foreach (var (off, price, port, args) in shops)
+            for (int i = 0; i < Cases; i++)
+            {
+                var r = new Inputs((uint)(0xCA5 * 0x10000 + off + 7919 * i));
+                var d = State(r);
+                d.Set(P.Player, (sbyte)r.Range(0, 3));
+                int pl = d.S8(P.Player);
+                d.Set(P.Action + pl, (sbyte)10);
+                d.Set(L.Oil + 2 * pl, (short)r.Range(0, 0x27));
+                d.Set(L.Rockets + 2 * pl, (short)r.Range(0, 9));
+                d.Set(L.ShopOil, (short)r.Range(1, 3));
+                d.Set(L.IsComputer + pl, (byte)0);
+                d.Set(L.Cash + 4 * pl, d.S16(price) + r.Range(-1, 1));
+                H.AssertSame(d, 0x08CF, off, (p, _, o) =>
+                {
+                    port(p, o);
+                    return null;
+                }, $"08CF:{off:X4} cash at price case {i}", args: args);
+                n++;
+            }
+        Assert.Equal(3 * Cases, n);
+    }
+
     // [DIFFERENTIAL] 08CF:0AF0
     [GameDataFact]
     public void Computer_wants_a_rocket() => EachResult(0x0AF0, 0x0AF0, d => B(R.ComputerWantsRocket(d)));

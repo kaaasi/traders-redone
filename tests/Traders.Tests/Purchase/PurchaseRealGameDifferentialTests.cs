@@ -43,18 +43,6 @@ public class PurchaseRealGameDifferentialTests
 
     private static readonly Lazy<List<Captured>> States = new(Capture);
 
-    private static readonly List<byte[]> EntryStates = [];
-
-    /// <summary>The data segment at the entry of 08CF:0004 in weeks 0–3 of the same game (for the flow tests of part 2).</summary>
-    internal static IReadOnlyList<byte[]> Entries
-    {
-        get
-        {
-            _ = States.Value;
-            return EntryStates;
-        }
-    }
-
     private static List<Captured> Capture()
     {
         var p = OriginalProgram.StartGame(TestGameData.DosDir);
@@ -76,7 +64,6 @@ public class PurchaseRealGameDifferentialTests
         {
             Assert.True(p.RunToRoutine(0x08CF, 0x0004, 1800), $"08CF:0004 not reached (week {p.Week})");
             Assert.Equal(w, p.Week);
-            EntryStates.Add(p.DataSegment()[..L.Size]);
             week = w;
             Assert.True(p.RunToRoutine(0x1F63, 0x0B03, 1800), $"end of the purchase of week {w} not reached");
             week = -1;
@@ -128,7 +115,7 @@ public class PurchaseRealGameDifferentialTests
         _ => 0,
     };
 
-    // [DIFFERENTIAL] 08CF:029A, 08CF:0CD5, 08CF:0F4D, 08CF:1348, 08CF:09F1, 08CF:0AF0
+    // [DIFFERENTIAL] 08CF:029A, 08CF:0CD5, 08CF:0F4D, 08CF:1348, 08CF:0AF0
     [GameDataFact]
     public void Rules_of_the_purchase_on_states_of_weeks_0_to_3()
     {
