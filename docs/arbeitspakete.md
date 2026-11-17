@@ -134,6 +134,11 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Abnahme:** alle drei Läufe grün; Einkauf im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Kauf ohne
   Geldprüfung, Vorrat ohne Obergrenze, Countdown nicht abgezogen, ein Bild doppelt verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
+- **Status:** PR #218 (Draft, Claude Opus). Teil 1 fertig (17.11.2026): Befund `08CF_0004_einkauf.md` mit allen 41 Routinen,
+  Regeln in `Purchase/PurchaseRules.cs`, Differenztests auf erzeugten Zuständen und Wochen 0–3. Teil 2 fertig (17.11.2026):
+  `Purchase/Purchase.cs` Bild für Bild, `PurchaseStep` (Aufruf 29), Gleichschritt Woche 0 und 2 mit Menschen. Teil 3 fertig
+  (17.11.2026): Szene `Presentation/Purchase/PurchaseScene.cs`, im Gleichschritt je Bild pixelgenau (VRAM, DAC, Bildstart) und
+  jede Befehlsliste des Ablaufs gleich, Gegenproben der Szene. Alle Teile fertig, Review.
 
 ## 3 `sammel` – P3-Sammlung aus R7 (Sonnet)
 

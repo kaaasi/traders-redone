@@ -529,6 +529,37 @@ Grundpreises · `0262`/`0276`/`028A` W[10] Atlas-x, -y, Höhe der Teile von `0BD
 (4 × 22h) Haufenzeilen der Spieler 0–3 (`1163`) · `0566` B[4] Haufenfarbe · `056A`/`05CF` B[101] Endpunkte der Balken `146B` ·
 `063C`/`0640` B[4] Balkenfarben `134D` · `02A6` Fernzeiger auf den Zahlenpuffer `0644` (Ausgabe).
 
+## Runde 8, Spur `einkauf` (Einkauf `08CF:0004`)
+
+Befund [08CF_0004_einkauf.md](../routines/08CF_0004_einkauf.md). G = belegt durch Differenztest, W = Bedeutung aus dem Ablauf
+gefolgert. Namen in `Traders.Core.Purchase.PurchaseLayout`. Indizierte Ziele aus dem Disassembly (`[bx+…]`), nicht aus
+`callgraph.py`.
+
+| DS-Offset | Typ | Name (C#) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `43B2` | B[4] u | `Mode` | 0Ah Straße, 0Bh Raketen, 0Ch Öl, 0Dh Lotto, 0Eh Edelsteine (ergänzt §14) | G – `039C`, `04BA`, `0CD5`; W |
+| `15AB` | B[4] s | `Shop` | Laden vor dem Spieler: 0 Lotto, 1 Öl, 2 Raketen, 3 Edelsteine | G – `029A`, `039C`, `0455` |
+| `3308` | B[4] s | `Action` | wie §10; vom Computer in `03E5`/`04BA`/`069F`/`09F1`/`0CD5` gesetzt (FFh = kein Ziel) | G – `03E5`, `0455` |
+| `4BCA` / `3022` / `4BD2` | W[4] s | `Direction` / `MoveTimer` / `MoveFrame` | Gehrichtung 0/1, Gehdauer 21h (`0609:1FE0`) | G – `029A` |
+| `3786` | DW[4] s | `MoveDelay` | Eingabesperre: 3 nach Öl, 64h nach Edelstein, 12Ch nach Lottozahl (Mensch); Computer kauft Öl erst bei ≤ 0 | G – `04BA`, `0886`, `0E53` |
+| `1586` | B[4] s | `Picks` | getippte Lottozahlen 0 … 4 | G – `0BE1`, `0E53`, `0F4D` |
+| `158A` | B[4][4] | `Tickets` | getippte Zahlen (1 oder 2), Schritt 4 | G – `0E53`, `0F4D` |
+| `159C` | B[4] s | `GemDeals` | Edelsteingeschäfte im Einkauf (Grenze des Computers) | G – `069F`, `0914` |
+| `15A0` / `15B0` / `15B8` / `15B2` | W s | `LottoX` / `OilX` / `RocketX` / `GemX` | x der Läden (40h Abstand; `15B0` nur mit Ölverbrauch) | G – `0082` |
+| `15A2` | B s | `DrawState` | Ziehung: FFh wartet, 0 … 3 Kugeln, F6h keine mehr | G – `0F4D`, `161F` |
+| `15A3` / `15A7` | B[4] | `Matches` / `Balls` | Treffer je Spieler (4 = Gewinn) / gezogene Kugeln 1 oder 2; `15A3[4…7]` liest `15A7` | G – `0F4D`, `115C` |
+| `15AF` | B s | `BlinkStep` | Blinkschritt der Gewinner 0 … 7 | G – `115C`, `0F4D` |
+| `159A` | W s | `NextBall` | Countdownwert der nächsten Kugel (`3780` − 5, − 1, − 2) | G – `0F4D`, `161F` |
+| `15B4` | W s | `ComputerDelay` | Bilder bis zur nächsten Computerentscheidung 5 … 0 | W – `01BD`; G – `069F`, `09F1`, `0CD5` |
+| `15B6` | W s | `TextX` | x der Preiszeile (`1543`) | G – `1348`, `1543` |
+| `00E8` / `00EA` | W s | `ShownTime` / `BlinkTimer` | zuletzt gezeigte Zeit bis zur Kugel (init. FFFFh) / Blinktakt (init. 1, dann 2) | G – `0F4D`, `115C` |
+| `00E4` | B[4] | `FigureX` | x-Versatz der Figur am Lottoladen (init. 25h, 1Dh, 23h, 19h) | W – `00CD` |
+| `08ED` | B[…] | `Preset` | vorgegebene Lottozahlen (init. FFh = keine); `08EE` ≠ FFh lässt jeden mit Losgeld spielen | G – `0CD5`, `0DEF`, `0F4D` |
+| `3046` | W[4] s | `RocketShortfall` | fehlende Raketen (§11); Computer kauft nur darunter | G – `0AF0` |
+| `4520` / `4B98` | W[4] s / W s | `Oil` / `ShopOil` | Öl (max. 28h) / Ölvorrat des Ladens | G – `04BA`, `05F1` |
+| `4BAC` / `37AF` / `300E` | W[4] / B[4] / W[4] | `Rockets` / `Gems` / `GemCredit` | Raketen (max. 10), Edelsteine (max. 10), Edelsteinkonto (max. 2000) | G – `09F1`, `178D`, `0886` |
+| `4BC2` | B[4] | `FatMikeFlag` | = 1: Computer kauft Raketen wie bei < 3 Raketen + Basen | G – `0AF0` |
+
 ## Runde 8, Spur `fatmike` (Fat Mike `1F63:000F`, Wettbewerb `1F63:0B03`)
 
 Befunde [`1F63_000F_fatmike.md`](../routines/1F63_000F_fatmike.md), [`1F63_0B03_wettbewerb.md`](../routines/1F63_0B03_wettbewerb.md);
