@@ -20,9 +20,11 @@ namespace Traders.Tests.App;
 /// first frame of the stations phase (call 11) every host frame is one retrace of the original: random state DS:10D2 and the
 /// picture – VRAM, DAC and CRTC start, in the report and the incidents the shown page and the DAC – are compared at every
 /// retrace, and at the first frame of call 11 the page state of the output layers (DS:082E/0830, 40DE…40E5, 4516) with the
-/// shown page. The stations phase after the incident is left out: from its 41st frame the host shows a figure at the top
-/// left that the original does not draw (the hidden page already differs by 88 bytes at its first frame) – finding of this
-/// test, reported in PR #185 for the scenes. Expected values come only from the RefEmu.
+/// shown page. From there on the stations phase and the first <see cref="HarvestFrames"/> frames of the harvest (call 16) are
+/// compared with both pages at every retrace: the last pass of the incidents' wait loop has to be played before the first
+/// call of the stations phase (finding #189 – played after it, the hidden page differed by 88 bytes at the first frame of
+/// call 11 and the star field showed the saved window at the top left from the 41st frame on). Expected values come only
+/// from the RefEmu.
 /// </summary>
 public class HostLoadedWeekFrameDifferentialTests
 {
@@ -43,6 +45,9 @@ public class HostLoadedWeekFrameDifferentialTests
     private const int EnterHold = 6, ContinueHold = 120;
 
     private const int MaxWeekFrames = 40_000;
+
+    /// <summary>Frames of the harvest (call 16) compared after the stations phase.</summary>
+    private const int HarvestFrames = 50;
 
     /// <summary>
     /// Start time of both runs (the clock of random(0) at the code request), chosen so that the loaded week also has a week
@@ -110,7 +115,7 @@ public class HostLoadedWeekFrameDifferentialTests
         var frames = new Dictionary<int, int>();
         for (int frame = 0; ; frame++)
         {
-            Assert.True(frame < MaxWeekFrames, $"the week did not reach call 11 within {MaxWeekFrames} frames");
+            Assert.True(frame < MaxWeekFrames, $"the week did not reach the harvest within {MaxWeekFrames} frames");
             m.Run(1);
             m.Run(4_000_000_000, mm => mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry);
             Assert.False(m.Exited, "original exited");
@@ -119,7 +124,7 @@ public class HostLoadedWeekFrameDifferentialTests
             string where = $"week frame {frame} (host frame {f}, call {step})";
             Assert.True(p.RandomState == host.Core.U32(DgroupLayout.RandomSeed),
                 $"{where}: random state original {p.RandomState:X8}, host {host.Core.U32(DgroupLayout.RandomSeed):X8}");
-            if (step == WeekSteps.StationsCall)
+            if (step == WeekSteps.StationsCall && frames.GetValueOrDefault(step) == 0)
             {
                 // first frame of the stations phase: the page state the core took over and the screen
                 var emu = p.DataSegment();
@@ -130,8 +135,8 @@ public class HostLoadedWeekFrameDifferentialTests
                         Assert.True(emu[i] == host.Core.U8(i), $"{where}: page state DS:{i:X4} original {emu[i]:X2} core {host.Core.U8(i):X2}");
                     }
                 HostPictures.CompareShown(p, host, where);
-                break;
             }
+            if (step == WeekSteps.HarvestCall && frames.GetValueOrDefault(step) >= HarvestFrames) break;
             if (step is WeekSteps.ReportCall or WeekSteps.IncidentsCall) HostPictures.CompareShown(p, host, where);
             else HostPictures.Compare(p, host, where);
             frames[step] = frames.GetValueOrDefault(step) + 1;
@@ -147,6 +152,7 @@ public class HostLoadedWeekFrameDifferentialTests
         Assert.Equal(LoadedWeek, p.Week);
         Assert.True(frames.GetValueOrDefault(CatastropheGuardStep.Call) > 100, "no catastrophe in the loaded week");
         Assert.True(frames.GetValueOrDefault(WeekSteps.IncidentsCall) > 100, "no week incident in the loaded week");
+        Assert.True(frames.GetValueOrDefault(WeekSteps.StationsCall) > 100, "no stations phase in the loaded week");
     }
 
     /// <summary>
