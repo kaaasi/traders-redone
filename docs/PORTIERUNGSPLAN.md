@@ -97,7 +97,7 @@ Jeder Meilenstein endet mit einem lauffähigen Zwischenstand auf `main`, festgeh
 | **M12** | Roboterkampf | `V-KAMPF`, Robo-Store, Kampfmechanik + KI (im Vorversuch offen) | Differenztests, Video 2 |
 | **M13** | Ende | Siegprüfung, Abendbild, Rang-Mosaik aus echten Werten | Endbild vs. Video |
 | **M14** | Ton | A.H.-Format, OPL2-Emulation, FX-Treiber-Effekte | Hörvergleich mit Video |
-| **M15** | Gesamtpartie | Komplette Partien mit aufgezeichneten Eingaben C# vs. RefEmu | Zustand pro Runde identisch → **v1.0 Originalport** |
+| **M15** | Gesamtpartie | Komplette Partien mit aufgezeichneten Eingaben C# vs. RefEmu | Zustand pro Runde identisch; danach Aufräumen des Repos (Nutzer 17.11.2026, Fahrplan R12) → **v1.0 Originalport** |
 
 **Zwischenziel (Nutzer 11.11.2026):** eine spielbare **Gesamtpartie ohne Roboterkampf** (Stufen 0–2, in denen er aus ist) vor M12;
 der Roboterkampf folgt danach in eigenen Runden. Grundlage: [analyse/BESTAND.md](analyse/BESTAND.md) §3.2–3.3; Reihenfolge der

@@ -85,7 +85,8 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   Einkauf (Woche bzw. Tastenmuster im Test festlegen). (3) **Host:** spielt mit Schalter ohne Halt Woche für Woche (Bild für Bild
   gegen das Original bis in Woche 1, Aufruf 8); Hinweis „Partie zu Ende“ bei Ausgang B; Wochenbericht nach der Wochengrenze mit
   richtiger Wochenachse (`ReportScene`, `DS:4B9A` ≥ 1). `MultiWeekRound7DifferentialTests` ersetzen oder erweitern, nicht
-  verdoppeln.
+  verdoppeln. Dazu #222: optionales Rechenbudget (Höchstzahl Befehle) in `OriginalProgram.Call`/`RunToRoutine`, Abbruch mit
+  Routine und CS:IP (additiv).
 - **Dateigrenzen:** `src/Traders.Core/Phases/**`, `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`,
   `tests/Traders.Tests/App/**`, `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
 - **Abnahme:** alle drei Läufe grün; Probe über ≥ 5 Wochen im Gleichschritt; Host-Bildtest über die Wochengrenze; Gegenprobe
@@ -145,7 +146,18 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Abnahme:** alle drei Läufe grün (Änderung an der Test-Infrastruktur); neue Regel meldet die Alias-Verletzung (Gegenprobe rot);
   #193, #205, #208 geschlossen (`Fixes #…`).
 - **Abhängigkeiten:** keine. Früh mergen (Spur 0 baut in `tests/Traders.Tests/App/**` darauf).
+- **Status:** **gemergt 17.11.2026** (PR #216, Claude Sonnet; Review `reviews/2026-11-17-r8-sammel.md` „Ja“); #193, #205, #208
+  erledigt; P3 R8S-1/-2 → #220, #221.
 - **Status (Claude Sonnet, 17.11.2026):** alle drei Teile fertig, PR #216 (Ready for review), alle drei Läufe von `pruefen.sh` grün; #193, #205, #208 per `Fixes`. Neue Tests: `Week_1_computers_in_lock_step`, `Week_3_with_two_humans_in_lock_step` (`Trade/TradeFrameDifferentialTests.cs`), `HostExtraPhaseFrameDifferentialTests` (`App/`). Kein Produktivcode.
+
+## Nachtrag `zeitlimit` – Zeitlimit und Fortschritt in den Testläufen (Leitstelle 17.11.2026)
+
+- **Anlass:** Endlosschleife im Differenztest `FatMikeDifferentialTests.Punishment_matches_the_original` (#217): ein
+  Testaufbau erzeugte einen Zustand, in dem `1F63:08DA` im Original wie im Port endlos zieht; `pruefen.sh` lief > 3 h.
+- **Teile:** Zeitlimit je Test (`--blame-hang-timeout`, `TR_HANG_TIMEOUT`, Vorgabe 20 min) in `tools/pruefen.sh` und
+  `build.yml`; Fortschritt in der Logdatei; Regel „Machbarkeitsprüfung oder Abbruchzähler“ in `routines/_vorlage.md` und
+  `prozess/zusammenarbeit.md` §5 Nr. 1; Empfehlung eigener Zufallsstartwert je Testfall. Modell Sonnet, Erstreview Opus.
+- **Status:** PR #223 (Claude, läuft). Rechenbudget im RefEmu (`OriginalProgram.Call`/`RunToRoutine`) → Spur 0 Teil 1 (#222).
 
 ## Zuständigkeit gemeinsamer Dateien in R8
 
@@ -162,7 +174,7 @@ erzeugte Block (alle). Übriges `STATUS.md`, `CHANGELOG.md`, dieser Plan, `docs/
 
 ## Integrationsfolge R8
 
-3 → 1 / 2 (in der Reihenfolge der Freigabe) → 0. Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss.
+3 → `zeitlimit` / 1 / 2 (in der Reihenfolge der Freigabe) → 0. Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss.
 
 ## Entscheidungen des Nutzers (R8)
 
@@ -186,6 +198,6 @@ Nach Runde 2, je Runde 2–4 Spuren; Vorschlag nach BESTAND §3.2 (Leitstelle 11
 | R8 | Fat Mike und Wettbewerb · Einkauf | `1F63`, `08CF` |
 | R9 | Ende/Abend (Rest `20B3`) · Ton · **Gesamtpartie ohne Roboterkampf** (Zwischenziel) | `20B3`, `218B`, `21A7` |
 | R10–R11 | Roboterkauf, Aufstellung, Kampffeld, Kampf, je mit KI | `1C68`, `16D6`, `0535`, `12C8`, `1E7E`, `0EDE`, `150F` |
-| R12 | Gesamtpartie v1.0 | – |
+| R12 | Gesamtpartie v1.0; als letzter Schritt vor v1.0 **Aufräumen** (Nutzer 17.11.2026): Quelltext nach Thema zusammenführen, Leichen entfernen · Testdateien nach Thema bündeln · veraltete Analysen und Reviews verdichten oder archivieren, Verweise prüfen · ungenutzte Skripte entfernen | – |
 
 Danach Erweiterungen ([PORTIERUNGSPLAN.md](PORTIERUNGSPLAN.md)).
