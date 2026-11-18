@@ -1,3 +1,4 @@
+using Traders.RefEmu.Cpu;
 using Traders.RefEmu.Hardware;
 using Traders.RefEmu.Machine;
 
@@ -171,14 +172,33 @@ public sealed class OriginalProgram
     public bool RunToRoutine(ushort imageSegment, ushort offset, double maxSeconds) =>
         RunUntil(() => IsAt(imageSegment, offset), maxSeconds);
 
-    private bool RunUntil(Func<bool> condition, double maxSeconds)
+    /// <summary>
+    /// <see cref="RunToRoutine(ushort, ushort, double)"/> with an instruction budget (#222): when
+    /// <paramref name="maxInstructions"/> instructions have run before the routine or the time limit is reached, the run
+    /// stops with an <see cref="EmulationException"/> naming the routine and CS:IP (image addresses). Meant for test
+    /// set-ups that may produce a state in which the original never gets there (a loop that only ends under a condition).
+    /// </summary>
+    public bool RunToRoutine(ushort imageSegment, ushort offset, double maxSeconds, long maxInstructions)
+    {
+        if (maxInstructions <= 0) throw new ArgumentOutOfRangeException(nameof(maxInstructions), maxInstructions, "budget must be positive");
+        long limit = Machine.Cpu.InstructionCount + maxInstructions;
+        bool exhausted = false;
+        bool reached = RunUntil(() => IsAt(imageSegment, offset), maxSeconds, () => exhausted = Machine.Cpu.InstructionCount >= limit);
+        if (!reached && exhausted) throw BudgetExceeded("run to", imageSegment, offset, maxInstructions);
+        return reached;
+    }
+
+    private bool RunUntil(Func<bool> condition, double maxSeconds, Func<bool>? abort = null)
     {
         // A stop at the current position would end the run at once; step past it first.
         if (condition()) Machine.Run(1);
         // RunFor also reports the time limit as Condition, so test the condition itself afterwards.
-        Machine.RunFor(maxSeconds, _ => condition());
+        Machine.RunFor(maxSeconds, _ => condition() || (abort?.Invoke() ?? false));
         return !Machine.Exited && condition();
     }
+
+    /// <summary>Default instruction budget of <see cref="Call"/> (that of <see cref="PcMachine.CallFar"/>).</summary>
+    public const long DefaultCallBudget = 50_000_000;
 
     // ------------------------------------------------------------------ machine snapshot (docs/analyse/REFEMU.md)
 
@@ -200,9 +220,42 @@ public sealed class OriginalProgram
         return p;
     }
 
-    /// <summary>Calls a far routine given by its image address; returns DX:AX.</summary>
+    /// <summary>
+    /// Calls a far routine given by its image address; returns DX:AX. A call that does not return within
+    /// <see cref="DefaultCallBudget"/> instructions stops with an <see cref="EmulationException"/>.
+    /// </summary>
     public (ushort Ax, ushort Dx) Call(ushort imageSegment, ushort offset, params ushort[] args) =>
-        Machine.CallFar(Segment(imageSegment), offset, args);
+        CallWithBudget(DefaultCallBudget, imageSegment, offset, args);
+
+    /// <summary>
+    /// <see cref="Call"/> with an instruction budget (#222): when the routine has not returned after
+    /// <paramref name="maxInstructions"/> instructions, an <see cref="EmulationException"/> names the routine and CS:IP
+    /// (image addresses) where it stopped.
+    /// </summary>
+    public (ushort Ax, ushort Dx) CallWithBudget(long maxInstructions, ushort imageSegment, ushort offset, params ushort[] args)
+    {
+        if (maxInstructions <= 0) throw new ArgumentOutOfRangeException(nameof(maxInstructions), maxInstructions, "budget must be positive");
+        long start = Machine.Cpu.InstructionCount;
+        try
+        {
+            return Machine.CallFar(Segment(imageSegment), offset, args, maxInstructions);
+        }
+        catch (EmulationException) when (!Machine.Exited && Machine.Cpu.InstructionCount - start >= maxInstructions)
+        {
+            throw BudgetExceeded("call of", imageSegment, offset, maxInstructions);
+        }
+    }
+
+    /// <summary>The error of an exhausted budget: routine and CS:IP as image addresses (prefix <see cref="BudgetMessage"/>).</summary>
+    private EmulationException BudgetExceeded(string what, ushort imageSegment, ushort offset, long budget)
+    {
+        var c = Machine.Cpu;
+        return new EmulationException(
+            $"{BudgetMessage} of {budget} for the {what} {imageSegment:X4}:{offset:X4}, stopped at CS:IP {(ushort)(c.Cs - Machine.LoadSegment):X4}:{c.IP:X4} (image)");
+    }
+
+    /// <summary>Start of the message of an exhausted instruction budget.</summary>
+    public const string BudgetMessage = "Instruction budget exhausted";
 
     public byte ReadByte(ushort dsOffset) => Machine.Mem.Read8(Dgroup, dsOffset);
     public ushort ReadWord(ushort dsOffset) => Machine.Mem.Read16(Dgroup, dsOffset);

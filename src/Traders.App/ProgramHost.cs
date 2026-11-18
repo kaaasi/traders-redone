@@ -89,7 +89,9 @@ public sealed class ProgramHost
                 Output<Core.Harvest.HarvestEvent>(e => Harvest!.Apply(e)), Output<Core.Trade.TradeEvent>(e => Trade!.Apply(e)),
                 Output<Core.Field.FieldEvent>(e => Extra!.Apply(e)), Output<Core.Extra.ExtraEvent>(e => Extra!.Apply(e))));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
-        Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
+        // Lane woche part 1 binds calls 26, 29 and 30 in the core; the host wires their scenes in part 3 and halts at
+        // call 26 until then (round8: false).
+        Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip, round8: false);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
             Week.Handlers);
 

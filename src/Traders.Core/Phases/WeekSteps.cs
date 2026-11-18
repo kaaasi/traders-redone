@@ -18,8 +18,10 @@ namespace Traders.Core.Phases;
 /// call 18 (robot phase 1C68:000B). The end check (call 19, 20B3:0005, round 7 lane ende) is always bound up to its decision;
 /// where the game ends it is pending unless its rest is given. With a handler for call 18 (the host's deviation that skips
 /// the robot phase, or an oracle) the week runs on through calls 19–21 to the trade (call 23); with the handlers of round 7
-/// given (lane ende part 3) through the trade and the extra phase (call 24, 1DEF:000C) to Fat Mike (call 26, 1F63:000F, R8).
-/// A handler left out stays pending: the machine stops at its call.
+/// given (lane ende part 3) through the trade and the extra phase (call 24, 1DEF:000C) to Fat Mike (call 26, 1F63:000F); with
+/// the handlers of round 8 given (lane woche part 1) through Fat Mike, the gem price (call 27), the purchase (call 29,
+/// 08CF:0004) and the contest (call 30, 1F63:0B03) to the next week. A handler left out stays pending: the machine stops at
+/// its call.
 /// </summary>
 public sealed class WeekSteps
 {
@@ -50,8 +52,14 @@ public sealed class WeekSteps
     /// <summary>Call number of the extra phase 1DEF:000C (round 7 lane zusatz).</summary>
     public const int ExtraCall = 24;
 
-    /// <summary>Call number of Fat Mike 1F63:000F, the first call step not ported in round 7 (R8).</summary>
+    /// <summary>Call number of Fat Mike 1F63:000F (round 8 lane fatmike).</summary>
     public const int FatMikeCall = 26;
+
+    /// <summary>Call number of the purchase 08CF:0004 (round 8 lane einkauf).</summary>
+    public const int PurchaseCall = 29;
+
+    /// <summary>Call number of the contest 1F63:0B03 (round 8 lane fatmike).</summary>
+    public const int ContestCall = 30;
 
     /// <param name="planting">Output of the planting phase (scene and sound) and its controls.</param>
     /// <param name="files">Lengths of the picture files (picture table of 186C:0002).</param>
@@ -64,10 +72,14 @@ public sealed class WeekSteps
     /// <param name="endRest">Handler of the whole call 19 where the game ends (null = pending, "game over").</param>
     /// <param name="trade">Handler for call 23 (null = pending).</param>
     /// <param name="extra">Handler for call 24 (null = pending).</param>
+    /// <param name="fatMike">Handler for call 26 (null = pending).</param>
+    /// <param name="purchase">Handler for call 29 (null = pending).</param>
+    /// <param name="contest">Handler for call 30 (null = pending).</param>
     public WeekSteps(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
         IWeekStepHandler? catastrophes = null, IWeekStepHandler? incidents = null, IWeekStepHandler? stations = null,
         IWeekStepHandler? harvest = null, IWeekStepHandler? robots = null, IWeekStepHandler? endRest = null,
-        IWeekStepHandler? trade = null, IWeekStepHandler? extra = null)
+        IWeekStepHandler? trade = null, IWeekStepHandler? extra = null, IWeekStepHandler? fatMike = null,
+        IWeekStepHandler? purchase = null, IWeekStepHandler? contest = null)
     {
         devices ??= KeyboardOnlyDevices.Instance;
         Report = new ReportStep(devices);
@@ -85,6 +97,9 @@ public sealed class WeekSteps
         if (robots is not null) Handlers[RobotCall] = robots;
         if (trade is not null) Handlers[TradeCall] = trade;
         if (extra is not null) Handlers[ExtraCall] = extra;
+        if (fatMike is not null) Handlers[FatMikeCall] = fatMike;
+        if (purchase is not null) Handlers[PurchaseCall] = purchase;
+        if (contest is not null) Handlers[ContestCall] = contest;
         End = new EndCheckStep(endRest);
         Handlers[EndCall] = End;
     }
@@ -107,7 +122,7 @@ public sealed class WeekSteps
     /// <summary>
     /// Call numbers with a handler that run in every week (call 4 only up to week 2 or without catastrophes, unless its rest
     /// is given; call 19 only where the game goes on, unless its rest is given), without the optional handlers of calls 9,
-    /// 11, 16, 18, 23 and 24.
+    /// 11, 16, 18, 23, 24, 26, 29 and 30.
     /// </summary>
     public static IReadOnlyList<int> ScreenCalls { get; } =
         [ReportCall, CatastropheGuardStep.Call, WeekPlanningStep.BeforePlantingCall, PlantingCall, EndCall, WeekPlanningStep.BeforeTradeCall];
@@ -117,6 +132,9 @@ public sealed class WeekSteps
 
     /// <summary>Call numbers of the screen steps of round 7 that the constructor binds when their handler is given.</summary>
     public static IReadOnlyList<int> Round7Calls { get; } = [TradeCall, ExtraCall];
+
+    /// <summary>Call numbers of the screen steps of round 8 that the constructor binds when their handler is given.</summary>
+    public static IReadOnlyList<int> Round8Calls { get; } = [FatMikeCall, PurchaseCall, ContestCall];
 
     /// <summary>
     /// Call 3 with the core part of the picture load 186C:0002(DS:08CE) of the report: the picture table entry and DS:09C8
