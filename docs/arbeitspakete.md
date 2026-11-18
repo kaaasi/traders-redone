@@ -93,6 +93,10 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   im Review (Aufruf 30 ausgelassen, Wochenzähler doppelt erhöht, Handler 26 doppelt getaktet, Host hält an 26, Host ignoriert Ausgang B „Partie zu Ende“ → rot, R8PL-5d);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1, 2 und 3 (#208 liegt in `tests/Traders.Tests/App/**`).
+- **Status:** PR #230 (Draft, Claude Opus). Teile 1 und 2 fertig (18.11.2026): `WeekScreens` bindet 26, 29, 30 (`FatMike`,
+  `Purchase`, `Contest`); #222 `OriginalProgram.CallWithBudget`/`RunToRoutine(…, maxInstructions)`; Mehrrundenprobe
+  `MultiWeekRound7DifferentialTests` erweitert (Wochen 0–4, alle Aufrufe außer 18 im Port, 26/29/30 Bild für Bild, `DS:4BC2`
+  gesetzt, Käufe). Host hält bis Teil 3 an 26 (`round8: false`).
 
 ## 1 `fatmike` – Fat Mike `1F63:000F` und Wettbewerb `1F63:0B03`
 
