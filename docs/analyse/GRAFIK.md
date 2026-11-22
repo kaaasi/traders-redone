@@ -142,7 +142,7 @@ berücksichtigt den Kopf auf `main`; `PlanarAtlas` übernimmt den Kopf als die e
   Korrektur zu §4: +10 zeigt direkt auf die Rückschreibsätze (4 Byte je Seite, ab `DS:33E4 + 8·i`), nicht auf Zeiger; Bildzeiger
   (VGA) werden über `0000:5101` normalisiert; Sicherungspuffer liegen im RAM-Atlas.
 - **P3 #60** (maskierter Blit `35DF` bzw. Maske füllen `3CE8` mit w < 4 und ungeradem Maskenoffset): statisch nicht erreichbar.
-  Einzige Aufrufer sind `0A96:0798/07E4` (Typ 3/4); die zehn Einreihaufrufe von `0A96:013B/01AA` (`0535`, `0609`, `0EDE`, `192D`,
-  `1C68` zweimal, `1DEF` zweimal, `20B3`, `1F63`-Grenze) übergeben alle feste Breiten 7…59 (7, 8, 0Fh, 10h, 20h, 38h, 3Bh).
+  Einzige Aufrufer sind `0A96:0798/07E4` (Typ 3/4); die neun Einreihaufrufe von `0A96:013B/01AA` (`0535`, `0609`, `0EDE`, `192D`,
+  `1C68` zweimal, `1DEF`, `20B3`, `1F63:0004` am Rand von `1E7E`; `tools/callgraph.py`, R9 `sammel`, #75 R3S-B2) übergeben alle feste Breiten 7…59 (7, 8, 0Fh, 10h, 20h, 38h, 3Bh).
   Aufrufe über Funktionszeiger auf `013B/01AA` gibt es nicht (Suche nach den Adressen in der Disassemblierung).
 
