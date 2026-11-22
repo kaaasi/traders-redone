@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md), Runde 8: [archiv/runde-8.md](archiv/runde-8.md)).
 
-## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go offen)
+## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go Nutzer 22.11.2026)
 
 **Ziel:** Zwischenziel **„Gesamtpartie ohne Roboterkampf“** (Nutzer 11.11.2026): Der Host spielt mit Roboter-Schalter
 (R7 F3 = A) vom Hauptmenü über eine neue Partie Woche für Woche bis zum Ende (Zielvermögen oder F10), zeigt die Endbilder
@@ -174,15 +174,15 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
 
 5 → 1 / 2 / 3 / 4 (in der Reihenfolge der Freigabe) → 0. Gesamtreview am Rundenende (ChatGPT/Codex), danach Abschluss.
 
-## Offene Fragen an den Nutzer (R9)
+## Entscheidungen des Nutzers (R9)
 
-- **G1 – Go** für Runde 9 mit diesem Plan, sobald das Plan-Review vorliegt (Befunde arbeitet die Leitstelle ein)?
-- **F1 – Quelle der OPL2-Synthese (Spur 4):** **A** eigene Umsetzung nach dem YM3812-Datenblatt (kein Fremdcode, mehr Aufwand,
-  Klangtreue nur per Hörvergleich) · **B** C#-Übertragung eines freien Emulators mit freizügiger Lizenz (z. B. `ymfm`,
-  BSD-3-Clause; Lizenzhinweis in `THIRD_PARTY.md`, kein NuGet-Paket). Empfehlung der Leitstelle: **B** (bewährte Genauigkeit,
-  weniger Risiko).
-- **F2 – Fortsetzungen:** Dürfen Spuren 2 `effekte` und 3 `musik` je bis zu zwei Fortsetzungen über das Limit von 3 hinaus
-  bekommen (Größe von `FXDRIVER` unbekannt)? Empfehlung: ja.
+- **G1 = Go** (Nutzer 22.11.2026): Runde 9 mit diesem Plan, sobald das Plan-Review vorliegt (Befunde arbeitet die Leitstelle ein).
+- **F2 = ja** (Nutzer 22.11.2026): Spuren 2 `effekte` und 3 `musik` dürfen je bis zu zwei Fortsetzungen über das Limit von 3
+  hinaus bekommen.
+- **F1 – Quelle der OPL2-Synthese (Spur 4): offen.** **A** eigene Umsetzung nach dem YM3812-Datenblatt · **B** C#-Übertragung
+  eines freien Emulators mit freizügiger Lizenz (z. B. `ymfm`, BSD-3-Clause; Lizenzhinweis in `THIRD_PARTY.md`, kein
+  NuGet-Paket). Empfehlung der Leitstelle: **B**. Spur 4 startet erst nach F1.
+- **Plan-Review:** geplanter Lauf `Traders R9 plan-review` (Opus, Nutzer 22.11.2026), Ablage `reviews/2026-11-22-r9-plan.md`.
 
 ## Fahrplan
 
