@@ -11,9 +11,11 @@ using Traders.Core.State;
 using Traders.Presentation.Disasters;
 using Traders.Presentation.Events;
 using Traders.Presentation.Extra;
+using Traders.Presentation.FatMike;
 using Traders.Presentation.Field;
 using Traders.Presentation.Harvest;
 using Traders.Presentation.Menus;
+using Traders.Presentation.Purchase;
 using Traders.Presentation.Stations;
 using Traders.Presentation.Trade;
 using Traders.Presentation.Week;
@@ -25,15 +27,15 @@ namespace Traders.App;
 /// <summary>
 /// The program as the host runs it, without a window: the core's program machine (main 1777:000C with all its call steps and
 /// the week loop with the ported steps of <see cref="WeekSteps"/> and <see cref="WeekScreens"/>: rule steps, week report,
-/// catastrophes, week planning, planting phase, week incidents, stations, harvest, trade, extra phase) and the scenes on the
-/// graphics layers – main menu, week report, catastrophes, planting field, incidents, stations, harvest, trade, extra phase
-/// (decisions F1 = B of R6 and R7). Per display frame the host calls <see cref="Frame"/> with the held keys; the core
-/// processes the frame exactly once (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. The week
-/// runs from the balance up to the harvest; with the robot switch on (default, decision F3 = A of R7) the host skips the robot
-/// phase 1C68 (call 18, <see cref="RobotPhaseSkip"/>) and the week goes on through the end check (call 19), the trade (call
-/// 23) and the extra phase (call 24) to the first call still pending, Fat Mike (call 26, 1F63:000F); without it the machine
-/// halts at call 18 as the core does. <see cref="Halt"/> then names the call, or
-/// tells that the game is over where the end check ends it (its end screens are pending, F1 = B of R7).
+/// catastrophes, week planning, planting phase, week incidents, stations, harvest, trade, extra phase, Fat Mike, purchase,
+/// contest) and the scenes on the graphics layers – main menu, week report, catastrophes, planting field, incidents, stations,
+/// harvest, trade, extra phase, Fat Mike with the contest, purchase (decisions F1 = B of R6 and R7). Per display frame the host
+/// calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once (<see cref="ProgramMachine.Advance"/>),
+/// the scenes play the events of that frame. Every call of the week but the robot phase 1C68 (call 18) is ported; with the
+/// robot switch on (default, decision F3 = A of R7) the host skips it (<see cref="RobotPhaseSkip"/>) and plays week after week
+/// without a halt until the end check (call 19) ends the game (<see cref="GameOver"/>, its end screens are pending, F1 = B of
+/// R7); without the switch the machine halts at call 18 as the core does. <see cref="Halt"/> then names the call or tells that
+/// the game is over.
 /// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
 /// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
 /// scene its numbers (2295:0001 is an output call there), and the core reads the texts from it.
@@ -87,11 +89,15 @@ public sealed class ProgramHost
             new WeekScreenOutputs(Output<Core.Disasters.DisasterEvent>(e => Disasters!.Apply(e)),
                 Output<Core.Stations.StationEvent>(e => Stations!.Apply(e)), Output<Core.Field.FieldEvent>(e => Harvest!.Apply(e)),
                 Output<Core.Harvest.HarvestEvent>(e => Harvest!.Apply(e)), Output<Core.Trade.TradeEvent>(e => Trade!.Apply(e)),
-                Output<Core.Field.FieldEvent>(e => Extra!.Apply(e)), Output<Core.Extra.ExtraEvent>(e => Extra!.Apply(e))));
+                Output<Core.Field.FieldEvent>(e => Extra!.Apply(e)), Output<Core.Extra.ExtraEvent>(e => Extra!.Apply(e)),
+                // Fat Mike (call 26) and the contest (call 30) on one scene, the contest's second field round 0609:0080 on
+                // its field (ContestField left out); the purchase (call 29) on its own scene
+                FatMikeField: Output<Core.Field.FieldEvent>(e => FatMike!.Apply(e)),
+                FatMike: Output<Core.FatMike.FatMikeEvent>(e => FatMike!.Apply(e)),
+                Purchase: Output<Core.Purchase.PurchaseEvent>(e => Purchase!.Apply(e)),
+                PurchaseField: Output<Core.Field.FieldEvent>(e => Purchase!.Apply(e))));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
-        // Lane woche part 1 binds calls 26, 29 and 30 in the core; the host wires their scenes in part 3 and halts at
-        // call 26 until then (round8: false).
-        Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip, round8: false);
+        Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
         Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
             Week.Handlers);
 
@@ -124,6 +130,8 @@ public sealed class ProgramHost
         Harvest = new HarvestScene(Layers, Core, pictures);
         Trade = new TradeScene(Layers, Core, pictures);
         Extra = new ExtraScene(Layers, Core, pictures);
+        FatMike = new FatMikeScene(Layers, Core, pictures);
+        Purchase = new PurchaseScene(Layers, Core, pictures);
     }
 
     /// <summary>The handlers of the calls 4, 9, 11, 16 (round 6), 23 and 24 (round 7) and their inputs.</summary>
@@ -150,6 +158,15 @@ public sealed class ProgramHost
     /// <summary>Scene of the extra phase (call 24); the core's events reach it while the frame is processed.</summary>
     public ExtraScene Extra { get; }
 
+    /// <summary>
+    /// Scene of Fat Mike (call 26) and of the contest (call 30, with its second field round); the core's events reach it while
+    /// the frame is processed.
+    /// </summary>
+    public FatMikeScene FatMike { get; }
+
+    /// <summary>Scene of the purchase (call 29); the core's events reach it while the frame is processed.</summary>
+    public PurchaseScene Purchase { get; }
+
     /// <summary>The ported call steps of the week loop.</summary>
     public WeekSteps Week { get; }
 
@@ -160,11 +177,17 @@ public sealed class ProgramHost
     public FieldScene Field { get; }
 
     /// <summary>
-    /// Notice when the week loop halts at a call step that is not ported yet (null while it runs): the step, its routine and
-    /// the week.
+    /// True once the end check (call 19) has ended the game (exit B of R7 F1): the machine halts at the call, whose end screens
+    /// are not ported.
+    /// </summary>
+    public bool GameOver => Machine.WeekMachine is { Status: PhaseStatus.Blocked, NextStep: WeekSteps.EndCall };
+
+    /// <summary>
+    /// Notice when the week loop halts (null while it runs): that the game is over (<see cref="GameOver"/>), or the call step
+    /// that is not ported yet (call 18 without the robot switch) with its routine; with the week.
     /// </summary>
     public string? Halt => Machine.WeekMachine is { Status: PhaseStatus.Blocked } w
-        ? w.NextStep == WeekSteps.EndCall
+        ? GameOver
             ? $"week {w.Week}: game over (end check {WeekLoop.Step(w.NextStep)}); the end screens are not ported yet - halted"
             : $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
         : null;
@@ -215,6 +238,8 @@ public sealed class ProgramHost
             Harvest.NextFrame(held);
             Trade.NextFrame(held);
             Extra.NextFrame(held);
+            FatMike.NextFrame(held);
+            Purchase.NextFrame(held);
             Report.NextFrame();
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
             Machine.DrainEvents();

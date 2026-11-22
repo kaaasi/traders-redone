@@ -168,8 +168,8 @@ public sealed class WeekScreens
     /// (call 30) to the next week (DS:4B9A + 1) – up to where the end check ends the game.
     /// </summary>
     /// <param name="round8">
-    /// False leaves calls 26, 29 and 30 pending (the machine stops at Fat Mike, as up to round 7): for a host whose scenes of
-    /// round 8 are not wired yet.
+    /// False leaves calls 26, 29 and 30 pending (the machine stops at Fat Mike, as up to round 7): for counter-checks of a
+    /// host that halts at call 26 (the host wires the scenes of round 8 since lane woche part 3).
     /// </param>
     public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
         IWeekStepHandler? robots = null, bool round8 = true) =>
