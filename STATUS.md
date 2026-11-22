@@ -1,6 +1,6 @@
 # Portierungsstatus
 
-Stand: 22.11.2026 · Runde 8 (Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host): alle Spuren gemergt (`main` `4aa1566`), Gesamtreview offen; danach Runde 9
+Stand: 22.11.2026 · Runde 8 (Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host) abgeschlossen ([archiv/runde-8.md](docs/archiv/runde-8.md)); nächste: Runde 9
 
 **Legende:** ✅ portiert und gegen Original geprüft · 🟢 portiert, Tests grün, Originalvergleich
 (RefEmu) noch offen · 🟡 in Arbeit · 🔍 analysiert, noch nicht portiert · ⬜ offen
@@ -16,11 +16,11 @@ Stand: 22.11.2026 · Runde 8 (Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host
 | M4 | Menü & Setup | ✅ | Programmablauf `1777:000C` mit Start `0DFD`, Lader `186C`, Code-Abfrage `21FD:0687` (ohne Anzeige, F1 = B); Menüs `192D` im Kern, erste Szene pixel- und zufallsgenau je Bild gegen den RefEmu; neue Partie `0E31`; Host zeigt Menüszene und holt Bilder bildweise nach (#111); Mehrrundenprobe mit Mensch über vier Wochen (R4). Gesamtreview R4 nach Fix R4G-1 erledigt; Windows-Start per Hand bestätigt (Nutzer 13.11.2026), Menü-Neuzeichnen #126 behoben (#127) |
 | M5 | Anbau | ✅ | Anbauphase `0609:0004`/`03E0` im Kern mit Szene Bild für Bild gegen den RefEmu, Computerzug `135D` mit Helfern `0609:074D`/`100F`, Wochenplanung `11A3` (beide Durchgänge), Warteschleife `21FD:0004`; Wochenschritte 3/6/8/21 und Wächter 4 im Port, Mehrrundenprobe über vier Wochen mit Mensch; Host spielt Bilanz und Anbau, Halt an Aufruf 9 (F1 = A). Gesamtreview R5 „Ja“ |
 | M6 | Produktion & Wetter | ✅ | Wetter `21FD:021F`, Produktion `22A3:0003`, Schwund `22A3:026B` (R3); Ernte zeigen und einsammeln `22A3:02D3` im Kern und als Szene Bild für Bild gegen den RefEmu (R6 Spur 0). Gesamtreview R6 „Ja“ |
-| M7 | Fat Mike / Schnecken | 🟢 | Fat Mike `1F63:000F` (23 Routinen) und Wettbewerb `1F63:0B03` mit zweiter Feldrunde `0609:0080` im Kern Bild für Bild, Szene pixelgenau (R8 Spur 1); Aufrufe 26 und 30 eingebunden (Spur 0). Gesamtreview R8 offen |
+| M7 | Fat Mike / Schnecken | ✅ | Fat Mike `1F63:000F` (23 Routinen) und Wettbewerb `1F63:0B03` mit zweiter Feldrunde `0609:0080` im Kern Bild für Bild, Szene pixelgenau (R8 Spur 1); Aufrufe 26 und 30 eingebunden (Spur 0). Gesamtreview R8 „Ja“ |
 | M8 | Auktion / Handel | ✅ | Handel `0B9F:0002` mit Bildschirm `0C29` und Handels-KI `141D` im Kern Bild für Bild, Szene pixelgenau (R7 Spuren 1/2); Aufrufe 19 (Endprüfung `20B3:0005` bis zur Entscheidung), 23, 24 (Zusatzphase `1DEF:000C`, Spur 3) eingebunden, Mehrrundenprobe Wochen 0–4; Host überspringt Aufruf 18 (abschaltbare Abweichung, Nutzer 16.11.2026) und spielt bis Fat Mike. Gesamtreview R7 „Ja“ |
 | M9 | Rakete & Stationen / Piraten | ✅ | Stationswahl, Raketenflug, Piraten, Stationsertrag `1B03:0009` (44 Routinen) im Kern Bild für Bild, Pixel über die Regelseite `Pixels/`, Szene pixelgenau (R6 Spur 3, F1 = B). Gesamtreview R6 „Ja“ |
 | M10 | Ereignisse & Katastrophen | ✅ | Katastrophen mit Sternvorführung `111D:0009` (Regelseite) und Wochenereignisse `17CB:0005` im Kern und als Szene (R6 Spuren 1/2); Aufrufe 4, 9, 11, 16 eingebunden, Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18. Gesamtreview R6 „Ja“ |
-| M11 | Wochenbilanz & Einkauf | 🟢 | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf `08CF:0004` (41 Routinen) im Kern Bild für Bild, Szene pixelgenau (R8 Spur 2), Aufruf 29 eingebunden; Host spielt Woche für Woche (Roboterphase übersprungen). Gesamtreview R8 offen |
+| M11 | Wochenbilanz & Einkauf | ✅ | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf `08CF:0004` (41 Routinen) im Kern Bild für Bild, Szene pixelgenau (R8 Spur 2), Aufruf 29 eingebunden; Host spielt Woche für Woche (Roboterphase übersprungen). Gesamtreview R8 „Ja“ |
 | M12 | Roboterkampf | ⬜ | |
 | M13 | Ende / Rang | 🟡 | Endprüfung `20B3:0005` bis zur Entscheidung (R7); Abend-/Endbilder offen (F1 = B, R9) |
 | M14 | Ton | ⬜ | |
