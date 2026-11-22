@@ -12,6 +12,7 @@
 #   3. mandatory run without data (TR_REQUIRE_GAMEDATA=1, TRADERS_GAMEDATA pointing nowhere) - MUST fail; otherwise
 #      original-data tests silently run empty. Every test that passes here must also pass in run 2: a test that passes
 #      without data but is skipped in run 2 carries [GameDataFact]/[GameDataTheory] needlessly and would no longer run in CI
+# Hang limit per test run: TR_HANG_TIMEOUT (default 20m, dotnet test --blame-hang-timeout); a hang counts as an error.
 # The original files come from the private repo kaaasi/traders-referenz (tools/claude/fetch-reference.sh original).
 # Prints the table for PR and handoff at the end. Exit code 0 only if every step is green and run 3 fails.
 set -uo pipefail
@@ -71,16 +72,42 @@ lauf() {   # lauf <id> <name> <must_fail 0|1> <env...>   (TRX results in $LOG/tr
   local id="$1" name="$2" soll="$3"; shift 3
   local log="$LOG/test-$id.txt" rc=0
   schritt "Tests: $name"
-  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
-  local zeilen; zeilen=$(grep -E "^(Passed|Failed)! " "$log" || true)
-  summe() { printf '%s\n' "$zeilen" | grep -oE "$1: +[0-9]+" | grep -oE "[0-9]+" | awk '{s+=$1} END {print s+0}'; }
-  if [ "$soll" -eq 1 ]; then
+  # --blame-hang-timeout: a hanging test aborts the run as an error naming the test (TR_HANG_TIMEOUT, default 20m);
+  # console logger "normal": the log shows during the run which tests have finished (the table still comes from the TRX).
+  env "$@" dotnet test "$SLN" -c Release --no-build --logger trx --logger "console;verbosity=normal" \
+    --blame-hang-timeout "${TR_HANG_TIMEOUT:-20m}" --blame-hang-dump-type none \
+    --results-directory "$LOG/trx-$id" >"$log" 2>&1 || rc=$?
+  # Table source is the TRX (Counters of every test project), not the console output.
+  local trx; trx=$(python3 - "$LOG/trx-$id" <<'PY'
+import glob, sys, xml.etree.ElementTree as ET
+p = f = s = n = 0
+for fn in glob.glob(sys.argv[1] + "/*.trx"):
+    for e in ET.parse(fn).iter():
+        if e.tag.endswith("Counters"):
+            p += int(e.get("passed", 0)); f += int(e.get("failed", 0)) + int(e.get("error", 0)) + int(e.get("timeout", 0)) + int(e.get("aborted", 0))
+            s += int(e.get("total", 0)) - int(e.get("executed", 0)); n += 1   # skipped = total - executed
+print(p, f, s, n)
+PY
+)
+  local np nf ns nt; read -r np nf ns nt <<<"$trx"
+  # An aborted run (hang limit, test host crash, "Test Run Aborted", missing TRX) is an error in EVERY run, the mandatory
+  # run included, and shows in the table row: the hanging test never reaches the TRX counters, so the row would look green.
+  local abgebrochen=0
+  if grep -q -E "^\s*Test Run Aborted" "$log" || [ "$nt" -ne "$PROJEKTE" ]; then abgebrochen=1; fi
+  if [ "$abgebrochen" -eq 1 ]; then
+    # all tests running at the abort (the block ends at the first empty line)
+    sed -n '/The test running when/,/^\s*$/p' "$log" | head -40
+    grep -E "hang timeout|inactivity time|Test Run Aborted" "$log" | head -5
+    [ "$nt" -eq "$PROJEKTE" ] || echo "  Ergebnisse für $nt von $PROJEKTE Testprojekten"
+    fehler "$name abgebrochen (Hang-Limit, Testhost-Absturz oder fehlende Ergebnisse)"
+    [ "$nf" -ge 1 ] || nf=1   # never an all-green row for an aborted run
+  elif [ "$soll" -eq 1 ]; then
     [ "$rc" -ne 0 ] || fehler "$name lief grün – Originaldaten-Tests laufen ohne Daten still leer"
   else
-    [ "$rc" -eq 0 ] || { grep -E "^\s*Failed [A-Za-z]" "$log" | head -20; fehler "$name"; }
-    [ "$(printf '%s\n' "$zeilen" | grep -c .)" -eq "$PROJEKTE" ] || { tail -20 "$log"; fehler "$name: Ergebnisse für weniger als $PROJEKTE Testprojekte"; }
+    [ "$rc" -eq 0 ] || { grep -E -A1 "^\s*Failed [A-Za-z]" "$log" | head -30; fehler "$name"; }
   fi
-  ZEILEN_TAB+=("| $name | $(summe Passed) | $(summe Failed) | $(summe Skipped) |")
+  local marke=""; [ "$abgebrochen" -eq 1 ] && marke=" – **abgebrochen**"
+  ZEILEN_TAB+=("| $name$marke | $np | $nf | $ns |")
 }
 if [ "$DATA" -eq 1 ]; then lauf mit "Mit Originaldaten (TR_REQUIRE_GAMEDATA=1)" 0 TR_REQUIRE_GAMEDATA=1; fi
 if [ "$QUICK" -eq 0 ] || [ "$DATA" -eq 0 ]; then lauf ohne "Ohne Originaldaten (TR_SKIP_GAMEDATA=1)" 0 TR_SKIP_GAMEDATA=1 TRADERS_GAMEDATA="$LOG/keine-originaldaten"; fi

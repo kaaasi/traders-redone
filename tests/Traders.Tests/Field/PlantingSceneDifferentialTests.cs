@@ -243,8 +243,9 @@ public class PlantingSceneDifferentialTests
                 Status, (_, s) => s.Status()));
         }
         Assert.True(H.Draws(new H.Case("0204 draws", [(0x1582, 0)], Status, (_, _) => { })));
-        // second round: the typed notice runs its own 060D calls (replaced as well), then the list holds only 0609:1F04; its
-        // unused entry bytes still hold the notice's entries, which the scene does not draw ([APPROX]), so only the pixels count
+        // second round: the typed notice runs its own 060D calls (replaced as well; the scene plays it since #217 via
+        // FieldScene.NoticeSteps), then the list holds only 0609:1F04; its unused entry bytes still hold the notice's entries,
+        // which the scene does not draw, so the lists are not compared and only the pixels count
         H.AssertReadOnly(new H.Case("0204 second round", [(0x1582, 1)], Status, (_, s) => s.Status()), compareList: false);
     }
 
