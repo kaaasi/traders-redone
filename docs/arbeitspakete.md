@@ -139,6 +139,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   und `CS:0415`–`042C` nach jedem Tick gleich, auch über Effektgrenzen; Gegenprobe im Review (Ring ohne Überlauf, `a` statt `b`
   gelesen, Musik nicht gestoppt, Ton aus ignoriert, Zufallszustand `03F8` zwischen Effekten zurückgesetzt → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xF60 Byte; bis zu zwei Fortsetzungen über das Limit (F2 = ja).
+- **Status:** in Arbeit (Claude, Draft-PR `paket/effekte`, Base `8cc9935`).
 
 ## 3 `musik` – CMF-Wiedergabe nach `FXDRIVER.EXE`
 
