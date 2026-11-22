@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Gesamtreview offen
+## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Abschluss nach Gesamtreview „Ja“
 
 - Prozess: Plan (PR #214, Plan-Review „Nein“ R8PL-1–5 eingearbeitet, Delta-Prüfung Leitstelle).
 - Spur 3 `sammel` (PR #216): Alias-Regel im Architekturcheck (#193), Handel Wochen 1/3 Bild für Bild (#205), Host-Bildtest
@@ -11,7 +11,8 @@
   Machbarkeitsprüfung/Abbruchzähler für Differenztests (Anlass: Endlosschleife im Testaufbau von #217); #228.
 - Spur 0 `woche` (PR #230): Aufrufe 26, 29, 30 eingebunden, Mehrrundenprobe Wochen 0–4, Host spielt Woche für Woche; Rechenbudget
   im RefEmu (#222).
-- Prozess: Nachtrag (PR #224, Aufräumen vor v1.0 im Fahrplan). 1204 Tests grün mit Originaldaten.
+- Prozess: Nachtrag (PR #224, Aufräumen vor v1.0 im Fahrplan), Status (PR #233). 1204 Tests grün mit Originaldaten.
+- Gesamtreview (Codex) „Ja“: keine neuen Fehler; Testlücke Endlosfall `1F63:08DA` → #236. M7 und M11 abgeschlossen.
 
 ## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview „Ja“
 
