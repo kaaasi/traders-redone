@@ -179,9 +179,9 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
 - **G1 = Go** (Nutzer 22.11.2026): Runde 9 mit diesem Plan, sobald das Plan-Review vorliegt (Befunde arbeitet die Leitstelle ein).
 - **F2 = ja** (Nutzer 22.11.2026): Spuren 2 `effekte` und 3 `musik` dürfen je bis zu zwei Fortsetzungen über das Limit von 3
   hinaus bekommen.
-- **F1 – Quelle der OPL2-Synthese (Spur 4): offen.** **A** eigene Umsetzung nach dem YM3812-Datenblatt · **B** C#-Übertragung
-  eines freien Emulators mit freizügiger Lizenz (z. B. `ymfm`, BSD-3-Clause; Lizenzhinweis in `THIRD_PARTY.md`, kein
-  NuGet-Paket). Empfehlung der Leitstelle: **B**. Spur 4 startet erst nach F1.
+- **F1 = B** (Nutzer 22.11.2026): OPL2-Synthese in Spur 4 als C#-Übertragung eines freien Emulators mit freizügiger Lizenz
+  (z. B. `ymfm`, BSD-3-Clause; Lizenzhinweis und Lizenztext in `THIRD_PARTY.md`, kein NuGet-Paket). Nach v1.0 durch eine eigene
+  Umsetzung ersetzen (Erweiterung E8, `PORTIERUNGSPLAN.md` §6).
 - **Plan-Review:** geplanter Lauf `Traders R9 plan-review` (Opus, Nutzer 22.11.2026), Ablage `reviews/2026-11-22-r9-plan.md`.
 
 ## Fahrplan
