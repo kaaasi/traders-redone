@@ -183,6 +183,12 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   belegt ein Test einen Fehler, `spur-wartet` mit Befund.
 - **Abnahme:** alle drei Läufe grün; #49, #75, #220, #221, #236 geschlossen, #76 bis auf R3H-2 (`Fixes #…` bzw. Kommentar).
 - **Abhängigkeiten:** keine. Früh mergen.
+- **Status (Claude Sonnet, 22.11.2026, PR #242):** alle Teile erledigt, `pruefen.sh --schnell` grün (1206 Tests). #236: lange Suche
+  beidseitig im Gleichschritt, Endlosfall original-seitig über das Befehlsbudget begrenzt (Port-Schleife ohne Prüfnaht nicht
+  begrenzbar, kein Produktivcode). #221: Alias je Block, Gegenprobe rot. #220: Absatz auf Stand R8. #75: B2 (neun Aufrufe) und B3
+  (getauschte Seitenzahlen, `index << 2` wird sichtbar) erledigt; **B1 offen**: die Seitenfüllungen von `0B67:0002` sind im Port
+  nicht beobachtbar (`InitializeVga` löscht den ganzen VRAM zuvor), eine Prüfnaht in `src/Traders.Vga/` wäre nötig. #76: R3H-1 (Rückrichtung,
+  seit R4 in `check-architecture.py`) und R3H-3 (Wortlaut `27C6:00AC`) standen schon auf `main`. #49: N1, N2 erledigt, N3 nur dokumentiert.
 
 ## Zuständigkeit gemeinsamer Dateien in R9
 
