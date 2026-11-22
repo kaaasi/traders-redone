@@ -157,6 +157,9 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Wiederholen aus, Fahrt ohne Schrittweite → rot).
 - **Abhängigkeiten:** keine (Tonbefehle aus 2 über eine schmale eigene Schnittstelle; bei Konflikt rebased die später gemergte
   Spur). Größe unbekannt (Treiber 756h Absätze resident inkl. Puffer); bis zu zwei Fortsetzungen über das Limit (F2).
+- **Stand** (Spur, 22.11.2026): PR #244 (Draft). Teil 1 fertig – `FxDriverImage` (LZEXE-Entpacker, Gegenprobe gegen den
+  RefEmu), `tools/fxdriver.py`, `[ORIGINAL-FX]` in `tools/abdeckung.py`, Befund `analyse/FXDRIVER.md` (Stückformat „A.H.“,
+  Takt, Tempo, Wiederholen, Fahrt, AdLib-Schicht). Teil 2 (Player) offen.
 
 ## 4 `klang` – OPL2-Synthese und Tonausgabe im Host
 

@@ -721,6 +721,15 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
 | **Summe** | **0x28DC0** | **891** | **534** | **521** | **521** |
 
+### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)
+
+| Offset | C# (`[ORIGINAL-FX]`) | Differenztest | Status |
+|---|---|---|---|
+| `427D` | `src/Traders.Assets/FxDriverImage.cs` | `MusicFxDriverImageTests.cs` | ✅ |
+| `4287` | `src/Traders.Assets/FxDriverImage.cs` | `MusicFxDriverImageTests.cs` | ✅ |
+
+2 Offsets mit Marker, davon 2 mit Differenztest.
+
 <!-- abdeckung:ende -->
 
 ## 6. Runden und Spuren
