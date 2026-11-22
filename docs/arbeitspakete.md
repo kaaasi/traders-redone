@@ -120,6 +120,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Pixelziel 2/6 vertauscht, `4B9A` nicht erhöht, Bilanz mit Parameter 1, Rang bei Gleichstand falsch, ein Bild doppelt
   verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xCE4 Byte.
+- **Status:** Teil 1 in Arbeit (Claude, Branch `paket/ende`, Base `8cc9935`).
 
 ## 2 `effekte` – Tonsteuerung `218B`/`21A7` und Effektmaschine
 
