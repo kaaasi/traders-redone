@@ -588,3 +588,13 @@ Namen in `src/Traders.Core/FatMike/FatMikePhase.cs` und `ContestPhase.cs`. Beleg
 | `1014` | W[4] | `PlayerColours` | rgb12 der Spielerfarben 0Ch…0Fh, mit denen `11AD` nach dem Blinken zurücksetzt | G – `11AD` |
 | `37E0` | Fernzeiger[2] | `SecondRoundLines` (`Planting`) | Zeilen des Hinweises der zweiten Feldrunde (Tabelle `37CC`, Einträge 5 und 6) | G – `0609:0204` |
 | `43B2` / `43FA` / `1582` | B[4] / B[4] / B | – | `0609:0080`: Gewinner Modus 5 und Kaufmerker 1, übrige Modus 6; `1582` = 1 | G – `0609:0080` |
+
+## Runde 9, Spur `effekte` (Tonsteuerung `218B`/`21A7`)
+
+Ergänzt §9 (`0910`, `10A3`, `10A5`, `10A9`); Befund `docs/routines/218B_21A7_ton.md`, Port `src/Traders.Core/Sound/SoundControl.cs`.
+
+| DS-Offset | Breite | Name (Port) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `1094` | Fernzeiger[3] (Offset, Segment) | `PieceNames` | Dateinamen der Stücke (ab `DS:10AB`), Fn 00h bekommt BX:CX = Segment:Offset | G – `218B:00DC`; P |
+| `10A0` | B[3] s | `PieceDisk` | Diskette je Stück, nur an die Dateisuche `186C:0A6C` (im Port entfallen) | G – `218B:00BA` |
+| `10A5` | W | `MusicPlaying` | bleibt gesetzt, wenn `0153` den Treiber stehend findet (Fn 12h → 0) | G – `218B:0167`; P |
