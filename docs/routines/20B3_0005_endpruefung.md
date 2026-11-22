@@ -17,9 +17,9 @@
    ungleich (`jnz`) → Abbruch; bei gleichem High-Wort Low-Wort `cmp dx,[08F4]`, kleiner (`jc`) → nächster Spieler, sonst Abbruch.
    Also **32 Bit vorzeichenlos**, Vermögen ≥ Ziel bricht ab; `DS:37AA` bleibt beim ersten solchen Spieler stehen.
 3. `20B3:0041`: `DS:37AA` = 4 **und** Tastenbyte `DS:3D8B` (= Tastentabelle `DS:3D47` + 44h) = 0 → AL = 0, Rückkehr (`004F`).
-4. Sonst ab `20B3:0053` der **Rest (nicht portiert, F1 = B):** `20B3:008E` (Endbild), `218B:0094(2, 3)` (Ton),
-   `20B3:0525`, `20B3:0863`, `inc word [DS:4B9A]` (`0071`), `0825:07C4`, `0825:000A(0)`, `27C6:00D2` (Warten auf Taste),
-   AL = 1.
+4. Sonst ab `20B3:0053` der **Rest:** `20B3:008E` (Endbild), `218B:0094(2, 3)` (Ton), `20B3:0525`, `20B3:0863`,
+   `inc word [DS:4B9A]` (`0071`), `0825:07C4`, `0825:000A(0)`, `27C6:00D2` (Warten auf Taste), AL = 1 – Befund
+   [20B3_008E_ende.md](20B3_008E_ende.md) (R9 Spur `ende`, `EndScreens`/`EndingStep`; Einbindung in Aufruf 19 Spur `partie`).
 
 Ein negatives Vermögen (Bit 31 gesetzt) ist vorzeichenlos riesig und beendet die Partie.
 
@@ -40,7 +40,7 @@ Entscheidung wird nur `06CB` gebraucht; alles ab `0053` gehört zu Ende/Abend (F
 ## Seiteneffekte in Reihenfolge
 
 Bis zur Entscheidung: kein Zufall, keine Uhr, keine Grafik, kein Ton; Eingabe nur als Lesen der Tastentabelle (`DS:3D8B`).
-Der Rest (Endbilder, Ton, Wochenzähler, Bilanz, Tastenwarten) ist ausstehend.
+Der Rest (Endbilder, Ton, Wochenzähler, Bilanz, Tastenwarten): [20B3_008E_ende.md](20B3_008E_ende.md).
 
 **Vorbedingung R7P-2:** Die Entscheidung hängt an `DS:2F06`, das erst `06CB` in `0005` schreibt. `IsPending` rechnet deshalb
 auf einer Kopie des Datensegments (`EndCheck.Ends`); bei Ende bleibt der Zustand unverändert, und ein Rest (z. B. das Orakel)
