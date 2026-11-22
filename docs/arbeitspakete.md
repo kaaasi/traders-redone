@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md)).
 
-## Aktuelle Runde: 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (Plan Leitstelle 17.11.2026, Go Nutzer 17.11.2026)
+## Aktuelle Runde: 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (Plan Leitstelle 17.11.2026, Go Nutzer 17.11.2026; alle Spuren gemergt 22.11.2026, Gesamtreview offen)
 
 **Ziel:** Die Woche läuft im Port vollständig durch: Fat Mike `1F63:000F` (Aufruf 26), Einkauf `08CF:0004` (29) und
 Wettbewerb/Auswertung `1F63:0B03` (30); Aufruf 27 (Edelsteinkurs `08CF:11D7`) liegt seit R3 vor, der Wochenzähler `DS:4B9A`++
@@ -93,13 +93,9 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   im Review (Aufruf 30 ausgelassen, Wochenzähler doppelt erhöht, Handler 26 doppelt getaktet, Host hält an 26, Host ignoriert Ausgang B „Partie zu Ende“ → rot, R8PL-5d);
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1, 2 und 3 (#208 liegt in `tests/Traders.Tests/App/**`).
-- **Status:** PR #230 (Draft, Claude Opus). Teile 1 und 2 fertig (18.11.2026): `WeekScreens` bindet 26, 29, 30 (`FatMike`,
-  `Purchase`, `Contest`); #222 `OriginalProgram.CallWithBudget`/`RunToRoutine(…, maxInstructions)`; Mehrrundenprobe
-  `MultiWeekRound7DifferentialTests` erweitert (Wochen 0–4, alle Aufrufe außer 18 im Port, 26/29/30 Bild für Bild, `DS:4BC2`
-  gesetzt, Käufe). Teil 3 fertig (22.11.2026): `ProgramHost` verdrahtet `FatMikeScene` (26, 30 samt zweiter Feldrunde) und
-  `PurchaseScene` (29), spielt mit Schalter ohne Halt bis „game over“ (`GameOver`, Ausgang B); Host-Bildtest Woche 0 über
-  die Wochengrenze bis Ende Aufruf 8 in Woche 1 (`HostExtraPhaseFrameDifferentialTests`), Host-Lauf bis zur Endprüfung
-  Woche 1 mit Ziel 0 (`ProgramHostTests`).
+- **Status:** **gemergt 22.11.2026** (PR #230, Claude Opus, Fortsetzungen 1 von 3; Review `reviews/2026-11-22-r8-woche.md` „Ja“,
+  `--schnell` der Leitstelle auf `main` + PR grün): Aufrufe 26, 29, 30 in `WeekSteps`/`WeekScreens`, Mehrrundenprobe Wochen 0–4
+  mit allen Aufrufen außer 18 im Port, Host spielt Woche für Woche (Hinweis bei Ausgang B); #222 erledigt.
 
 ## 1 `fatmike` – Fat Mike `1F63:000F` und Wettbewerb `1F63:0B03`
 
@@ -122,7 +118,8 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
   pixelgenau; Gegenprobe im Review (eine Ziehung ausgelassen oder vertauscht, Buchung mit Vorzeichenfehler, Merker `4BC2` nie
   gesetzt, ein Bild doppelt verarbeitet, zweite Feldrunde ohne `1582` = 1 bzw. ohne Tippbilder → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0x1400 Byte; bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
-- **Status:** Teile 1 und 2 fertig (Kern `1F63:000F` mit allen 23 Routinen, Handler `FatMikeStep`; Wettbewerb `0B03`/`11AD`, zweite Feldrunde `0609:0080` samt `1582`-Zweig von `0204`, Handler `ContestStep`; Differenztests; PR #217). Teil 3 fertig: Szene `FatMikeScene` (`1F63:104B` neu belegt), Aufrufe 26 und 30 Bild für Bild im Gleichschritt mit dem Original (Bildzähler, Datensegment, Bild); Spur fertig – Review.
+- **Status:** **gemergt 17.11.2026** (PR #217, Claude Opus, Fortsetzungen 2 von 3; Review `reviews/2026-11-17-r8-fatmike.md` „Ja“,
+  `--schnell` der Leitstelle auf `main` + PR grün): Kern, Wettbewerb, zweite Feldrunde, Szene `FatMikeScene`; P3 R8F-1 → #228 (erledigt mit #223).
 
 ## 2 `einkauf` – Einkauf `08CF:0004`
 
@@ -141,11 +138,8 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Abnahme:** alle drei Läufe grün; Einkauf im Gleichschritt mit dem RefEmu, Szene pixelgenau; Gegenprobe im Review (Kauf ohne
   Geldprüfung, Vorrat ohne Obergrenze, Countdown nicht abgezogen, ein Bild doppelt verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größte Spur der Runde (≈ 0x1830 Byte); bis zu zwei Fortsetzungen über das Limit von 3 (F1 = ja).
-- **Status:** PR #218 (Draft, Claude Opus). Teil 1 fertig (17.11.2026): Befund `08CF_0004_einkauf.md` mit allen 41 Routinen,
-  Regeln in `Purchase/PurchaseRules.cs`, Differenztests auf erzeugten Zuständen und Wochen 0–3. Teil 2 fertig (17.11.2026):
-  `Purchase/Purchase.cs` Bild für Bild, `PurchaseStep` (Aufruf 29), Gleichschritt Woche 0 und 2 mit Menschen. Teil 3 fertig
-  (17.11.2026): Szene `Presentation/Purchase/PurchaseScene.cs`, im Gleichschritt je Bild pixelgenau (VRAM, DAC, Bildstart) und
-  jede Befehlsliste des Ablaufs gleich, Gegenproben der Szene. Alle Teile fertig, Review.
+- **Status:** **gemergt 17.11.2026** (PR #218, Claude Opus, Fortsetzungen 2 von 3; Review `reviews/2026-11-17-r8-einkauf.md` „Nein“ R8E-1 P2,
+  R8E-2/-3 P3 → Fixlauf Sonnet, Merge von `main` Haiku, Delta-Prüfung Leitstelle): Kern, Bild für Bild, Szene `PurchaseScene`.
 
 ## 3 `sammel` – P3-Sammlung aus R7 (Sonnet)
 
@@ -170,7 +164,9 @@ zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte; bestätigt im Plan-Review
 - **Teile:** Zeitlimit je Test (`--blame-hang-timeout`, `TR_HANG_TIMEOUT`, Vorgabe 20 min) in `tools/pruefen.sh` und
   `build.yml`; Fortschritt in der Logdatei; Regel „Machbarkeitsprüfung oder Abbruchzähler“ in `routines/_vorlage.md` und
   `prozess/zusammenarbeit.md` §5 Nr. 1; Empfehlung eigener Zufallsstartwert je Testfall. Modell Sonnet, Erstreview Opus.
-- **Status:** PR #223 (Claude, läuft). Rechenbudget im RefEmu (`OriginalProgram.Call`/`RunToRoutine`) → Spur 0 Teil 1 (#222).
+- **Status:** **gemergt 22.11.2026** (PR #223, Claude Sonnet; Erstreview `reviews/2026-11-17-r8-zeitlimit.md` „Nein“ R8Z-1 P1,
+  Fixlauf, Nachprüfung `reviews/2026-11-22-r8-zeitlimit-nachpruefung.md` „Ja“): Zeitlimit 20 min je Test, Abbruch in jedem Lauf
+  ein Fehler und in der Tabelle sichtbar, Regel in `routines/_vorlage.md` und `prozess/zusammenarbeit.md` §5 Nr. 1; #228 erledigt.
 
 ## Zuständigkeit gemeinsamer Dateien in R8
 

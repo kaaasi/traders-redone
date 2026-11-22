@@ -1,10 +1,17 @@
 # Zwischenstände
 
-## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (ab 17.11.2026) · läuft
+## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Gesamtreview offen
 
 - Prozess: Plan (PR #214, Plan-Review „Nein“ R8PL-1–5 eingearbeitet, Delta-Prüfung Leitstelle).
 - Spur 3 `sammel` (PR #216): Alias-Regel im Architekturcheck (#193), Handel Wochen 1/3 Bild für Bild (#205), Host-Bildtest
   mit Roboter-Schalter und Zusatzphase (#208).
+- Spur 1 `fatmike` (PR #217): Fat Mike `1F63:000F` und Wettbewerb `1F63:0B03` samt zweiter Feldrunde im Kern und als Szene.
+- Spur 2 `einkauf` (PR #218): Einkauf `08CF:0004` (41 Routinen) Bild für Bild, Szene pixelgenau; Grenzfall Bargeld = Preis (R8E-1).
+- `zeitlimit` (PR #223): Zeitlimit 20 min je Test in `tools/pruefen.sh` und CI, Abbruch gilt in jedem Lauf als Fehler; Regel
+  Machbarkeitsprüfung/Abbruchzähler für Differenztests (Anlass: Endlosschleife im Testaufbau von #217); #228.
+- Spur 0 `woche` (PR #230): Aufrufe 26, 29, 30 eingebunden, Mehrrundenprobe Wochen 0–4, Host spielt Woche für Woche; Rechenbudget
+  im RefEmu (#222).
+- Prozess: Nachtrag (PR #224, Aufräumen vor v1.0 im Fahrplan). 1204 Tests grün mit Originaldaten.
 
 ## Runde 7 – Endprüfung, Handel, Handels-KI, Zusatzphase (16.–17.11.2026) · letzte Spur `b335163`, Abschluss nach Gesamtreview „Ja“
 
