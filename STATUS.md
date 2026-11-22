@@ -195,7 +195,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0825:08EB` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:096D` | [0825_0813_vermoegen.md](docs/routines/0825_0813_vermoegen.md) | `src/Traders.Core/Rules/Wealth.cs` | `WealthProductionDifferentialTests.cs` | ✅ |
 | `0825:09C9` | [0825_000A_wochenbilanz.md](docs/routines/0825_000A_wochenbilanz.md) | `src/Traders.Core/Week/Report.cs`, `src/Traders.Presentation/Week/ReportScene.cs` | `WeekReportSceneDifferentialTests.cs`, `ReportDifferentialTests.cs` | ✅ |
-| `08CF:0004` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/Purchase.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
+| `08CF:0004` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/Purchase.cs` | `ProgramHostTests.cs`, `PurchaseFrameDifferentialTests.cs` | ✅ |
 | `08CF:0082` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/PurchaseRules.cs` | `PurchaseRulesDifferentialTests.cs` | ✅ |
 | `08CF:00CD` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/Purchase.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
 | `08CF:01BD` | [08CF_0004_einkauf.md](docs/routines/08CF_0004_einkauf.md) | `src/Traders.Core/Purchase/Purchase.cs` | `PurchaseFrameDifferentialTests.cs` | ✅ |
@@ -545,7 +545,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1DEF:06F8` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:0751` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:07AD` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
-| `1F63:000F` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
+| `1F63:000F` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `ProgramHostTests.cs`, `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:01B2` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0305` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:0390` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
@@ -555,7 +555,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1F63:079A` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:08DA` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:0A8A` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
-| `1F63:0B03` | [1F63_0B03_wettbewerb.md](docs/routines/1F63_0B03_wettbewerb.md) | `src/Traders.Core/FatMike/ContestPhase.cs` | `ContestDifferentialTests.cs`, `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
+| `1F63:0B03` | [1F63_0B03_wettbewerb.md](docs/routines/1F63_0B03_wettbewerb.md) | `src/Traders.Core/FatMike/ContestPhase.cs` | `ProgramHostTests.cs`, `ContestDifferentialTests.cs`, `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:0C82` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0D24` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0E5C` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |

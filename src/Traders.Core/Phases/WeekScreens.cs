@@ -1,11 +1,13 @@
 using Traders.Core.Disasters;
 using Traders.Core.Events;
 using Traders.Core.Extra;
+using Traders.Core.FatMike;
 using Traders.Core.Field;
 using Traders.Core.Harvest;
 using Traders.Core.Input;
 using Traders.Core.Menus;
 using Traders.Core.Pixels;
+using Traders.Core.Purchase;
 using Traders.Core.Startup;
 using Traders.Core.State;
 using Traders.Core.Stations;
@@ -49,9 +51,18 @@ public sealed record WeekScreenInputs(
     Func<ExtraFrame>? ExtraFrame = null);
 
 /// <summary>
-/// Receivers of the output events of the screen steps of rounds 6 and 7 (scenes, sound); the incidents are drained. A receiver
-/// of the trade (call 23) or the extra phase (call 24) left out discards that step's events (the step still runs in the core).
+/// Receivers of the output events of the screen steps of rounds 6 to 8 (scenes, sound); the incidents are drained. A receiver
+/// of the trade (call 23), the extra phase (call 24), Fat Mike (call 26), the purchase (call 29) or the contest (call 30) left
+/// out discards that step's events (the step still runs in the core).
 /// </summary>
+/// <param name="FatMikeField">Field-layer requests of Fat Mike (call 26) and of the contest's own scene (call 30).</param>
+/// <param name="FatMike">The requests of segment 1F63 (calls 26 and 30).</param>
+/// <param name="ContestField">
+/// Requests of the contest's second field round 0609:0080; null = <paramref name="FatMikeField"/> (the field of Fat Mike's scene,
+/// as in the frame harness of lane fatmike).
+/// </param>
+/// <param name="Purchase">The purchase's own requests (call 29).</param>
+/// <param name="PurchaseField">Field and frame requests of the purchase (call 29).</param>
 public sealed record WeekScreenOutputs(
     Action<DisasterEvent> Disasters,
     Action<StationEvent> Stations,
@@ -59,7 +70,12 @@ public sealed record WeekScreenOutputs(
     Action<HarvestEvent> Harvest,
     Action<TradeEvent>? Trade = null,
     Action<FieldEvent>? ExtraField = null,
-    Action<ExtraEvent>? Extra = null);
+    Action<ExtraEvent>? Extra = null,
+    Action<FieldEvent>? FatMikeField = null,
+    Action<FatMikeEvent>? FatMike = null,
+    Action<FieldEvent>? ContestField = null,
+    Action<PurchaseEvent>? Purchase = null,
+    Action<FieldEvent>? PurchaseField = null);
 
 /// <summary>
 /// The handlers of the screen steps of round 6 for <see cref="WeekSteps"/> (lane ernte part 3): call 4 beyond its guard
@@ -69,7 +85,10 @@ public sealed record WeekScreenOutputs(
 /// draw page DS:40DE[DS:082E] of that moment, the stations' picture DS:08D0, font and text buffer – are made anew at every
 /// call (<see cref="DeferredStep"/>). Round 7 (lane ende part 3) adds call 23 (<see cref="TradeStep"/> of lane handel with the
 /// trading computer <see cref="TradeComputer"/> of lane handelski) and call 24 (<see cref="ExtraStep"/> of lane zusatz), also
-/// made anew at every call (the frame of 1DEF:000C and the text buffer are those of the moment).
+/// made anew at every call (the frame of 1DEF:000C and the text buffer are those of the moment). Round 8 (lane woche part 1)
+/// adds call 26 (<see cref="FatMikeStep"/> of lane fatmike), call 29 (<see cref="PurchaseStep"/> of lane einkauf) and call 30
+/// (<see cref="ContestStep"/> of lane fatmike with its second field round on <see cref="ContestFieldHost"/>), made anew at
+/// every call on the text buffer of the moment.
 /// </summary>
 public sealed class WeekScreens
 {
@@ -98,6 +117,17 @@ public sealed class WeekScreens
         var extra = outputs.Extra ?? (_ => { });
         Extra = new DeferredStep(c => new ExtraStep(new ExtraHost(extraField, extra,
             (offset, segment) => FarString(c.State, Texts(), offset, segment), devices), inputs.Files, inputs.ExtraFrame?.Invoke()));
+        var fatMikeField = outputs.FatMikeField ?? (_ => { });
+        var fatMike = outputs.FatMike ?? (_ => { });
+        var contestField = outputs.ContestField ?? fatMikeField;
+        Func<ushort, ushort, byte[]> Far(StepContext c) => (offset, segment) => FarString(c.State, Texts(), offset, segment);
+        FatMike = new DeferredStep(c => new FatMikeStep(new FatMikeHost(fatMikeField, fatMike, Far(c), devices), inputs.Files));
+        var purchase = outputs.Purchase ?? (_ => { });
+        var purchaseField = outputs.PurchaseField ?? (_ => { });
+        Purchase = new DeferredStep(c => new PurchaseStep(
+            new PurchaseHost(purchase, purchaseField, new TextBufferMemory(c.State, inputs.TextBuffer), devices), inputs.Files));
+        Contest = new DeferredStep(c => new ContestStep(new FatMikeHost(fatMikeField, fatMike, Far(c), devices,
+            new ContestFieldHost(contestField, Far(c), devices, c.State, inputs.Files)), inputs.Files));
     }
 
     /// <summary>Rest of call 4 behind its guard (a <see cref="CatastropheStep"/> per call).</summary>
@@ -118,18 +148,33 @@ public sealed class WeekScreens
     /// <summary>Call 24, the extra phase 1DEF:000C (an <see cref="ExtraStep"/> per call).</summary>
     public DeferredStep Extra { get; }
 
+    /// <summary>Call 26, Fat Mike 1F63:000F (a <see cref="FatMikeStep"/> per call).</summary>
+    public DeferredStep FatMike { get; }
+
+    /// <summary>Call 29, the purchase 08CF:0004 (a <see cref="PurchaseStep"/> per call).</summary>
+    public DeferredStep Purchase { get; }
+
+    /// <summary>Call 30, the contest 1F63:0B03 (a <see cref="ContestStep"/> per call).</summary>
+    public DeferredStep Contest { get; }
+
     /// <summary>Events of the running or last week incidents since the last drain (empty before the first call).</summary>
     public List<IncidentEvent> DrainIncidentEvents() =>
         (Incidents.Current as WeekIncidentsStep)?.Incidents?.DrainEvents() ?? [];
 
     /// <summary>
     /// The week steps with these handlers bound: everything up to call 16 runs in the core, call 18 (robot phase) is the
-    /// first pending call unless <paramref name="robots"/> stands in for it; then the week runs on through the end check
-    /// (call 19), the trade (call 23) and the extra phase (call 24) to Fat Mike (call 26, the first call still pending).
+    /// only pending call unless <paramref name="robots"/> stands in for it; then the week runs on through the end check
+    /// (call 19), the trade (call 23), the extra phase (call 24), Fat Mike (call 26), the purchase (call 29) and the contest
+    /// (call 30) to the next week (DS:4B9A + 1) – up to where the end check ends the game.
     /// </summary>
+    /// <param name="round8">
+    /// False leaves calls 26, 29 and 30 pending (the machine stops at Fat Mike, as up to round 7): for counter-checks of a
+    /// host that halts at call 26 (the host wires the scenes of round 8 since lane woche part 3).
+    /// </param>
     public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
-        IWeekStepHandler? robots = null) =>
-        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots, trade: Trade, extra: Extra);
+        IWeekStepHandler? robots = null, bool round8 = true) =>
+        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots, trade: Trade, extra: Extra,
+            fatMike: round8 ? FatMike : null, purchase: round8 ? Purchase : null, contest: round8 ? Contest : null);
 
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =
