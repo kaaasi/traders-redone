@@ -129,11 +129,32 @@ Aufgerufen über die Kette des Zeitgebers von `T.EXE` (jeder vierte Tick, TON §
 - Grundwerte der Operatoren (`2DE1`): melodisch DS:1536/1544 (= `5D46`/`5D54`, Modulator/Träger), Schlagzeug DS:1552 … 1598
   (= `5D62` … `5DA8`).
 
-## 6. Für den Port (Teil 2)
+## 6. Port (Teil 2)
 
-- Tabellen (F-Zahlen, Operator- und Stimmtabellen, Grundwerte, Schlagmasken) aus `FxDriverImage` lesen, nie als Tabelle im
-  Code; Marker `[ORIGINAL-FX]` mit den Abbild-Offsets oben.
-- Zustand des Treibers bleibt über Stücke erhalten (`[4A]`, Kanalzustand nur bei Fn 01h gelöscht, Fahrt nur bei 03h/05h).
-- Vergleich gegen `OplTrace` je Tonbefehl relativ zum Befehlstick (Vorgaben R9PL-2); Takt = Aufruf von CS:1262.
-- Offen: genaue Lage der Musikticks zur Zeitgeberkette im Spiel (TON §2 nennt jeden vierten Tick, im Differenztest von Teil 2
-  zu bestätigen); Weg ohne AdLib (`[42]` ≠ 0, Lautsprecher) entfällt.
+`src/Traders.Audio/Music/FxMusicDriver*.cs` überträgt den Treiber als Zustandsmaschine auf einer Kopie seines Datensegments
+(aus `FxDriverImage`, Offsets wie im Original); Tabellen werden dort gelesen, nie in den Code kopiert. Ausgabe: Folge der
+OPL-Schreibungen (`Written`); der Host ruft `Tick()` je Aufruf von CS:1262, solange `TimerActive`.
+
+| Original (Abbild) | Port | Anmerkung |
+|---|---|---|
+| `4630` Start des Treibers (CS:1D10) | `Install` | Fahrt aus, Schritt 1, Karte an 388h angenommen, SetMode(1); `[APPROX]` Statusprüfung |
+| `427D` Verteiler, `4324` Fn 06h, `296B`/`3403` Karte, `2993` Grundzustand | `Call`, `FindCard`, `Detect`, `WarmInit` | Registerfolge des Timer-Tests ohne Statuslesen |
+| `3657` Laden, `4150` Start, `4236` Stopp | `Load`, `Start`, `Stop` | Lautsprecher (`1CA4`) entfällt |
+| `3B82` Takt, `3BED` Kanal, `405C` Ende, `40B4` Fahrt | `Tick`, `PlayChannel`, `End` | Ablauf §4 |
+| `2928` Schreiben, `2A3F`, `2AA1`, `2AF5`, `2B1D` | `Out`, `SetMode`, `SetWaveSelect`, `SetPitchRange`, `SetGlobalParameters` | |
+| `2B45`, `2BFA`, `2C79`, `2CBB`, `2D75` | `SetVoiceTimbre`, `SetVoiceVolume`, `SetVoicePitch`, `NoteOn`, `NoteOff` | |
+| `2DE1`, `2F55`, `2EFA`, `3031` | `DefaultOperators`, `SetSlotFromBytes`, `StoreSlot` | Folge BD, 08, 40, C0, 60, 80, 20, E0 |
+| `307D`, `3151`, `3176`, `31D8`, `322B`, `327E`, `3326`, `337E` | `WriteLevel`, `WriteNoteSelect`, `WriteFeedback`, `WriteAttackDecay`, `WriteSustainRelease`, `WriteCharacter`, `WriteRhythm`, `WriteWave` | Register 40h, 08h, C0h, 60h, 80h, 20h, BDh, E0h |
+| `33C8`, `34AD` | `SetFrequency`, `Frequency` | A0h/B0h, Schatten `[194]` |
+
+**Differenztests** (`tests/Traders.Tests/Audio/Music*`, **P**): (a) Treiber im RefEmu und Port mit denselben int-64h-Aufrufen
+und Taktaufrufen (IRQ 0 maskiert, Takt = Aufruf von CS:1262): OPL-Schreibungen je Aufruf und Takt, Rückgaberegister,
+Datensegment (bis auf gesicherten `int 8`-Vektor `016A`–`016D` und DOS-Registerblock `017E`–`0191`) und Musterpuffer gleich – alle
+drei Stücke je ≥ 60 s mit den Merkern des Spiels, Vorspann bis zum Ende, Menü mit Wiederholen über den Umlauf, Stopp mitten in
+einer Zeile und Wechsel, Ausblenden bis zum Ende. (b) Spiel mit residentem Treiber (`runFxDriver`): alle int-64h-Aufrufe und
+Taktaufrufe aus `T.EXE` werden in den Port gespielt, die Schreibungen aus dem Treibercode je Ereignis verglichen – Vorspann
+beim Hochlauf über ≥ 60 s (das Spiel startet im Hauptmenü kein anderes Stück), Menü- und Endmusik über `218B:0094(1, 2)` bzw.
+`(2, 3)` je ≥ 60 s; dabei 1108…1113 Taktaufrufe in 61 s (jeder vierte Zeitgebertick, TON §2 bestätigt).
+
+Offen: Weg ohne AdLib (`[42]` ≠ 0, Lautsprecher) entfällt; nicht genutzte Funktionen (02h, 04h, 07h–0Fh, 13h, 14h, 16h, 17h,
+1Ch) sind nicht portiert und geben nur die Register zurück.

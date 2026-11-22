@@ -725,10 +725,46 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 
 | Offset | C# (`[ORIGINAL-FX]`) | Differenztest | Status |
 |---|---|---|---|
-| `427D` | `src/Traders.Assets/FxDriverImage.cs` | `MusicFxDriverImageTests.cs` | ✅ |
+| `2928` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `296B` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2993` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2A3F` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2AA1` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2AF5` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2B1D` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2B45` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2BFA` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2C79` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2CBB` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2D75` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2DE1` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2EFA` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `2F55` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3031` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `307D` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3151` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3176` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `31D8` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `322B` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `327E` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3326` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `337E` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `33C8` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3403` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `34AD` | `src/Traders.Audio/Music/FxMusicDriver.Adlib.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `3657` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `3B82` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `3BED` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `405C` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `40B4` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `4150` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `4236` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicGameDifferentialTests.cs` | ✅ |
+| `427D` | `src/Traders.Assets/FxDriverImage.cs`, `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs`, `MusicFxDriverImageTests.cs` | ✅ |
 | `4287` | `src/Traders.Assets/FxDriverImage.cs` | `MusicFxDriverImageTests.cs` | ✅ |
+| `4324` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
+| `4630` | `src/Traders.Audio/Music/FxMusicDriver.cs` | `MusicDriverDifferentialTests.cs` | ✅ |
 
-2 Offsets mit Marker, davon 2 mit Differenztest.
+38 Offsets mit Marker, davon 38 mit Differenztest.
 
 <!-- abdeckung:ende -->
 
