@@ -73,6 +73,22 @@ damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz.
 - **Tick `0000:0732`** (72,82 Hz): `0770` (Auftrag holen, Klangfolge aus der Tabelle starten), `0866`, `121C` (Stimmen
   fortschreiben, OPL-Register) – Inhalt nicht untersucht.
 
+### 4.1 Nachtrag R9, Spur `effekte`
+
+- **Teil 1 portiert** (`src/Traders.Core/Sound/SoundControl.cs`, Befund `docs/routines/218B_21A7_ton.md`): `218B` und `21A7` geben
+  `SoundCommand`s aus; `0153` lässt `10A5` stehen, wenn Fn 12h 0 meldet; `0002` übergibt den ersten Puffer mit dem unnormalisierten
+  Zeiger der Zuteilung, die übrigen normalisiert (Huge-Zeiger `0000:5079`).
+- **Vorarbeit Teil 2** (gelesen, **C**, noch ohne Probe): Die Effektmaschine arbeitet nur auf ihrem Codesegment (`DS` = `CS` =
+  Segment `0000`). Ring `CS:041B` (16 Plätze), Kopf `0417` (`0750`), Ende `0419` (`0770`), Starttabelle `0415` (aus
+  `CS:15B2`, `06FE`). `0770` holt je offenem Auftrag das niedrige Byte, liest über `[0415]+2·b` den Zeiger auf die Klangfolge,
+  deren erstes Wort Stimme (BL) und Vorrang (BH) nennt; Stimmenblöcke über die Zeigertabelle `CS:06C9` (Stimme 0…9, Stimme 9
+  Sonderfall), OPL-Kanalversatz `CS:06DD+v`. Ein Auftrag startet nur, wenn sein Vorrang ≥ `[Stimme+8]`. `0812` (Rücksetzen):
+  `03F0` = 0, Zufall `03F8` = 1234h, OPL 01h = 20h, 08h = 0, BDh = 0, alle Stimmen still (40h/43h+Kanal = 3Fh). `0866`
+  durchläuft die Stimmen 9…0 (`03EF`), Bytecode mit Sprungtabelle `CS:151E` (Befehle ≥ 80h, Ende > F0h), Unterroutinen über
+  `[Stimme+29h]`/`[+2Bh]`. OPL-Schreiben `0000:11FA` (AH = Register, AL = Wert), Zufall `0000:150E` (Befehl bei `0C81`).
+  Port-Idee: das Codesegment `0000` aus `T.EXE` als Speicherabbild laden und die Befehle darauf übertragen; Vergleich des ganzen
+  Datenbereichs `CS:03EC`–`06FD` plus Stimmenblöcke nach jedem Tick.
+
 ## 5. Für den Port (R10)
 
 - Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz). Der Kern löst nur Ereignisse
