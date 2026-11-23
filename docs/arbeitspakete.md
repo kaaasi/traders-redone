@@ -89,8 +89,9 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
 
 ## 0 `partie` – Gesamtpartie im Host, Einbindung Ende und Ton
 
-- **Teile:** (1) **Einbindung Ende:** `EndCheckStep` (Aufruf 19) ruft bei „Ende“ den Rest aus Spur 1 statt anzuhalten; Abbruchweg
-  B zurück nach `1777:000C`, Hauptmenü erneut. (2) **Einbindung Ton:** Tonbefehle aus Kern und Programmablauf (`ProgramSteps`
+- **Teile:** (1) **Einbindung Ende:** `EndCheckStep` (Aufruf 19) ruft bei „Ende“ den Rest aus Spur 1 statt anzuhalten; im Kern wie
+  das Original Abbruchweg B (`1777:017F` ruft die Woche, `0184` AL = 1) → Abbau `018C`; die Rückkehr ins Hauptmenü ist nur die
+  Host-Abweichung nach F3 = B (Standard an, mit Originalschalter Programmende). (2) **Einbindung Ton:** Tonbefehle aus Kern und Programmablauf (`ProgramSteps`
   Schritte 3–7, Ereignisse „sound call“ der Module, Tastenklick `21A7:0054(1, 16h)` aus den Szenen – `DrawHelpers.cs`,
   `FieldScene.Output.cs`, `StationScene.cs` –, bei laufender Musik mit Stopp und `DS:10A5` = 0 im Kern, R9PL-9) an Spur 2/3 anschließen; Host gibt über Spur 4 aus, Ton an/aus aus dem Menü
   (`DS:10A7`). (3) **Gesamtpartieprobe:** vom Hochlauf über Menü und neue Partie (ein Mensch, drei Computer, niedriges
@@ -105,7 +106,8 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
 - **Abnahme:** alle drei Läufe grün; Gesamtpartie im Gleichschritt bis ins Hauptmenü, Tonbefehle je Bild und OPL-Folge je
   Befehl relativ zum Befehlstick gleich; Host-Bildtest über das
   Ende; Gegenprobe im Review (Rest von 19 ausgelassen, Wochenzähler bei Ende nicht erhöht, Ton bei `10A7` = 0 trotzdem
-  ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende → rot); `check-architecture.py` grün.
+  ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende bzw. kehrt mit Standard nicht ins Hauptmenü zurück, mit Originalschalter
+  nicht bis zum Abbau → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
 - **Status (Leitstelle):** gestartet 23.11.2026 (geplanter Lauf `Traders R9 partie`, Opus) nach Merge von 1–5; mitzunehmen #253, #254, #256. Für #254 zusätzlich erlaubt: `src/Traders.Audio/Effects/EffectMachine*.cs` und `tests/Traders.Tests/Audio/Effects*` (Tick vom Aufrufer, gemeinsamer Zähler `DS:1180`).
 
@@ -246,6 +248,10 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
 - **F1 = B** (Nutzer 22.11.2026): OPL2-Synthese in Spur 4 als C#-Übertragung eines freien Emulators mit freizügiger Lizenz
   (z. B. `ymfm`, BSD-3-Clause; Lizenzhinweis und Lizenztext in `THIRD_PARTY.md`, kein NuGet-Paket). Nach v1.0 durch eine eigene
   Umsetzung ersetzen (Erweiterung E8, `PORTIERUNGSPLAN.md` §6).
+- **F3 = B** (Nutzer 23.11.2026): Nach dem Partie-Ende kehrt der Host standardmäßig ins Hauptmenü zurück – bewusste,
+  abschaltbare Host-Abweichung (Schalter wie `RobotPhaseSkip`); das Original beendet das Programm (Abbruchweg B: Aufruf `1777:017F`, Prüfung `0184` →
+  Abbau `018C`), der Kern bleibt originalgetreu. Spur 0: Abweichung in `src/Traders.App/Deviations/**`, Tests für beide
+  Einstellungen.
 - **Plan-Review** `reviews/2026-11-22-r9-plan.md` „Nein“ (Opus): P2 R9PL-1–3, P3 R9PL-4–9 eingearbeitet (Leitstelle
   22.11.2026; R9PL-3 entschieden: Marker `[ORIGINAL-FX]`, Tabellen zur Laufzeit, Werkzeugausgabe git-ignoriert); nur Plantext,
   daher Delta-Prüfung der Leitstelle statt Nachprüfung (vom Review so freigestellt).
