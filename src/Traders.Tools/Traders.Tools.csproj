@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Traders.Assets\Traders.Assets.csproj" />
+    <ProjectReference Include="..\Traders.Audio\Traders.Audio.csproj" />
   </ItemGroup>
 </Project>
