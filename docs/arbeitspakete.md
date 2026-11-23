@@ -126,6 +126,14 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Bild (`HostWholeGameFrameDifferentialTests`: Datensegment, `DS:10D2`, Bild, Tonbefehle je Bild) läuft mit vier Computern durch
   die Wochen 0–2 gleich, **blockiert** an den Endbildern (ab Bild ~1166 von Aufruf 19, vor dem Tastenwarten) und mit einem
   Menschen an 1B03:0101 (neue Stationen ein Bild zu spät, Spur stationen) – Tests übersprungen mit Grund, Details PR #259.
+  Fortsetzung 3 (23.11.2026): Befund (a) behoben – die Schriftlage `DS:3CA8`/`34A4` gehört den Ausgabeschichten; ohne sie im
+  Kern fand die Regelseite des Abends keine Schrift, schrieb keinen Text, und die Aufdeckung `20B3:069A` kopierte im Host die
+  Bildzellen statt der Blöcke am Text (ab Bild 1166 von Aufruf 19). Der Kern übernimmt sie jetzt mit dem Seitenstand zu Beginn von
+  Aufruf 19 (`WeekScreens.MirrorFont`, `[APPROX]` Host-Eingabe); Regressionstest `WeekScreensEndingTests`, keine Änderung in
+  `Presentation/Ending`. Die Gesamtpartieprobe läuft mit vier Computern in beiden Fällen (Ziel Woche 2 mit `--original-ende` bis
+  zum Programmende; F10 Woche 0 mit Standard zurück ins Hauptmenü) Bild für Bild gleich, Tastenwarten `27C6:00D2` eingeschlossen.
+  Teil 4: der Host spielt damit ohne Halt bis ins Hauptmenü bzw. mit `--original-ende` bis zum Abbau. Probe mit Mensch bleibt bis
+  zum Fixlauf `fix/stationen-0288` (#264) übersprungen (Befund (b), nicht in dieser Spur).
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 

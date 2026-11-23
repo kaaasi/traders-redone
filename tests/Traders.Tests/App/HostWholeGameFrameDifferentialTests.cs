@@ -20,7 +20,8 @@ namespace Traders.Tests.App;
 /// state DS:10D2, the data segment (outside <see cref="ProgramHostTests.Ignored"/>), the picture shown and the sound commands
 /// issued so far (<see cref="OriginalSoundRecorder"/>: int 64h, effect machine, timer callback; the key clicks of the scenes
 /// included) are equal. The game ends at the end check (call 19) by the target or by F10; the end screens run frame by frame
-/// up to their key wait (no key pressed before it), the next key ends them, the week loop returns AL = 1. With <c>--original-ende</c> main goes to
+/// up to their key wait 27C6:00D2 (no key pressed before it; there the host polls its first time, data segment, picture and
+/// sound compared once more), RETURN ends them, the week loop returns AL = 1. With <c>--original-ende</c> main goes to
 /// its teardown 1777:018C like the original (data segment, picture and every sound command up to the program's exit equal);
 /// with the default the host goes back to the main menu where the original tears down (host deviation R9 F3 = B; the sound
 /// commands of the teardown are the original's, the main menu follows).
@@ -31,6 +32,9 @@ public class HostWholeGameFrameDifferentialTests
     private static string Dir => TestGameData.DosDir;
 
     private const ushort RetraceSegment = 0x0D73, RetraceEntry = 0x00D3, RetraceEnd = 0x00F7;
+
+    /// <summary>The any-key wait 27C6:00D2 of the end screens: it polls the make counter DS:115D without a retrace wait.</summary>
+    private const ushort WaitKeySegment = 0x27C6, WaitKeyEntry = 0x00D2;
 
     /// <summary>Key presses in the main menu by menu pass: player 1 human, play, confirm controls.</summary>
     private static readonly (int Passes, byte Key)[] HumanMenuPlan = [(3, MenuKeys.F1), (6, MenuKeys.Enter), (9, MenuKeys.Enter)];
@@ -60,20 +64,16 @@ public class HostWholeGameFrameDifferentialTests
         F10,
     }
 
-    /// <summary>Why the whole-game probes are skipped for now (lane partie, continuation 2; handover in PR #259).</summary>
-    private const string EndScreensDiffer =
-        "blocked: end screens differ at host level from retrace 1166 (week 0) / 1181 (week 2) of call 19, before the key wait " +
-        "(shown page x 140, y 20: original 07, host 09) - PR #259";
-
+    /// <summary>Why the probe with a human is skipped for now (lane partie; fix run fix/stationen-0288, #264).</summary>
     private const string NewStationsLate =
-        "blocked: with a human, week 2: the core reports 0A69:0288 of 1B03:0101 (new stations) one frame after the original " +
-        "(lane stationen) - PR #259";
+        "blocked until #264 (fix/stationen-0288) is merged: with a human, week 2: the core reports 0A69:0288 of 1B03:0101 " +
+        "(new stations) one frame after the original - PR #259";
 
     private sealed record Outcome(ProgramHost Host, OriginalProgram Original, Dictionary<(int Week, int Call), int> Frames,
         int Clicks, int Commands);
 
     /// <summary>
-    /// Probe 1777:000C, 1777:01F8, 20B3:0005, 21A7:0054, 218B:0094 (skipped: <see cref="EndScreensDiffer"/>) – the whole game to the
+    /// Probe 1777:000C, 1777:01F8, 20B3:0005, 21A7:0054, 218B:0094 – the whole game to the
     /// target with four computers: weeks 0 and 1 with all
     /// their ported calls, week 2 (with the contest) up to its end check, which ends the game (target 0 since the end check of
     /// week 1); end screens, the end music 218B:0094(2, 3), the key, the teardown 1777:018C and the program's exit with
@@ -81,7 +81,7 @@ public class HostWholeGameFrameDifferentialTests
     /// Counter-checks (local, review): the rest of call 19 left out, DS:4B9A not incremented at the end, a click with DS:10A7 = 0,
     /// the host holding at the end → red.
     /// </summary>
-    [GameDataFact(Skip = EndScreensDiffer)]
+    [GameDataFact]
     public void Whole_game_to_the_target_in_week_2_runs_frame_by_frame_with_its_sounds_to_the_teardown()
     {
         var r = Play(EndBy.Target, endWeek: 2, returnToMenu: false, human: false);
@@ -100,12 +100,12 @@ public class HostWholeGameFrameDifferentialTests
     }
 
     /// <summary>
-    /// Probe 20B3:0005, 21A7:0054 (skipped: <see cref="EndScreensDiffer"/>) – four computers, the game ended with F10 at the end
+    /// Probe 20B3:0005, 21A7:0054 – four computers, the game ended with F10 at the end
     /// check of week 0 (no player at the target), with the
     /// host's default: frame by frame through the end screens to the return of the week loop, the sound commands up to the
     /// teardown's equal; then the host's main menu instead of the original's teardown (R9 F3 = B).
     /// </summary>
-    [GameDataFact(Skip = EndScreensDiffer)]
+    [GameDataFact]
     public void Game_ended_with_F10_runs_frame_by_frame_to_its_end_and_the_host_goes_back_to_the_main_menu()
     {
         var r = Play(EndBy.F10, endWeek: 0, returnToMenu: true, human: false);
@@ -114,9 +114,13 @@ public class HostWholeGameFrameDifferentialTests
         Assert.All(Enumerable.Range(0, 4), pl => Assert.True(host.Core.U32(DgroupLayout.CurrentWealth + 4 * pl) < host.Core.U32(DgroupLayout.Target)));
         Assert.Equal(1, r.Original.Week);
         AssertWeeks(r, lastWeek: 0);
+        // the new main menu (the menu of the first game stays in Menu.Menu until the step starts anew)
+        var before = host.Menu.Menu;
         long f = host.LastFrame + 1;
-        for (long until = f + 2000; f < until && host.Menu.Menu is null; f++) host.Frame(f, []);
+        for (long until = f + 2000; f < until && !(host.Machine.Status == ProgramStatus.Waiting && host.Menu.Menu != before); f++)
+            host.Frame(f, []);
         Assert.NotNull(host.Menu.Menu);
+        Assert.NotSame(before, host.Menu.Menu);
         Assert.Equal(ProgramStatus.Waiting, host.Machine.Status);
         Assert.Equal(ProgramLoop.MainMenu, host.Machine.NextStep);
     }
@@ -195,11 +199,11 @@ public class HostWholeGameFrameDifferentialTests
         Assert.Equal(human ? 0 : 1, host.Core.U8(DgroupLayout.IsComputer));
         int checkedCommands = CompareSound(sound, stub, 0, "week 0, call 3");
 
-        ushort retrace = p.Segment(RetraceSegment);
+        ushort retrace = p.Segment(RetraceSegment), waitKey = p.Segment(WaitKeySegment);
         var m = p.Machine;
         var frames = new Dictionary<(int Week, int Call), int>();
         byte? held = null;
-        bool targetSet = false, f10Down = false, f10Up = false, ended = false;
+        bool targetSet = false, f10Down = false, f10Up = false, ended = false, keyWait = false;
         int lastWeek = 0, lastStep = WeekSteps.ReportCall;
         for (int frame = 0; ; frame++)
         {
@@ -207,7 +211,7 @@ public class HostWholeGameFrameDifferentialTests
             bool hostDone = host.Machine.Status == ProgramStatus.Ended || (host.MenuReturn?.Returns ?? 0) > 0;
             m.Run(1);
             m.Run(8_000_000_000, mm => (mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry) || (mm.Cpu.Cs == loop && mm.Cpu.IP == call18)
-                || (mm.Cpu.Cs == main && mm.Cpu.IP == ProgramLoop.TeardownSite));
+                || (mm.Cpu.Cs == main && mm.Cpu.IP == ProgramLoop.TeardownSite) || (mm.Cpu.Cs == waitKey && mm.Cpu.IP == WaitKeyEntry));
             Assert.False(m.Exited, "original exited");
             if (m.Cpu.Cs == loop && m.Cpu.IP == call18)
             {
@@ -223,6 +227,27 @@ public class HostWholeGameFrameDifferentialTests
                 break;
             }
             Assert.False(hostDone, $"{where}: the host's game has ended, the original waits a retrace");
+            if (m.Cpu.Cs == waitKey && m.Cpu.IP == WaitKeyEntry)
+            {
+                // the end screens' key wait: the host polls in this frame (its first poll after the last retrace); data
+                // segment, picture and sound as there, then a key (RETURN) ends the wait on both sides (the host counts the
+                // make in its next frame, DS:115D), and the week loop returns AL = 1
+                where = $"key wait of the end screens (frame {frame}, host frame {f})";
+                Assert.False(keyWait, $"{where}: a second key wait");
+                keyWait = true;
+                Assert.True(host.Screens.Ending?.Current is EndingStep { Polls: 1 },
+                    $"{where}: the host does not poll its first time ({(host.Screens.Ending?.Current as EndingStep)?.Polls} polls)");
+                Assert.True(p.RandomState == host.Core.U32(DgroupLayout.RandomSeed), $"{where}: random state");
+                CompareDataSegment(p, host, compared, where);
+                HostPictures.Compare(p, host, where);
+                checkedCommands = CompareSound(sound, stub, checkedCommands, where);
+                // 27C6:00D2 clears DS:115D first: the make comes a little later (as in EndingFrameHarness)
+                p.Press(MenuKeys.Enter, delay: 0.02, hold: 0.05);
+                f++;
+                host.Frame(f, [MenuKeys.Enter]);
+                frame--;
+                continue;
+            }
             var week = host.Machine.WeekMachine;
             Assert.True(week is not null, $"{where}: the host left the week loop, the original waits a retrace");
             lastWeek = week.Week;
@@ -282,6 +307,7 @@ public class HostWholeGameFrameDifferentialTests
             host.Frame(f, [.. Enumerable.Range(0, keys.Length).Where(sc => keys[sc] != 0).Select(sc => (byte)sc)]);
         }
         Assert.True(ended);
+        Assert.True(keyWait, "the original did not wait for a key at the end screens");
         Assert.True(endBy != EndBy.Target || targetSet, "target not set");
         Assert.True(endBy != EndBy.F10 || f10Up, "F10 not pressed and released");
         Assert.True(host.GameOver || host.MenuReturn is { Returns: 1 });

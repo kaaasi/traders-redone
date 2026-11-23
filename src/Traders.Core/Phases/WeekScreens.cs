@@ -152,10 +152,15 @@ public sealed class WeekScreens
         {
             var endingHost = new GameEndingHost(outputs.EndingField ?? (_ => { }), outputs.Ending ?? (_ => { }),
                 outputs.EndingReport ?? (_ => { }));
-            // the evening's rule page starts on the draw page of the moment (EndingStep reads it from the data segment)
+            // the evening's rule page starts on the draw page of the moment and draws its texts in the driver's font of the
+            // moment (EndingStep reads both from the data segment)
             Ending = new DeferredStep(c =>
             {
-                Pages(c);
+                if (inputs.OutputPages?.Invoke() is { } output)
+                {
+                    MirrorPages(c.State, output.Span);
+                    MirrorFont(c.State, output.Span);
+                }
                 return new EndingStep(endingHost, inputs.Files, inputs.Pictures, fonts());
             });
         }
@@ -236,6 +241,23 @@ public sealed class WeekScreens
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =
         [(RulePage.DrawPageIndex, 4), (RulePage.PageNumbers, 8), (0x4516, 2)];
+
+    /// <summary>
+    /// Bytes of the driver's current font as 21FD:05DB leaves them: advance DS:3CA8 and line height DS:34A4 (the font of the
+    /// output layers; the core's rule page of the end screens picks its <see cref="Pixels.RuleFont"/> by them).
+    /// </summary>
+    public static IReadOnlyList<(int Offset, int Length)> FontState { get; } =
+        [(Pixels.EndingPage.Advance, 2), (Pixels.EndingPage.Height, 2)];
+
+    /// <summary>Copies the output's font state (<see cref="FontState"/>) into the core's data segment.</summary>
+    // [APPROX] Host input: 21FD:05DB runs in the output layers (the scenes select the fonts); the core takes the font state at
+    // the start of call 19 where the game ends (its evening draws texts on the rule page) instead of following every font
+    // selection of the earlier steps itself.
+    public static void MirrorFont(Dgroup d, ReadOnlySpan<byte> output)
+    {
+        foreach (var (offset, length) in FontState)
+            for (int i = 0; i < length; i++) d.Set(offset + i, output[offset + i]);
+    }
 
     /// <summary>Copies the output's page state (<see cref="PageState"/>) into the core's data segment.</summary>
     // [APPROX] Host input: the page state is the output layers' (21FD:051F/0590 run in Traders.Vga); the core takes it at the
