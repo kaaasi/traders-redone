@@ -22,8 +22,8 @@ Stand: 22.11.2026 · Runde 8 (Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host
 | M10 | Ereignisse & Katastrophen | ✅ | Katastrophen mit Sternvorführung `111D:0009` (Regelseite) und Wochenereignisse `17CB:0005` im Kern und als Szene (R6 Spuren 1/2); Aufrufe 4, 9, 11, 16 eingebunden, Mehrrundenprobe Wochen 0–4 mit Mensch und Katastrophe; Host spielt bis zur Ernte, Halt an Aufruf 18. Gesamtreview R6 „Ja“ |
 | M11 | Wochenbilanz & Einkauf | ✅ | Wochenbilanz `0825:000A` mit Szene (R5); Einkauf `08CF:0004` (41 Routinen) im Kern Bild für Bild, Szene pixelgenau (R8 Spur 2), Aufruf 29 eingebunden; Host spielt Woche für Woche (Roboterphase übersprungen). Gesamtreview R8 „Ja“ |
 | M12 | Roboterkampf | ⬜ | |
-| M13 | Ende / Rang | 🟡 | Endprüfung `20B3:0005` bis zur Entscheidung (R7); Abend-/Endbilder offen (F1 = B, R9) |
-| M14 | Ton | ⬜ | |
+| M13 | Ende / Rang | 🟡 | Endprüfung `20B3:0005` vollständig: Endbild, Abend und Rangbild (26 Routinen) im Kern Bild für Bild, Szene pixelgenau (R9 Spur 1); Einbindung in Aufruf 19 und Host offen (Spur 0) |
+| M14 | Ton | 🟡 | Tonsteuerung `218B`/`21A7` im Kern, Effektmaschine `0000:06FE`–`15B1` (R9 Spur 2), CMF-Wiedergabe nach `FXDRIVER` mit eigenem LZEXE-Entpacker (Spur 3), OPL2-Synthese nach ymfm (F1 = B) und Tonausgabe (Spur 4), je gegen RefEmu bzw. ymfm; Einbindung in den Host (Spur 0) und Hörvergleich durch den Nutzer offen |
 | M15 | Gesamtpartie = v1.0 | ⬜ | |
 | E1–E7 | Erweiterungen | ⬜ | nach v1.0, siehe Plan |
 
