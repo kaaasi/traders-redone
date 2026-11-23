@@ -1,10 +1,14 @@
+using System.IO.Compression;
 using System.Security.Cryptography;
 using Traders.Assets;
+using Traders.Audio.Opl;
 
 return args switch
 {
     ["export", var src, var dst] => Export(src, dst),
     ["decrunch", var src, var dst] => Decrunch(src, dst),
+    ["opl-wav", var src, var dst] => OplWav(src, dst, 44_100),
+    ["opl-wav", var src, var dst, var rate] => OplWav(src, dst, int.Parse(rate, System.Globalization.CultureInfo.InvariantCulture)),
     _ => Usage(),
 };
 
@@ -12,7 +16,21 @@ static int Usage()
 {
     Console.Error.WriteLine("traders-tools export <original-dos-dir> <out-dir>");
     Console.Error.WriteLine("traders-tools decrunch <file.pp> <out.bin>");
+    Console.Error.WriteLine("traders-tools opl-wav <opl-trace.txt[.gz]> <out.wav> [sample-rate]");
     return 1;
+}
+
+// Renders an OplTrace text file (RefEmu, OplTrace.WriteText) to a WAV file for listening (lane klang, M14).
+static int OplWav(string src, string dst, int rate)
+{
+    using var file = File.OpenRead(src);
+    using Stream input = src.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) ? new GZipStream(file, CompressionMode.Decompress) : file;
+    using var reader = new StreamReader(input);
+    var writes = OplRenderer.ReadTrace(reader);
+    var pcm = OplRenderer.Render(writes, OplClock.Pit, rate);
+    using (var output = File.Create(dst)) OplRenderer.WriteWav(output, pcm, rate);
+    Console.WriteLine($"{src}: {writes.Count} writes -> {dst}: {pcm.Length} samples, {pcm.Length / (double)rate:F1} s at {rate} Hz");
+    return 0;
 }
 
 static int Decrunch(string src, string dst)

@@ -329,7 +329,10 @@ public class CommandListTests
         }
     }
 
-    /// <summary>Frames and lines after a line pattern (type 14): the direction of each of the four lines is visible.</summary>
+    /// <summary>
+    /// Frames and lines after a line pattern (type 14): the direction of the two vertical lines is visible; the driver draws the
+    /// horizontal ones always from the smaller x (<c>378B/38F2</c>), so reversing one of them cannot be seen (#75 R3S-B3).
+    /// </summary>
     // [DIFFERENTIAL] 0A96:0A51
     [GameDataFact]
     public void Frames_with_line_pattern_match_original()
@@ -418,18 +421,21 @@ public class CommandListTests
         var h = new LayerHarness(340);
         h.WriteDwordBoth(GraphicsLayers.Page0, 0xA000_0000);
         h.WriteDwordBoth(GraphicsLayers.Page1, 0xA400_0000);
-        h.WriteDwordBoth(GraphicsLayers.PageNumbers, 1);
-        h.WriteDwordBoth(GraphicsLayers.PageNumbers + 4, 2);
-        foreach (ushort index in new ushort[] { 0, 1, 1, 0 })
-        {
-            for (int p = 0; p < 4; p++)
+        // #75 R3S-B3: the game's pairing (1, 2) and the swapped one (2, 1): with (1, 2) a table entry scaled by 2 instead of 4
+        // is not seen (0299 treats every direction other than 1 alike), with (2, 1) it reads the high word 0 for index 1
+        foreach (var (first, second) in new[] { (1, 2), (2, 1) })
+            foreach (ushort index in new ushort[] { 0, 1, 1, 0 })
             {
-                h.Rng.NextBytes(h.Driver.Port.Vram.Planes[p]);
-                h.Driver.Port.Vram.Planes[p].CopyTo(h.Original.Machine.Vga.Planes[p], 0);
+                h.WriteDwordBoth(GraphicsLayers.PageNumbers, (uint)first);
+                h.WriteDwordBoth(GraphicsLayers.PageNumbers + 4, (uint)second);
+                for (int p = 0; p < 4; p++)
+                {
+                    h.Rng.NextBytes(h.Driver.Port.Vram.Planes[p]);
+                    h.Driver.Port.Vram.Planes[p].CopyTo(h.Original.Machine.Vga.Planes[p], 0);
+                }
+                h.Call(List, 0x0C3F, index);
+                h.Port.CopyGamePage(index);
+                h.AssertScreenEqual($"0C3F({index}) numbers ({first}, {second})");
             }
-            h.Call(List, 0x0C3F, index);
-            h.Port.CopyGamePage(index);
-            h.AssertScreenEqual($"0C3F({index})");
-        }
     }
 }

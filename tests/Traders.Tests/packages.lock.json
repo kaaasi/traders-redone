@@ -123,6 +123,7 @@
         "dependencies": {
           "MonoGame.Framework.DesktopGL": "[3.8.*, )",
           "Traders.Assets": "[1.0.0, )",
+          "Traders.Audio": "[1.0.0, )",
           "Traders.Core": "[1.0.0, )",
           "Traders.Presentation": "[1.0.0, )",
           "Traders.Vga": "[1.0.0, )"

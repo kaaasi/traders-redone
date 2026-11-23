@@ -21,6 +21,12 @@ far entry point of the head's segment (otherwise: error "ohne Befund"); the diff
 an entry is ✅ only with its own [DIFFERENTIAL] (else 🟢 "über <head>", no error). The segment table counts only addresses
 with their own finding. The inheritance checks itself on every run (counter-checks A/A'/C/C' of review R5PL-1).
 
+FXDRIVER.EXE (spur musik R9, additive): markers "[ORIGINAL-FX] OOOO" in src/ and tags "[DIFFERENTIAL-FX] OOOO" in tests/
+name byte offsets in the unpacked load image of FXDRIVER.EXE V1.06 (tools/fxdriver.py, docs/analyse/FXDRIVER.md §1);
+lists with "/" or "," as above, bare offsets only. They are counted in a table of their own. An offset is valid only
+with 4 upper-case hex digits inside the image; it needs its finding (the offset as `OOOO` in docs/analyse/FXDRIVER.md)
+and its own [DIFFERENTIAL-FX] tag. The FX parser and the range check check themselves on every run.
+
 Usage:
   python3 tools/abdeckung.py --write   renew the tables between <!-- abdeckung:anfang --> and <!-- abdeckung:ende -->
   python3 tools/abdeckung.py --check   exit 1 if STATUS.md is stale, a marker has no finding, a ported finding has no
@@ -43,6 +49,11 @@ DIFF_TAG = re.compile(r"\[DIFFERENTIAL\]" + TAG_ADDR)
 # further entry of a collective list: separator, then SSSS:OOOO or a bare OOOO (not followed by another word character)
 LIST_NEXT = re.compile(r"\s*[/,]\s*(?:([0-9A-F]{4}):)?([0-9A-F]{4})\b(?!:)")
 DGROUP = 0x28DC
+FX_TAG_ADDR = r"\s+([0-9A-F]{4})\b(?!:)"
+FX_MARKER = re.compile(r"\[ORIGINAL-FX\]" + FX_TAG_ADDR)
+FX_DIFF_TAG = re.compile(r"\[DIFFERENTIAL-FX\]" + FX_TAG_ADDR)
+FX_NEXT = re.compile(r"\s*[/,]\s*([0-9A-F]{4})\b(?!:)")
+FX_FINDING = ROOT / "docs/analyse/FXDRIVER.md"
 
 
 def segments(exe: pathlib.Path):
@@ -210,6 +221,95 @@ def status_of(addr, markers, tests, via):
     return status
 
 
+def fx_image_length(exe: pathlib.Path) -> int:
+    """Length of the unpacked load image of FXDRIVER.EXE (unpacker of tools/fxdriver.py, loaded by path)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("fxdriver", ROOT / "tools" / "fxdriver.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return len(mod.unpack(exe.read_bytes())[1])
+
+
+def fx_offsets(line: str, pattern: re.Pattern):
+    """All offsets of the FX lists in `line` (first offset after the tag, then FX_NEXT entries)."""
+    result = []
+    for m in pattern.finditer(line):
+        result.append(int(m.group(1), 16))
+        pos = m.end()
+        while (n := FX_NEXT.match(line, pos)) is not None:
+            result.append(int(n.group(1), 16))
+            pos = n.end()
+    return result
+
+
+def fx_scan(tag: str, pattern: re.Pattern, files, length: int, errors):
+    """Offsets after `tag` (offset -> files); invalid spellings and offsets outside the image go to `errors`."""
+    hits = collections.defaultdict(set)
+    for f in files:
+        if "bin" in f.parts or "obj" in f.parts:
+            continue
+        rel = f.relative_to(ROOT).as_posix() if f.is_absolute() else str(f)
+        for n, line in enumerate(f.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            fx_line(tag, pattern, line, f"{rel}:{n}", length, hits, rel, errors)
+    return hits
+
+
+def fx_line(tag, pattern, line, where, length, hits, rel, errors):
+    if line.count(tag) > len(list(pattern.finditer(line))):
+        errors.append(f"{tag} ohne gültigen Offset OOOO (Großbuchstaben) in {where}: {line.strip()}")
+    for o in fx_offsets(line, pattern):
+        if o >= length:
+            errors.append(f"{tag} {o:04X} liegt außerhalb des entpackten FXDRIVER-Abbilds (0x{length:X} Bytes) in {where}")
+        else:
+            hits[o].add(rel)
+
+
+def fx_self_errors(length: int):
+    """Self-check of the FX parser and range check (counter-check: an invalid offset must be an error)."""
+    cases = [
+        ("// [ORIGINAL-FX] 427D / 4287 – entry", [0x427D, 0x4287], 0),
+        ("// [ORIGINAL-FX] 0B8D, 0C79 and then 1262", [0x0B8D, 0x0C79], 0),
+        (f"// [ORIGINAL-FX] {length:04X} behind the image", [], 1),
+        ("// [ORIGINAL-FX] 427d lower case", [], 1),
+        ("// [ORIGINAL-FX] 0292:1262 with segment", [], 1),
+        ("// [ORIGINAL] 0292:1262 is not an FX marker", [], 0),
+    ]
+    errors = []
+    for line, want, want_errors in cases:
+        hits, got = collections.defaultdict(set), []
+        fx_line("[ORIGINAL-FX]", FX_MARKER, line, "selbsttest", length, hits, "x", got)
+        if sorted(hits) != sorted(want) or len(got) != want_errors:
+            errors.append(f"Selbsttest FX-Marker: {line!r} ergibt {[f'{o:04X}' for o in sorted(hits)]}, Fehler {got}")
+    return errors
+
+
+def fx_build(errors):
+    """Table of the FXDRIVER markers and the errors of their checks."""
+    exe = exe_path().parent / "FXDRIVER.EXE"
+    if not exe.exists():
+        errors.append(f"{exe} fehlt – FXDRIVER-Marker nicht prüfbar")
+        return []
+    length = fx_image_length(exe)
+    errors.extend(fx_self_errors(length))
+    markers = fx_scan("[ORIGINAL-FX]", FX_MARKER, sorted((ROOT / "src").rglob("*.cs")), length, errors)
+    tests = fx_scan("[DIFFERENTIAL-FX]", FX_DIFF_TAG, sorted((ROOT / "tests").rglob("*.cs")), length, errors)
+    finding = FX_FINDING.read_text(encoding="utf-8") if FX_FINDING.exists() else ""
+    lines = ["", "### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)", ""]
+    if not markers:
+        return lines + ["Noch keine Marker."]
+    lines += ["| Offset | C# (`[ORIGINAL-FX]`) | Differenztest | Status |", "|---|---|---|---|"]
+    for o in sorted(markers):
+        if f"`{o:04X}`" not in finding:
+            errors.append(f"Marker [ORIGINAL-FX] {o:04X} ohne Befund (`{o:04X}` fehlt in docs/analyse/FXDRIVER.md)")
+        elif o not in tests:
+            errors.append(f"FX {o:04X} ist portiert (Marker), aber ohne Differenztest ([DIFFERENTIAL-FX] in tests/**/*.cs)")
+        t = sorted(tests.get(o, ()))
+        lines.append(f"| `{o:04X}` | {', '.join(f'`{x}`' for x in sorted(markers[o]))} | "
+                     f"{', '.join(f'`{pathlib.PurePosixPath(x).name}`' for x in t) or '–'} | {'✅' if t else '🟢'} |")
+    lines += ["", f"{len(markers)} Offsets mit Marker, davon {sum(1 for o in markers if o in tests)} mit Differenztest."]
+    return lines
+
+
 def exe_path() -> pathlib.Path:
     base = os.environ.get("TRADERS_GAMEDATA")
     return (pathlib.Path(base) if base else ROOT / "gamedata") / "dos" / "T.EXE"
@@ -249,6 +349,7 @@ def build():
         total["g"] += size[s]
         lines.append(f"| `{s:04X}` | 0x{size[s]:X} | {row[0]} | {row[1]} | {row[2]} | {row[3]} |")
     lines.append(f"| **Summe** | **0x{total['g']:X}** | **{total['e']}** | **{total['b']}** | **{total['p']}** | **{total['t']}** |")
+    lines += fx_build(errors)
     lines += ["", END]
     return "\n".join(lines), errors
 

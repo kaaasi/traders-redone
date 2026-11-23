@@ -146,13 +146,16 @@ Zeitpunkt abhängen: Regelseite auf der Zeichenseite `DS:40DE[DS:082E]`, Bild `D
 Ausgabeaufruf über die Schichten hinein). Seitenzustand `DS:082E/0830`, `40DE…40E5`, `4516` gehört den Ausgabeschichten; der
 Host gibt ihn zu Beginn jedes Aufrufs als Eingabe (`WeekScreenInputs.OutputPages`, `[APPROX]`).
 
-**Mehrrundenprobe** `tests/Traders.Tests/Phases/MultiWeekRound7DifferentialTests.cs` (frühere `MultiWeekRound6DifferentialTests.cs` entfernt): Standardpartie, Spieler 0 Mensch
-(Steuerung 4, R5-Tastenmuster), Katastrophen an, Wochen 0–4 und Aufruf 1 von Woche 5. Aufrufe 3, 4, 8, 9, 11, 16 Bild für Bild
-(je Rücklauf DS ohne Ausgabebytes des Schritts, `10D2`; das Original rechnet sein Bild zuerst, damit ein `time()`-Wert für
-`random(0)` bekannt ist), 6, 21 und Regelschritte am Rücksprung, 18, 19, 23–30 im RefEmu. Textpuffer nach 4, 9, 11, 16 gleich
-(nach RefEmu-Schritten übernommen). Belegt (Lauf auf diesem Stand): Katastrophe Art 0 mit Sternvorführung `0112` in Woche 4
-(1402 Bilder im Port), Wochenereignis in Woche 3 (1096 Bilder), Stationen und Ernte jede Woche mit Handlungen des Menschen.
-Gegenprobe (lokal): ein Bild von Aufruf 4 doppelt verarbeitet → rot in Woche 4 (`DS:09C8`, Rücklauf 727).
+**Mehrrundenprobe** `tests/Traders.Tests/Phases/MultiWeekRound7DifferentialTests.cs` (Stand R8; frühere `MultiWeekRound6DifferentialTests.cs`
+entfernt): Standardpartie, Spieler 0 Mensch (Steuerung 4, R5-Tastenmuster), Katastrophen an, Wochen 0–4 und Aufruf 1 von Woche 5.
+Im Port laufen alle Aufrufe außer 18 (Roboterphase, R10–R11, als einziger im RefEmu): Aufrufe 3, 4, 8, 9, 11, 16, 23, 24, 26, 29, 30
+Bild für Bild (je Rücklauf DS ohne Ausgabebytes des Schritts, `10D2`; das Original rechnet sein Bild zuerst, damit ein
+`time()`-Wert für `random(0)` bekannt ist), 6, 21 und die Regelschritte am Rücksprung, 19 (Ende-Prüfung `20B3:0005` bis zur
+Entscheidung) am Rücksprung mit AL verglichen. Textpuffer nach den Bildschritten gleich (nach RefEmu-Schritten übernommen).
+Belegt im Lauf der R6 (Bildzahlen nicht neu gemessen): Katastrophe Art 0 mit Sternvorführung `0112` in Woche 4 (1402 Bilder im
+Port), Wochenereignis in Woche 3 (1096 Bilder), Stationen und Ernte jede Woche mit Handlungen des Menschen. Gegenprobe (lokal, R6):
+ein Bild von Aufruf 4 doppelt verarbeitet → rot in Woche 4 (`DS:09C8`, Rücklauf 727). Zu den Aufrufen 23–30 siehe die Gegenproben im
+Kommentar des Tests (Handel zweimal je Bild, Zug von `1DEF:00DB` ausgelassen, Fat Mike zweimal je Bild).
 
 **Host** (`src/Traders.App/ProgramHost.cs`): spielt Woche 0 bis zur Ernte mit allen Szenen und hält an Aufruf 18;
 `HostPlantingFrameDifferentialTests` Bild für Bild gegen den RefEmu (VRAM, DAC, CRTC-Start, `10D2` je Rücklauf; Bericht und

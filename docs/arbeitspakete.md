@@ -37,13 +37,21 @@ von 2 oder 3 (braucht nur `OplTrace`, darf auch früher starten, falls Kontingen
   `analyse/TON.md` §2). **Schnittstelle zwischen den Tonspuren:** Folge von OPL2-Registerschreibungen mit Tick
   (`(Tick, Register, Wert)`), vergleichbar mit `Traders.RefEmu/Machine/OplTrace.cs`. **Zeitbasis** (R9PL-2): Effekte – Tick =
   Aufrufnummer von `0000:0732` (per `Call` einzeln treibbar, endet mit `retf`); Musik – Tick = ⌊(Time − T₀)/4000h⌋ mit T₀ = Setzen
-  des PIT-Teilers, Phase relativ zu Fn 01h; Schreibungen in Fn 00h/05h/06h außerhalb eines Ticks gesondert. Vergleiche je
-  Tonbefehl relativ zum Befehlstick, nie absolute PIT-Zeit über Bilder (der Port taktet Bilder). PC-Lautsprecher `2850` entfällt (Nutzer
+  des PIT-Teilers; Schreibungen in Fn 00h/05h/06h außerhalb eines Ticks gesondert. Vergleiche je
+  Tonbefehl relativ zum Befehlstick, nie absolute PIT-Zeit über Bilder (der Port taktet Bilder).
+  **Einheit** (Leitstelle 23.11.2026, R9M-1): `OplWrite.Tick` zählt für Effekte und Musik einheitlich Zeitgeberticks
+  (72,82 Hz). `FxMusicDriver` bekommt den Tick vom Aufrufer (Host bzw. Spur 0) und stempelt seine Schreibungen damit; Tests
+  prüfen Abstand 4 und Phase gegen die RefEmu-Probe aus dem Review. **Einzige Phasenregel** (R9T-1, R9T-3): Die Zeitgeber-ISR
+  `27C6:03E4` ruft je Tick zuerst den Effekt-Rückruf und erhöht dann `DS:1180`; die Musik (alter Vektor) läuft in dem Tick, in dem
+  `DS:1180` danach ≡ 0 (mod 4) ist; `27C6:037A` setzt `DS:1180` = 0 (Befund `27C6_0043_eingabe_zeitgeber.md`). Gemeinsamer
+  Tickzähler für Effekte und Musik ist deshalb `DS:1180` nach dem Erhöhen; bis Spur 0 beide Ströme so verankert, haben Effekte
+  (Aufrufnummer ab 1) und Musik (ab T₀) verschiedene Nullpunkte und werden nur relativ verglichen (R9T-2, R9E-2). PC-Lautsprecher `2850` entfällt (Nutzer
   11.11.2026); der Port nimmt `DS:0910` = 1 (AdLib) an.
 - **Daten und Marker der Tonspuren** (R9PL-3, Leitstelle 22.11.2026): Tabellen aus dem Original (`CS:15B2` und weitere der
   Effektmaschine, Noten-, Operator- und Tempotabellen von `FXDRIVER`) nie als Tabelle im Code, sondern zur Laufzeit gelesen –
   aus `T.EXE` bzw. aus `FXDRIVER.EXE` über einen eigenen LZEXE-Entpacker in `src/Traders.Assets/` (Spur 3, Muster
-  `Dgroup.FromExe`). Ausgaben von `tools/fxdriver*` nur in ein git-ignoriertes Verzeichnis. Marker für Fremdprogramme:
+  `Dgroup.FromExe`). Ausgaben von `tools/fxdriver*` nur in ein git-ignoriertes Verzeichnis; auch
+  Erkennungssignaturen nicht als Bytes aus dem Original im Code, sondern über Kopffelder und Prüfsumme (R9M-2). Marker für Fremdprogramme:
   `[ORIGINAL-FX] OOOO` (Offset im entpackten Abbild von `FXDRIVER.EXE` V1.06); `tools/abdeckung.py` erweitert Spur 3 additiv
   (zählt und prüft sie getrennt, Regel 2.8 gilt sinngemäß). OPL2-Synthese (Spur 4) ist kein Original und bekommt keine Marker.
 - **Mehrrundenprobe** (`AGENTS.md` §5): Spur 1 über Orakelzustände an Aufruf 19 aus echten Partien (Ende in Woche 0–3, Mensch
@@ -147,6 +155,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   und `CS:0415`–`042C` nach jedem Tick gleich, auch über Effektgrenzen; Gegenprobe im Review (Ring ohne Überlauf, `a` statt `b`
   gelesen, Musik nicht gestoppt, Ton aus ignoriert, Zufallszustand `03F8` zwischen Effekten zurückgesetzt → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xF60 Byte; bis zu zwei Fortsetzungen über das Limit (F2 = ja).
+- **Status:** fertig – Review (Claude, PR #243 `paket/effekte`, Base `8cc9935`): Teil 1 fertig; Teil 2 fertig (Review); nach Merge von #244/#245 Ausgabe `EffectWrite` → `Opl.OplWrite` beim Rebase.
 
 ## 3 `musik` – CMF-Wiedergabe nach `FXDRIVER.EXE`
 
@@ -165,6 +174,13 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Wiederholen aus, Fahrt ohne Schrittweite → rot).
 - **Abhängigkeiten:** keine (Tonbefehle aus 2 über eine schmale eigene Schnittstelle; bei Konflikt rebased die später gemergte
   Spur). Größe unbekannt (Treiber 756h Absätze resident inkl. Puffer); bis zu zwei Fortsetzungen über das Limit (F2).
+- **Stand** (Spur, 22.11.2026): PR #244, beide Teile fertig. Teil 1: `FxDriverImage` (LZEXE-Entpacker, Gegenprobe gegen den
+  RefEmu), `tools/fxdriver.py`, `[ORIGINAL-FX]` in `tools/abdeckung.py`, Befund `analyse/FXDRIVER.md`. Teil 2:
+  `Traders.Audio.Music.FxMusicDriver` (Treiber als Zustandsmaschine, Ausgabe OPL-Schreibungen, `Opl/OplWrite.cs` angelegt),
+  Differenztests gegen den Treiber im RefEmu und gegen das Spiel mit `runFxDriver` (alle drei Stücke ≥ 60 s). Review R9-Musik (Head `df8cd69`): R9M-1, R9M-2.
+  **Fixlauf** (Claude Sonnet, 23.11.2026): R9M-1: `FxMusicDriver.Tick(long timerTick)` stempelt mit dem Tick des Aufrufers (Zeitgeberticks, jeder
+  vierte, Phase vom Aufrufer; `CurrentTick` für Funktionen); Tests prüfen Abstand 4 und Phase 3/2/1/0 gegen die RefEmu-Probe des Reviews.
+  `OplWrite.cs`, `FXDRIVER.md` §6, `TON.md` §2/§5 nachgezogen. R9M-2: Signaturbytes entfernt, `FxDriverImage.Unpack` prüft Kopffelder und SHA-256.
 
 ## 4 `klang` – OPL2-Synthese und Tonausgabe im Host
 
@@ -179,6 +195,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Menümusik liegt dem Nutzer vor (nicht im Repo). Gegenprobe im Review (Hüllkurve ohne Release, Frequenzzahl um ein Bit
   verschoben → rot).
 - **Abhängigkeiten:** keine (Eingabe `OplTrace`); Einbindung in den Host durch 0.
+- **Status:** Teile 1–3 fertig; Fixlauf R9K-1 (ymfm-Referenzhashes `OplReferenceTests`) und R9K-2 (Scheduler) erledigt, Delta-Prüfung offen; R9K-3 offen (Claude, PR #245 `paket/klang`).
 
 ## 5 `sammel` – P3-Sammlung (Sonnet)
 
@@ -191,6 +208,12 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   belegt ein Test einen Fehler, `spur-wartet` mit Befund.
 - **Abnahme:** alle drei Läufe grün; #49, #75, #220, #221, #236 geschlossen, #76 bis auf R3H-2 (`Fixes #…` bzw. Kommentar).
 - **Abhängigkeiten:** keine. Früh mergen.
+- **Status (Claude Sonnet, 22.11.2026, PR #242):** alle Teile erledigt, `pruefen.sh --schnell` grün (1206 Tests). #236: lange Suche
+  beidseitig im Gleichschritt, Endlosfall original-seitig über das Befehlsbudget begrenzt (Port-Schleife ohne Prüfnaht nicht
+  begrenzbar, kein Produktivcode). #221: Alias je Block, Gegenprobe rot. #220: Absatz auf Stand R8. #75: B2 (neun Aufrufe) und B3
+  (getauschte Seitenzahlen, `index << 2` wird sichtbar) erledigt; **B1 offen**: die Seitenfüllungen von `0B67:0002` sind im Port
+  nicht beobachtbar (`InitializeVga` löscht den ganzen VRAM zuvor), eine Prüfnaht in `src/Traders.Vga/` wäre nötig. #76: R3H-1 (Rückrichtung,
+  seit R4 in `check-architecture.py`) und R3H-3 (Wortlaut `27C6:00AC`) standen schon auf `main`. #49: N1, N2 erledigt, N3 nur dokumentiert.
 
 ## Zuständigkeit gemeinsamer Dateien in R9
 

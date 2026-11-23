@@ -31,6 +31,12 @@
       "traders.assets": {
         "type": "Project"
       },
+      "traders.audio": {
+        "type": "Project",
+        "dependencies": {
+          "Traders.Assets": "[1.0.0, )"
+        }
+      },
       "traders.core": {
         "type": "Project"
       },
