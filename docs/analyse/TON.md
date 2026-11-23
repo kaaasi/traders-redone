@@ -43,7 +43,8 @@ größere Nummern geben die Register unverändert zurück (**P**). Die Spalte �
 **Takt des Treibers:** Bei der Installation setzt er nur `int 64h` (und Laufzeitvektoren 0/4/5/6, **P**), `int 8` erst auf einen Aufruf aus `T.EXE` hin, also nach dessen Handlern. Der DOS-Filter `27C6:058B` leitet das
 Setzen in das Weitergabeziel `27C6:[CS:0412]` um (Befund `docs/routines/27C6_0043_eingabe_zeitgeber.md`): nach dem Hochlauf zeigt
 es in den Treiber (`1292:1262`), Vektor 8 bleibt `27C6:03E4`, PIT-Teiler `4000h` (**P**, Lauf mit `runFxDriver`). Die Musik läuft
-damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz.
+damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz. **Einheit in `OplWrite.Tick`** (R9M-1): Zeitgeberticks (72,82 Hz) für Effekte
+und Musik; der Musiktakt kommt vom Aufrufer (Abstand 4, Phase 0…3 aus dem Zeitgeberzähler von `T.EXE`, gemessen: `FXDRIVER.md` §6).
 
 ## 3. `218B` – Musik
 
@@ -75,7 +76,7 @@ damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz.
 
 ## 5. Für den Port (R10)
 
-- Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz). Der Kern löst nur Ereignisse
+- Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz; `FxMusicDriver.Tick(timerTick)` bekommt die Tick-Nummer samt Phase vom Host). Der Kern löst nur Ereignisse
   aus (Effekt `b`, Stück `i` mit Merkern); Ausgabe und FM-Synthese gehören in `Traders.Audio`.
 - Geklärt (R9, Spur `musik`): Stückformat, Ereignisse in den 24 Puffern, Tempo, Wiederholen und Lautstärkefahrt sowie die
   AdLib-Schicht des Treibers – `docs/analyse/FXDRIVER.md` (Offsets im entpackten Abbild, Marker `[ORIGINAL-FX]`).

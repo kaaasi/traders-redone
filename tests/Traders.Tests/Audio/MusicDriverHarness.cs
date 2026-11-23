@@ -6,7 +6,7 @@ namespace Traders.Tests.Audio;
 
 /// <summary>
 /// The resident FXDRIVER in the RefEmu next to the port <see cref="FxMusicDriver"/>, both driven with the same int 64h
-/// calls and timer calls (CS:1262, one call = one tick). Every step returns the OPL writes of both sides; the driver's
+/// calls and timer calls (CS:1262, one call = four timer ticks). Every step returns the OPL writes of both sides; the driver's
 /// data segment can be compared byte for byte. The buffers of function 10h lie where the game puts them (one block of
 /// 24 × 0C04h bytes, normalised far pointers).
 /// </summary>
@@ -24,6 +24,11 @@ internal sealed class MusicDriverHarness
     public ushort Load { get; }
     public ushort DataSegment { get; }
     public long Ticks { get; private set; }
+
+    /// <summary>The driver's handler runs on every fourth timer tick (PIT divisor 4000h); the harness numbers the calls like that,
+    /// starting at a phase of its own.</summary>
+    public const int TimerTicksPerCall = 4;
+    public const long FirstTimerTick = 2;
 
     private readonly OplTrace _trace;
     private readonly List<(byte, byte)> _portWrites = [];
@@ -95,8 +100,8 @@ internal sealed class MusicDriverHarness
     public void Tick()
     {
         Machine.CallFar(StubSegment, TickStub, []);
-        if (Port.TimerActive) Port.Tick();
         Ticks++;
+        if (Port.TimerActive) Port.Tick(FirstTimerTick + TimerTicksPerCall * Ticks);
     }
 
     /// <summary>The game's start sequence (TON §3): 06h (BX = 0), 05h, 24 × 10h with the buffers of one block.</summary>

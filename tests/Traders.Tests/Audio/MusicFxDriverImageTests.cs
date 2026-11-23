@@ -78,4 +78,20 @@ public class MusicFxDriverImageTests
                 if (m.Mem.Read8((ushort)(load + i / 16), (ushort)(i % 16)) != image.ReadByte(i)) differences.Add(i - image.DataBase);
         Assert.Equal(string.Empty, string.Join(" ", differences.Select(d => d.ToString("X4"))));
     }
+
+    // R9M-2: format check by header fields and checksum, no bytes of the driver in the code
+    [GameDataFact]
+    public void Unpack_rejects_wrong_header_fields_and_wrong_checksum()
+    {
+        byte[] exe = File.ReadAllBytes(TestGameData.Dos("FXDRIVER.EXE"));
+        Assert.Equal(FxDriverImage.Sha256, Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(exe)).ToLowerInvariant());
+        var shortFile = exe[..^1];
+        Assert.Contains("header fields", Assert.Throws<InvalidDataException>(() => FxDriverImage.Unpack(shortFile)).Message);
+        var wrongEntry = (byte[])exe.Clone();
+        wrongEntry[0x14] ^= 1;
+        Assert.Contains("header fields", Assert.Throws<InvalidDataException>(() => FxDriverImage.Unpack(wrongEntry)).Message);
+        var otherData = (byte[])exe.Clone();
+        otherData[exe.Length - 1] ^= 1; // header intact, content changed
+        Assert.Contains("checksum", Assert.Throws<InvalidDataException>(() => FxDriverImage.Unpack(otherData)).Message);
+    }
 }

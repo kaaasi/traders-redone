@@ -25,13 +25,13 @@ public sealed partial class FxMusicDriver
     /// <summary>OPL2 register writes (register, value) in the order of the original.</summary>
     public event Action<byte, byte>? Written;
 
-    /// <summary>The same writes with the tick they belong to (<see cref="TickCount"/> at the write; common interface of the
+    /// <summary>The same writes with the tick they belong to (<see cref="CurrentTick"/> at the write; common interface of the
     /// sound spurs, <see cref="OplWrite"/>).</summary>
     public event Action<OplWrite>? WrittenAt;
 
-    /// <summary>Calls of <see cref="Tick"/> so far: the tick of writes made by a call is the number of that call
-    /// (1, 2, …); writes of int 64h functions carry the number of the last call before them (0 before the first).</summary>
-    public long TickCount { get; private set; }
+    /// <summary>Tick (timer ticks of the game, 72,82 Hz) stamped on the writes: the value given to the last <see cref="Tick"/>
+    /// call, or set by the host before an int 64h function (those writes carry the host's current tick; 0 before the first).</summary>
+    public long CurrentTick { get; set; }
 
     /// <param name="image">Unpacked driver; its data segment is the initial state.</param>
     /// <param name="openFile">Returns the bytes of a module file by its DOS name (null: open fails).</param>
@@ -332,11 +332,13 @@ public sealed partial class FxMusicDriver
         SetW(Running, 0);
     }
 
-    /// <summary>One call of the driver's timer handler (every fourth tick of the game's timer, analyse/TON.md §2).</summary>
+    /// <summary>One call of the driver's timer handler (CS:1262), which the original gets on every fourth tick of the game's timer
+    /// (analyse/TON.md §2). The caller keeps that rhythm and phase: <paramref name="timerTick"/> is the number of the timer
+    /// tick of this call (same unit as the effect ticks), and the writes of the call carry it.</summary>
     /// <remarks>[ORIGINAL-FX] 3B82, 3BED, 405C, 40B4</remarks>
-    public void Tick()
+    public void Tick(long timerTick)
     {
-        TickCount++;
+        CurrentTick = timerTick;
         if (W(Running) > 1)
         {
             SetW(Running, W(Running) - 1);

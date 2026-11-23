@@ -8,7 +8,7 @@ public sealed partial class FxMusicDriver
     private void Out(int register, int value)
     {
         Written?.Invoke((byte)register, (byte)value);
-        WrittenAt?.Invoke(new Opl.OplWrite(TickCount, (byte)register, (byte)value));
+        WrittenAt?.Invoke(new Opl.OplWrite(CurrentTick, (byte)register, (byte)value));
     }
 
     /// <summary>Melodic (9 voices) or percussion mode (6 melodic + 5 drums).</summary>

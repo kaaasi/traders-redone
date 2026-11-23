@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace Traders.Assets;
 
 /// <summary>
@@ -66,8 +68,16 @@ public sealed class FxDriverImage
         int headerBytes = Word(exe, 8) * 16;
         ushort ip = Word(exe, 0x14), cs = Word(exe, 0x16);
         int lz = headerBytes + cs * 16; // LZEXE header at CS:0 of the packed program
-        if (lz + 0x158 > exe.Length || ip != 0x000E || !exe.Slice(lz + ip, Lz91Start.Length).SequenceEqual(Lz91Start))
-            throw new InvalidDataException("Decompressor not recognised as LZEXE 0.91.");
+        // LZEXE 0.91 format check by header fields: no relocations in the packed program's own table, the table offset at 1Ch,
+        // entry IP 000Eh, a file length that matches the page fields and the packer header with its relocation table inside
+        // the file. Then the checksum of the whole file (V1.06 only).
+        int pages = Word(exe, 4), lastPage = Word(exe, 2);
+        long declaredLength = lastPage == 0 ? pages * 512L : (pages - 1) * 512L + lastPage;
+        if (Word(exe, 6) != 0 || Word(exe, 0x18) != 0x1C || ip != 0x000E || exe.Length < 0x20
+            || declaredLength != exe.Length || lz + 0x158 > exe.Length)
+            throw new InvalidDataException("Not an LZEXE 0.91 program (header fields).");
+        if (!Convert.ToHexString(SHA256.HashData(exe)).Equals(Sha256, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("FXDRIVER.EXE is not V1.06 (checksum).");
         ushort ip0 = Word(exe, lz), cs0 = Word(exe, lz + 2), sp0 = Word(exe, lz + 4), ss0 = Word(exe, lz + 6);
         int packedParagraphs = Word(exe, lz + 8);
 
@@ -123,10 +133,8 @@ public sealed class FxDriverImage
         return new FxDriverImage([.. output], relocations, cs0, ip0, ss0, sp0);
     }
 
-    // push es; push cs; pop ds; mov cx,[000C]; mov si,cx; dec si; mov di,si; mov bx,ds; add bx,[000A]; mov es,bx;
-    // std; rep movsb – the self-relocation at the start of the LZEXE 0.91 decompressor.
-    private static ReadOnlySpan<byte> Lz91Start =>
-        [0x06, 0x0E, 0x1F, 0x8B, 0x0E, 0x0C, 0x00, 0x8B, 0xF1, 0x4E, 0x89, 0xF7, 0x8C, 0xDB, 0x03, 0x1E, 0x0A, 0x00, 0x8E, 0xC3, 0xFD, 0xF3, 0xA4];
+    /// <summary>SHA-256 of <c>FXDRIVER.EXE</c> V1.06 (<c>tools/originale/SHA256SUMS.dos</c>).</summary>
+    public const string Sha256 = "fcbab0643d2cb4b5bf3713f663d8c1717b4b8ba8d35d67ad32ccd8c9ddcea2e2";
 
     private static ushort Word(ReadOnlySpan<byte> d, int o) => (ushort)(d[o] | d[o + 1] << 8);
 

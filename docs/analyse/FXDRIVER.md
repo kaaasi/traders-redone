@@ -133,7 +133,12 @@ Aufgerufen über die Kette des Zeitgebers von `T.EXE` (jeder vierte Tick, TON §
 
 `src/Traders.Audio/Music/FxMusicDriver*.cs` überträgt den Treiber als Zustandsmaschine auf einer Kopie seines Datensegments
 (aus `FxDriverImage`, Offsets wie im Original); Tabellen werden dort gelesen, nie in den Code kopiert. Ausgabe: Folge der
-OPL-Schreibungen (`Written`); der Host ruft `Tick()` je Aufruf von CS:1262, solange `TimerActive`.
+OPL-Schreibungen (`Written`, mit Tick `WrittenAt`/`OplWrite`); der Host ruft `Tick(timerTick)` je Aufruf von CS:1262, solange
+`TimerActive`. **Einheit des Ticks** (R9M-1, Leitstelle 23.11.2026): wie bei den Effekten ein Zeitgeberticks (72,82 Hz, Teiler
+`4000h`); der Aufrufer ruft jeden vierten Tick (Abstand genau 4) und gibt die Nummer mit. Die Phase φ (0…3, Tick des ersten Aufrufs nach
+Fn 01h, ⌊(Zeit − Zeit von Fn 01h)/4000h⌋) hängt vom Zähler im Zeitgeber von `T.EXE` ab, nicht vom Treiber; sie liefert allein der
+Host. Schreibungen der Funktionen außerhalb eines Takts tragen `CurrentTick`, den der Host davor setzt. RefEmu-Probe (Review): φ = 3 beim
+Vorspann, 2 bzw. 1 im Menü (`+1,01 s` bzw. `+1,07 s`), 0 am Ende (`+1,03 s`).
 
 | Original (Abbild) | Port | Anmerkung |
 |---|---|---|
@@ -154,7 +159,8 @@ drei Stücke je ≥ 60 s mit den Merkern des Spiels, Vorspann bis zum Ende, Men�
 einer Zeile und Wechsel, Ausblenden bis zum Ende. (b) Spiel mit residentem Treiber (`runFxDriver`): alle int-64h-Aufrufe und
 Taktaufrufe aus `T.EXE` werden in den Port gespielt, die Schreibungen aus dem Treibercode je Ereignis verglichen – Vorspann
 beim Hochlauf über ≥ 60 s (das Spiel startet im Hauptmenü kein anderes Stück), Menü- und Endmusik über `218B:0094(1, 2)` bzw.
-`(2, 3)` je ≥ 60 s; dabei 1108…1113 Taktaufrufe in 61 s (jeder vierte Zeitgebertick, TON §2 bestätigt).
+`(2, 3)` je ≥ 60 s; dabei 1108…1113 Taktaufrufe in 61 s (jeder vierte Zeitgebertick, TON §2 bestätigt). Der Port bekommt je Aufruf
+⌊(`Machine.Now` − T₀)/4000h⌋ (T₀ = Zeit von Fn 01h); der Test prüft Abstand 4 und die Phase.
 
 Offen: Weg ohne AdLib (`[42]` ≠ 0, Lautsprecher) entfällt; nicht genutzte Funktionen (02h, 04h, 07h–0Fh, 13h, 14h, 16h, 17h,
 1Ch) sind nicht portiert und geben nur die Register zurück.

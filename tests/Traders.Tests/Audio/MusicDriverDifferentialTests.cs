@@ -171,19 +171,19 @@ public class MusicDriverDifferentialTests
     }
 
     [GameDataFact]
-    public void Writes_carry_the_number_of_the_timer_call()
+    public void Writes_carry_the_timer_tick_of_the_call_four_ticks_apart()
     {
         var h = new MusicDriverHarness();
         var ticks = new List<long>();
         h.Port.WrittenAt += w => ticks.Add(w.Tick);
         h.Boot();
         h.Play("TRADMENU", 2);
-        Assert.All(ticks, t => Assert.Equal(0, t));
+        Assert.All(ticks, t => Assert.Equal(0, t)); // outside a tick: the host's current tick, 0 before the first call
         ticks.Clear();
         h.Tick();
         h.Tick();
         Assert.NotEmpty(ticks);
         Assert.Equal(ticks.OrderBy(t => t), ticks);
-        Assert.Equal([1L, 2L], ticks.Distinct());
+        Assert.Equal([MusicDriverHarness.FirstTimerTick + 4, MusicDriverHarness.FirstTimerTick + 8], ticks.Distinct());
     }
 }
