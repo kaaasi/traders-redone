@@ -46,6 +46,10 @@ namespace Traders.Core.Phases;
 /// The driver's fonts by number (21FD:05DB) for the evening's rule page of the end screens (call 19 where the game ends);
 /// null leaves the end of the game pending (the machine stops at call 19, as up to round 8).
 /// </param>
+/// <param name="Sound">
+/// The program's sound control: the steps' sound requests run on it (<see cref="SoundRequests"/>); null leaves them to the
+/// receivers alone (tests of single steps).
+/// </param>
 public sealed record WeekScreenInputs(
     Func<int, ImageFileLengths> Files,
     Func<int, IndexedImage> Pictures,
@@ -55,7 +59,8 @@ public sealed record WeekScreenInputs(
     IControlDevices? Devices = null,
     Func<ReadOnlyMemory<byte>>? OutputPages = null,
     Func<ExtraFrame>? ExtraFrame = null,
-    Func<IReadOnlyList<RuleFont>>? Fonts = null);
+    Func<IReadOnlyList<RuleFont>>? Fonts = null,
+    ProgramSound? Sound = null);
 
 /// <summary>
 /// Receivers of the output events of the screen steps of rounds 6 to 8 (scenes, sound); the incidents are drained. A receiver
@@ -107,6 +112,8 @@ public sealed class WeekScreens
 {
     public WeekScreens(WeekScreenInputs inputs, WeekScreenOutputs outputs)
     {
+        _sound = inputs.Sound;
+        outputs = WithSound(outputs, inputs.Sound);
         var devices = inputs.Devices ?? KeyboardOnlyDevices.Instance;
         byte[] Texts() => inputs.TextBuffer() ?? throw new InvalidOperationException("Text buffer used before the program start.");
         StepContext Pages(StepContext c)
@@ -152,6 +159,21 @@ public sealed class WeekScreens
                 return new EndingStep(endingHost, inputs.Files, inputs.Pictures, fonts());
             });
         }
+    }
+
+    private readonly ProgramSound? _sound;
+
+    /// <summary>The receivers with the sound requests run on <paramref name="sound"/> first (<see cref="SoundRequests"/>).</summary>
+    private static WeekScreenOutputs WithSound(WeekScreenOutputs o, ProgramSound? sound)
+    {
+        if (sound is null) return o;
+        Action<FieldEvent>? F(Action<FieldEvent>? a) => a is null ? null : SoundRequests.Field(a, sound);
+        return new WeekScreenOutputs(SoundRequests.Disasters(o.Disasters, sound), SoundRequests.Stations(o.Stations, sound),
+            SoundRequests.Field(o.HarvestField, sound), o.Harvest,
+            o.Trade is null ? null : SoundRequests.Trade(o.Trade, sound), F(o.ExtraField), o.Extra, F(o.FatMikeField), o.FatMike,
+            F(o.ContestField), o.Purchase is null ? null : SoundRequests.Purchase(o.Purchase, sound), F(o.PurchaseField),
+            F(o.EndingField), o.Ending is null ? null : SoundRequests.Ending(o.Ending, sound),
+            o.EndingReport is null ? null : SoundRequests.Week(o.EndingReport, sound));
     }
 
     /// <summary>
@@ -204,9 +226,12 @@ public sealed class WeekScreens
     /// <param name="ending">False leaves the end of the game pending even with <see cref="Ending"/> (counter-checks).</param>
     public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
         IWeekStepHandler? robots = null, bool round8 = true, bool ending = true) =>
-        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots, trade: Trade, extra: Extra,
+        new(SoundRequests.Field(planting, _sound), files, devices, Catastrophes,
+            _sound is null ? Incidents : new SoundAfterStep(Incidents,
+                () => (Incidents.Current as WeekIncidentsStep)?.Incidents?.Events is { } e ? [.. SoundRequests.Of(e)] : null, _sound),
+            Stations, Harvest, robots, trade: Trade, extra: Extra,
             fatMike: round8 ? FatMike : null, purchase: round8 ? Purchase : null, contest: round8 ? Contest : null,
-            endRest: ending ? Ending : null);
+            endRest: ending ? Ending : null, sound: _sound);
 
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =

@@ -285,7 +285,9 @@ public class ProgramHostTests
     {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
-        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase, returnToMenu);
+        // the sound as in the RefEmu's default run (driver there, nothing playing), so the sound flags are compared too
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase, returnToMenu,
+            new Traders.Tests.Phases.StubSoundHost());
         bool targetSet = false;
         void Frame(long frame, IReadOnlyCollection<byte> held)
         {
@@ -379,11 +381,10 @@ public class ProgramHostTests
         Assert.Equal(call == Teardown ? week + 1 : week, p.Week); // 20B3:0071 counts the week of the end once more
 
         var original = p.DataSegment();
-        // bytes of the host (heap, C runtime), the output layers and the music, as in the lockstep tests of program start,
-        // menu and planting; everything else is the core's
+        // bytes of the host (heap, C runtime) and the output layers, as in the lockstep tests of program start, menu and
+        // planting; everything else is the core's (the sound flags DS:10A5, 10A9 included, lane partie part 2)
         List<(int Offset, int Length)> ignored = Traders.Tests.Phases.RefEmuWeekOracle.InterruptOwned.Select(r => (r.Offset, r.Length))
             .Concat(Traders.Tests.Phases.RefEmuProgramOracle.HostOwnedByInitialisation.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Phases.RefEmuProgramOracle.SoundOwned.Select(r => (r.Offset, r.Length)))
             .Concat(ProgramStartDifferentialTests.OutputOwned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.Phases.ProgramHumanDifferentialTests.MenuOutputOwned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.Field.PlantingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))

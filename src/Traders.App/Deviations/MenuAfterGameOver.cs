@@ -15,12 +15,14 @@ namespace Traders.App.Deviations;
 // [APPROX] bewusste Abweichung, Nutzer 23.11.2026 (R9 F3 = B): back to the main menu instead of the end of the program. The
 // machine ends in the frame the week loop returns; the loop start runs in the next frame (the original has no such step).
 // DS:08FA stays 1 as after exit A, so the menu asks "new game or continue" before a game (192D:12A6); "continue" runs the
-// week loop of the ended game again. The teardown 1777:018C (music off 218B:0153, effects off 21A7:0043) is not run.
+// week loop of the ended game again. The core's machine has run the sound part of the teardown 1777:018C (music off 218B:0153,
+// effects off 21A7:0043) when it ended; the loop start then starts the menu music again (218B:013A = 0).
 public sealed class MenuAfterGameOver(
     Dgroup state,
     OriginalRandom random,
     IReadOnlyDictionary<int, IProgramStepHandler> handlers,
-    IReadOnlyDictionary<int, IWeekStepHandler> weekHandlers)
+    IReadOnlyDictionary<int, IWeekStepHandler> weekHandlers,
+    ProgramSound? sound = null)
 {
     /// <summary>Returns to the main menu so far.</summary>
     public int Returns { get; private set; }
@@ -38,6 +40,6 @@ public sealed class MenuAfterGameOver(
     {
         if (machine.Status != ProgramStatus.Ended || !EndedByGameOver(events)) return null;
         Returns++;
-        return new ProgramMachine(state, random, handlers, weekHandlers, ProgramLoop.LoopStart, machine.LastFrame);
+        return new ProgramMachine(state, random, handlers, weekHandlers, ProgramLoop.LoopStart, machine.LastFrame, sound);
     }
 }

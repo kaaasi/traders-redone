@@ -1,6 +1,7 @@
 using Traders.Assets;
 using Traders.Assets.Loading;
 using Traders.App.Deviations;
+using Traders.App.Sound;
 using Traders.Core;
 using Traders.Core.Events;
 using Traders.Core.Menus;
@@ -84,20 +85,25 @@ public sealed class ProgramHost
     /// Menu switch: true (default) goes back to the main menu after the end of a game (<see cref="MenuAfterGameOver"/>), false
     /// ends the program there as the original does (<c>--original-ende</c>).
     /// </param>
+    /// <param name="sound">
+    /// The host's end of the sound control; null: <see cref="HostSound"/> on the original files (effect machine, music driver).
+    /// </param>
     public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true,
-        bool returnToMenu = true)
+        bool returnToMenu = true, ISoundHost? sound = null)
     {
         _dir = dosDirectory;
         var exe = Load("T.EXE");
         Core = ProgramSteps.InitialState(exe);
+        SoundHost = sound ?? HostSound.ForDirectory(dosDirectory, FileName);
+        Sound = new ProgramSound(Core, SoundHost);
         Start = new ProgramStart(Lengths, new MenuTextPlaque(), new TextFile(Load(ResourceTable.EnglishText), TextBufferOffset, TextBufferSegment));
-        Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
+        Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths, Sound);
         var masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
         var fonts = PowerPacker.Decrunch(Load(ResourceTable.Fonts));
         RuleFont[] ruleFonts = [.. DriverFonts.Select(f => RuleFontOf(fonts, f))];
         Screens = new WeekScreens(
             new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => EarlierPlayed(Layers!).Ds,
-                Fonts: () => ruleFonts),
+                Fonts: () => ruleFonts, Sound: Sound),
             new WeekScreenOutputs(Output<Core.Disasters.DisasterEvent>(e => Disasters!.Apply(e)),
                 Output<Core.Stations.StationEvent>(e => Stations!.Apply(e)), Output<Core.Field.FieldEvent>(e => Harvest!.Apply(e)),
                 Output<Core.Harvest.HarvestEvent>(e => Harvest!.Apply(e)), Output<Core.Trade.TradeEvent>(e => Trade!.Apply(e)),
@@ -115,9 +121,9 @@ public sealed class ProgramHost
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
         Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
         var random = new OriginalRandom(clock);
-        var steps = ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu);
-        Machine = new ProgramMachine(Core, random, steps, Week.Handlers);
-        MenuReturn = returnToMenu ? new MenuAfterGameOver(Core, random, steps, Week.Handlers) : null;
+        var steps = ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu, Sound);
+        Machine = new ProgramMachine(Core, random, steps, Week.Handlers, sound: Sound);
+        MenuReturn = returnToMenu ? new MenuAfterGameOver(Core, random, steps, Week.Handlers, Sound) : null;
 
         Driver = new ModeXDriver();
         Driver.Fonts = [.. DriverFonts.Select(f => new FontDescriptor(fonts, f.Offset, (ushort)f.Height, (ushort)f.Advance, (ushort)f.First))];
@@ -228,6 +234,21 @@ public sealed class ProgramHost
     /// <summary>The host's stand-in for the robot phase (call 18) when the robot switch is on, else null.</summary>
     public RobotPhaseSkip? RobotSkip { get; }
 
+    /// <summary>The program's sound control (core): the sound calls of main and the sound requests of the menus.</summary>
+    public ProgramSound Sound { get; }
+
+    /// <summary>The host's end of the sound control (executes the commands; <see cref="HostSound"/> unless given).</summary>
+    public ISoundHost SoundHost { get; }
+
+    /// <summary>The name of a music file behind a far pointer into the core's data segment (int 64h function 00h).</summary>
+    private string? FileName(ushort segment, ushort offset)
+    {
+        if (segment != DgroupLayout.Segment) return null;
+        var bytes = Core.Bytes;
+        int end = Array.IndexOf(bytes, (byte)0, offset);
+        return end < 0 ? null : System.Text.Encoding.ASCII.GetString(bytes, offset, end - offset);
+    }
+
     /// <summary>The host's return to the main menu after the end of a game when the menu switch is on, else null.</summary>
     public MenuAfterGameOver? MenuReturn { get; }
 
@@ -291,6 +312,7 @@ public sealed class ProgramHost
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held, Makes(held)));
             var events = Machine.DrainEvents();
             Machine.DrainWeekEvents();
+            Sound.Flush();
             if (MenuReturn?.Continue(Machine, events) is { } next) Machine = next;
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
