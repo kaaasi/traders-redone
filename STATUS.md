@@ -774,7 +774,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `23CD:3CE8` | [23CD_35DF_masken.md](docs/routines/23CD_35DF_masken.md) | `src/Traders.Vga/ModeXDriver.cs` | `DriverDifferentialTests.cs`, `DriverWrapTests.cs` | ✅ |
 | `27C6:0000` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
 | `27C6:0027` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:0043` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Input/KeyStateTable.cs` | `HostInputDifferentialTests.cs` | ✅ |
+| `27C6:0043` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Input/KeyStateTable.cs`, `src/Traders.Core/Phases/StepHandling.cs` | `HostInputDifferentialTests.cs` | ✅ |
 | `27C6:00AC` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Input/KeyStateTable.cs` | `HostInputDifferentialTests.cs` | ✅ |
 | `27C6:00D2` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.Core/Ending/EndScreens.cs` | `WaitKeyDifferentialTests.cs` | ✅ |
 | `27C6:0268` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/JoystickReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
