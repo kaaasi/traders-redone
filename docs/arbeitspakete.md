@@ -171,7 +171,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Menümusik liegt dem Nutzer vor (nicht im Repo). Gegenprobe im Review (Hüllkurve ohne Release, Frequenzzahl um ein Bit
   verschoben → rot).
 - **Abhängigkeiten:** keine (Eingabe `OplTrace`); Einbindung in den Host durch 0.
-- **Status:** Teile 1–3 fertig, Review offen (Claude, PR #245 `paket/klang`, Base `8cc9935`).
+- **Status:** Teile 1–3 fertig; Fixlauf R9K-1 (ymfm-Referenzhashes `OplReferenceTests`) und R9K-2 (Scheduler) erledigt, Delta-Prüfung offen; R9K-3 offen (Claude, PR #245 `paket/klang`).
 
 ## 5 `sammel` – P3-Sammlung (Sonnet)
 

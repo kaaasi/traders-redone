@@ -131,4 +131,39 @@ public class OplHostAudioTests
         s.Render(pcm);
         Assert.True(pcm.Max(v => Math.Abs((int)v)) < 100);
     }
+
+    [Fact]
+    public void Slow_device_keeps_every_write_on_its_own_sample_position()
+    {
+        // R9K-2: the device plays 5 % slower than the host clock (about 73 timer ticks per second, one write per tick);
+        // a forward correction must not pile writes up on one sample position while the render position catches up
+        const int latency = 2205;
+        var s = new OplScheduler(Rate, latency);
+        int perTick = (int)(Rate * 16384.0 / 1_193_182 * 0.95);
+        var block = new short[perTick];
+        long previous = -1, maxLag = 0;
+        for (int tick = 1; tick <= 120 * 73; tick++)
+        {
+            s.Enqueue(new OplWrite(tick, 0x20, 0x01));
+            Assert.True(s.LastTarget > previous, $"tick {tick}: target {s.LastTarget} not after {previous}");
+            previous = s.LastTarget;
+            maxLag = Math.Max(maxLag, s.LastTarget - s.Rendered);
+            s.Render(block);
+        }
+        Assert.Equal(1, s.Anchorings);
+        Assert.True(s.Corrections > 0);
+        Assert.InRange(maxLag, 1, 4L * latency + Rate / 10 + Rate / 10); // stays near the re-anchoring limit
+    }
+
+    [Fact]
+    public void Write_after_a_pause_of_a_second_or_more_jumps_ahead_cleanly()
+    {
+        var s = new OplScheduler(Rate, latencySamples: 2205);
+        s.Enqueue(new OplWrite(0, 0x20, 0x01));
+        s.Render(new short[Rate / 4]);
+        s.Enqueue(new OplWrite(300, 0x20, 0x01));     // about 4 s of host time later, device only played 0.25 s
+        Assert.Equal(2, s.Anchorings);
+        Assert.Equal(Rate / 4 + 2205, s.LastTarget);
+        Assert.Equal(0, s.Corrections);
+    }
 }
