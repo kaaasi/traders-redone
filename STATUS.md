@@ -572,7 +572,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1F63:13FE` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:143E` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:147B` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
-| `20B3:0005` | [20B3_0005_endpruefung.md](docs/routines/20B3_0005_endpruefung.md) | `src/Traders.Core/Ending/EndCheck.cs`, `src/Traders.Core/Ending/EndScreens.cs` | `ProgramHostTests.cs`, `EndCheckDifferentialTests.cs`, `EndScreensDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
+| `20B3:0005` | [20B3_0005_endpruefung.md](docs/routines/20B3_0005_endpruefung.md) | `src/Traders.Core/Ending/EndCheck.cs`, `src/Traders.Core/Ending/EndScreens.cs` | `ProgramHostTests.cs`, `EndCheckDifferentialTests.cs`, `EndScreensDifferentialTests.cs`, `EndingFrameDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `20B3:008E` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `20B3:015B` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `20B3:0267` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |

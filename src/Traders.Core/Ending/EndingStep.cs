@@ -24,6 +24,11 @@ public sealed class EndingStep(IEndingHost host, Func<int, ImageFileLengths> fil
 {
     private IEnumerator<FieldWait>? _run;
 
+    /// <summary>Frames waited so far, by kind: retrace waits of the original, polls of the key wait 27C6:00D2.</summary>
+    public int Retraces { get; private set; }
+
+    public int Polls { get; private set; }
+
     /// <summary>The rule page of the running end screens.</summary>
     public EndingPage? Page { get; private set; }
 
@@ -44,7 +49,12 @@ public sealed class EndingStep(IEndingHost host, Func<int, ImageFileLengths> fil
 
     private StepOutcome Next()
     {
-        if (_run!.MoveNext()) return StepOutcome.Running;
+        if (_run!.MoveNext())
+        {
+            if (_run.Current == FieldWait.Retrace) Retraces++;
+            else Polls++;
+            return StepOutcome.Running;
+        }
         _run.Dispose();
         _run = null;
         return StepOutcome.Finished(1); // 20B3:0088
@@ -64,6 +74,15 @@ public sealed class EndingStep(IEndingHost host, Func<int, ImageFileLengths> fil
 
         public void Emit(EndingEvent e) => host.Emit(e);
         public byte ReadPixel(RulePage page, short x, short y) => host.ReadPixel(page, x, y);
-        public IEnumerable<FieldWait> Report(Dgroup d, OriginalRandom random) => host.Report(d, random);
+        /// <summary>
+        /// 0825:000A(0): its picture load 186C:0002(DS:08CE) comes before its first wait (after 0825:06CB, which leaves DS:08CE
+        /// alone), so the picture table entry is recorded at the call, as <see cref="Phases.WeekSteps"/> does for call 3.
+        /// </summary>
+        public IEnumerable<FieldWait> Report(Dgroup d, OriginalRandom random)
+        {
+            // [ORIGINAL] 186C:0002 – called from 0825:000A; the picture table entry and DS:09C8 (ImageTable.RecordLoad)
+            ImageTable.RecordLoad(state, d.U16(Week.ReportLayout.Picture), files);
+            return host.Report(d, random);
+        }
     }
 }
