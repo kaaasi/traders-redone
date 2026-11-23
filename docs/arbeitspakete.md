@@ -165,6 +165,13 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Wiederholen aus, Fahrt ohne Schrittweite → rot).
 - **Abhängigkeiten:** keine (Tonbefehle aus 2 über eine schmale eigene Schnittstelle; bei Konflikt rebased die später gemergte
   Spur). Größe unbekannt (Treiber 756h Absätze resident inkl. Puffer); bis zu zwei Fortsetzungen über das Limit (F2).
+- **Stand** (Spur, 22.11.2026): PR #244, beide Teile fertig. Teil 1: `FxDriverImage` (LZEXE-Entpacker, Gegenprobe gegen den
+  RefEmu), `tools/fxdriver.py`, `[ORIGINAL-FX]` in `tools/abdeckung.py`, Befund `analyse/FXDRIVER.md`. Teil 2:
+  `Traders.Audio.Music.FxMusicDriver` (Treiber als Zustandsmaschine, Ausgabe OPL-Schreibungen, `Opl/OplWrite.cs` angelegt),
+  Differenztests gegen den Treiber im RefEmu und gegen das Spiel mit `runFxDriver` (alle drei Stücke ≥ 60 s). Review R9-Musik (Head `df8cd69`): R9M-1, R9M-2.
+  **Fixlauf** (Claude Sonnet, 23.11.2026): R9M-1: `FxMusicDriver.Tick(long timerTick)` stempelt mit dem Tick des Aufrufers (Zeitgeberticks, jeder
+  vierte, Phase vom Aufrufer; `CurrentTick` für Funktionen); Tests prüfen Abstand 4 und Phase 3/2/1/0 gegen die RefEmu-Probe des Reviews.
+  `OplWrite.cs`, `FXDRIVER.md` §6, `TON.md` §2/§5 nachgezogen. R9M-2: Signaturbytes entfernt, `FxDriverImage.Unpack` prüft Kopffelder und SHA-256.
 
 ## 4 `klang` – OPL2-Synthese und Tonausgabe im Host
 
