@@ -37,13 +37,21 @@ von 2 oder 3 (braucht nur `OplTrace`, darf auch früher starten, falls Kontingen
   `analyse/TON.md` §2). **Schnittstelle zwischen den Tonspuren:** Folge von OPL2-Registerschreibungen mit Tick
   (`(Tick, Register, Wert)`), vergleichbar mit `Traders.RefEmu/Machine/OplTrace.cs`. **Zeitbasis** (R9PL-2): Effekte – Tick =
   Aufrufnummer von `0000:0732` (per `Call` einzeln treibbar, endet mit `retf`); Musik – Tick = ⌊(Time − T₀)/4000h⌋ mit T₀ = Setzen
-  des PIT-Teilers, Phase relativ zu Fn 01h; Schreibungen in Fn 00h/05h/06h außerhalb eines Ticks gesondert. Vergleiche je
-  Tonbefehl relativ zum Befehlstick, nie absolute PIT-Zeit über Bilder (der Port taktet Bilder). PC-Lautsprecher `2850` entfällt (Nutzer
+  des PIT-Teilers; Schreibungen in Fn 00h/05h/06h außerhalb eines Ticks gesondert. Vergleiche je
+  Tonbefehl relativ zum Befehlstick, nie absolute PIT-Zeit über Bilder (der Port taktet Bilder).
+  **Einheit** (Leitstelle 23.11.2026, R9M-1): `OplWrite.Tick` zählt für Effekte und Musik einheitlich Zeitgeberticks
+  (72,82 Hz). `FxMusicDriver` bekommt den Tick vom Aufrufer (Host bzw. Spur 0) und stempelt seine Schreibungen damit; Tests
+  prüfen Abstand 4 und Phase gegen die RefEmu-Probe aus dem Review. **Einzige Phasenregel** (R9T-1, R9T-3): Die Zeitgeber-ISR
+  `27C6:03E4` ruft je Tick zuerst den Effekt-Rückruf und erhöht dann `DS:1180`; die Musik (alter Vektor) läuft in dem Tick, in dem
+  `DS:1180` danach ≡ 0 (mod 4) ist; `27C6:037A` setzt `DS:1180` = 0 (Befund `27C6_0043_eingabe_zeitgeber.md`). Gemeinsamer
+  Tickzähler für Effekte und Musik ist deshalb `DS:1180` nach dem Erhöhen; bis Spur 0 beide Ströme so verankert, haben Effekte
+  (Aufrufnummer ab 1) und Musik (ab T₀) verschiedene Nullpunkte und werden nur relativ verglichen (R9T-2, R9E-2). PC-Lautsprecher `2850` entfällt (Nutzer
   11.11.2026); der Port nimmt `DS:0910` = 1 (AdLib) an.
 - **Daten und Marker der Tonspuren** (R9PL-3, Leitstelle 22.11.2026): Tabellen aus dem Original (`CS:15B2` und weitere der
   Effektmaschine, Noten-, Operator- und Tempotabellen von `FXDRIVER`) nie als Tabelle im Code, sondern zur Laufzeit gelesen –
   aus `T.EXE` bzw. aus `FXDRIVER.EXE` über einen eigenen LZEXE-Entpacker in `src/Traders.Assets/` (Spur 3, Muster
-  `Dgroup.FromExe`). Ausgaben von `tools/fxdriver*` nur in ein git-ignoriertes Verzeichnis. Marker für Fremdprogramme:
+  `Dgroup.FromExe`). Ausgaben von `tools/fxdriver*` nur in ein git-ignoriertes Verzeichnis; auch
+  Erkennungssignaturen nicht als Bytes aus dem Original im Code, sondern über Kopffelder und Prüfsumme (R9M-2). Marker für Fremdprogramme:
   `[ORIGINAL-FX] OOOO` (Offset im entpackten Abbild von `FXDRIVER.EXE` V1.06); `tools/abdeckung.py` erweitert Spur 3 additiv
   (zählt und prüft sie getrennt, Regel 2.8 gilt sinngemäß). OPL2-Synthese (Spur 4) ist kein Original und bekommt keine Marker.
 - **Mehrrundenprobe** (`AGENTS.md` §5): Spur 1 über Orakelzustände an Aufruf 19 aus echten Partien (Ende in Woche 0–3, Mensch
