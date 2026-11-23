@@ -121,6 +121,84 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 
 | Adresse | Befund | C# (`[ORIGINAL]`) | Differenztest | Status |
 |---|---|---|---|---|
+| `0000:06FE` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0724` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs` | ✅ |
+| `0000:0732` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0750` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0770` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0812` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0866` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0921` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0946` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:094B` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0953` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:09A2` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09A8` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09B4` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09CC` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09DF` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09E5` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:09FB` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A18` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A1F` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A3A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A40` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A5D` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A81` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0A97` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0AAD` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0ABB` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0AC1` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0AE0` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0AE6` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B02` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B32` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B3B` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B4E` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B64` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B6D` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B74` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B7D` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B83` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0B89` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0BAA` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0BCD` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0BEB` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0C09` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0C15` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0C81` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0CB4` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0CBD` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0D77` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0D81` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0D85` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0D8B` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0DA8` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0DAB` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0E8A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0EBA` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0ECD` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:0F71` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:1015` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:10A5` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:10AB` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Commands.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:10B5` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:116A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:119A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:11C2` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:11FA` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:120B` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:121C` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:127A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:12A9` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:12E1` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:131F` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:1352` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:13BE` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:1408` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:1461` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:148A` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsSequenceTests.cs` | ✅ |
+| `0000:150E` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.Voices.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
 | `0000:4F65` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `0000:5079` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `0000:5101` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
@@ -686,7 +764,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 
 | Segment | Größe | Far-Einsprünge | mit Befund | portiert | mit Differenztest |
 |---|---:|---:|---:|---:|---:|
-| `0000` | 0x5350 | 76 | 3 | 3 | 3 |
+| `0000` | 0x5350 | 76 | 81 | 81 | 81 |
 | `0535` | 0xD40 | 24 | 0 | 0 | 0 |
 | `0609` | 0x21C0 | 56 | 57 | 57 | 57 |
 | `0825` | 0xAA0 | 16 | 16 | 16 | 16 |
@@ -731,7 +809,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **546** | **534** | **534** |
+| **Summe** | **0x28DC0** | **891** | **624** | **612** | **612** |
 
 <!-- abdeckung:ende -->
 
