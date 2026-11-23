@@ -1,0 +1,43 @@
+# Fremdcode und Lizenzen
+
+## ymfm (OPL2-Synthese)
+
+- **Verwendet in:** `src/Traders.Audio/Opl/` (`Opl2.cs`, `Opl2Channel.cs`, `Opl2Operator.cs`, `OplTables.cs`) – C#-Übertragung
+  der YM3812-Teile (`ym3812`, `opl_registers_base<2>`, `fm_engine_base`, `fm_channel`, `fm_operator`, Tabellen) aus
+  `src/ymfm_opl.h`, `src/ymfm_opl.cpp`, `src/ymfm_fm.h`, `src/ymfm_fm.ipp`, `src/ymfm.h`; kein NuGet-Paket.
+- **Quelle:** <https://github.com/aaronsgiles/ymfm>, Stand `81aec25ccbb98f4873a255f7551ac4dadac59b4a`.
+- **Entscheidung:** F1 = B (Nutzer 22.11.2026, `docs/arbeitspakete.md` R9); nach v1.0 durch eine eigene Umsetzung zu ersetzen
+  (Erweiterung E8, `docs/PORTIERUNGSPLAN.md` §6).
+- **Lizenz:** BSD 3-Clause, Wortlaut:
+
+```text
+BSD 3-Clause License
+
+Copyright (c) 2021, Aaron Giles
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
