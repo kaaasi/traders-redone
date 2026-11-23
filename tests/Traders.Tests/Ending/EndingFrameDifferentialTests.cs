@@ -66,6 +66,8 @@ public class EndingFrameDifferentialTests
     public void A_mutated_port_leaves_the_lockstep(string name)
     {
         var mutation = Enum.Parse<Mutation>(name);
+        // the original files must be there: a run that fails for want of them proves nothing (pflichtlauf without data)
+        Assert.True(Traders.Tests.TestGameData.Available, $"original files missing ({Traders.Tests.TestGameData.DosDir})");
         var e = Record.Exception(() => Run(new Script(GameA, 0, F10: false, []), mutation));
         Assert.NotNull(e);
         _out.WriteLine($"{mutation}: {e.Message}");
