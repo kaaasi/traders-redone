@@ -1,5 +1,15 @@
 # Zwischenstände
 
+## Runde 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (22.11.2026–) · in Arbeit
+
+- Prozess: Plan (PR #239, Plan-Review „Nein“ R9PL-1–9 eingearbeitet; F1 = B, E8 nach v1.0), Einheit der OPL-Ticks und
+  Phasenregel `DS:1180` (PR #250, R9M-1/R9T-1).
+- Spur 5 `sammel` (PR #242): #236, #221, #220, #75 B2/B3, #49; #76 R3H-1/-3.
+- Spur 3 `musik` (PR #244): CMF-Wiedergabe nach `FXDRIVER.EXE` V1.06, eigener LZEXE-Entpacker, Marker `[ORIGINAL-FX]`.
+- Spur 2 `effekte` (PR #243): Tonsteuerung `218B`/`21A7` im Kern, Effektmaschine `0000:06FE`–`15B1` mit Ring und eigenem Zufall; #76 R3H-2.
+- Spur 4 `klang` (PR #245): OPL2-Synthese als Übertragung von ymfm (BSD-3-Clause, `THIRD_PARTY.md`), Tonausgabe im Host, WAV-Export.
+- Spur 1 `ende` (PR #241): Rest von `20B3:0005` (Endbild, Abend, Rangbild, 26 Routinen) Bild für Bild, Szene pixelgenau.
+
 ## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Abschluss nach Gesamtreview „Ja“
 
 - Prozess: Plan (PR #214, Plan-Review „Nein“ R8PL-1–5 eingearbeitet, Delta-Prüfung Leitstelle).

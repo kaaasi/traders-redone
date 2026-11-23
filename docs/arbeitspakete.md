@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md), Runde 8: [archiv/runde-8.md](archiv/runde-8.md)).
 
-## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go Nutzer 22.11.2026)
+## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go Nutzer 22.11.2026; Spuren 1–5 gemergt 23.11.2026)
 
 **Ziel:** Zwischenziel **„Gesamtpartie ohne Roboterkampf“** (Nutzer 11.11.2026): Der Host spielt mit Roboter-Schalter
 (R7 F3 = A) vom Hauptmenü über eine neue Partie Woche für Woche bis zum Ende (Zielvermögen oder F10), zeigt die Endbilder
@@ -107,6 +107,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Ende; Gegenprobe im Review (Rest von 19 ausgelassen, Wochenzähler bei Ende nicht erhöht, Ton bei `10A7` = 0 trotzdem
   ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
+- **Status (Leitstelle):** gestartet 23.11.2026 (geplanter Lauf `Traders R9 partie`, Opus) nach Merge von 1–5; mitzunehmen #253, #254, #256. Für #254 zusätzlich erlaubt: `src/Traders.Audio/Effects/EffectMachine*.cs` und `tests/Traders.Tests/Audio/Effects*` (Tick vom Aufrufer, gemeinsamer Zähler `DS:1180`).
 - **Status:** Teil 1 fertig (PR #259, Claude): `EndCheckStep` bekommt mit den Schriften als Eingabe (`WeekScreenInputs.Fonts`)
   `EndingStep` als Rest (`WeekScreens.Ending`, Szene `EndingScene` im Host), Tastenzähler `DS:115D` als Eingabe des Ticks
   (`PhaseTick.Makes`); Host spielt mit Roboter-Schalter über das Ende bis zum Abbau `1777:018C` gleich dem Original
@@ -133,6 +134,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Pixelziel 2/6 vertauscht, `4B9A` nicht erhöht, Bilanz mit Parameter 1, Rang bei Gleichstand falsch, ein Bild doppelt
   verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xCE4 Byte.
+- **Status (Leitstelle):** **gemergt 23.11.2026** (PR #241, Claude Opus, Fortsetzungen 2 von 3; Review `reviews/2026-11-23-r9-ende.md` „Ja“ ohne Befunde, Merge von `main` Haiku, Delta-Prüfung Leitstelle, CI mit Originaldaten grün).
 - **Status:** Teil 1 fertig (PR #241, Claude): Befund `20B3_008E_ende.md`, `EndScreens`/`EndingStep`/`EndingPage`,
   Differenztests Aufrufe, Zufall, Datensegment (echte Partie Woche 0–3, F10, gesetzte Zustände), Regelseite gegen das
   unveränderte Original (`EveningRulePageTests`), `27C6:00D2`. Teil 2 fertig (Fortsetzung 1): `EndingFrameDifferentialTests`
@@ -160,6 +162,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   und `CS:0415`–`042C` nach jedem Tick gleich, auch über Effektgrenzen; Gegenprobe im Review (Ring ohne Überlauf, `a` statt `b`
   gelesen, Musik nicht gestoppt, Ton aus ignoriert, Zufallszustand `03F8` zwischen Effekten zurückgesetzt → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xF60 Byte; bis zu zwei Fortsetzungen über das Limit (F2 = ja).
+- **Status (Leitstelle):** **gemergt 23.11.2026** (PR #243, Claude Opus, Fortsetzungen 1 von 3; Review `reviews/2026-11-23-r9-effekte.md` „Ja“, P3 R9E-1/-2 → #253, #254; #76 erledigt).
 - **Status:** fertig – Review (Claude, PR #243 `paket/effekte`, Base `8cc9935`): Teil 1 fertig; Teil 2 fertig (Review); nach Merge von #244/#245 Ausgabe `EffectWrite` → `Opl.OplWrite` beim Rebase.
 
 ## 3 `musik` – CMF-Wiedergabe nach `FXDRIVER.EXE`
@@ -179,6 +182,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Wiederholen aus, Fahrt ohne Schrittweite → rot).
 - **Abhängigkeiten:** keine (Tonbefehle aus 2 über eine schmale eigene Schnittstelle; bei Konflikt rebased die später gemergte
   Spur). Größe unbekannt (Treiber 756h Absätze resident inkl. Puffer); bis zu zwei Fortsetzungen über das Limit (F2).
+- **Status (Leitstelle):** **gemergt 23.11.2026** (PR #244, Claude Opus; Review `reviews/2026-11-23-r9-musik.md` „Nein“ R9M-1 P2, R9M-2 P3 → Fixlauf Sonnet, Delta-Prüfung Leitstelle; Einheit der Ticks PR #250).
 - **Stand** (Spur, 22.11.2026): PR #244, beide Teile fertig. Teil 1: `FxDriverImage` (LZEXE-Entpacker, Gegenprobe gegen den
   RefEmu), `tools/fxdriver.py`, `[ORIGINAL-FX]` in `tools/abdeckung.py`, Befund `analyse/FXDRIVER.md`. Teil 2:
   `Traders.Audio.Music.FxMusicDriver` (Treiber als Zustandsmaschine, Ausgabe OPL-Schreibungen, `Opl/OplWrite.cs` angelegt),
@@ -200,6 +204,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Menümusik liegt dem Nutzer vor (nicht im Repo). Gegenprobe im Review (Hüllkurve ohne Release, Frequenzzahl um ein Bit
   verschoben → rot).
 - **Abhängigkeiten:** keine (Eingabe `OplTrace`); Einbindung in den Host durch 0.
+- **Status (Leitstelle):** **gemergt 23.11.2026** (PR #245, Claude Opus; Review `reviews/2026-11-23-r9-klang.md` „Nein“ R9K-1 P2, R9K-2 P3 → Fixlauf Sonnet, Merge von `main` Sonnet, Delta-Prüfung Leitstelle; R9K-3 → #256).
 - **Status:** Teile 1–3 fertig; Fixlauf R9K-1 (ymfm-Referenzhashes `OplReferenceTests`) und R9K-2 (Scheduler) erledigt, Delta-Prüfung offen; R9K-3 offen (Claude, PR #245 `paket/klang`).
 
 ## 5 `sammel` – P3-Sammlung (Sonnet)
@@ -213,6 +218,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   belegt ein Test einen Fehler, `spur-wartet` mit Befund.
 - **Abnahme:** alle drei Läufe grün; #49, #75, #220, #221, #236 geschlossen, #76 bis auf R3H-2 (`Fixes #…` bzw. Kommentar).
 - **Abhängigkeiten:** keine. Früh mergen.
+- **Status (Leitstelle):** **gemergt 23.11.2026** (PR #242, Claude Sonnet; Review `reviews/2026-11-23-r9-sammel.md` „Ja“, P3 R9S-1 → #249; offen #75 B1).
 - **Status (Claude Sonnet, 22.11.2026, PR #242):** alle Teile erledigt, `pruefen.sh --schnell` grün (1206 Tests). #236: lange Suche
   beidseitig im Gleichschritt, Endlosfall original-seitig über das Befehlsbudget begrenzt (Port-Schleife ohne Prüfnaht nicht
   begrenzbar, kein Produktivcode). #221: Alias je Block, Gegenprobe rot. #220: Absatz auf Stand R8. #75: B2 (neun Aufrufe) und B3
