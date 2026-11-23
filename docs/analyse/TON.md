@@ -74,6 +74,18 @@ und Musik; der Musiktakt kommt vom Aufrufer (Abstand 4, Phase 0…3 aus dem Zeit
 - **Tick `0000:0732`** (72,82 Hz): `0770` (Auftrag holen, Klangfolge aus der Tabelle starten), `0866`, `121C` (Stimmen
   fortschreiben, OPL-Register) – Inhalt nicht untersucht.
 
+### 4.1 Nachtrag R9, Spur `effekte`
+
+- **Teil 1 portiert** (`src/Traders.Core/Sound/SoundControl.cs`, Befund `docs/routines/218B_21A7_ton.md`): `218B` und `21A7` geben
+  `SoundCommand`s aus; `0153` lässt `10A5` stehen, wenn Fn 12h 0 meldet; `0002` übergibt den ersten Puffer mit dem unnormalisierten
+  Zeiger der Zuteilung, die übrigen normalisiert (Huge-Zeiger `0000:5079`).
+- **Teil 2 portiert** (`src/Traders.Audio/Effects/EffectMachine*.cs`, Befund `docs/routines/0000_0750_effekte.md`): Die
+  Effektmaschine arbeitet nur auf ihrem Codesegment (`DS` = `CS` = Segment `0000`); der Port überträgt sie Befehl für Befehl auf
+  einer Kopie des 64-KiB-Fensters aus `T.EXE` (Tabellen zur Laufzeit). Belegt: Ring mit Byteversatz und ohne Überlaufschutz (16
+  offene Aufträge = leer, #76 R3H-2), eigener Zufall `03F8` nur in `0812` zurückgesetzt, Stapelrutsch in `148A` beendet die
+  Stimmenschleife des Ticks, doppelte BDh-Schreibung in `0E8A`. Im Spiel tickt die Maschine erst ab `21A7:000D` (Spielstart bzw.
+  erster Effekt nach Musik, die `0054` vorher stoppt); im Hauptmenü läuft sie nicht.
+
 ## 5. Für den Port (R10)
 
 - Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz; `FxMusicDriver.Tick(timerTick)` bekommt die Tick-Nummer samt Phase vom Host). Der Kern löst nur Ereignisse
