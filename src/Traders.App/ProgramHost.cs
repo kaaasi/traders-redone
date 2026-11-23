@@ -36,8 +36,9 @@ namespace Traders.App;
 /// 1C68 (call 18) is ported; with the robot switch on (default, decision F3 = A of R7) the host skips it
 /// (<see cref="RobotPhaseSkip"/>) and plays week after week without a halt until the end check (call 19) ends the game
 /// (<see cref="GameOver"/>): the end screens run with their scene (<see cref="Ending"/>) up to the any-key wait, then the week
-/// loop returns AL = 1 and main ends the program (1777:0184 → teardown 018C, exit code 0). Without the switch the machine
-/// halts at call 18 as the core does; <see cref="Halt"/> then names the call.
+/// loop returns AL = 1 and main ends the program (1777:0184 → teardown 018C, exit code 0) – with the menu switch on (default,
+/// decision F3 = B of R9) the host goes back to the main menu instead (<see cref="MenuAfterGameOver"/>). Without the robot
+/// switch the machine halts at call 18 as the core does; <see cref="Halt"/> then names the call.
 /// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
 /// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
 /// scene its numbers (2295:0001 is an output call there), and the core reads the texts from it.
@@ -79,7 +80,12 @@ public sealed class ProgramHost
     /// <param name="skipRobotPhase">
     /// Robot switch: true (default) skips call 18 (<see cref="RobotPhaseSkip"/>), false halts there (<c>--original-roboter</c>).
     /// </param>
-    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true)
+    /// <param name="returnToMenu">
+    /// Menu switch: true (default) goes back to the main menu after the end of a game (<see cref="MenuAfterGameOver"/>), false
+    /// ends the program there as the original does (<c>--original-ende</c>).
+    /// </param>
+    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true,
+        bool returnToMenu = true)
     {
         _dir = dosDirectory;
         var exe = Load("T.EXE");
@@ -108,8 +114,10 @@ public sealed class ProgramHost
                 EndingReport: Output<Core.Week.WeekEvent>(e => Ending!.Apply(e))));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
         Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
-        Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
-            Week.Handlers);
+        var random = new OriginalRandom(clock);
+        var steps = ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu);
+        Machine = new ProgramMachine(Core, random, steps, Week.Handlers);
+        MenuReturn = returnToMenu ? new MenuAfterGameOver(Core, random, steps, Week.Handlers) : null;
 
         Driver = new ModeXDriver();
         Driver.Fonts = [.. DriverFonts.Select(f => new FontDescriptor(fonts, f.Offset, (ushort)f.Height, (ushort)f.Advance, (ushort)f.First))];
@@ -220,12 +228,25 @@ public sealed class ProgramHost
     /// <summary>The host's stand-in for the robot phase (call 18) when the robot switch is on, else null.</summary>
     public RobotPhaseSkip? RobotSkip { get; }
 
-    /// <summary>Note for the status line while the robot switch is on (null when it is off).</summary>
-    public string? Deviation => RobotSkip is null ? null : "robot phase skipped (deviation, --original-roboter turns it off)";
+    /// <summary>The host's return to the main menu after the end of a game when the menu switch is on, else null.</summary>
+    public MenuAfterGameOver? MenuReturn { get; }
+
+    /// <summary>Note for the status line while a deviation switch is on (null when both are off).</summary>
+    public string? Deviation => (RobotSkip, MenuReturn) switch
+    {
+        (null, null) => null,
+        (not null, null) => "robot phase skipped (deviation, --original-roboter turns it off)",
+        (null, not null) => "back to the menu after the end (deviation, --original-ende turns it off)",
+        _ => "robot phase skipped, back to the menu after the end (deviations, --original-roboter, --original-ende)",
+    };
 
     public Dgroup Core { get; }
 
-    public ProgramMachine Machine { get; }
+    /// <summary>
+    /// The core's program machine; after the end of a game with the menu switch on, the machine that goes on at the loop start
+    /// (<see cref="MenuAfterGameOver"/>).
+    /// </summary>
+    public ProgramMachine Machine { get; private set; }
 
     public ProgramStart Start { get; }
 
@@ -268,8 +289,9 @@ public sealed class ProgramHost
             Ending.NextFrame(held);
             Report.NextFrame();
             Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held, Makes(held)));
-            Machine.DrainEvents();
+            var events = Machine.DrainEvents();
             Machine.DrainWeekEvents();
+            if (MenuReturn?.Continue(Machine, events) is { } next) Machine = next;
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
             PlayEarlier();

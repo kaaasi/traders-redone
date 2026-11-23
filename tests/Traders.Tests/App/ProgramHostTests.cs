@@ -116,7 +116,7 @@ public class ProgramHostTests
         Assert.Contains("call 18 ", host.Halt);
         Assert.False(host.GameOver);
         Assert.Null(host.RobotSkip);
-        Assert.Null(host.Deviation);
+        Assert.DoesNotContain("robot", host.Deviation);
         AssertLikeOriginal(host, WeekSteps.RobotCall, week: 0);
     }
 
@@ -129,7 +129,8 @@ public class ProgramHostTests
     /// After the end check of week 0 the target DS:08F4 is set to 0 on both sides (the only other reader is the target line of
     /// the week report, drawn on both sides alike), so the end check of week 1 ends the game (exit B): the end screens run in
     /// the core with their scene (lane partie part 1) up to the any-key wait 27C6:00D2, a key (RETURN) ends it, the week loop
-    /// returns AL = 1 and main goes to its teardown (1777:0184 → 018C): the program machine ends with exit code 0. Expected
+    /// returns AL = 1 and main goes to its teardown (1777:0184 → 018C) – menu switch off (<c>--original-ende</c>): the program
+    /// machine ends with exit code 0. Expected
     /// values from the original with its call 18 jumped over in both weeks (IP set to the return address at the call site, the
     /// call takes no arguments) and a key once it waits in 27C6:00D2: data segment and picture shown at the teardown
     /// 1777:018C are equal.
@@ -138,14 +139,15 @@ public class ProgramHostTests
     [GameDataFact]
     public void Host_with_the_robot_switch_plays_over_the_week_boundary_through_the_end_screens_to_the_teardown_like_the_original()
     {
-        var host = PlayToHalt(skipRobotPhase: true);
+        var host = PlayToHalt(skipRobotPhase: true, returnToMenu: false);
         var week = host.Machine.WeekMachine!;
         Assert.Equal(1, week.Week);
         Assert.Equal(WeekSteps.EndCall, week.NextStep);
         Assert.True(host.GameOver);
         Assert.Null(host.Halt);
         Assert.Equal(2, host.RobotSkip!.Skipped);
-        Assert.NotNull(host.Deviation);
+        Assert.Null(host.MenuReturn);
+        Assert.DoesNotContain("menu", host.Deviation);
         Assert.False(host.Trade.Presenting);
         Assert.False(host.Extra.Presenting);
         Assert.False(host.FatMike.Presenting);
@@ -171,6 +173,65 @@ public class ProgramHostTests
         Assert.Null(host.Machine.WeekMachine);
         Assert.False(host.Ending.Presenting);
         AssertLikeOriginal(host, Teardown, week: 1);
+    }
+
+    /// <summary>
+    /// Both switches on (the host's defaults; decisions F3 = A of R7 and F3 = B of R9): the game as above up to the end screens and
+    /// their key wait, a key (RETURN); where the original goes to its teardown the host goes back to the main menu
+    /// (<see cref="Traders.App.Deviations.MenuAfterGameOver"/>): loop start 1777:013B in the next frame, main menu entered a
+    /// second time, its plate after two passes the same as at the first entry (pixels through the DAC; the rivets and the wood
+    /// depend on the menu's random draws). DS:08FA stays 1 as
+    /// after exit A, so RETURN brings the dialog "new game or continue" (192D:12A6); N starts a new game (0E31:0003, the week
+    /// counter DS:4B9A back to 0) and the week loop runs again. The ending itself is compared with the original in the test
+    /// above; the return has no original to compare with.
+    /// Counter-check (local): the host without the switch (<c>returnToMenu: false</c>) → red (the program ends).
+    /// </summary>
+    [GameDataFact]
+    public void Host_with_both_switches_goes_back_to_the_main_menu_after_the_end_screens_and_starts_a_new_game()
+    {
+        uint[]? firstMenu = null;
+        var host = PlayToHalt(skipRobotPhase: true, beforeFrame: (h, _) =>
+        {
+            if (firstMenu is null && h.Menu.Calls == 1 && Passes(h) == 2) firstMenu = Shown(h);
+        });
+        Assert.NotNull(firstMenu);
+        Assert.True(host.GameOver);
+        Assert.NotNull(host.MenuReturn);
+        var ending = Assert.IsType<Traders.Core.Ending.EndingStep>(host.Screens.Ending!.Current);
+        long f = host.LastFrame + 1;
+        for (long until = f + 60_000; f < until && ending.Polls == 0; f++) host.Frame(f, []);
+        Assert.True(ending.Polls > 0, "the end screens did not reach the key wait");
+        for (int i = 0; i < 6; i++) host.Frame(f++, [MenuKeys.Enter]);
+        for (long until = f + 2000; f < until && (host.Menu.Calls < 2 || Passes(host) < 2); f++) host.Frame(f, []);
+
+        Assert.Equal(1, host.MenuReturn.Returns);
+        Assert.Equal(ProgramStatus.Waiting, host.Machine.Status);
+        Assert.Equal(ProgramLoop.MainMenu, host.Machine.NextStep);
+        Assert.Equal(2, host.Menu.Calls);
+        Assert.Equal(2, Passes(host));
+        Assert.Null(host.Machine.WeekMachine);
+        Assert.False(host.Ending.Presenting);
+        Assert.Equal(1, host.Core.U8(ProgramLoop.GameRunning));
+        var shown = Shown(host);
+        // the plate without its corner rivets (the rivets and the wood around depend on the menu's random draws)
+        int diff = Enumerable.Range(0, shown.Length)
+            .Count(i => i % FramePresenter.Width is >= 72 and < 248 && i / FramePresenter.Width is >= 16 and < 184 && shown[i] != firstMenu[i]);
+        Assert.True(diff == 0, $"{diff} pixels of the menu plate differ from its first entry");
+
+        // RETURN: the dialog of a game in progress; N: a new game, the week loop again
+        for (int i = 0; i < 6; i++) host.Frame(f++, [MenuKeys.Enter]);
+        for (long until = f + 600; f < until && host.Machine.Status != ProgramStatus.InWeek; f++)
+            host.Frame(f, f % 20 < 6 ? [MenuKeys.N] : []);
+        Assert.Equal(ProgramStatus.InWeek, host.Machine.Status);
+        Assert.Equal(0, host.Core.U16(DgroupLayout.Week));
+        Assert.False(host.Machine.IsBlocked);
+    }
+
+    private static uint[] Shown(ProgramHost host)
+    {
+        var shown = new uint[FramePresenter.Width * FramePresenter.Height];
+        FramePresenter.Present(host.Driver.Vram, host.Driver.DisplayStart, host.Layers.Dac.Registers, shown);
+        return shown;
     }
 
     /// <summary><see cref="AssertLikeOriginal"/> up to the teardown 1777:018C of main after the end of the game.</summary>
@@ -220,11 +281,11 @@ public class ProgramHostTests
     /// switch the target DS:08F4 is set to 0 after the end check of week 0 (<see cref="EndTarget"/>), so the game ends at the
     /// end check of week 1.
     /// </summary>
-    private static ProgramHost PlayToHalt(bool skipRobotPhase, Action<ProgramHost, long>? beforeFrame = null)
+    private static ProgramHost PlayToHalt(bool skipRobotPhase, Action<ProgramHost, long>? beforeFrame = null, bool returnToMenu = true)
     {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
-        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase);
+        var host = new ProgramHost(Dir, new RecordedClock([clock]), new NoSaveFile(), skipRobotPhase, returnToMenu);
         bool targetSet = false;
         void Frame(long frame, IReadOnlyCollection<byte> held)
         {
