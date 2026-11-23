@@ -1,3 +1,4 @@
+using Traders.Assets;
 using Traders.Core;
 using Traders.Core.Ending;
 using Traders.Core.Field;
@@ -5,12 +6,16 @@ using Traders.Core.Menus;
 using Traders.Core.Phases;
 using Traders.Core.Pixels;
 using Traders.Core.State;
+using Traders.Presentation.Ending;
+using Traders.Presentation.Menus;
 using Traders.RefEmu;
 using Traders.RefEmu.Hardware;
 using Traders.RefEmu.Machine;
 using Traders.Tests.Field;
 using Traders.Tests.Harvest;
 using Traders.Tests.Startup;
+using Traders.Vga;
+using Traders.Vga.Layers;
 using L = Traders.Core.State.DgroupLayout;
 
 namespace Traders.Tests.Ending;
@@ -27,6 +32,9 @@ namespace Traders.Tests.Ending;
 /// the number of random() calls are compared. When the original enters the key wait, the port must poll; after
 /// <see cref="Script.Polls"/> port frames a key is pressed in the original and the port's keyboard handler counts the make
 /// (DS:115D + 1, as the host's <c>KeyStateTable</c> does); both must return in that frame with AL = 1, compared once more.
+/// The port's <see cref="EndingScene"/> plays every event (and the report's) through the graphics layers frame by frame: at
+/// each retrace the scene must make its k-th retrace wait in that frame, and the picture (four VRAM planes, DAC, CRTC start) and
+/// the command list 0A96 (count and used entries) are compared as well; at the key wait and the return once more (part 3).
 /// </summary>
 internal static class EndingFrameHarness
 {
@@ -60,7 +68,8 @@ internal static class EndingFrameHarness
     public const int ReadLimit = 400_000;
 
     /// <summary>Result of a run (diagnostics and coverage of the scenarios).</summary>
-    public sealed record Result(int Retraces, int Polls, long RandomCalls, int PixelReads, byte[] DataSegment, List<string> Events);
+    public sealed record Result(int Retraces, int Polls, long RandomCalls, int PixelReads, byte[] DataSegment, List<string> Events,
+        int PicturesCompared, int DistinctPictures);
 
     /// <summary>Counter-tests: a mutation of the port's host or phase machine.</summary>
     public enum Mutation
@@ -78,6 +87,112 @@ internal static class EndingFrameHarness
 
         /// <summary>The week counter DS:4B9A is taken back when the step finishes (20B3:0071 left out).</summary>
         KeepWeek,
+
+        /// <summary>Scene: the reveal's cell is drawn on the hidden page (0B67:0206 for 0B67:01D4).</summary>
+        SceneRevealOnHiddenPage,
+
+        /// <summary>Scene: the palette step of the wipe writes the DAC before its retrace (21FD:03EB without frame step).</summary>
+        ScenePaletteStepAtOnce,
+
+        /// <summary>Scene: the masked blit of the closing picture's scenery (20B3:015B) is left out.</summary>
+        SceneWithoutMaskedBlit,
+    }
+
+    /// <summary>Retrace wait of the port's layers: notes the port frame of every wait.</summary>
+    private sealed class FrameRetraces : IRetraceWait
+    {
+        public long CurrentFrame { get; set; }
+
+        public List<long> Frames { get; } = [];
+
+        public void WaitForRetrace() => Frames.Add(CurrentFrame);
+    }
+
+    /// <summary>Picture resources (186C:0002) from the original files.</summary>
+    private sealed class Pictures : IPictureSource
+    {
+        public byte[] Decrunched(int resource) =>
+            PowerPacker.Decrunch(File.ReadAllBytes(TestGameData.Dos(ResourceTable.Pictures[resource].Vga)));
+    }
+
+    /// <summary>Real-mode memory as a flat copy (texts outside DS).</summary>
+    private sealed class LinearMemory(byte[] memory) : IFarMemory
+    {
+        public byte Read(ushort segment, ushort offset) => memory[((segment << 4) + offset) & 0xFFFFF];
+
+        public void Write(ushort segment, ushort offset, byte value) => memory[((segment << 4) + offset) & 0xFFFFF] = value;
+    }
+
+    /// <summary>The port's output: the scene on layers set up from the original at the entry.</summary>
+    private sealed class PortOutput
+    {
+        public PortOutput(OriginalProgram o, Dgroup core)
+        {
+            Driver = Traders.Tests.Field.FieldSceneHarness.DriverFrom(o);
+            o.Machine.Vga.Dac.CopyTo(Dac.Registers, 0);
+            var memory = o.Machine.Mem.ReadBlock(0, 0, 0x100000);
+            var layers = new GraphicsLayers(Driver, o.DataSegment(), Dac, Retraces)
+                { DataSegment = o.Dgroup, OtherMemory = new LinearMemory(memory) };
+            Scene = new EndingScene(layers, core, layers.OtherMemory, new Pictures());
+        }
+
+        public EndingScene Scene { get; }
+        public ModeXDriver Driver { get; }
+        public VgaDac Dac { get; } = new();
+        public FrameRetraces Retraces { get; } = new();
+    }
+
+    /// <summary>Picture state: VRAM planes, DAC, CRTC start (first difference named).</summary>
+    private static void ComparePicture(OriginalProgram o, PortOutput port, string where)
+    {
+        var vga = o.Machine.Vga;
+        Assert.True(vga.StartAddress == port.Driver.DisplayStart,
+            $"{where}: display start original {vga.StartAddress:X4}, port {port.Driver.DisplayStart:X4}");
+        for (int pl = 0; pl < 4; pl++)
+        {
+            var a = vga.Planes[pl].AsSpan();
+            var b = port.Driver.Vram.Planes[pl].AsSpan();
+            int k = a.CommonPrefixLength(b);
+            if (k < a.Length)
+                Assert.Fail($"{where}: plane {pl} offset {k:X4} (page {k / 0x4000}, x {(k % 0x4000) % 80 * 4 + pl}, y {k % 0x4000 / 80}) " +
+                            $"original {a[k]:X2} port {b[k]:X2}");
+        }
+        int d = vga.Dac.AsSpan().CommonPrefixLength(port.Dac.Registers);
+        if (d < port.Dac.Registers.Length)
+            Assert.Fail($"{where}: DAC colour {d / 3} component {d % 3} original {vga.Dac[d]:X2} port {port.Dac.Registers[d]:X2}");
+    }
+
+    /// <summary>The command list 0A96: count DS:15BE and its used entries (count · 1Ch bytes from DS:15C0), first difference named.</summary>
+    private static void CompareList(OriginalProgram o, PortOutput port, string where)
+    {
+        var ods = o.DataSegment();
+        var pds = port.Scene.Layers.Ds;
+        int count = ods[GraphicsLayers.ListCount] | ods[GraphicsLayers.ListCount + 1] << 8;
+        int portCount = pds[GraphicsLayers.ListCount] | pds[GraphicsLayers.ListCount + 1] << 8;
+        Assert.True(count == portCount, $"{where}: command list with {count} entries in the original, {portCount} in the port");
+        var a = ods.AsSpan(GraphicsLayers.ListStart, count * GraphicsLayers.EntrySize);
+        var b = pds.AsSpan(GraphicsLayers.ListStart, count * GraphicsLayers.EntrySize);
+        int k = a.CommonPrefixLength(b);
+        if (k < a.Length)
+            Assert.Fail($"{where}: command list entry {k / GraphicsLayers.EntrySize} byte {k % GraphicsLayers.EntrySize:X2} " +
+                        $"original {a[k]:X2} port {b[k]:X2}");
+    }
+
+    /// <summary>
+    /// Scene waits so far: one per retrace of the original, the last one in <paramref name="frame"/> (the port frame of the
+    /// original's last retrace).
+    /// </summary>
+    private static void CompareWaits(PortOutput port, int waits, long frame, string where)
+    {
+        var f = port.Retraces.Frames;
+        Assert.True(f.Count == waits && (waits == 0 || f[^1] == frame),
+            $"{where}: the core has waited {waits} retraces, the scene made {f.Count} waits (last in frame {(f.Count > 0 ? f[^1] : -1)})");
+    }
+
+    private static void CompareOutput(OriginalProgram o, PortOutput port, string where)
+    {
+        ComparePicture(o, port, where);
+        CompareList(o, port, where);
     }
 
     /// <summary>Games run on to the entries asked for; snapshots by game and week.</summary>
@@ -124,7 +239,8 @@ internal static class EndingFrameHarness
         var run = new OriginalRun(o, retCs, retIp);
         var core = new Dgroup(o.DataSegment()[..L.Size]);
         var random = new OriginalRandom(new RecordedClock([]), core.U32(L.RandomSeed));
-        var host = new Host(mutation);
+        var output = new PortOutput(o, core);
+        var host = new Host(mutation, output.Scene);
         var step = new EndingStep(host, ProgramStartDifferentialTests.Files, n => EndingInputs.Pictures.Value[n],
             EndingInputs.Fonts.Value);
         IWeekStepHandler handler = mutation switch
@@ -137,8 +253,11 @@ internal static class EndingFrameHarness
             nextStep: EndCheckStep.Call);
 
         long frame = 0;
-        machine.Advance(new PhaseTick(frame, run.Held()));
-        int retraces = 0;
+        var held = run.Held();
+        output.Scene.NextFrame(held);
+        machine.Advance(new PhaseTick(frame, held));
+        int retraces = 0, pictures = 0;
+        var distinct = new HashSet<ulong>();
         while (true)
         {
             Assert.True(frame < MaxFrames, $"the end screens did not end within {MaxFrames} frames");
@@ -154,11 +273,18 @@ internal static class EndingFrameHarness
             Assert.True(step.Retraces == retraces + 1 && step.Polls == 0,
                 $"{where}: the original waits its retrace {retraces}, the port has waited {step.Retraces} retraces and {step.Polls} polls");
             run.Compare(core, random.Calls, where);
+            CompareWaits(output, retraces + 1, frame, where);
+            CompareOutput(o, output, where);
+            pictures++;
+            distinct.Add(Traders.Tests.Presentation.MenuSceneHarness.Hash(m.Vga.Planes, m.Vga.Dac, m.Vga.StartAddress));
             retraces++;
             run.RunToRetraceEnd();
             run.CheckControls();
             frame++;
-            machine.Advance(new PhaseTick(frame, run.Held()));
+            output.Retraces.CurrentFrame = frame;
+            held = run.Held();
+            output.Scene.NextFrame(held);
+            machine.Advance(new PhaseTick(frame, held));
         }
 
         // 27C6:00D2: the original clears DS:115D and loops until a make is counted; the port polls once per frame.
@@ -166,10 +292,17 @@ internal static class EndingFrameHarness
         Assert.True(machine.Status == PhaseStatus.Waiting && step.Retraces == retraces && step.Polls == 1,
             $"{atWait}: port {machine.Status}, {step.Retraces} retraces and {step.Polls} polls");
         run.Compare(core, random.Calls, atWait);
+        Assert.False(output.Scene.Presenting, $"{atWait}: the scene still presents");
+        CompareWaits(output, retraces, frame - 1, atWait);
+        CompareOutput(o, output, atWait);
+        pictures++;
         for (int k = 1; k < script.Polls; k++)
         {
             frame++;
-            machine.Advance(new PhaseTick(frame, run.Held()));
+            output.Retraces.CurrentFrame = frame;
+            held = run.Held();
+            output.Scene.NextFrame(held);
+            machine.Advance(new PhaseTick(frame, held));
             Assert.True(machine.Status == PhaseStatus.Waiting, $"{atWait}: the port ended its wait without a key");
         }
         Assert.Equal(script.Polls, step.Polls);
@@ -178,7 +311,10 @@ internal static class EndingFrameHarness
         run.CheckControls();
         core.Set(EndScreens.MakeCount, unchecked((byte)(core.U8(EndScreens.MakeCount) + 1))); // 27C6:0043, the make
         frame++;
-        machine.Advance(new PhaseTick(frame, run.Held()));
+        output.Retraces.CurrentFrame = frame;
+        held = run.Held();
+        output.Scene.NextFrame(held);
+        machine.Advance(new PhaseTick(frame, held));
 
         string end = $"return of 20B3:0005 after {retraces} retraces";
         Assert.True(machine.Status == PhaseStatus.Finished && machine.Result == WeekLoop.ResultGameOver,
@@ -188,14 +324,18 @@ internal static class EndingFrameHarness
         Assert.Equal(o.ReadByte(EndScreens.MakeCount), core.U8(EndScreens.MakeCount));
         Assert.Equal(retraces, step.Retraces);
         Assert.Equal(run.PixelReads, host.PixelReads);
-        return new Result(retraces, step.Polls, random.Calls, host.PixelReads, core.Bytes, host.Events);
+        Assert.False(output.Scene.Presenting, $"{end}: the scene still presents");
+        Assert.Equal(retraces, output.Retraces.Frames.Count);
+        CompareOutput(o, output, end);
+        pictures++;
+        return new Result(retraces, step.Polls, random.Calls, host.PixelReads, core.Bytes, host.Events, pictures, distinct.Count);
     }
 
     /// <summary>
-    /// The port's host for the test: records the events, reads the rule page (with an abort counter), runs the report of
-    /// lane bilanz with argument 0.
+    /// The port's host for the test: records the events and plays them on the scene, reads the rule page (with an abort
+    /// counter), runs the report of lane bilanz with argument 0 and plays its events after each of its frames.
     /// </summary>
-    private sealed class Host(Mutation mutation) : IEndingHost
+    private sealed class Host(Mutation mutation, EndingScene scene) : IEndingHost
     {
         public List<string> Events { get; } = [];
         public int PixelReads { get; private set; }
@@ -206,11 +346,25 @@ internal static class EndingFrameHarness
         public void Emit(FieldEvent e)
         {
             if (e.Kind is FieldEventKind.LoadImage or FieldEventKind.Sound) Events.Add(e.ToString());
+            scene.Apply(e);
         }
 
         public void Emit(EndingEvent e)
         {
             if (e.Kind is EndingEventKind.Music or EndingEventKind.WaitKey) Events.Add(e.ToString());
+            switch (mutation)
+            {
+                case Mutation.SceneRevealOnHiddenPage when e.Kind == EndingEventKind.DrawShownPage:
+                    scene.Apply(e with { Kind = EndingEventKind.DrawHiddenPage });
+                    return;
+                case Mutation.ScenePaletteStepAtOnce when e.Kind == EndingEventKind.PaletteStep:
+                    scene.Finish();
+                    scene.Layers.Blend((ushort)e.Args[0], (ushort)e.Args[1]);
+                    return;
+                case Mutation.SceneWithoutMaskedBlit when e.Kind == EndingEventKind.MaskedBlit:
+                    return;
+            }
+            scene.Apply(e);
         }
 
         public byte ReadPixel(RulePage page, short x, short y)
@@ -223,7 +377,11 @@ internal static class EndingFrameHarness
         public IEnumerable<FieldWait> Report(Dgroup d, OriginalRandom random)
         {
             Events.Add("Report");
-            if (mutation != Mutation.ReportArgument1) return EndScreens.Report(d, random, _ => { });
+            if (mutation != Mutation.ReportArgument1)
+                return EndScreens.Report(d, random, events =>
+                {
+                    foreach (var e in events) scene.Apply(e);
+                });
             return ReportWith1(d, random);
         }
 

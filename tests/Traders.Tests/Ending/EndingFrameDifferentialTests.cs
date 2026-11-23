@@ -8,8 +8,10 @@ namespace Traders.Tests.Ending;
 /// The end check 20B3:0005 where the game ends (call 19 with the end screens) as a step of the phase machine in lockstep with
 /// the original in two running games (<see cref="EndingFrameHarness"/>): every retrace of the original is a frame of the port
 /// (frame counter of the step), the key wait a poll per frame; data segment, DS:10D2 and the number of random() calls are equal
-/// at each of them and at the return. Counter-tests: the report with argument 1, the reveal's colours 2 and 6 swapped, a frame
-/// processed twice, DS:4B9A not incremented – each must fail.
+/// at each of them and at the return; the scene (<see cref="Traders.Presentation.Ending.EndingScene"/>) makes its retrace waits in
+/// the same frames, its picture (VRAM, DAC, CRTC start) and command list are equal there too. Counter-tests: the report with
+/// argument 1, the reveal's colours 2 and 6 swapped, a frame processed twice, DS:4B9A not incremented, and of the scene the
+/// reveal on the hidden page, the wipe's palette step without its frame, the scenery's masked blit left out – each must fail.
 /// </summary>
 public class EndingFrameDifferentialTests
 {
@@ -27,12 +29,15 @@ public class EndingFrameDifferentialTests
     {
         var r = Run(script);
         _out.WriteLine($"game {script.MenuDelay} week {script.Week}{(script.F10 ? " F10" : "")}: retraces {r.Retraces}, " +
-            $"polls {r.Polls}, random {r.RandomCalls}, pixel reads {r.PixelReads}");
+            $"polls {r.Polls}, random {r.RandomCalls}, pixel reads {r.PixelReads}, pictures {r.PicturesCompared} " +
+            $"({r.DistinctPictures} distinct)");
         _out.WriteLine(string.Join("; ", r.Events.GroupBy(e => e.Split('(')[0]).Select(g => $"{g.Key} {g.Count()}")));
         Assert.True(r.Retraces > 2_000, $"only {r.Retraces} retraces");
         Assert.True(r.PixelReads >= 5 * EndScreens.RevealCells);
         Assert.Equal(["Music(2, 3)"], r.Events.Where(e => e.StartsWith("Music", StringComparison.Ordinal)));
         Assert.Equal("WaitKey()", r.Events[^1]);
+        Assert.Equal(r.Retraces + 2, r.PicturesCompared);
+        Assert.True(r.DistinctPictures > 1_000, $"only {r.DistinctPictures} distinct pictures");
         return r;
     }
 
@@ -48,13 +53,16 @@ public class EndingFrameDifferentialTests
 
     /// <summary>
     /// Counter-tests of the acceptance (review of lane ende): the report 0825:000A with argument 1, the colours 2 and 6 of the
-    /// reveal swapped, one frame processed twice, DS:4B9A not incremented – the lockstep must fail.
+    /// reveal swapped, one frame processed twice, DS:4B9A not incremented, and three of the scene – the lockstep must fail.
     /// </summary>
     [GameDataTheory]
     [InlineData(nameof(Mutation.ReportArgument1))]
     [InlineData(nameof(Mutation.SwapPixelTargets))]
     [InlineData(nameof(Mutation.DoubleFrame))]
     [InlineData(nameof(Mutation.KeepWeek))]
+    [InlineData(nameof(Mutation.SceneRevealOnHiddenPage))]
+    [InlineData(nameof(Mutation.ScenePaletteStepAtOnce))]
+    [InlineData(nameof(Mutation.SceneWithoutMaskedBlit))]
     public void A_mutated_port_leaves_the_lockstep(string name)
     {
         var mutation = Enum.Parse<Mutation>(name);
