@@ -128,6 +128,14 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   vertauscht, Pixelziel 2/6 vertauscht, `4B9A` nicht erhöht, Bilanz mit Parameter 1, Rang bei Gleichstand falsch, ein Bild doppelt
   verarbeitet → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 0xCE4 Byte.
+- **Status:** Teil 1 fertig (PR #241, Claude): Befund `20B3_008E_ende.md`, `EndScreens`/`EndingStep`/`EndingPage`,
+  Differenztests Aufrufe, Zufall, Datensegment (echte Partie Woche 0–3, F10, gesetzte Zustände), Regelseite gegen das
+  unveränderte Original (`EveningRulePageTests`), `27C6:00D2`. Teil 2 fertig (Fortsetzung 1): `EndingFrameDifferentialTests`
+  – `EndingStep` in der Phasenmaschine Bild für Bild gegen das unveränderte Original in zwei Partien (Woche 0 Ziel, Woche 2 F10;
+  Datensegment, `DS:10D2`, Ziehungen, Bildzähler, Tastenwarten), Bildeintrag der Bilanz im Schritt nachgetragen, Gegenproben
+  (Bilanz Parameter 1, Farben 2/6, Bild doppelt, `4B9A`) eingecheckt. Teil 3 fertig (Fortsetzung 2): `EndingScene`
+  (`src/Traders.Presentation/Ending/`, mit `FieldScene` und `ReportScene` auf denselben Schichten) im selben Gleichschritt je Bild
+  pixelgenau (VRAM, DAC, CRTC-Start), Befehlsliste und Bildwechsel-Warten gleich; Gegenproben der Szene eingecheckt. Spur fertig – Review.
 
 ## 2 `effekte` – Tonsteuerung `218B`/`21A7` und Effektmaschine
 

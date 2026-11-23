@@ -598,3 +598,26 @@ Ergänzt §9 (`0910`, `10A3`, `10A5`, `10A9`); Befund `docs/routines/218B_21A7_t
 | `1094` | Fernzeiger[3] (Offset, Segment) | `PieceNames` | Dateinamen der Stücke (ab `DS:10AB`), Fn 00h bekommt BX:CX = Segment:Offset | G – `218B:00DC`; P |
 | `10A0` | B[3] s | `PieceDisk` | Diskette je Stück, nur an die Dateisuche `186C:0A6C` (im Port entfallen) | G – `218B:00BA` |
 | `10A5` | W | `MusicPlaying` | bleibt gesetzt, wenn `0153` den Treiber stehend findet (Fn 12h → 0) | G – `218B:0167`; P |
+
+## Runde 9, Spur `ende` (Ende und Abend `20B3:0053`–`0D77`)
+
+Befund [`20B3_008E_ende.md`](../routines/20B3_008E_ende.md); Namen in `src/Traders.Core/Ending/EndScreens.cs` und
+`src/Traders.Core/Pixels/EndingPage.cs`. Belege: `tests/Traders.Tests/Ending/EndScreensDifferentialTests.cs`,
+`EveningRulePageTests.cs`, `WaitKeyDifferentialTests.cs`.
+
+| Offset | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `08CE` / `08E0` / `08DC` | W | `FieldPictureNumber` / `EveningPictureNumber` / `RankPictureNumber` | Bildnummern Schlussbild (`V-ANBAU`), Abend (`V-ABEND`), Rangbild (`V-ENDE`) | G – `008E`, `0525`, `0863` |
+| `1040` / `1060` | Palette | `RankPalette` / `EveningPalette` | Argumente von `21FD:026C` | G – `0525`, `0863` |
+| `1080` | W s | `Walk` | Lage auf dem Gang des Siegers (initialisiert 0, nicht zurückgesetzt) | G – `09D4`, `0863` |
+| `1082` / `1084` | W s / B s | `BlinkTimer` / `BlinkStep` | Takt (initialisiert 1) und Bild 0…3 des Blinkens | G – `0986` |
+| `1085` / `1089` | W s | `Bow1` / `Bow2` | Bilder der Verbeugungen (initialisiert 15) | G – `0A9F`, `0B40` |
+| `1087` | W s | `Drink` | Bilder des Trunks 0…100 | G – `0ADC` |
+| `108B` | W[2] | `ObjectFrames` | y der Objektbilder je Argument von `0D0D` | G – `0D0D` |
+| `108F` | Text | `RankText` | „RANK“ | G – `05B4` |
+| `0D17` | W[91] s | `CosTable` | cos 0…90° skaliert | G – `0B7D` |
+| `10DA` / `10DD` | B[3] | `Advances` / `Heights` | Vorschub und Höhe je Schrift (6, 14, 5 / 5, 12, 5) | G – `21FD:05DB` |
+| `3CA8` / `34A4` | W | `Advance` / `Height` | Vorschub und Höhe der gewählten Schrift | G – `21FD:05DB` |
+| `54D4` | W u | `RankState` | Zustand des Rangbilds 0…7 | G – `0863` |
+| `54D6` | B s | `Winners` | Sieger (Rang 0), danach verbleibende Trunkrunden | G – `008E`, `0ADC` |
+| `115D` | B u | `MakeCount` | Make-Zähler; `27C6:00D2` = 0 | G – `27C6:00D2` |

@@ -6,6 +6,8 @@
 - **Aufgerufen von / Phase:** `1777:0208` (Wochenschleife, Aufruf 3, Argument 1; danach prüft `1777:020E` die Rücktaste
   `DS:3D55` → zurück ins Menü), `20B3:007D` (Spielende, Argument 0, ohne Warten).
 - **Parameter / Rückgabe:** `[bp+6]` (Byte-Vergleich mit 1); kein Rückgabewert.
+  Nachtrag R9 Spur `ende`: Parameter 0 aus `20B3:007D` geprüft – ohne Öffnung `09C9` und ohne Warteschleife, sonst gleich
+  (Szenarien „end of game no wait“, „scale …“ in `ReportDifferentialTests`); Rahmen für das Ende `EndScreens.Report`.
 
 ## Ablauf (eigene Worte)
 1. `0825:06CB` Rangfolge (portiert, `Ranking.Apply`).
