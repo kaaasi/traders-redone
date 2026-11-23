@@ -98,7 +98,7 @@ public sealed class SoundStep(ProgramSound sound) : IProgramStepHandler
 /// before it loads the pictures of the loading screen (0DFD:0239); the rest of the start is <paramref name="start"/>. The
 /// start's first frame holds the call, as the core runs the parts of 0DFD:000D before the code request in that frame.
 /// </summary>
-// [ORIGINAL] 0DFD:02FE – call of 218B:0094(0, 0)
+// [ORIGINAL] 0DFD:000D (site 02FE) – call of 218B:0094(0, 0)
 public sealed class ProgramStartWithMusic(IProgramStepHandler start, ProgramSound sound) : IProgramStepHandler
 {
     public StepOutcome Begin(ProgramStepContext context)

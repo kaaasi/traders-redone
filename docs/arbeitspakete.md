@@ -113,6 +113,11 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   (`PhaseTick.Makes`); Host spielt mit Roboter-Schalter über das Ende bis zum Abbau `1777:018C` gleich dem Original
   (Datensegment, Bild). Wie im Original endet danach das Programm (`1777:0184` → `018C`), kein Hauptmenü – Entscheidung
   Nutzer, falls doch gewünscht (Abweichung im Host). Mitgenommen: #253 (Doku), #254 (`EffectMachine.Tick(long)`), #256 (Test M10).
+  Fortsetzung 1 (23.11.2026): Rückkehr ins Hauptmenü als Host-Abweichung (R9 F3 = B, `Deviations/MenuAfterGameOver.cs`,
+  `--original-ende`), Tests für beide Einstellungen. Teil 2 zum Großteil: `ProgramSound` (Initialisierung `218B:0002`, Vorspann,
+  Schritte 3–7, Menü, Wochenschritte, Endmusik, Abbau), `HostSound` im Host (Effektmaschine, Treiber, Ausgabe über `HostAudio`);
+  Befehlsfolge bis Aufruf 18 von Woche 0 gleich dem RefEmu. Offen in Teil 2: Tastenklicks der Szenen (`FieldScene.Output.cs`,
+  `StationScene.cs`, R9PL-9), Ton an/aus im Lauf mit echtem Treiber (`10A7`).
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 

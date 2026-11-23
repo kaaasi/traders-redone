@@ -107,7 +107,7 @@ public readonly record struct ProgramEvent(ProgramEventKind Kind, int Step, long
 /// there (<see cref="ProgramStatus.Blocked"/>) instead of skipping them.
 /// </summary>
 // [ORIGINAL] 1777:000C – step order, checks at 1777:0120/0132/0142/0168/016E/0184, DS:08FA = 1 at 1777:017A, loop back at 1777:018A
-// [ORIGINAL] 1777:018C – sound part of the teardown (218B:0153, 21A7:0043) when the machine has a ProgramSound
+// [ORIGINAL] 1777:000C (site 018C) – sound part of the teardown (218B:0153, 21A7:0043) when the machine has a ProgramSound
 // [APPROX] Command line (1777:0014..0116), the rest of the teardown (1777:019A..01A4: system layer, video mode) and the closing
 // message (1777:01A5..01EF) are the host's: the machine ends with the exit code that selects the message (0 normal end, 1/2
 // errors of the initialisation).

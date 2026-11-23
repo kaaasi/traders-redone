@@ -410,7 +410,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0C29:146B` | [0B9F_0002_handel.md](docs/routines/0B9F_0002_handel.md) | `src/Traders.Presentation/Trade/TradeScene.cs` | `TradeFrameDifferentialTests.cs` | ✅ |
 | `0D73:00D3` | [0B67_0002_seiten.md](docs/routines/0B67_0002_seiten.md) | `src/Traders.Presentation/Field/FieldScene.Output.cs`, `src/Traders.Vga/Layers/FrameSteps.cs`, `src/Traders.Vga/Layers/GraphicsLayers.cs` | `PageLayerTests.cs` | ✅ |
 | `0D73:07E0` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/MouseReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
-| `0DFD:000D` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
+| `0DFD:000D` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Startup/ProgramStart.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `0DFD:0074` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.App/ProgramHost.cs` | `HostMenuPictureDifferentialTests.cs` | ✅ |
 | `0DFD:0132` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | `src/Traders.App/ProgramHost.cs` | `HostMenuPictureDifferentialTests.cs` | ✅ |
 | `0DFD:0158` | [0DFD_000D_programmstart.md](docs/routines/0DFD_000D_programmstart.md) | – | – | 🔍 |
@@ -480,7 +480,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `141D:0E67` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `141D:0ED7` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `141D:0F01` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
-| `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Trade/TradeRules.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
+| `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Trade/TradeRules.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekRound7DifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
 | `1777:04E4` | [1777_04E4_initialisierung.md](docs/routines/1777_04E4_initialisierung.md) | `src/Traders.Core/Phases/ProgramSteps.cs` | `ProgramMachineDifferentialTests.cs` | ✅ |
@@ -500,7 +500,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `186C:0997` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | `src/Traders.Core/Startup/ImageTable.cs` | `ProgramStartDifferentialTests.cs` | ✅ |
 | `186C:0AB1` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
 | `186C:0B0A` | [186C_ressourcenlader.md](docs/routines/186C_ressourcenlader.md) | – | – | 🔍 |
-| `192D:0007` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs`, `ProgramHumanDifferentialTests.cs` | ✅ |
+| `192D:0007` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Core/Phases/ProgramSteps.cs` | `MainMenuDifferentialTests.cs`, `ProgramHumanDifferentialTests.cs` | ✅ |
 | `192D:0058` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs` | ✅ |
 | `192D:00C5` | [192D_00C5_menueszene.md](docs/routines/192D_00C5_menueszene.md) | `src/Traders.Core/Menus/MainMenu.cs`, `src/Traders.Presentation/Menus/MenuScene.cs` | `MainMenuDifferentialTests.cs`, `MenuSceneDifferentialTests.cs` | ✅ |
 | `192D:0234` | [192D_0007_menues.md](docs/routines/192D_0007_menues.md) | `src/Traders.Core/Menus/MainMenu.cs` | `MainMenuDifferentialTests.cs`, `MenuFrameDifferentialTests.cs` | ✅ |
@@ -679,14 +679,14 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `20B3:0D0D` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `20B3:0D65` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `20B3:0D77` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
-| `218B:0002` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
-| `218B:0094` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
-| `218B:013A` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
+| `218B:0002` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
+| `218B:0094` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
+| `218B:013A` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `218B:0153` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `218B:01A4` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
-| `21A7:000D` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
+| `21A7:000D` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `21A7:0043` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
-| `21A7:0054` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
+| `21A7:0054` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `21AF:0002` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Vga/Layers/Objects.cs` | `PlantingDifferentialTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |

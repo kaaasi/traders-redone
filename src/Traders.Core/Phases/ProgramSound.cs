@@ -69,7 +69,7 @@ public sealed class ProgramSound
     /// <summary>
     /// Sound part of the teardown 1777:018C: 218B:0153 (music off), then 21A7:0043 (effect voices off).
     /// </summary>
-    // [ORIGINAL] 1777:018C – calls of 218B:0153 and 21A7:0043 (the system layer 0D73:04A9 and the video mode 0D73:07B6(3)
+    // [ORIGINAL] 1777:000C (site 018C) – calls of 218B:0153 and 21A7:0043 (the system layer 0D73:04A9 and the video mode 0D73:07B6(3)
     // after them are the host's)
     public void Teardown()
     {
