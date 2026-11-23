@@ -5,6 +5,7 @@ using Traders.Core.Field;
 using Traders.Core.State;
 using Traders.Core.Week;
 using Traders.RefEmu;
+using Traders.RefEmu.Cpu;
 using C = Traders.Core.Field.FieldCursor;
 using F = Traders.Core.Field.FieldGrid;
 using L = Traders.Core.State.DgroupLayout;
@@ -314,6 +315,135 @@ public class FatMikeDifferentialTests
             destroyed += h.Calls.Count(c => c == "Sound(0, 38)");
         }
         Assert.True(lost > 5 && destroyed > 5, $"lost {lost}, destroyed {destroyed}");
+    }
+
+    /// <summary>
+    /// A field with exactly one cell the punishment of player <paramref name="p"/> (crops destroyed, one field to hit) may hit
+    /// (<paramref name="qualifying"/>: kind 0 of that player), or none at all (endless in the original). All other cells belong to
+    /// other players or nobody, with consistent counters.
+    /// </summary>
+    private static void ArrangeSearch(FatMikeHarness h, int p, int cols, int rows, (int X, int Y)? qualifying)
+    {
+        var o = h.Program;
+        o.WriteWord(F.Columns, (ushort)cols);
+        o.WriteWord(F.Rows, (ushort)rows);
+        o.WriteByte(L.ActivePlayer, (byte)p);
+        o.WriteByte(M.NobodyPaid, 0);
+        for (int i = 0; i < 4; i++)
+        {
+            o.WriteByte((ushort)(M.Verdict + i), 0);
+            o.WriteByte((ushort)(F.OwnedFields + i), 0);
+            for (int k = 0; k < 4; k++) o.WriteByte((ushort)(F.OwnedKinds + 4 * i + k), 0);
+        }
+        o.WriteByte((ushort)(M.Verdict + p), 1);
+        int free = 0, other = (p + 1) % 4;
+        for (int x = 0; x < 9; x++)
+            for (int y = 0; y < 6; y++)
+            {
+                bool inside = x < cols && y < rows;
+                bool mine = qualifying == (x, y);
+                int owner = !inside ? -1 : mine ? p : (x + y) % 2 == 0 ? other : -1;
+                int kind = mine ? 0 : -2;
+                if (inside && owner == -1) free++;
+                if (inside && owner == other) o.WriteByte((ushort)(F.OwnedFields + other), (byte)(o.ReadByte((ushort)(F.OwnedFields + other)) + 1));
+                o.WriteByte((ushort)(F.Owner + x * 6 + y), unchecked((byte)owner));
+                o.WriteByte((ushort)(F.Kind + x * 6 + y), unchecked((byte)kind));
+            }
+        o.WriteByte(F.FreeFields, (byte)free);
+        if (qualifying != null)
+        {
+            o.WriteByte((ushort)(F.OwnedFields + p), 1);
+            o.WriteByte((ushort)(F.OwnedKinds + 4 * p), 4); // count of 0A8A: (4 + 0 + 0 + 0) / 4 = 1 field to hit
+        }
+        else
+            o.WriteByte((ushort)(F.OwnedKinds + 4 * p), 4); // count 1 although the player owns no field: 08DA never ends
+    }
+
+    /// <summary>First seed of DS:10D2 from <paramref name="from"/> on for which the 08DA search for the single cell needs at least <paramref name="minPairs"/> draws of (column, row).</summary>
+    private static uint? SeedForLongSearch(int from, int cols, int rows, (int X, int Y) target, int minPairs)
+    {
+        for (uint seed = (uint)from; seed < (uint)from + 3000; seed++)
+        {
+            var rnd = new OriginalRandom(new RecordedClock([]), seed);
+            int pairs = 0;
+            while (true)
+            {
+                pairs++;
+                int x = rnd.Next((short)(cols - 1)), y = rnd.Next((short)(rows - 1));
+                if ((x, y) == target) break;
+                if (pairs >= 20_000) break;
+            }
+            if (pairs >= minPairs && pairs < 20_000) return seed;
+        }
+        return null;
+    }
+
+    // [DIFFERENTIAL] 1F63:08DA – a search that needs hundreds of draws (one hittable field) ends in step with the original
+    [GameDataFact]
+    public void Punishment_with_a_long_search_matches_the_original()
+    {
+        var h = new FatMikeHarness();
+        var r = new Random(0x236);
+        long maxDraws = 0;
+        for (int n = 0; n < 12; n++)
+        {
+            Arrange(h, r);
+            int cols = r.Next(4, 10), rows = r.Next(3, 7), p = r.Next(4);
+            var target = (X: r.Next(cols), Y: r.Next(rows));
+            ArrangeSearch(h, p, cols, rows, target);
+            if (SeedForLongSearch(r.Next(1, 1 << 20), cols, rows, target, 150) is not { } seed)
+            {
+                n--; // no seed found: the low bits of the generator can make a pair of power-of-two ranges miss the cell for ever
+                continue;
+            }
+            h.Program.WriteDword(OriginalProgram.RandomStateOffset, seed);
+            AssertSame(h, $"08DA long search {n}", 0x08DA, (d, random, rec) => Drain(M.PunishPlayerFrames(d, random, rec)));
+            maxDraws = Math.Max(maxDraws, h.RandomArgs.Count);
+        }
+        Assert.True(maxDraws >= 300, $"the longest search drew only {maxDraws} times");
+    }
+
+    /// <summary>
+    /// 1F63:08DA when no field qualifies although the count is positive: the original draws on without end (finding
+    /// 1F63_000F_fatmike.md, #236). The call is stopped by the instruction budget (#222); until then every draw is
+    /// random(columns − 1) then random(rows − 1), the seed is that of the replayed draws, and field, counters and the rest of the data
+    /// segment are unchanged. The port's loop (FatMikePhase.PunishPlayerFrames) has no yield or budget on this path and cannot be run
+    /// bounded without a production hook; its draw order is the one the original shows here.
+    /// </summary>
+    // [DIFFERENTIAL] 1F63:08DA – endless draw without a hittable field, bounded by the instruction budget
+    [GameDataFact]
+    public void Punishment_without_a_hittable_field_draws_endlessly_like_the_original()
+    {
+        var h = new FatMikeHarness();
+        var r = new Random(0x2360);
+        for (int n = 0; n < 6; n++)
+        {
+            Arrange(h, r);
+            int cols = r.Next(4, 10), rows = r.Next(3, 7), p = r.Next(4);
+            ArrangeSearch(h, p, cols, rows, null);
+            uint seed = (uint)r.Next(1, int.MaxValue);
+            h.Program.WriteDword(OriginalProgram.RandomStateOffset, seed);
+            var before = h.Program.DataSegment();
+            h.Calls.Clear();
+            h.RandomArgs.Clear();
+            var e = Assert.Throws<EmulationException>(() => h.Program.CallWithBudget(300_000, Seg, 0x08DA));
+            Assert.StartsWith(OriginalProgram.BudgetMessage, e.Message);
+            Assert.True(h.RandomArgs.Count > 100, $"case {n}: only {h.RandomArgs.Count} draws within the budget");
+            // the budget may stop the routine inside a draw: the seed then fits the draws counted (hook at the entry)
+            var rnd = new OriginalRandom(new RecordedClock([]), seed);
+            for (int i = 0; i < h.RandomArgs.Count; i++)
+            {
+                short expected = (short)(i % 2 == 0 ? cols - 1 : rows - 1);
+                Assert.True(h.RandomArgs[i] == expected, $"case {n}: draw {i} was random({h.RandomArgs[i]}), expected random({expected})");
+                rnd.Next(expected);
+            }
+            var after = h.Program.DataSegment();
+            Assert.Equal(rnd.Seed, h.Program.ReadDword(OriginalProgram.RandomStateOffset));
+            // the field and its counters are untouched
+            Assert.True(before.AsSpan(F.Owner, 54).SequenceEqual(after.AsSpan(F.Owner, 54)), "owners changed");
+            Assert.True(before.AsSpan(F.Kind, 54).SequenceEqual(after.AsSpan(F.Kind, 54)), "kinds changed");
+            Assert.True(before.AsSpan(F.OwnedFields, 4).SequenceEqual(after.AsSpan(F.OwnedFields, 4)), "counters changed");
+        }
     }
 
     // [DIFFERENTIAL] 1F63:000F

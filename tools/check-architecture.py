@@ -128,8 +128,9 @@ def _methods(text):
         pos = start
 
 
-def _locals(text, known_types):
-    """Variable, field, property and parameter names declared with a known core type: name -> type."""
+def _locals(text, known_types, aliases=True):
+    """Variable, field, property and parameter names declared with a known core type: name -> type. `aliases=False` leaves
+    out the `var` aliases (the caller scopes them itself, see `_alias_scopes`)."""
     found = {}
     for m in re.finditer(r'\b([A-Z]\w*)(?:<[^<>]*>)?\??\s+(_?[A-Za-z]\w*)\s*(?=[;=,){]|=>)', text):
         if m.group(1) in known_types:
@@ -138,12 +139,47 @@ def _locals(text, known_types):
         if m.group(2) in known_types:
             found[m.group(1)] = m.group(2)
     # #193 R7H-3: `var t = _texts;` / `var a = this._a!;` aliases a known variable; chains resolve by repeating until stable.
+    changed = aliases
+    while changed:
+        changed = False
+        for m in re.finditer(_ALIAS, text):
+            if m.group(2) in found and m.group(1) not in found:
+                found[m.group(1)] = found[m.group(2)]
+                changed = True
+    return found
+
+
+_ALIAS = r'\bvar\s+(\w+)\s*=\s*(?:this\s*\.\s*)?(\w+)\s*!?\s*(?=[;,)])'
+
+
+def _enclosing_block(text, pos):
+    """(start, end) of the innermost block { ... } around text[pos]; the whole text outside any block."""
+    depth = 0
+    for i in range(pos - 1, -1, -1):
+        if text[i] == '}':
+            depth += 1
+        elif text[i] == '{':
+            if depth == 0:
+                return i, _block_end(text, i)
+            depth -= 1
+    return 0, len(text)
+
+
+def _alias_scopes(text, base):
+    """#221 R8S-2: `var t = x;` aliases a known variable only from its declaration to the end of its own block (a method body),
+    not in the whole file. Chains resolve by repeating until stable; the source may be a base variable (declared with a known
+    type anywhere in the file) or an alias whose scope contains the declaration. Returns [(name, type, start, end)]."""
+    found = []  # (name, type, scope start = end of the declaration, scope end)
     changed = True
     while changed:
         changed = False
-        for m in re.finditer(r'\bvar\s+(\w+)\s*=\s*(?:this\s*\.\s*)?(\w+)\s*!?\s*(?=[;,)])', text):
-            if m.group(2) in found and m.group(1) not in found:
-                found[m.group(1)] = found[m.group(2)]
+        for m in re.finditer(_ALIAS, text):
+            if any(f[0] == m.group(1) and f[2] == m.end() for f in found):
+                continue
+            source = m.group(2)
+            kind = next((f[1] for f in found if f[0] == source and f[2] <= m.start() < f[3]), base.get(source))
+            if kind:
+                found.append((m.group(1), kind, m.end(), _enclosing_block(text, m.start())[1]))
                 changed = True
     return found
 
@@ -256,10 +292,13 @@ def scene_violations(source, writers, members=None):
     for cls in sorted(writing_classes):
         if re.search(rf'\bnew\s+(?:\w+\s*\.\s*)*{cls}\s*\(', source):
             found.append(f'Szene erzeugt schreibende Kerninstanz {cls}')
-    variables = _locals(source, writing_classes)
-    for var, method in re.findall(r'\b(\w+)\s*[!?]*\s*\.\s*(\w+)\b', source):
-        if var in variables and f'{variables[var]}.{method}' in writers and not writers[f'{variables[var]}.{method}']:
-            found.append(f'Szene ruft schreibende Kernroutine {variables[var]}.{method} über {var}')
+    variables = _locals(source, writing_classes, aliases=False)
+    # declared variables count in the whole file, `var` aliases only inside their block (#221)
+    scopes = [(0, len(source), variables)] + [(a, b, {name: kind}) for name, kind, a, b in _alias_scopes(source, variables)]
+    for start, end, scoped in scopes:
+        for var, method in re.findall(r'\b(\w+)\s*[!?]*\s*\.\s*(\w+)\b', source[start:end]):
+            if var in scoped and f'{scoped[var]}.{method}' in writers and not writers[f'{scoped[var]}.{method}']:
+                found.append(f'Szene ruft schreibende Kernroutine {scoped[var]}.{method} über {var}')
     for member, method in re.findall(r'\.\s*(\w+)\s*[!?]*\s*\.\s*(\w+)\b', source):
         for cls in sorted(members.get(member, ())):
             if f'{cls}.{method}' in writers and not writers[f'{cls}.{method}']:
@@ -368,6 +407,15 @@ for probe, mode in [(scene_violations('KeyTable.Write(_state, keys);', _writers)
                     (scene_violations('void F(TextBufferMemory m) { var a = m; var b = a; b.Write(1, 2, 3); }', _writers, _members), CATCH),
                     (scene_violations('private readonly Holder _h; void F() { var h = this._h!; h.Go(_state); }', _writers, _members), CATCH),
                     (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; byte b = t.Read(1, 2); }', _writers, _members), CLEAN),
+                    # #221 R8S-2: an alias counts in its own method only; the same name in another method stays clean, in a nested block it catches
+                    (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; byte b = t.Read(1, 2); }'
+                                      ' void G(Other t) { t.Write(1, 2, 3); }', _writers, _members), CLEAN),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; byte b = t.Read(1, 2); }'
+                                      ' void G() { if (x) { var t = _texts; t.Write(1, 2, 3); } }', _writers, _members), CATCH),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { var t = _texts; if (x) { t.Write(1, 2, 3); } }',
+                                      _writers, _members), CATCH),
+                    (scene_violations('private readonly ITextMemory _texts; void F() { if (x) { var t = _texts; } t.Write(1, 2, 3); }',
+                                      _writers, _members), CLEAN),
                     (scene_violations('private readonly ITextMemory _texts; void F() { byte b = _texts.Read(1, 2);'
                                       ' ushort n = IncidentText.Length(_texts, 1, 2); }', _writers, _members), CLEAN),
                     # #76 P3-1: one violation per reference rule, and the real layering stays clean
