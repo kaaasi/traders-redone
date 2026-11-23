@@ -107,6 +107,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Ende; Gegenprobe im Review (Rest von 19 ausgelassen, Wochenzähler bei Ende nicht erhöht, Ton bei `10A7` = 0 trotzdem
   ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
+- **Status:** Teil 1 in Arbeit (Draft-PR, Claude, Base `33f026e`).
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 
