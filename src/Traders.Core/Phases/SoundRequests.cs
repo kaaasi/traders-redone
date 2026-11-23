@@ -65,9 +65,17 @@ public static class SoundRequests
     public static IEnumerable<(int A, int B)> Of(IEnumerable<WeekEvent> events) =>
         events.Where(e => e.Kind == WeekEventKind.Sound).Select(e => (e.A, e.B));
 
-    /// <summary>The sound requests among the incidents' events (call 9).</summary>
+    /// <summary>
+    /// The sound requests among the incidents' events (call 9): their own and those of the wait loop 21FD:0004(0) at the end of
+    /// every incident (the arrow keys' sounds 21FD:0101–0133; found by the whole-game probe of lane partie).
+    /// </summary>
     public static IEnumerable<(int A, int B)> Of(IEnumerable<IncidentEvent> events) =>
-        events.Where(e => e.Kind == IncidentEventKind.Sound).Select(e => (e.A, e.B));
+        events.Select(e => e switch
+        {
+            { Kind: IncidentEventKind.Sound } => ((int A, int B)?)(e.A, e.B),
+            { Kind: IncidentEventKind.WaitLoop, Inner: { Kind: WeekEventKind.Sound } w } => (w.A, w.B),
+            _ => null,
+        }).OfType<(int A, int B)>();
 }
 
 /// <summary>

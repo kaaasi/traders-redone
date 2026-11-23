@@ -1,4 +1,5 @@
 using Traders.Core;
+using Traders.Core.Events;
 using Traders.Core.Phases;
 using Traders.Core.Sound;
 using Traders.Core.State;
@@ -148,5 +149,22 @@ public class ProgramSoundTests
         Assert.Equal(0, d.U16(SoundControl.DriverReady));
         Assert.Equal([new SoundCommand(SoundCommandKind.EffectsReset), new SoundCommand(SoundCommandKind.TickCallback, Bx: 0, Cx: 0x0732),
             new SoundCommand(SoundCommandKind.Effect, Bx: 1), new SoundCommand(SoundCommandKind.EffectsStop)], sound.Commands);
+    }
+
+    /// <summary>
+    /// The incidents' sound requests include those of their wait loop 21FD:0004(0) (arrow keys, 21FD:0101–0133), in order;
+    /// other wait-loop events are none. Counter-check: only <c>IncidentEventKind.Sound</c> taken → red (whole-game probe).
+    /// </summary>
+    [Fact]
+    public void Sound_requests_of_the_incidents_include_their_wait_loop()
+    {
+        IncidentEvent[] events =
+        [
+            new(Traders.Core.Events.IncidentEventKind.Sound, 1, 1, 7),
+            new(Traders.Core.Events.IncidentEventKind.WaitLoop, 2, Inner: new Traders.Core.Week.WeekEvent(Traders.Core.Week.WeekEventKind.Sound, 2, 0, 3)),
+            new(Traders.Core.Events.IncidentEventKind.WaitLoop, 3, Inner: new Traders.Core.Week.WeekEvent(Traders.Core.Week.WeekEventKind.Flip, 3)),
+            new(Traders.Core.Events.IncidentEventKind.WaitLoop, 4, Inner: new Traders.Core.Week.WeekEvent(Traders.Core.Week.WeekEventKind.Sound, 4, 2, 5)),
+        ];
+        Assert.Equal([(1, 7), (0, 3), (2, 5)], SoundRequests.Of(events));
     }
 }

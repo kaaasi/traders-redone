@@ -134,6 +134,7 @@ public sealed class ProgramHost
         ds[GraphicsLayers.CardMode + 1] = 0;
         Layers = new GraphicsLayers(Driver, ds, new VgaDac(), Retraces) { DataSegment = DataSegmentValue };
         Layers.InitializePages(PageBuffer);
+        Layers.Effects = Clicks = new TypewriterClicks(Core, Sound, SoundHost);
         SetUpGamePages(Layers);
         var texts = new TextMemory(Start);
         Layers.OtherMemory = texts;
@@ -236,6 +237,9 @@ public sealed class ProgramHost
 
     /// <summary>The program's sound control (core): the sound calls of main and the sound requests of the menus.</summary>
     public ProgramSound Sound { get; }
+
+    /// <summary>Key clicks of the typewriter text of the scenes, to <see cref="SoundHost"/> (#262).</summary>
+    public TypewriterClicks Clicks { get; }
 
     /// <summary>The host's end of the sound control (executes the commands; <see cref="HostSound"/> unless given).</summary>
     public ISoundHost SoundHost { get; }

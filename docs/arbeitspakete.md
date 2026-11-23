@@ -116,8 +116,14 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Fortsetzung 1 (23.11.2026): Rückkehr ins Hauptmenü als Host-Abweichung (R9 F3 = B, `Deviations/MenuAfterGameOver.cs`,
   `--original-ende`), Tests für beide Einstellungen. Teil 2 zum Großteil: `ProgramSound` (Initialisierung `218B:0002`, Vorspann,
   Schritte 3–7, Menü, Wochenschritte, Endmusik, Abbau), `HostSound` im Host (Effektmaschine, Treiber, Ausgabe über `HostAudio`);
-  Befehlsfolge bis Aufruf 18 von Woche 0 gleich dem RefEmu. Offen in Teil 2: Tastenklicks der Szenen (`FieldScene.Output.cs`,
-  `StationScene.cs`, R9PL-9), Ton an/aus im Lauf mit echtem Treiber (`10A7`).
+  Befehlsfolge bis Aufruf 18 von Woche 0 gleich dem RefEmu.
+  Fortsetzung 2 (23.11.2026): Teil 2 fertig – Tastenklicks der Szenen über `ITypewriterEffects` im Host
+  (`Sound/TypewriterClicks.cs`, Entscheidung Leitstelle, #262; Befehle aus `SoundControl.PlayEffect` auf einer Kopie des
+  Datensegments, keine Buchung), Tonanfragen der Warteschleife in den Ereignissen (Aufruf 9) ergänzt. Teil 3: OPL-Folge des Hosts
+  gegen `OplTrace` mit `runFxDriver` (Vorspann, Menümusik, Effekte von Woche 0, Endmusik) grün; Gesamtpartieprobe im Host Bild für
+  Bild (`HostWholeGameFrameDifferentialTests`: Datensegment, `DS:10D2`, Bild, Tonbefehle je Bild) läuft mit vier Computern durch
+  die Wochen 0–2 gleich, **blockiert** an den Endbildern (ab Bild ~1166 von Aufruf 19, vor dem Tastenwarten) und mit einem
+  Menschen an 1B03:0101 (neue Stationen ein Bild zu spät, Spur stationen) – Tests übersprungen mit Grund, Details PR #259.
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 

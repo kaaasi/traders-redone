@@ -381,30 +381,7 @@ public class ProgramHostTests
         Assert.Equal(call == Teardown ? week + 1 : week, p.Week); // 20B3:0071 counts the week of the end once more
 
         var original = p.DataSegment();
-        // bytes of the host (heap, C runtime) and the output layers, as in the lockstep tests of program start, menu and
-        // planting; everything else is the core's (the sound flags DS:10A5, 10A9 included, lane partie part 2)
-        List<(int Offset, int Length)> ignored = Traders.Tests.Phases.RefEmuWeekOracle.InterruptOwned.Select(r => (r.Offset, r.Length))
-            .Concat(Traders.Tests.Phases.RefEmuProgramOracle.HostOwnedByInitialisation.Select(r => (r.Offset, r.Length)))
-            .Concat(ProgramStartDifferentialTests.OutputOwned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Phases.ProgramHumanDifferentialTests.MenuOutputOwned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Field.PlantingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Disasters.CatastropheFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Stations.StationsLockstep.OutputOwned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Harvest.HarvestFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Trade.TradeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Extra.ExtraFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.FatMike.FatMikeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Purchase.PurchaseFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            .Concat(Traders.Tests.Ending.EndingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-            // segment words of the far pointers of 1DEF:000C into its stack frame: the host gives the game's frame relative
-            // to its DS value (ExtraStep.GameFrame), the original's SS is relocated; the offsets are compared
-            .Append((Traders.Core.Extra.ExtraPhase.GoodsPointer + 2, 2))
-            .Append((Traders.Core.Extra.ExtraPhase.ClaimsPointer + 2, 2))
-            .Append((Traders.Core.Extra.ExtraPhase.GroundPointer + 2, 2))
-            .Append((0x023A, 2)) // 0B67:01D4/0206 draw on the shown or the hidden page (Vga pages)
-            .Append((0x37CC, 0x3C90 - 0x37CC)) // text table 192D:18B6: far pointers into the host's text buffer (6000:0000)
-            .Append((0x4884, 4)) // far pointer of the text buffer (host heap)
-            .ToList();
+        var ignored = Ignored;
         var differing = Enumerable.Range(0, DgroupLayout.Size)
             .Where(i => original[i] != host.Core.Bytes[i] && !loaded.Contains(i) && !ignored.Any(r => i >= r.Offset && i < r.Offset + r.Length)).ToList();
         var ranges = new List<string>();
@@ -426,6 +403,34 @@ public class ProgramHostTests
         int diff = Enumerable.Range(0, shown.Length).Count(i => shown[i] != expected[i]);
         Assert.True(diff == 0, $"{diff} pixels differ, first at {Enumerable.Range(0, shown.Length).FirstOrDefault(i => shown[i] != expected[i], -1)}");
     }
+
+    /// <summary>
+    /// Bytes of the host (heap, C runtime), of the interrupt handlers and of the output layers, as in the lockstep tests of
+    /// program start, menu and the week's steps; everything else is the core's (the sound flags DS:10A5, 10A9 included).
+    /// </summary>
+    internal static readonly (int Offset, int Length)[] Ignored =
+    [.. Traders.Tests.Phases.RefEmuWeekOracle.InterruptOwned.Select(r => (r.Offset, r.Length))
+        .Concat(Traders.Tests.Phases.RefEmuProgramOracle.HostOwnedByInitialisation.Select(r => (r.Offset, r.Length)))
+        .Concat(ProgramStartDifferentialTests.OutputOwned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Phases.ProgramHumanDifferentialTests.MenuOutputOwned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Field.PlantingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Disasters.CatastropheFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Stations.StationsLockstep.OutputOwned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Harvest.HarvestFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Trade.TradeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Extra.ExtraFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.FatMike.FatMikeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Purchase.PurchaseFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        .Concat(Traders.Tests.Ending.EndingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        // segment words of the far pointers of 1DEF:000C into its stack frame: the host gives the game's frame relative
+        // to its DS value (ExtraStep.GameFrame), the original's SS is relocated; the offsets are compared
+        .Append((Traders.Core.Extra.ExtraPhase.GoodsPointer + 2, 2))
+        .Append((Traders.Core.Extra.ExtraPhase.ClaimsPointer + 2, 2))
+        .Append((Traders.Core.Extra.ExtraPhase.GroundPointer + 2, 2))
+        .Append((0x023A, 2)) // 0B67:01D4/0206 draw on the shown or the hidden page (Vga pages)
+        .Append((0x37CC, 0x3C90 - 0x37CC)) // text table 192D:18B6: far pointers into the host's text buffer (6000:0000)
+        .Append((0x4884, 4)) // far pointer of the text buffer (host heap)
+        ];
 
     private static int Passes(ProgramHost host) => host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;
 
