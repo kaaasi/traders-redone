@@ -34,16 +34,17 @@ größere Nummern geben die Register unverändert zurück (**P**). Die Spalte �
 | 11h | → BX = 1, CX = 0 (Version) | – | **P** |
 | 12h | → BX = Zustand (`[50h]`; 0 = steht) | `218B:013A` (BL ≠ 0 = läuft) | **P** (0 ohne Stück) |
 | 15h | → BX = 0C04h (Größe eines Puffers) | – | **P** |
-| 18h | Wiederholen an (BX = 1) / aus (0) | `218B:0094` (Merker Bit 1) | **C**; **V** Bedeutung |
-| 19h | Lautstärkefahrt abwärts (Stand 1, Richtung 0) | `218B:016F` (kein Aufrufer gefunden) | **C**; **V** |
-| 1Ah | Lautstärkefahrt aufwärts (Stand 7Fh, Richtung 1) | `218B:0094` | **C**; **V** |
-| 1Bh | Schrittweite der Fahrt = BX (3 langsam, 7Fh sofort) | `218B:0094`, `016F`, `01A4` | **C**; **V** |
+| 18h | Wiederholen an (BX = 1) / aus (0): am Ende der Reihenfolge von vorn statt Stopp | `218B:0094` (Merker Bit 1) | **C** (`FXDRIVER.md` §4) |
+| 19h | Ausblenden: Dämpfung `[19Eh]` = 1, Richtung 0; je Takt + Schrittweite, ab 80h Stopp | `218B:016F` (kein Aufrufer gefunden) | **C** (`FXDRIVER.md` §4) |
+| 1Ah | Einblenden: Dämpfung 7Fh, Richtung 1; je Takt − Schrittweite bis 0 | `218B:0094` | **C** (`FXDRIVER.md` §4) |
+| 1Bh | Schrittweite der Fahrt = BX (3 langsam, 7Fh sofort) | `218B:0094`, `016F`, `01A4` | **C** (`FXDRIVER.md` §4) |
 | 02h, 04h, 07h–0Fh, 13h, 14h, 16h, 17h, 1Ch | Kanal-, Instrument- und Registerzugriffe, Freigabe | – (nicht genutzt) | nicht untersucht |
 
 **Takt des Treibers:** Bei der Installation setzt er nur `int 64h` (und Laufzeitvektoren 0/4/5/6, **P**), `int 8` erst auf einen Aufruf aus `T.EXE` hin, also nach dessen Handlern. Der DOS-Filter `27C6:058B` leitet das
 Setzen in das Weitergabeziel `27C6:[CS:0412]` um (Befund `docs/routines/27C6_0043_eingabe_zeitgeber.md`): nach dem Hochlauf zeigt
 es in den Treiber (`1292:1262`), Vektor 8 bleibt `27C6:03E4`, PIT-Teiler `4000h` (**P**, Lauf mit `runFxDriver`). Die Musik läuft
-damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz.
+damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz. **Einheit in `OplWrite.Tick`** (R9M-1): Zeitgeberticks (72,82 Hz) für Effekte
+und Musik; der Musiktakt kommt vom Aufrufer (Abstand 4, Phase 0…3 aus dem Zeitgeberzähler von `T.EXE`, gemessen: `FXDRIVER.md` §6).
 
 ## 3. `218B` – Musik
 
@@ -75,10 +76,11 @@ damit auf jedem vierten Tick: 72,82 Hz / 4 ≈ 18,2 Hz.
 
 ## 5. Für den Port (R10)
 
-- Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz). Der Kern löst nur Ereignisse
+- Zwei Takte aus `Traders.App/Timing`: Effekte je Tick (72,82 Hz), Musik je vierten Tick (18,2 Hz; `FxMusicDriver.Tick(timerTick)` bekommt die Tick-Nummer samt Phase vom Host). Der Kern löst nur Ereignisse
   aus (Effekt `b`, Stück `i` mit Merkern); Ausgabe und FM-Synthese gehören in `Traders.Audio`.
-- Vor der Portierung zu klären: Ereignisformat in den 24 Puffern (Fn 00h), Bedeutung der Lautstärkefahrt (19h–1Bh), die
-  Effektmaschine `0000:0750…131F` samt Tabelle `CS:15B2`. Referenz für den Vergleich: OPL-Spur des RefEmu (`AdLibStub`, Lauf mit
+- Geklärt (R9, Spur `musik`): Stückformat, Ereignisse in den 24 Puffern, Tempo, Wiederholen und Lautstärkefahrt sowie die
+  AdLib-Schicht des Treibers – `docs/analyse/FXDRIVER.md` (Offsets im entpackten Abbild, Marker `[ORIGINAL-FX]`).
+- Vor der Portierung zu klären: die Effektmaschine `0000:0750…131F` samt Tabelle `CS:15B2`. Referenz für den Vergleich: OPL-Spur des RefEmu (`AdLibStub`, Lauf mit
   `runFxDriver`).
 - Offen: Tonart mit Treiber, aber ohne AdLib-Karte (Fn 06h findet nichts) – `10A3` wird trotzdem 1 (**C**: `0002` prüft das
   Ergebnis von Fn 06h nicht).
