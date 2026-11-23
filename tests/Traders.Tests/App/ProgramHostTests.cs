@@ -127,22 +127,23 @@ public class ProgramHostTests
     /// the trade (23), the extra phase (24), Fat Mike (26), the gem rate (27), the purchase (29) and the contest (30) run in
     /// the core with their scenes, the week counter DS:4B9A goes to 1 and week 1 runs through all its calls up to its end check.
     /// After the end check of week 0 the target DS:08F4 is set to 0 on both sides (the only other reader is the target line of
-    /// the week report, drawn on both sides alike), so the end check of week 1 ends the game (exit B of R7 F1): the host halts
-    /// there with the notice "game over". Expected values from the original with its call 18 jumped over in both weeks (IP set
-    /// to the return address at the call site, the call takes no arguments): data segment and picture shown at the call site
-    /// of call 19 in week 1 are equal.
-    /// Counter-checks (local): the host built with <c>round8: false</c> (halts at call 26) → red; a <see cref="ProgramHost.Halt"/>
-    /// without the game-over notice → red.
+    /// the week report, drawn on both sides alike), so the end check of week 1 ends the game (exit B): the end screens run in
+    /// the core with their scene (lane partie part 1) up to the any-key wait 27C6:00D2, a key (RETURN) ends it, the week loop
+    /// returns AL = 1 and main goes to its teardown (1777:0184 → 018C): the program machine ends with exit code 0. Expected
+    /// values from the original with its call 18 jumped over in both weeks (IP set to the return address at the call site, the
+    /// call takes no arguments) and a key once it waits in 27C6:00D2: data segment and picture shown at the teardown
+    /// 1777:018C are equal.
+    /// Counter-check (local, lane woche): the host built with <c>round8: false</c> (halts at call 26) → red.
     /// </summary>
     [GameDataFact]
-    public void Host_with_the_robot_switch_plays_over_the_week_boundary_to_the_end_of_the_game_like_the_original()
+    public void Host_with_the_robot_switch_plays_over_the_week_boundary_through_the_end_screens_to_the_teardown_like_the_original()
     {
         var host = PlayToHalt(skipRobotPhase: true);
         var week = host.Machine.WeekMachine!;
         Assert.Equal(1, week.Week);
         Assert.Equal(WeekSteps.EndCall, week.NextStep);
         Assert.True(host.GameOver);
-        Assert.Contains("game over", host.Halt);
+        Assert.Null(host.Halt);
         Assert.Equal(2, host.RobotSkip!.Skipped);
         Assert.NotNull(host.Deviation);
         Assert.False(host.Trade.Presenting);
@@ -156,8 +157,24 @@ public class ProgramHostTests
         var purchase = Assert.IsType<Traders.Core.Purchase.PurchaseStep>(host.Screens.Purchase.Current);
         Assert.True(purchase.Retraces > 100, $"purchase ran {purchase.Retraces} frames");
         Assert.IsType<Traders.Core.FatMike.ContestStep>(host.Screens.Contest.Current);
-        AssertLikeOriginal(host, WeekSteps.EndCall, week: 1);
+
+        // the end screens up to the key wait, a key, the teardown
+        var ending = Assert.IsType<Traders.Core.Ending.EndingStep>(host.Screens.Ending!.Current);
+        long f = host.LastFrame + 1;
+        for (long until = f + 60_000; f < until && ending.Polls == 0; f++) host.Frame(f, []);
+        Assert.True(ending.Polls > 0, "the end screens did not reach the key wait");
+        Assert.True(ending.Retraces > 1000, $"the end screens ran {ending.Retraces} frames");
+        for (int i = 0; i < 6; i++) host.Frame(f++, [MenuKeys.Enter]);
+        for (long until = f + 100; f < until && host.Machine.Status != ProgramStatus.Ended; f++) host.Frame(f, []);
+        Assert.Equal(ProgramStatus.Ended, host.Machine.Status);
+        Assert.Equal(0, host.Machine.ExitCode);
+        Assert.Null(host.Machine.WeekMachine);
+        Assert.False(host.Ending.Presenting);
+        AssertLikeOriginal(host, Teardown, week: 1);
     }
+
+    /// <summary><see cref="AssertLikeOriginal"/> up to the teardown 1777:018C of main after the end of the game.</summary>
+    private const int Teardown = -1;
 
     /// <summary>
     /// R7E-2 (#201): in a frame in which a step ends and the next one starts, the scenes get the rest of the week report
@@ -223,10 +240,11 @@ public class ProgramHostTests
         long f = 0;
         for (; f < 2000 && Passes(host) < 2; f++) Frame(f, []);
         for (long until = f + 6; f < until; f++) Frame(f, [MenuKeys.Enter]);
-        for (long until = f + 300_000; f < until && host.Halt is null; f++) Frame(f, []);
+        for (long until = f + 300_000; f < until && host.Halt is null && !host.GameOver; f++) Frame(f, []);
 
         Assert.Equal(ProgramStatus.InWeek, host.Machine.Status);
-        Assert.True(host.Machine.IsBlocked);
+        Assert.Equal(!skipRobotPhase, host.Machine.IsBlocked);
+        Assert.Equal(skipRobotPhase, host.GameOver);
         Assert.Equal(skipRobotPhase, targetSet);
         Assert.Equal(1, host.Core.U8(ProgramLoop.GameRunning));
         Assert.Equal(new byte[] { 1, 1, 1, 1 }, Enumerable.Range(0, 4).Select(i => host.Core.U8(DgroupLayout.IsComputer + i)));
@@ -248,7 +266,9 @@ public class ProgramHostTests
     /// <summary>
     /// The original with the same clock and the same key at the same menu pass, to the call site of <paramref name="call"/> in
     /// <paramref name="week"/> (every call 18 before it jumped over, and after the end check of week 0 the target set to
-    /// <see cref="EndTarget"/> as in <see cref="PlayToHalt"/>): data segment and picture shown equal the host's.
+    /// <see cref="EndTarget"/> as in <see cref="PlayToHalt"/>), or with <see cref="Teardown"/> through the end of the game in
+    /// that week (a key once the original waits in 27C6:00D2) to the teardown 1777:018C: data segment and picture shown equal
+    /// the host's.
     /// </summary>
     private static void AssertLikeOriginal(ProgramHost host, int call, int week)
     {
@@ -268,7 +288,10 @@ public class ProgramHostTests
         var atMain = p.DataSegment();
         var loaded = Enumerable.Range(0, DgroupLayout.Size).Where(i => image[i] != atMain[i]).ToHashSet();
         ushort loop = p.Segment(WeekLoop.Segment), call18 = WeekLoop.Step(WeekSteps.RobotCall).Site,
-            call20 = WeekLoop.Step(WeekSteps.EndCall + 1).Site, target = WeekLoop.Step(call).Site;
+            call20 = WeekLoop.Step(WeekSteps.EndCall + 1).Site,
+            target = call == Teardown ? ProgramLoop.TeardownSite : WeekLoop.Step(call).Site;
+        if (call == Teardown)
+            p.Machine.AddCodeHook(p.Segment(0x27C6), 0x00D2, m => m.ScheduleKey(m.Seconds + 0.1, MenuKeys.Enter, 6 / 70.0));
         void RunTo(ushort site, string what)
         {
             p.Machine.Run(80_000_000_000, m => m.Cpu.Cs == loop && m.Cpu.IP == site);
@@ -292,7 +315,7 @@ public class ProgramHostTests
                 p.Machine.Mem.Write16(p.Dgroup, DgroupLayout.Target + 2, (ushort)(EndTarget >> 16));
             }
         }
-        Assert.Equal(week, p.Week);
+        Assert.Equal(call == Teardown ? week + 1 : week, p.Week); // 20B3:0071 counts the week of the end once more
 
         var original = p.DataSegment();
         // bytes of the host (heap, C runtime), the output layers and the music, as in the lockstep tests of program start,
@@ -310,6 +333,7 @@ public class ProgramHostTests
             .Concat(Traders.Tests.Extra.ExtraFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.FatMike.FatMikeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
             .Concat(Traders.Tests.Purchase.PurchaseFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+            .Concat(Traders.Tests.Ending.EndingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
             // segment words of the far pointers of 1DEF:000C into its stack frame: the host gives the game's frame relative
             // to its DS value (ExtraStep.GameFrame), the original's SS is relocated; the offsets are compared
             .Append((Traders.Core.Extra.ExtraPhase.GoodsPointer + 2, 2))

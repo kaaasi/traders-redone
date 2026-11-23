@@ -107,7 +107,11 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   Ende; Gegenprobe im Review (Rest von 19 ausgelassen, Wochenzähler bei Ende nicht erhöht, Ton bei `10A7` = 0 trotzdem
   ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
-- **Status:** Teil 1 in Arbeit (Draft-PR, Claude, Base `33f026e`).
+- **Status:** Teil 1 fertig (PR #259, Claude): `EndCheckStep` bekommt mit den Schriften als Eingabe (`WeekScreenInputs.Fonts`)
+  `EndingStep` als Rest (`WeekScreens.Ending`, Szene `EndingScene` im Host), Tastenzähler `DS:115D` als Eingabe des Ticks
+  (`PhaseTick.Makes`); Host spielt mit Roboter-Schalter über das Ende bis zum Abbau `1777:018C` gleich dem Original
+  (Datensegment, Bild). Wie im Original endet danach das Programm (`1777:0184` → `018C`), kein Hauptmenü – Entscheidung
+  Nutzer, falls doch gewünscht (Abweichung im Host). Mitgenommen: #253 (Doku), #254 (`EffectMachine.Tick(long)`), #256 (Test M10).
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 

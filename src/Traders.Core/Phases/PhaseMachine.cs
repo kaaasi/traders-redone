@@ -120,6 +120,7 @@ public sealed class PhaseMachine
     public void Advance(PhaseTick tick)
     {
         if (tick.HeldScancodes is { } keys) WriteKeyTable(_state, keys);
+        if (LastFrame < tick.Frame) tick.CountMakes(_state);
         while (LastFrame < tick.Frame && Status != PhaseStatus.Finished)
         {
             _currentFrame = LastFrame + 1;

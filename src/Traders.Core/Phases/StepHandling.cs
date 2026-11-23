@@ -74,4 +74,20 @@ public sealed class StepContext
 /// </summary>
 // [APPROX] One tick = one 70 Hz frame; how the original's wait loops relate to the frame change is to be confirmed with the
 // scenes (docs/routines/1777_01F8_wochenschleife.md).
-public readonly record struct PhaseTick(long Frame, IReadOnlyCollection<byte>? HeldScancodes = null);
+/// <remarks>
+/// <see cref="Makes"/> is the number of key makes the keyboard handler counted since the last tick (27C6:0043 increments the
+/// byte DS:115D per make); the machine adds it to DS:115D before it processes the first frame of the tick. The any-key wait
+/// 27C6:00D2 of the end screens clears the byte and waits for it to change.
+/// </remarks>
+public readonly record struct PhaseTick(long Frame, IReadOnlyCollection<byte>? HeldScancodes = null, int Makes = 0)
+{
+    /// <summary>DS offset of the make counter of the keyboard handler 27C6:0043.</summary>
+    public const int MakeCounter = 0x115D;
+
+    /// <summary>Adds <see cref="Makes"/> to DS:115D (8 bit, as the handler's <c>inc byte</c>).</summary>
+    // [ORIGINAL] 27C6:0043 – make counter DS:115D, one per make; the handler itself is the host's (key table, R3)
+    internal void CountMakes(Dgroup state)
+    {
+        if (Makes != 0) state.Set(MakeCounter, unchecked((byte)(state.U8(MakeCounter) + Makes)));
+    }
+}
