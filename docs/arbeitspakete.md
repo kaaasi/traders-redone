@@ -246,6 +246,10 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
 - **F1 = B** (Nutzer 22.11.2026): OPL2-Synthese in Spur 4 als C#-Übertragung eines freien Emulators mit freizügiger Lizenz
   (z. B. `ymfm`, BSD-3-Clause; Lizenzhinweis und Lizenztext in `THIRD_PARTY.md`, kein NuGet-Paket). Nach v1.0 durch eine eigene
   Umsetzung ersetzen (Erweiterung E8, `PORTIERUNGSPLAN.md` §6).
+- **F3 = B** (Nutzer 23.11.2026): Nach dem Partie-Ende kehrt der Host standardmäßig ins Hauptmenü zurück – bewusste,
+  abschaltbare Host-Abweichung (Schalter wie `RobotPhaseSkip`); das Original beendet das Programm (Abbruchweg B → `1777:0184` →
+  Abbau `018C`), der Kern bleibt originalgetreu. Spur 0: Abweichung in `src/Traders.App/Deviations/**`, Tests für beide
+  Einstellungen.
 - **Plan-Review** `reviews/2026-11-22-r9-plan.md` „Nein“ (Opus): P2 R9PL-1–3, P3 R9PL-4–9 eingearbeitet (Leitstelle
   22.11.2026; R9PL-3 entschieden: Marker `[ORIGINAL-FX]`, Tabellen zur Laufzeit, Werkzeugausgabe git-ignoriert); nur Plantext,
   daher Delta-Prüfung der Leitstelle statt Nachprüfung (vom Review so freigestellt).
