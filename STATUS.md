@@ -123,7 +123,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 |---|---|---|---|---|
 | `0000:06FE` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
 | `0000:0724` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs` | ✅ |
-| `0000:0732` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
+| `0000:0732` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `HostSoundOplDifferentialTests.cs`, `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
 | `0000:0750` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsGameDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
 | `0000:0770` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsDifferentialTests.cs`, `EffectsSequenceTests.cs` | ✅ |
 | `0000:0812` | [0000_0750_effekte.md](docs/routines/0000_0750_effekte.md) | `src/Traders.Audio/Effects/EffectMachine.cs` | `EffectsSequenceTests.cs` | ✅ |
@@ -680,13 +680,13 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `20B3:0D65` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `20B3:0D77` | [20B3_008E_ende.md](docs/routines/20B3_008E_ende.md) | `src/Traders.Core/Ending/EndScreens.cs` | `EndScreensDifferentialTests.cs` | ✅ |
 | `218B:0002` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
-| `218B:0094` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
+| `218B:0094` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `HostSoundOplDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `218B:013A` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `218B:0153` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `218B:01A4` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `21A7:000D` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `21A7:0043` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
-| `21A7:0054` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
+| `21A7:0054` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/SoundRequests.cs`, `src/Traders.Core/Sound/SoundControl.cs` | `HostSoundDifferentialTests.cs`, `HostSoundOplDifferentialTests.cs`, `SoundControlDifferentialTests.cs` | ✅ |
 | `21AF:0002` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `21AF:000D` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Core/Field/Planting.cs`, `src/Traders.Vga/Layers/Objects.cs` | `PlantingDifferentialTests.cs`, `ObjectLayerTests.cs` | ✅ |
 | `21AF:00CA` | [21AF_000D_objekte.md](docs/routines/21AF_000D_objekte.md) | `src/Traders.Vga/Layers/Objects.cs` | `ObjectLayerTests.cs` | ✅ |
@@ -780,7 +780,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `27C6:0268` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/JoystickReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `27C6:037A` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Timing/HostClock.cs` | `HostTimerTests.cs` | ✅ |
 | `27C6:03C3` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
-| `27C6:03E4` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Timing/TimerTicks.cs` | `HostTimerTests.cs` | ✅ |
+| `27C6:03E4` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.App/Timing/TimerTicks.cs` | `HostSoundOplDifferentialTests.cs`, `HostTimerTests.cs` | ✅ |
 | `27C6:0416` | [218B_21A7_ton.md](docs/routines/218B_21A7_ton.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `27C6:041B` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | `src/Traders.Core/Sound/SoundControl.cs` | `SoundControlDifferentialTests.cs` | ✅ |
 | `27C6:0551` | [27C6_0043_eingabe_zeitgeber.md](docs/routines/27C6_0043_eingabe_zeitgeber.md) | – | – | 🔍 |
