@@ -109,8 +109,8 @@ Datenlayout `docs/analyse/DATENLAYOUT.md`), RefEmu-Lauf, Videobilder (`fetch-ref
 ## 6. Git und Pull Requests
 
 - **Branches:** `paket/<spur>`, `fix/<thema>`, `prozess/<thema>`, `integration/<runde>`, `review/<thema>` (nur die
-  Review-Datei). Vor jedem Push `git fetch origin && git rebase origin/main` (eigener Branch, `--force-with-lease`) und
-  `tools/pruefen.sh` grün.
+  Review-Datei). Vor jedem Push `git fetch origin`; ist `main` neuer, per **Merge-Commit** integrieren
+  (`git merge origin/main`, normaler Push) – Force-Push ist in geplanten Läufen gesperrt (Erfahrung R9); `tools/pruefen.sh` grün.
 - **Commits** auf Deutsch, aussagekräftig, mit Agenten-Trailer (z. B. `Co-Authored-By: ChatGPT <noreply@openai.com>`) – alle
   Agenten schreiben über dasselbe GitHub-Konto.
 - **Kleine PRs gegen `main`**, Beschreibung nach `.github/pull_request_template.md`; per Weboberfläche oder REST

@@ -13,7 +13,8 @@ Die nächste Leitstelle plant Runde 10 in einem neuen Chat (`vorlagen/leitstelle
 
 Nach dem Fahrplan (Zeile R10–R11): Roboterkauf, Aufstellung, Kampffeld, Kampf, je mit KI (`1C68`, `16D6`, `0535`, `12C8`, `1E7E`,
 `0EDE`, `150F`; Aufruf 18 der Woche, bisher im Host übersprungen) – Zuschnitt auf R10/R11 im Plan. Dazu die Testlücken #275, #276 und
-die P3 #75 B1, #249, #262. Hörvergleich M14 durch den Nutzer. Modell je Spur nach `prozess/zusammenarbeit.md` §5.
+die P3 #75 B1, #249, #262; aus den Erfahrungen R9 für die Sammelspur: Tests der Ausnahmelisten im Gleichschritt
+(`routines/_vorlage.md`) und ein Hintergrundmodus für `tools/pruefen.sh` (Log, Fortschritt, kein Abbruch durch das Werkzeuglimit). Hörvergleich M14 durch den Nutzer. Modell je Spur nach `prozess/zusammenarbeit.md` §5.
 
 ## Fahrplan
 
