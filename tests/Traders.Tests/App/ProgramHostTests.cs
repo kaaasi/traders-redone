@@ -411,7 +411,7 @@ public class ProgramHostTests
     internal static readonly (int Offset, int Length)[] Ignored =
     [.. Traders.Tests.Phases.RefEmuWeekOracle.InterruptOwned.Select(r => (r.Offset, r.Length))
         .Concat(Traders.Tests.Phases.RefEmuProgramOracle.HostOwnedByInitialisation.Select(r => (r.Offset, r.Length)))
-        .Concat(ProgramStartDifferentialTests.OutputOwned.Select(r => (r.Offset, r.Length)))
+        .Concat(ProgramStartDifferentialTests.OutputOwned.Where(NotSoundFlag).Select(r => (r.Offset, r.Length)))
         .Concat(Traders.Tests.Phases.ProgramHumanDifferentialTests.MenuOutputOwned.Select(r => (r.Offset, r.Length)))
         .Concat(Traders.Tests.Field.PlantingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
         .Concat(Traders.Tests.Disasters.CatastropheFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
@@ -421,7 +421,8 @@ public class ProgramHostTests
         .Concat(Traders.Tests.Extra.ExtraFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
         .Concat(Traders.Tests.FatMike.FatMikeFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
         .Concat(Traders.Tests.Purchase.PurchaseFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
-        .Concat(Traders.Tests.Ending.EndingFrameHarness.Owned.Select(r => (r.Offset, r.Length)))
+        // the lists of program start and ending also hold the sound flags (RefEmuProgramOracle.SoundOwned); the whole-game probes compare them
+        .Concat(Traders.Tests.Ending.EndingFrameHarness.Owned.Where(NotSoundFlag).Select(r => (r.Offset, r.Length)))
         // segment words of the far pointers of 1DEF:000C into its stack frame: the host gives the game's frame relative
         // to its DS value (ExtraStep.GameFrame), the original's SS is relocated; the offsets are compared
         .Append((Traders.Core.Extra.ExtraPhase.GoodsPointer + 2, 2))
@@ -431,6 +432,9 @@ public class ProgramHostTests
         .Append((0x37CC, 0x3C90 - 0x37CC)) // text table 192D:18B6: far pointers into the host's text buffer (6000:0000)
         .Append((0x4884, 4)) // far pointer of the text buffer (host heap)
         ];
+
+    private static bool NotSoundFlag((int Offset, int Length, string Owner) r) =>
+        !Traders.Tests.Phases.RefEmuProgramOracle.SoundOwned.Any(f => f.Offset == r.Offset && f.Length == r.Length);
 
     private static int Passes(ProgramHost host) => host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;
 
