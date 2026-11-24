@@ -42,8 +42,7 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 
 - **Ein Branch – ein Bearbeiter.** Je gleichzeitigem Agenten ein eigener Klon bzw. Worktree. Fortsetzungen einer Spur arbeiten
   **nacheinander** auf `paket/<spur>` mit einem PR (`spur-start.md` „Teile und Fortsetzung“).
-- Kein `git push --force`; `main` wird per Merge-Commit in den eigenen Branch geholt (Force-Push ist in geplanten Läufen gesperrt,
-  Erfahrung R9).
+- Kein Force-Push (in geplanten Läufen gesperrt, Erfahrung R9); `main` wird per Merge-Commit in den eigenen Branch geholt.
 - Dateigrenzen einhalten; Berührungen gemeinsamer Dateien im PR begründen. Überschneidende Spuren laufen nacheinander.
 - `docs/arbeitspakete.md` nur im eigenen Statusabschnitt; Planabschnitte ändert die Leitstelle.
 - Abgeschlossene Branches erst löschen, wenn geprüft ist, dass keine unintegrierte Arbeit darauf liegt (`git log main..<branch>`).
@@ -74,9 +73,10 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      oder einen Abbruchzähler im Harness hat; Empfehlung: eigener Zufallsstartwert je Testfall (`new Random(seed + n)`).
   2. **Fixlauf:** behebt die Befunde, `tools/pruefen.sh --schnell`.
   3. **Nachprüfung** nur, wenn der Fixlauf **P0/P1** behebt: nur Delta, Gegenbeispiele und Rückmutationen dieser Befunde.
-  4. **Delta-Prüfung der Leitstelle** statt Nachprüfung, wenn das Delta **nur P2/P3** behebt oder nur Rebase ohne Konflikt ist
-     (`git range-diff`): Delta (`compare`/`--stat`), CI auf dem Head, Testtabelle des Fixlaufs; Vermerk im Merge-Kommentar
-     („Delta geprüft durch Leitstelle, nur P2/P3“ bzw. „… nur Rebase“).
+  4. **Delta-Prüfung der Leitstelle** statt Nachprüfung, wenn das Delta **nur P2/P3** behebt oder nur ein Merge von `main`
+     ohne Konflikt ist (`update-branch` bzw. Merge-Commit; Prüfung mit `git diff <alt> <neu> -- <Spurdateien>` leer und
+     `git show --first-parent`): Delta (`compare`/`--stat`), CI auf dem Head, Testtabelle des Fixlaufs; Vermerk im Merge-Kommentar
+     („Delta geprüft durch Leitstelle, nur P2/P3“ bzw. „… nur Merge von main“). Damit gilt §6 Nr. 1 für den neuen Head.
   5. **P3** bekommt keinen eigenen Lauf: Issue mit Label `P3`, gesammelt an den letzten Lauf der Runde. Ein ohnehin laufender
      Fixlauf darf P3 mitnehmen.
   6. **Gesamtreview** am Rundenende (ChatGPT): risikoorientiert ([anhang.md](anhang.md) C).
@@ -113,7 +113,7 @@ GitHub Free erzwingt nichts davon ([anhang.md](anhang.md) B); die Liste ist verb
 
 1. [ ] **Head-SHA** = vom Review freigegebener SHA (sonst Nachprüfung; Ausnahmen mit Delta-Prüfung nach §5 Punkt 4).
 2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review im Code neu (nicht nur Doku, per `compare`):
-   `main` in den PR holen (`PUT …/pulls/<nr>/update-branch`, bei Doku-Konflikten Merge-Lauf Haiku) und die CI auf dem neuen Head mit
+   `main` in den PR holen (`PUT …/pulls/<nr>/update-branch`, bei Doku-Konflikten Fixlauf ohne Befund mit Haiku, `spur-start.md` „Fixlauf“) und die CI auf dem neuen Head mit
    Originaldaten abwarten; Tabelle aus dem CI-Log in den Merge-Kommentar (Delta „nur Merge von main“, §5 Nr. 4). Ein lokaler Lauf
    der Leitstelle zählt nur, wenn er vollständig endet (Hintergrundprozesse enden mit der Antwort, Erfahrung R9).
 3. [ ] **CI grün auf genau diesem Head** (Check-Runs des Head-SHA). Nur `docs/**`/`*.md` geändert: CI startet nicht

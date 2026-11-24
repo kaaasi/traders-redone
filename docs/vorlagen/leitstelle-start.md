@@ -34,7 +34,7 @@
    Gesamtreview am Rundenende: dem Nutzer den ausgefüllten Kurzaufruf für ChatGPT geben (`anhang.md` C, D). In jedem Review- und
    Gesamtreview-Aufruf die Laufzeit von `tools/pruefen.sh` nennen (derzeit 30–80 min: im Hintergrund starten, nicht abbrechen).
 5. **Integration:** Spur-PRs nach Review und Merge-Prüfung (`zusammenarbeit.md` §6) in der Integrationsfolge mergen. Ist `main`
-   seit dem Review im Code neu, wird **nicht** rebased: `update-branch` (bzw. Merge-Lauf Haiku bei Doku-Konflikten) und CI auf dem
+   seit dem Review im Code neu, wird **nicht** rebased: `update-branch` (bei Doku-Konflikten Fixlauf ohne Befund mit Haiku, `spur-start.md` „Fixlauf“) und CI auf dem
    neuen Head mit Originaldaten, Tabelle aus dem CI-Log im Merge-Kommentar (`zusammenarbeit.md` §6 Nr. 2). `integration/<runde>` nur bei Konflikten zwischen Spuren. Eigene Integrations-Commits brauchen
    das Review wie jede andere Änderung.
 6. **Nach jedem Merge:** `STATUS.md` (Meilensteine, Routinen – Erzeugung nach `tools/abdeckung.py`, sobald vorhanden),
