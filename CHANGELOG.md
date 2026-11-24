@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (22.11.2026–) · in Arbeit
+## Runde 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (22.–24.11.2026) · Spuren gemergt, Gesamtreview offen
 
 - Prozess: Plan (PR #239, Plan-Review „Nein“ R9PL-1–9 eingearbeitet; F1 = B, E8 nach v1.0), Einheit der OPL-Ticks und
   Phasenregel `DS:1180` (PR #250, R9M-1/R9T-1).
@@ -9,6 +9,10 @@
 - Spur 2 `effekte` (PR #243): Tonsteuerung `218B`/`21A7` im Kern, Effektmaschine `0000:06FE`–`15B1` mit Ring und eigenem Zufall; #76 R3H-2.
 - Spur 4 `klang` (PR #245): OPL2-Synthese als Übertragung von ymfm (BSD-3-Clause, `THIRD_PARTY.md`), Tonausgabe im Host, WAV-Export.
 - Spur 1 `ende` (PR #241): Rest von `20B3:0005` (Endbild, Abend, Rangbild, 26 Routinen) Bild für Bild, Szene pixelgenau.
+- Spur 0 `partie` (PR #259): Ende und Ton in Woche und Host eingebunden, Gesamtpartie gegen den RefEmu (Ziel und F10), Host
+  spielt ohne Halt; Rückkehr ins Hauptmenü als Host-Abweichung (F3 = B, `--original-ende`); #253, #254, #256.
+- Fix #264 (PR #265): `StationScene` las die Texttabelle aus dem Schichtenabbild; Folgelauf (PR #270): Probe mit Mensch frei,
+  Tonmerker im Gleichschritt (#268). Zwischenziel **Gesamtpartie ohne Roboterkampf** erreicht.
 
 ## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Abschluss nach Gesamtreview „Ja“
 
