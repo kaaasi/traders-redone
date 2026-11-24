@@ -1,8 +1,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Traders.App.Audio;
 using Traders.App.Input;
 using Traders.App.Rendering;
+using Traders.App.Sound;
 using Traders.App.Timing;
 using Traders.Vga;
 
@@ -24,7 +26,9 @@ public sealed record HostOptions
 /// <summary>
 /// Desktop host: counts timer ticks and frames from host time, turns key presses into scancode bytes for the key-state table
 /// and, with a <see cref="ProgramHost"/>, hands every frame with the held keys to the core's program machine (R4) and shows
-/// the page the scene drew. Without one (no original files) it shows a fixed mode-X page.
+/// the page the scene drew. Without one (no original files) it shows a fixed mode-X page. The program's sound (lane partie
+/// part 2) is ticked with the timer ticks (effects every tick, music on the ticks passed on, <see cref="HostSound.Tick"/>) and
+/// its OPL writes go to the sound device (<see cref="HostAudio"/>, silent without one).
 /// </summary>
 public sealed class HostGame : Game
 {
@@ -51,9 +55,14 @@ public sealed class HostGame : Game
     private readonly ProgramHost? _program;
     private readonly List<byte> _held = [];
     private bool _haltReported;
+    private HostAudio? _audio;
+    private long _tick;
 
     public HostGame(HostOptions options, ProgramHost program) : this(options, program.Driver.Vram, program.Layers.Dac.Registers) =>
         _program = program;
+
+    /// <summary>The program's sound host when it is the host's own (<see cref="HostSound"/>), else null.</summary>
+    private HostSound? Sound => _program?.SoundHost as HostSound;
 
     public HostGame(HostOptions options, ModeXMemory vram, byte[] dac)
     {
@@ -73,6 +82,11 @@ public sealed class HostGame : Game
 
     protected override void LoadContent()
     {
+        if (Sound is { } sound)
+        {
+            _audio = HostAudio.Create(log: Console.Out);
+            sound.Written += w => _audio.Write(w.Tick, w.Register, w.Value);
+        }
         _batch = new SpriteBatch(GraphicsDevice);
         _texture = new Texture2D(GraphicsDevice, FramePresenter.Width, FramePresenter.Height, false, SurfaceFormat.Color);
     }
@@ -81,7 +95,11 @@ public sealed class HostGame : Game
     {
         var step = gameTime.ElapsedGameTime < MaxStep ? gameTime.ElapsedGameTime : MaxStep;
         var (ticks, frames) = _clock.Advance(step);
-        for (int i = 0; i < ticks; i++) Timer.Tick();
+        for (int i = 0; i < ticks; i++)
+        {
+            bool chained = Timer.Tick();
+            Sound?.Tick(++_tick, chained);
+        }
 
         _scancodes.Clear();
         if (IsActive) Edges.Update(Keyboard.GetState().GetPressedKeys(), _scancodes);
@@ -113,7 +131,14 @@ public sealed class HostGame : Game
                 : $"Traders – frame {_clock.Frames}, step {_program.Machine.NextStep} {_program.Machine.Status}"
                   + (_program.Deviation is { } deviation ? $" – {deviation}" : "");
         if (_options.MaxFrames is long max && _clock.Frames >= max) Exit();
+        _audio?.Update();
         base.Update(gameTime);
+    }
+
+    protected override void UnloadContent()
+    {
+        _audio?.Dispose();
+        base.UnloadContent();
     }
 
     protected override void Draw(GameTime gameTime)

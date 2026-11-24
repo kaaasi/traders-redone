@@ -12,10 +12,11 @@ namespace Traders.Core.Phases;
 /// interrupt vectors and handler mask (0D73:00F8..049B), music driver (218B:0002) and display pages (0B67:0002).
 /// </summary>
 // [ORIGINAL] 1777:04E4 – DS:090E = -1 → detect the card; still -1 → result 2; DS:0910 = -1 → detect the sound device
+// [ORIGINAL] 218B:0002 – the music driver is started after the detections (with a ProgramSound; DS:10A3, buffers to the driver)
 // [APPROX] The detections 0D73:0712 (card) and 0D73:04CA (AdLib at port 388h) are replaced: the port is VGA only (card 1, as
 // the RefEmu detects it) and the host passes the sound device as an explicit input. The error result 1 of 0B67:0002 (no
 // memory for the page buffer) is the host's.
-public sealed class ProgramInitialisation(short soundDevice) : IProgramStepHandler
+public sealed class ProgramInitialisation(short soundDevice, ProgramSound? sound = null) : IProgramStepHandler
 {
     /// <summary>DS offset of the graphics card (1 VGA, 0 EGA, 2 Tandy, 63h Tandy emulation, -1 detect).</summary>
     public const int GraphicsCard = 0x090E;
@@ -38,6 +39,7 @@ public sealed class ProgramInitialisation(short soundDevice) : IProgramStepHandl
         if (d.S16(GraphicsCard) == -1) d.Set(GraphicsCard, Vga);
         if (d.S16(GraphicsCard) == -1) return StepOutcome.Finished(NoGraphicsCard); // unreachable with the fixed detection
         if (d.S16(SoundDevice) == -1) d.Set(SoundDevice, soundDevice);
+        sound?.StartDriver();
         return StepOutcome.Finished(0);
     }
 
@@ -45,12 +47,14 @@ public sealed class ProgramInitialisation(short soundDevice) : IProgramStepHandl
 }
 
 /// <summary>
-/// Sound calls of main (steps 3–7: 218B:013A, 21A7:000D, 21A7:0054(0, 1), 218B:0094(1, 2)) until the sound lane (R10):
-/// they return at once with AL = 0 and change nothing. That is what 218B:013A returns without a music driver (DS:10A3 = 0),
-/// and 218B:0094 then does nothing either (218B:00A5); main takes the same path as in the reference run.
+/// Sound calls of main (steps 3–7: 218B:013A, 21A7:000D, 21A7:0054(0, 1), 218B:0094(1, 2)) without a sound control: they
+/// return at once with AL = 0 and change nothing. That is what 218B:013A returns without a music driver (DS:10A3 = 0), and
+/// 218B:0094 then does nothing either (218B:00A5); main takes the same path as in a run without the driver. The program run
+/// of the host binds <see cref="SoundStep"/> instead (<see cref="ProgramSteps.All"/> with a <see cref="ProgramSound"/>).
 /// </summary>
-// [APPROX] Sound pending (R10): 21A7:000D/0054 set the sound effect source and play an effect (DS:10A5, timer callback 27C6:041B);
-// in the port they are no-ops. The bytes they write in the original are listed in docs/routines/1777_000C_main.md ("Ton").
+// [APPROX] Only for tests of single steps without sound: 21A7:000D/0054 set the effect callback and play an effect (DS:10A5,
+// timer callback 27C6:041B); here they are no-ops. The bytes they write in the original are listed in
+// docs/routines/1777_000C_main.md ("Ton").
 public sealed class PendingSoundStep : IProgramStepHandler
 {
     public static PendingSoundStep Instance { get; } = new();
@@ -61,6 +65,52 @@ public sealed class PendingSoundStep : IProgramStepHandler
 }
 
 /// <summary>
+/// A sound call of main (steps 3–7) on the program's sound control: 218B:013A returns the driver's playback state in AL
+/// (steps 3 and 5, main jumps on non-zero), 21A7:000D returns AX = 1 (main does not read it), 21A7:0054(0, 1) and
+/// 218B:0094(1, 2) return nothing main reads (AL = 0 here).
+/// </summary>
+// [ORIGINAL] 1777:000C (sites 012B, 0136, 013B, 014D, 015C) – calls of 218B:013A, 21A7:000D, 218B:013A, 21A7:0054(0, 1),
+// 218B:0094(1, 2)
+public sealed class SoundStep(ProgramSound sound) : IProgramStepHandler
+{
+    public StepOutcome Begin(ProgramStepContext context)
+    {
+        var step = context.Step;
+        switch (step.TargetSegment, step.TargetOffset)
+        {
+            case (0x218B, 0x013A): return StepOutcome.Finished(sound.MusicState());
+            case (0x21A7, 0x000D): return StepOutcome.Finished((byte)sound.SelectEffects());
+            case (0x21A7, 0x0054):
+                sound.Effect(step.Arguments[0], step.Arguments[1]);
+                return StepOutcome.Finished(0);
+            case (0x218B, 0x0094):
+                sound.Music(step.Arguments[0], step.Arguments[1]);
+                return StepOutcome.Finished(0);
+            default: throw new InvalidOperationException($"step {step} is not a sound call");
+        }
+    }
+
+    public StepOutcome Tick(ProgramStepContext context) => throw new InvalidOperationException("sound calls finish at once");
+}
+
+/// <summary>
+/// Program step 2 with the music of the program start: 0DFD:000D calls 218B:0094(0, 0) (the intro, piece 0 without repeat)
+/// before it loads the pictures of the loading screen (0DFD:0239); the rest of the start is <paramref name="start"/>. The
+/// start's first frame holds the call, as the core runs the parts of 0DFD:000D before the code request in that frame.
+/// </summary>
+// [ORIGINAL] 0DFD:000D (site 02FE) – call of 218B:0094(0, 0)
+public sealed class ProgramStartWithMusic(IProgramStepHandler start, ProgramSound sound) : IProgramStepHandler
+{
+    public StepOutcome Begin(ProgramStepContext context)
+    {
+        sound.Music(0, 0);
+        return start.Begin(context);
+    }
+
+    public StepOutcome Tick(ProgramStepContext context) => start.Tick(context);
+}
+
+/// <summary>
 /// Program step 8, the main menu 192D:0007 of lane menue (<see cref="MainMenu"/>) as a step of the program machine:
 /// <see cref="Begin"/> runs it in the start frame up to its first wait, every <see cref="Tick"/> one frame further; the
 /// outcome's AL is the result of 192D:0007 (0 quit, 1 play). The machine writes the key table DS:3D47 from the held keys of
@@ -68,7 +118,9 @@ public sealed class PendingSoundStep : IProgramStepHandler
 /// entered in the picture table of the core (<see cref="ImageTable"/>); the events go on to the scene (<see cref="DrainEvents"/>).
 /// </summary>
 // [ORIGINAL] 1777:000C (site 0163) – call of 192D:0007; 192D:000A – 186C:0002([08DA])
-public sealed class MainMenuProgramStep(IMenuHost host, Func<int, ImageFileLengths> files) : IProgramStepHandler
+// [ORIGINAL] 192D:0007 – its sound requests 21A7:0054(a, b) go to the program's sound control at the place of the request
+public sealed class MainMenuProgramStep(IMenuHost host, Func<int, ImageFileLengths> files, ProgramSound? sound = null)
+    : IProgramStepHandler
 {
     private readonly List<MenuEvent> _events = [];
     private IEnumerator<MenuWait>? _run;
@@ -105,6 +157,7 @@ public sealed class MainMenuProgramStep(IMenuHost host, Func<int, ImageFileLengt
         foreach (var e in Menu.DrainEvents())
         {
             if (e.Kind == MenuEventKind.LoadPicture) ImageTable.RecordLoad(context.State, e.A, files);
+            if (e.Kind == MenuEventKind.Sound) sound?.Effect(e.A, e.B);
             _events.Add(e);
         }
         return more ? StepOutcome.Running : StepOutcome.Finished(Menu.Result ?? 0);
@@ -129,25 +182,32 @@ public sealed class NewGameProgramStep : IProgramStepHandler
 /// <summary>Handlers of the program steps the core has.</summary>
 public static class ProgramSteps
 {
-    /// <summary>Program steps with a sound call (handled by <see cref="PendingSoundStep"/> until R10).</summary>
+    /// <summary>Program steps with a sound call (<see cref="SoundStep"/>, without sound <see cref="PendingSoundStep"/>).</summary>
     public static IReadOnlyList<int> SoundSteps { get; } = [3, 4, 5, 6, 7];
 
     /// <summary>
-    /// Initialisation and the sound stubs only (tests of single steps). The whole program is <see cref="All"/>: the program
-    /// start needs the host's file lengths and text file, the main menu the host's save file and joystick.
+    /// Initialisation and the sound steps only (tests of single steps); without <paramref name="sound"/> the sound stubs. The
+    /// whole program is <see cref="All"/>: the program start needs the host's file lengths and text file, the main menu the
+    /// host's save file and joystick.
     /// </summary>
-    public static Dictionary<int, IProgramStepHandler> Defaults(short soundDevice = ProgramInitialisation.AdLib)
+    public static Dictionary<int, IProgramStepHandler> Defaults(short soundDevice = ProgramInitialisation.AdLib, ProgramSound? sound = null)
     {
-        var d = new Dictionary<int, IProgramStepHandler> { [1] = new ProgramInitialisation(soundDevice) };
-        foreach (int n in SoundSteps) d[n] = PendingSoundStep.Instance;
+        var d = new Dictionary<int, IProgramStepHandler> { [1] = new ProgramInitialisation(soundDevice, sound) };
+        IProgramStepHandler soundStep = sound is null ? PendingSoundStep.Instance : new SoundStep(sound);
+        foreach (int n in SoundSteps) d[n] = soundStep;
         return d;
     }
 
-    /// <summary>All nine call steps of main: initialisation, program start, sound stubs, main menu and new game.</summary>
-    public static Dictionary<int, IProgramStepHandler> All(short soundDevice, ProgramStart start, MainMenuProgramStep menu)
+    /// <summary>
+    /// All nine call steps of main: initialisation, program start, sound calls, main menu and new game; with
+    /// <paramref name="sound"/> the program start plays its music and the sound calls go to it (the main menu gets it from its
+    /// constructor).
+    /// </summary>
+    public static Dictionary<int, IProgramStepHandler> All(short soundDevice, ProgramStart start, MainMenuProgramStep menu,
+        ProgramSound? sound = null)
     {
-        var d = Defaults(soundDevice);
-        d[2] = start;
+        var d = Defaults(soundDevice, sound);
+        d[2] = sound is null ? start : new ProgramStartWithMusic(start, sound);
         d[ProgramLoop.MainMenu] = menu;
         d[ProgramLoop.NewGame] = NewGameProgramStep.Instance;
         return d;

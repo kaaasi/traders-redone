@@ -110,6 +110,30 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   nicht bis zum Abbau → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
 - **Status (Leitstelle):** gestartet 23.11.2026 (geplanter Lauf `Traders R9 partie`, Opus) nach Merge von 1–5; mitzunehmen #253, #254, #256. Für #254 zusätzlich erlaubt: `src/Traders.Audio/Effects/EffectMachine*.cs` und `tests/Traders.Tests/Audio/Effects*` (Tick vom Aufrufer, gemeinsamer Zähler `DS:1180`).
+- **Status:** Teil 1 fertig (PR #259, Claude): `EndCheckStep` bekommt mit den Schriften als Eingabe (`WeekScreenInputs.Fonts`)
+  `EndingStep` als Rest (`WeekScreens.Ending`, Szene `EndingScene` im Host), Tastenzähler `DS:115D` als Eingabe des Ticks
+  (`PhaseTick.Makes`); Host spielt mit Roboter-Schalter über das Ende bis zum Abbau `1777:018C` gleich dem Original
+  (Datensegment, Bild). Wie im Original endet danach das Programm (`1777:0184` → `018C`), kein Hauptmenü – Entscheidung
+  Nutzer, falls doch gewünscht (Abweichung im Host). Mitgenommen: #253 (Doku), #254 (`EffectMachine.Tick(long)`), #256 (Test M10).
+  Fortsetzung 1 (23.11.2026): Rückkehr ins Hauptmenü als Host-Abweichung (R9 F3 = B, `Deviations/MenuAfterGameOver.cs`,
+  `--original-ende`), Tests für beide Einstellungen. Teil 2 zum Großteil: `ProgramSound` (Initialisierung `218B:0002`, Vorspann,
+  Schritte 3–7, Menü, Wochenschritte, Endmusik, Abbau), `HostSound` im Host (Effektmaschine, Treiber, Ausgabe über `HostAudio`);
+  Befehlsfolge bis Aufruf 18 von Woche 0 gleich dem RefEmu.
+  Fortsetzung 2 (23.11.2026): Teil 2 fertig – Tastenklicks der Szenen über `ITypewriterEffects` im Host
+  (`Sound/TypewriterClicks.cs`, Entscheidung Leitstelle, #262; Befehle aus `SoundControl.PlayEffect` auf einer Kopie des
+  Datensegments, keine Buchung), Tonanfragen der Warteschleife in den Ereignissen (Aufruf 9) ergänzt. Teil 3: OPL-Folge des Hosts
+  gegen `OplTrace` mit `runFxDriver` (Vorspann, Menümusik, Effekte von Woche 0, Endmusik) grün; Gesamtpartieprobe im Host Bild für
+  Bild (`HostWholeGameFrameDifferentialTests`: Datensegment, `DS:10D2`, Bild, Tonbefehle je Bild) läuft mit vier Computern durch
+  die Wochen 0–2 gleich, **blockiert** an den Endbildern (ab Bild ~1166 von Aufruf 19, vor dem Tastenwarten) und mit einem
+  Menschen an 1B03:0101 (neue Stationen ein Bild zu spät, Spur stationen) – Tests übersprungen mit Grund, Details PR #259.
+  Fortsetzung 3 (23.11.2026): Befund (a) behoben – die Schriftlage `DS:3CA8`/`34A4` gehört den Ausgabeschichten; ohne sie im
+  Kern fand die Regelseite des Abends keine Schrift, schrieb keinen Text, und die Aufdeckung `20B3:069A` kopierte im Host die
+  Bildzellen statt der Blöcke am Text (ab Bild 1166 von Aufruf 19). Der Kern übernimmt sie jetzt mit dem Seitenstand zu Beginn von
+  Aufruf 19 (`WeekScreens.MirrorFont`, `[APPROX]` Host-Eingabe); Regressionstest `WeekScreensEndingTests`, keine Änderung in
+  `Presentation/Ending`. Die Gesamtpartieprobe läuft mit vier Computern in beiden Fällen (Ziel Woche 2 mit `--original-ende` bis
+  zum Programmende; F10 Woche 0 mit Standard zurück ins Hauptmenü) Bild für Bild gleich, Tastenwarten `27C6:00D2` eingeschlossen.
+  Teil 4: der Host spielt damit ohne Halt bis ins Hauptmenü bzw. mit `--original-ende` bis zum Abbau. Probe mit Mensch bleibt bis
+  zum Fixlauf `fix/stationen-0288` (#264) übersprungen (Befund (b), nicht in dieser Spur).
 
 ## 1 `ende` – Ende und Abend `20B3:0005` ab `0053`
 

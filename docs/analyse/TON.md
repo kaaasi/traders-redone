@@ -83,8 +83,10 @@ und Musik; der Musiktakt kommt vom Aufrufer (Abstand 4, Phase 0…3 aus dem Zeit
   Effektmaschine arbeitet nur auf ihrem Codesegment (`DS` = `CS` = Segment `0000`); der Port überträgt sie Befehl für Befehl auf
   einer Kopie des 64-KiB-Fensters aus `T.EXE` (Tabellen zur Laufzeit). Belegt: Ring mit Byteversatz und ohne Überlaufschutz (16
   offene Aufträge = leer, #76 R3H-2), eigener Zufall `03F8` nur in `0812` zurückgesetzt, Stapelrutsch in `148A` beendet die
-  Stimmenschleife des Ticks, doppelte BDh-Schreibung in `0E8A`. Im Spiel tickt die Maschine erst ab `21A7:000D` (Spielstart bzw.
-  erster Effekt nach Musik, die `0054` vorher stoppt); im Hauptmenü läuft sie nicht.
+  Stimmenschleife des Ticks, doppelte BDh-Schreibung in `0E8A`. Im Spiel tickt die Maschine ab dem ersten `21A7:000D`
+  (Spielstart, oder der erste Effekt nach laufender Musik, den `0054` mit `0153` → `000D` einleitet – auch im Hauptmenü aus
+  `192D:0360`). `0054` stoppt laufende Musik vor dem Effekt; `0094` startet Musik, ohne Effekte zu stoppen (`1777:014D`/`015C`:
+  Effekt 1 und Musikstück 1 gleichzeitig) – der Host legt beide Schreibströme auf einen OPL2 (R9E-1, #253).
 
 ## 5. Für den Port (R10)
 

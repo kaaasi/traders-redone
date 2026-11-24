@@ -107,8 +107,10 @@ public readonly record struct ProgramEvent(ProgramEventKind Kind, int Step, long
 /// there (<see cref="ProgramStatus.Blocked"/>) instead of skipping them.
 /// </summary>
 // [ORIGINAL] 1777:000C – step order, checks at 1777:0120/0132/0142/0168/016E/0184, DS:08FA = 1 at 1777:017A, loop back at 1777:018A
-// [APPROX] Command line (1777:0014..0116), teardown (1777:018C..01A4) and the closing message (1777:01A5..01EF) are the host's:
-// the machine ends with the exit code that selects the message (0 normal end, 1/2 errors of the initialisation).
+// [ORIGINAL] 1777:000C (site 018C) – sound part of the teardown (218B:0153, 21A7:0043) when the machine has a ProgramSound
+// [APPROX] Command line (1777:0014..0116), the rest of the teardown (1777:019A..01A4: system layer, video mode) and the closing
+// message (1777:01A5..01EF) are the host's: the machine ends with the exit code that selects the message (0 normal end, 1/2
+// errors of the initialisation).
 public sealed class ProgramMachine
 {
     private readonly Dgroup _state;
@@ -118,6 +120,7 @@ public sealed class ProgramMachine
     private readonly List<IPlayerCommand> _commands = [];
     private readonly List<ProgramEvent> _events = [];
     private readonly List<PhaseEvent> _weekEvents = [];
+    private readonly ProgramSound? _sound;
     private long _currentFrame = -1;
 
     /// <param name="state">Data segment image; the machine and the handlers work on it directly.</param>
@@ -126,8 +129,9 @@ public sealed class ProgramMachine
     /// <param name="weekHandlers">Handlers of the week loop by call number 1..30 (see <see cref="PhaseMachine"/>).</param>
     /// <param name="nextStep">Step at which the machine starts (1 = program start).</param>
     /// <param name="lastFrame">Last frame already processed.</param>
+    /// <param name="sound">Sound control of the program run: its teardown runs when main reaches 1777:018C (null: none).</param>
     public ProgramMachine(Dgroup state, OriginalRandom random, IReadOnlyDictionary<int, IProgramStepHandler> handlers,
-        IReadOnlyDictionary<int, IWeekStepHandler> weekHandlers, int nextStep = 1, long lastFrame = -1)
+        IReadOnlyDictionary<int, IWeekStepHandler> weekHandlers, int nextStep = 1, long lastFrame = -1, ProgramSound? sound = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(nextStep, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nextStep, ProgramLoop.Steps.Count);
@@ -137,6 +141,7 @@ public sealed class ProgramMachine
         _weekHandlers = weekHandlers;
         NextStep = nextStep;
         LastFrame = lastFrame;
+        _sound = sound;
     }
 
     public ProgramStatus Status { get; private set; }
@@ -191,6 +196,7 @@ public sealed class ProgramMachine
     public void Advance(PhaseTick tick)
     {
         if (tick.HeldScancodes is { } keys) PhaseMachine.WriteKeyTable(_state, keys);
+        if (LastFrame < tick.Frame) tick.CountMakes(_state);
         while (LastFrame < tick.Frame && Status != ProgramStatus.Ended)
         {
             _currentFrame = LastFrame + 1;
@@ -310,6 +316,7 @@ public sealed class ProgramMachine
 
     private void End(ProgramStep step)
     {
+        _sound?.Teardown(); // 1777:018C
         Status = ProgramStatus.Ended;
         _events.Add(new ProgramEvent(ProgramEventKind.Ended, step.Number, _currentFrame, ExitCode));
     }

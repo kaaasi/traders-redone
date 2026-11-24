@@ -132,6 +132,31 @@ public class OplHostAudioTests
         Assert.True(pcm.Max(v => Math.Abs((int)v)) < 100);
     }
 
+    /// <summary>
+    /// R9K-3 (#256): a write for an earlier tick queued after a re-anchoring by a later tick (the effect and music streams
+    /// share one OPL2, their writes of neighbouring ticks interleave) goes neither before that write's sample position nor
+    /// before it in order: the tone switched on by the re-anchoring write is muted by the later-queued earlier one.
+    /// Counter-check: <c>target = Math.Max(target, _lastTarget)</c> removed (mutation M10) → red.
+    /// </summary>
+    [Fact]
+    public void A_write_after_a_reanchoring_by_a_later_tick_keeps_its_order()
+    {
+        // latency above one tick (about 605 samples): tick 39 lands after the render position but before tick 40's target
+        var s = new OplScheduler(Rate, latencySamples: 2000);
+        s.Enqueue(new OplWrite(1, 0x20, 0x01));
+        s.Render(new short[Rate]); // stall: tick 40 would land in the past
+        foreach (var (r, v) in ToneOn) s.Enqueue(new OplWrite(40, r, v));
+        Assert.Equal(2, s.Anchorings);
+        long reanchored = s.LastTarget;
+        s.Enqueue(new OplWrite(39, 0x43, 0x3f)); // earlier tick, queued later
+        Assert.True(s.LastTarget >= reanchored, $"target {s.LastTarget} before the re-anchored write at {reanchored}");
+        Assert.Equal(2, s.Anchorings);
+        var pcm = new short[Rate / 2];
+        s.Render(pcm);
+        Assert.Equal(0, s.Pending);
+        Assert.True(pcm.Max(v => Math.Abs((int)v)) < 100, "the mute was applied before the key on");
+    }
+
     [Fact]
     public void Slow_device_keeps_every_write_on_its_own_sample_position()
     {

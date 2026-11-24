@@ -79,14 +79,15 @@ public sealed class WeekSteps
         IWeekStepHandler? catastrophes = null, IWeekStepHandler? incidents = null, IWeekStepHandler? stations = null,
         IWeekStepHandler? harvest = null, IWeekStepHandler? robots = null, IWeekStepHandler? endRest = null,
         IWeekStepHandler? trade = null, IWeekStepHandler? extra = null, IWeekStepHandler? fatMike = null,
-        IWeekStepHandler? purchase = null, IWeekStepHandler? contest = null)
+        IWeekStepHandler? purchase = null, IWeekStepHandler? contest = null, ProgramSound? sound = null)
     {
         devices ??= KeyboardOnlyDevices.Instance;
         Report = new ReportStep(devices);
         var report = new ReportPictureStep(Report, files);
         Planting = new PlantingStep(new PlantingHost(planting, devices), files);
         Handlers = WeekRuleSteps.Handlers();
-        Handlers[ReportCall] = report;
+        Handlers[ReportCall] = sound is null ? report
+            : new SoundAfterStep(report, () => Report.Report?.Events is { } e ? [.. SoundRequests.Of(e)] : null, sound);
         Handlers[CatastropheGuardStep.Call] = new CatastropheGuardStep(catastrophes);
         Handlers[WeekPlanningStep.BeforePlantingCall] = WeekPlanningStep.ForCall(WeekPlanningStep.BeforePlantingCall);
         Handlers[PlantingCall] = Planting;

@@ -1,4 +1,5 @@
 using Traders.Core.Disasters;
+using Traders.Core.Ending;
 using Traders.Core.Events;
 using Traders.Core.Extra;
 using Traders.Core.FatMike;
@@ -12,6 +13,7 @@ using Traders.Core.Startup;
 using Traders.Core.State;
 using Traders.Core.Stations;
 using Traders.Core.Trade;
+using Traders.Core.Week;
 
 namespace Traders.Core.Phases;
 
@@ -40,6 +42,14 @@ namespace Traders.Core.Phases;
 /// Stack frame of 1DEF:000C when call 24 starts (its far pointers into the stack arrays are stored in DS:547C…5480); null =
 /// <see cref="ExtraStep.GameFrame"/>, the frame of the game relative to the image's DGROUP (the host's segment numbering).
 /// </param>
+/// <param name="Fonts">
+/// The driver's fonts by number (21FD:05DB) for the evening's rule page of the end screens (call 19 where the game ends);
+/// null leaves the end of the game pending (the machine stops at call 19, as up to round 8).
+/// </param>
+/// <param name="Sound">
+/// The program's sound control: the steps' sound requests run on it (<see cref="SoundRequests"/>); null leaves them to the
+/// receivers alone (tests of single steps).
+/// </param>
 public sealed record WeekScreenInputs(
     Func<int, ImageFileLengths> Files,
     Func<int, IndexedImage> Pictures,
@@ -48,7 +58,9 @@ public sealed record WeekScreenInputs(
     Func<byte[]?> TextBuffer,
     IControlDevices? Devices = null,
     Func<ReadOnlyMemory<byte>>? OutputPages = null,
-    Func<ExtraFrame>? ExtraFrame = null);
+    Func<ExtraFrame>? ExtraFrame = null,
+    Func<IReadOnlyList<RuleFont>>? Fonts = null,
+    ProgramSound? Sound = null);
 
 /// <summary>
 /// Receivers of the output events of the screen steps of rounds 6 to 8 (scenes, sound); the incidents are drained. A receiver
@@ -63,6 +75,9 @@ public sealed record WeekScreenInputs(
 /// </param>
 /// <param name="Purchase">The purchase's own requests (call 29).</param>
 /// <param name="PurchaseField">Field and frame requests of the purchase (call 29).</param>
+/// <param name="EndingField">Field-layer requests of the end screens (call 19 where the game ends).</param>
+/// <param name="Ending">The requests of segment 20B3 from 20B3:0053 on (call 19).</param>
+/// <param name="EndingReport">Requests of the report 0825:000A(0) at the end of the game (call 19).</param>
 public sealed record WeekScreenOutputs(
     Action<DisasterEvent> Disasters,
     Action<StationEvent> Stations,
@@ -75,7 +90,10 @@ public sealed record WeekScreenOutputs(
     Action<FatMikeEvent>? FatMike = null,
     Action<FieldEvent>? ContestField = null,
     Action<PurchaseEvent>? Purchase = null,
-    Action<FieldEvent>? PurchaseField = null);
+    Action<FieldEvent>? PurchaseField = null,
+    Action<FieldEvent>? EndingField = null,
+    Action<EndingEvent>? Ending = null,
+    Action<WeekEvent>? EndingReport = null);
 
 /// <summary>
 /// The handlers of the screen steps of round 6 for <see cref="WeekSteps"/> (lane ernte part 3): call 4 beyond its guard
@@ -94,6 +112,8 @@ public sealed class WeekScreens
 {
     public WeekScreens(WeekScreenInputs inputs, WeekScreenOutputs outputs)
     {
+        _sound = inputs.Sound;
+        outputs = WithSound(outputs, inputs.Sound);
         var devices = inputs.Devices ?? KeyboardOnlyDevices.Instance;
         byte[] Texts() => inputs.TextBuffer() ?? throw new InvalidOperationException("Text buffer used before the program start.");
         StepContext Pages(StepContext c)
@@ -128,7 +148,44 @@ public sealed class WeekScreens
             new PurchaseHost(purchase, purchaseField, new TextBufferMemory(c.State, inputs.TextBuffer), devices), inputs.Files));
         Contest = new DeferredStep(c => new ContestStep(new FatMikeHost(fatMikeField, fatMike, Far(c), devices,
             new ContestFieldHost(contestField, Far(c), devices, c.State, inputs.Files)), inputs.Files));
+        if (inputs.Fonts is { } fonts)
+        {
+            var endingHost = new GameEndingHost(outputs.EndingField ?? (_ => { }), outputs.Ending ?? (_ => { }),
+                outputs.EndingReport ?? (_ => { }));
+            // the evening's rule page starts on the draw page of the moment and draws its texts in the driver's font of the
+            // moment (EndingStep reads both from the data segment)
+            Ending = new DeferredStep(c =>
+            {
+                if (inputs.OutputPages?.Invoke() is { } output)
+                {
+                    MirrorPages(c.State, output.Span);
+                    MirrorFont(c.State, output.Span);
+                }
+                return new EndingStep(endingHost, inputs.Files, inputs.Pictures, fonts());
+            });
+        }
     }
+
+    private readonly ProgramSound? _sound;
+
+    /// <summary>The receivers with the sound requests run on <paramref name="sound"/> first (<see cref="SoundRequests"/>).</summary>
+    private static WeekScreenOutputs WithSound(WeekScreenOutputs o, ProgramSound? sound)
+    {
+        if (sound is null) return o;
+        Action<FieldEvent>? F(Action<FieldEvent>? a) => a is null ? null : SoundRequests.Field(a, sound);
+        return new WeekScreenOutputs(SoundRequests.Disasters(o.Disasters, sound), SoundRequests.Stations(o.Stations, sound),
+            SoundRequests.Field(o.HarvestField, sound), o.Harvest,
+            o.Trade is null ? null : SoundRequests.Trade(o.Trade, sound), F(o.ExtraField), o.Extra, F(o.FatMikeField), o.FatMike,
+            F(o.ContestField), o.Purchase is null ? null : SoundRequests.Purchase(o.Purchase, sound), F(o.PurchaseField),
+            F(o.EndingField), o.Ending is null ? null : SoundRequests.Ending(o.Ending, sound),
+            o.EndingReport is null ? null : SoundRequests.Week(o.EndingReport, sound));
+    }
+
+    /// <summary>
+    /// Rest of call 19 where the game ends (an <see cref="EndingStep"/> per call, from 20B3:0005 on), or null without
+    /// <see cref="WeekScreenInputs.Fonts"/> (the end of the game stays pending).
+    /// </summary>
+    public DeferredStep? Ending { get; }
 
     /// <summary>Rest of call 4 behind its guard (a <see cref="CatastropheStep"/> per call).</summary>
     public DeferredStep Catastrophes { get; }
@@ -171,14 +228,36 @@ public sealed class WeekScreens
     /// False leaves calls 26, 29 and 30 pending (the machine stops at Fat Mike, as up to round 7): for counter-checks of a
     /// host that halts at call 26 (the host wires the scenes of round 8 since lane woche part 3).
     /// </param>
+    /// <param name="ending">False leaves the end of the game pending even with <see cref="Ending"/> (counter-checks).</param>
     public WeekSteps Week(Action<FieldEvent> planting, Func<int, ImageFileLengths> files, IControlDevices? devices = null,
-        IWeekStepHandler? robots = null, bool round8 = true) =>
-        new(planting, files, devices, Catastrophes, Incidents, Stations, Harvest, robots, trade: Trade, extra: Extra,
-            fatMike: round8 ? FatMike : null, purchase: round8 ? Purchase : null, contest: round8 ? Contest : null);
+        IWeekStepHandler? robots = null, bool round8 = true, bool ending = true) =>
+        new(SoundRequests.Field(planting, _sound), files, devices, Catastrophes,
+            _sound is null ? Incidents : new SoundAfterStep(Incidents,
+                () => (Incidents.Current as WeekIncidentsStep)?.Incidents?.Events is { } e ? [.. SoundRequests.Of(e)] : null, _sound),
+            Stations, Harvest, robots, trade: Trade, extra: Extra,
+            fatMike: round8 ? FatMike : null, purchase: round8 ? Purchase : null, contest: round8 ? Contest : null,
+            endRest: ending ? Ending : null, sound: _sound);
 
     /// <summary>Bytes of the output's page state: indices DS:082E/0830, numbers DS:40DE…40E5, draw page number DS:4516.</summary>
     public static IReadOnlyList<(int Offset, int Length)> PageState { get; } =
         [(RulePage.DrawPageIndex, 4), (RulePage.PageNumbers, 8), (0x4516, 2)];
+
+    /// <summary>
+    /// Bytes of the driver's current font as 21FD:05DB leaves them: advance DS:3CA8 and line height DS:34A4 (the font of the
+    /// output layers; the core's rule page of the end screens picks its <see cref="Pixels.RuleFont"/> by them).
+    /// </summary>
+    public static IReadOnlyList<(int Offset, int Length)> FontState { get; } =
+        [(Pixels.EndingPage.Advance, 2), (Pixels.EndingPage.Height, 2)];
+
+    /// <summary>Copies the output's font state (<see cref="FontState"/>) into the core's data segment.</summary>
+    // [APPROX] Host input: 21FD:05DB runs in the output layers (the scenes select the fonts); the core takes the font state at
+    // the start of call 19 where the game ends (its evening draws texts on the rule page) instead of following every font
+    // selection of the earlier steps itself.
+    public static void MirrorFont(Dgroup d, ReadOnlySpan<byte> output)
+    {
+        foreach (var (offset, length) in FontState)
+            for (int i = 0; i < length; i++) d.Set(offset + i, output[offset + i]);
+    }
 
     /// <summary>Copies the output's page state (<see cref="PageState"/>) into the core's data segment.</summary>
     // [APPROX] Host input: the page state is the output layers' (21FD:051F/0590 run in Traders.Vga); the core takes it at the

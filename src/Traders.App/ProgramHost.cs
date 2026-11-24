@@ -1,6 +1,7 @@
 using Traders.Assets;
 using Traders.Assets.Loading;
 using Traders.App.Deviations;
+using Traders.App.Sound;
 using Traders.Core;
 using Traders.Core.Events;
 using Traders.Core.Menus;
@@ -9,6 +10,7 @@ using Traders.Core.Pixels;
 using Traders.Core.Startup;
 using Traders.Core.State;
 using Traders.Presentation.Disasters;
+using Traders.Presentation.Ending;
 using Traders.Presentation.Events;
 using Traders.Presentation.Extra;
 using Traders.Presentation.FatMike;
@@ -29,13 +31,15 @@ namespace Traders.App;
 /// the week loop with the ported steps of <see cref="WeekSteps"/> and <see cref="WeekScreens"/>: rule steps, week report,
 /// catastrophes, week planning, planting phase, week incidents, stations, harvest, trade, extra phase, Fat Mike, purchase,
 /// contest) and the scenes on the graphics layers – main menu, week report, catastrophes, planting field, incidents, stations,
-/// harvest, trade, extra phase, Fat Mike with the contest, purchase (decisions F1 = B of R6 and R7). Per display frame the host
-/// calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once (<see cref="ProgramMachine.Advance"/>),
-/// the scenes play the events of that frame. Every call of the week but the robot phase 1C68 (call 18) is ported; with the
-/// robot switch on (default, decision F3 = A of R7) the host skips it (<see cref="RobotPhaseSkip"/>) and plays week after week
-/// without a halt until the end check (call 19) ends the game (<see cref="GameOver"/>, its end screens are pending, F1 = B of
-/// R7); without the switch the machine halts at call 18 as the core does. <see cref="Halt"/> then names the call or tells that
-/// the game is over.
+/// harvest, trade, extra phase, Fat Mike with the contest, purchase, end screens (decisions F1 = B of R6 and R7). Per display
+/// frame the host calls <see cref="Frame"/> with the held keys; the core processes the frame exactly once
+/// (<see cref="ProgramMachine.Advance"/>), the scenes play the events of that frame. Every call of the week but the robot phase
+/// 1C68 (call 18) is ported; with the robot switch on (default, decision F3 = A of R7) the host skips it
+/// (<see cref="RobotPhaseSkip"/>) and plays week after week without a halt until the end check (call 19) ends the game
+/// (<see cref="GameOver"/>): the end screens run with their scene (<see cref="Ending"/>) up to the any-key wait, then the week
+/// loop returns AL = 1 and main ends the program (1777:0184 → teardown 018C, exit code 0) – with the menu switch on (default,
+/// decision F3 = B of R9) the host goes back to the main menu instead (<see cref="MenuAfterGameOver"/>). Without the robot
+/// switch the machine halts at call 18 as the core does; <see cref="Halt"/> then names the call.
 /// The scenes and the layers keep their own data segment image; they read the core's state and never write it. The text
 /// buffer of the program start is shared: the core writes the amounts of the incidents into it (2295:0001), the stations
 /// scene its numbers (2295:0001 is an output call there), and the core reads the texts from it.
@@ -43,8 +47,9 @@ namespace Traders.App;
 // [APPROX] Host parts of the program start: the heap addresses (text buffer, page buffer) and the segment value of DS are
 // fixed host choices; the display part of 0DFD:000D is reduced to what the menu scene needs (pages 0B67:0002, page numbers
 // and first flip 0DFD:0074/0132, fonts from FONTS.PP as the original's driver table, masks). The loading picture and the code
-// request are not shown; the week runs up to its first pending call step and halts there with a notice (F1 = B of R6 and R7).
-// The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of calls 4, 9 and 11
+// request are not shown; without the robot switch the week runs up to its first pending call step and halts there with a
+// notice (F1 = B of R6 and R7).
+// The page state of the output layers (DS:082E/0830, 40DE, 4516) is given to the core at the start of calls 4, 9, 11 and 19
 // (WeekScreenInputs.OutputPages; the harvest, trade and extra phase read none of it); the driver's current font likewise for
 // call 11. The extra phase stores far pointers into its stack frame; the host gives the frame of the game relative to its
 // DS value (ExtraStep.GameFrame), so their segment words are host values.
@@ -76,16 +81,29 @@ public sealed class ProgramHost
     /// <param name="skipRobotPhase">
     /// Robot switch: true (default) skips call 18 (<see cref="RobotPhaseSkip"/>), false halts there (<c>--original-roboter</c>).
     /// </param>
-    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true)
+    /// <param name="returnToMenu">
+    /// Menu switch: true (default) goes back to the main menu after the end of a game (<see cref="MenuAfterGameOver"/>), false
+    /// ends the program there as the original does (<c>--original-ende</c>).
+    /// </param>
+    /// <param name="sound">
+    /// The host's end of the sound control; null: <see cref="HostSound"/> on the original files (effect machine, music driver).
+    /// </param>
+    public ProgramHost(string dosDirectory, IClockInput clock, IMenuHost? menuHost = null, bool skipRobotPhase = true,
+        bool returnToMenu = true, ISoundHost? sound = null)
     {
         _dir = dosDirectory;
         var exe = Load("T.EXE");
         Core = ProgramSteps.InitialState(exe);
+        SoundHost = sound ?? HostSound.ForDirectory(dosDirectory, FileName);
+        Sound = new ProgramSound(Core, SoundHost);
         Start = new ProgramStart(Lengths, new MenuTextPlaque(), new TextFile(Load(ResourceTable.EnglishText), TextBufferOffset, TextBufferSegment));
-        Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths);
+        Menu = new MainMenuProgramStep(menuHost ?? new SaveFileHost(dosDirectory), Lengths, Sound);
         var masks = PowerPacker.Decrunch(Load(ResourceTable.Masks));
+        var fonts = PowerPacker.Decrunch(Load(ResourceTable.Fonts));
+        RuleFont[] ruleFonts = [.. DriverFonts.Select(f => RuleFontOf(fonts, f))];
         Screens = new WeekScreens(
-            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => EarlierPlayed(Layers!).Ds),
+            new WeekScreenInputs(Lengths, Picture, masks, CurrentFont, () => Start.TextBuffer, OutputPages: () => EarlierPlayed(Layers!).Ds,
+                Fonts: () => ruleFonts, Sound: Sound),
             new WeekScreenOutputs(Output<Core.Disasters.DisasterEvent>(e => Disasters!.Apply(e)),
                 Output<Core.Stations.StationEvent>(e => Stations!.Apply(e)), Output<Core.Field.FieldEvent>(e => Harvest!.Apply(e)),
                 Output<Core.Harvest.HarvestEvent>(e => Harvest!.Apply(e)), Output<Core.Trade.TradeEvent>(e => Trade!.Apply(e)),
@@ -95,21 +113,20 @@ public sealed class ProgramHost
                 FatMikeField: Output<Core.Field.FieldEvent>(e => FatMike!.Apply(e)),
                 FatMike: Output<Core.FatMike.FatMikeEvent>(e => FatMike!.Apply(e)),
                 Purchase: Output<Core.Purchase.PurchaseEvent>(e => Purchase!.Apply(e)),
-                PurchaseField: Output<Core.Field.FieldEvent>(e => Purchase!.Apply(e))));
+                PurchaseField: Output<Core.Field.FieldEvent>(e => Purchase!.Apply(e)),
+                // the end screens (call 19 where the game ends) and their report 0825:000A(0) on one scene
+                EndingField: Output<Core.Field.FieldEvent>(e => Ending!.Apply(e)),
+                Ending: Output<Core.Ending.EndingEvent>(e => Ending!.Apply(e)),
+                EndingReport: Output<Core.Week.WeekEvent>(e => Ending!.Apply(e))));
         RobotSkip = skipRobotPhase ? new RobotPhaseSkip() : null;
         Week = Screens.Week(Output<Core.Field.FieldEvent>(e => Field!.Apply(e)), Lengths, robots: RobotSkip);
-        Machine = new ProgramMachine(Core, new OriginalRandom(clock), ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu),
-            Week.Handlers);
+        var random = new OriginalRandom(clock);
+        var steps = ProgramSteps.All(ProgramInitialisation.AdLib, Start, Menu, Sound);
+        Machine = new ProgramMachine(Core, random, steps, Week.Handlers, sound: Sound);
+        MenuReturn = returnToMenu ? new MenuAfterGameOver(Core, random, steps, Week.Handlers, Sound) : null;
 
         Driver = new ModeXDriver();
-        var fonts = PowerPacker.Decrunch(Load(ResourceTable.Fonts));
-        // [APPROX] Font table of the driver as 0DFD:0158 leaves it (small 5/6 at 5A0h, large 12/14 at 0, digits 5/5 from "/" at
-        // 7F8h; checked against the original's table in MenuSceneHarness and by the menu picture); 0158 itself is not ported.
-        Driver.Fonts =
-        [
-            new FontDescriptor(fonts, 0x5A0, 5, 6, 0x20), new FontDescriptor(fonts, 0, 12, 14, 0x20),
-            new FontDescriptor(fonts, 0x7F8, 5, 5, 0x2F),
-        ];
+        Driver.Fonts = [.. DriverFonts.Select(f => new FontDescriptor(fonts, f.Offset, (ushort)f.Height, (ushort)f.Advance, (ushort)f.First))];
         Driver.Masks = masks;
         var ds = new byte[0x10000];
         ProgramSteps.InitialState(exe).Bytes.CopyTo(ds, 0);
@@ -117,6 +134,7 @@ public sealed class ProgramHost
         ds[GraphicsLayers.CardMode + 1] = 0;
         Layers = new GraphicsLayers(Driver, ds, new VgaDac(), Retraces) { DataSegment = DataSegmentValue };
         Layers.InitializePages(PageBuffer);
+        Layers.Effects = Clicks = new TypewriterClicks(Core, Sound, SoundHost);
         SetUpGamePages(Layers);
         var texts = new TextMemory(Start);
         Layers.OtherMemory = texts;
@@ -132,7 +150,31 @@ public sealed class ProgramHost
         Extra = new ExtraScene(Layers, Core, pictures);
         FatMike = new FatMikeScene(Layers, Core, pictures);
         Purchase = new PurchaseScene(Layers, Core, pictures);
+        Ending = new EndingScene(Layers, Core, texts, pictures);
     }
+
+    /// <summary>
+    /// Font table of the driver as 0DFD:0158 leaves it: small 5/6 at 5A0h, large 12/14 at 0, digits 5/5 from "/" at 7F8h
+    /// (offset in FONTS.PP, rows, advance, first character).
+    /// </summary>
+    // [APPROX] Checked against the original's table in MenuSceneHarness and by the menu picture; 0158 itself is not ported.
+    private static readonly (int Offset, int Height, int Advance, int First)[] DriverFonts =
+        [(0x5A0, 5, 6, 0x20), (0, 12, 14, 0x20), (0x7F8, 5, 5, 0x2F)];
+
+    /// <summary>A font of the driver as input of the core's rule page (R6P-1): 16-bit rows, high byte first.</summary>
+    private static RuleFont RuleFontOf(byte[] data, (int Offset, int Height, int Advance, int First) f)
+    {
+        int glyphs = (data.Length - f.Offset) / (2 * f.Height);
+        var rows = new ushort[glyphs * f.Height];
+        for (int i = 0; i < rows.Length; i++) rows[i] = (ushort)(data[f.Offset + 2 * i] << 8 | data[f.Offset + 2 * i + 1]);
+        return new RuleFont(f.Height, f.Advance, f.First, rows);
+    }
+
+    /// <summary>
+    /// Scene of the end screens (call 19 where the game ends: closing picture, evening, ranking, report 0825:000A(0)); the
+    /// core's events reach it while the frame is processed.
+    /// </summary>
+    public EndingScene Ending { get; }
 
     /// <summary>The handlers of the calls 4, 9, 11, 16 (round 6), 23 and 24 (round 7) and their inputs.</summary>
     public WeekScreens Screens { get; }
@@ -177,30 +219,59 @@ public sealed class ProgramHost
     public FieldScene Field { get; }
 
     /// <summary>
-    /// True once the end check (call 19) has ended the game (exit B of R7 F1): the machine halts at the call, whose end screens
-    /// are not ported.
+    /// True once the end check (call 19) has ended the game: the end screens run (<see cref="Ending"/>) and the week loop
+    /// returns AL = 1 (exit B), after which main goes to its teardown and the program ends (1777:0184 → 018C).
     /// </summary>
-    public bool GameOver => Machine.WeekMachine is { Status: PhaseStatus.Blocked, NextStep: WeekSteps.EndCall };
+    public bool GameOver => Week.End.GameOver;
 
     /// <summary>
-    /// Notice when the week loop halts (null while it runs): that the game is over (<see cref="GameOver"/>), or the call step
-    /// that is not ported yet (call 18 without the robot switch) with its routine; with the week.
+    /// Notice when the week loop halts (null while it runs): the call step that is not ported yet (call 18 without the robot
+    /// switch) with its routine and the week.
     /// </summary>
     public string? Halt => Machine.WeekMachine is { Status: PhaseStatus.Blocked } w
-        ? GameOver
-            ? $"week {w.Week}: game over (end check {WeekLoop.Step(w.NextStep)}); the end screens are not ported yet - halted"
-            : $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
+        ? $"week {w.Week}: call {WeekLoop.Step(w.NextStep)} is not ported yet - halted"
         : null;
 
     /// <summary>The host's stand-in for the robot phase (call 18) when the robot switch is on, else null.</summary>
     public RobotPhaseSkip? RobotSkip { get; }
 
-    /// <summary>Note for the status line while the robot switch is on (null when it is off).</summary>
-    public string? Deviation => RobotSkip is null ? null : "robot phase skipped (deviation, --original-roboter turns it off)";
+    /// <summary>The program's sound control (core): the sound calls of main and the sound requests of the menus.</summary>
+    public ProgramSound Sound { get; }
+
+    /// <summary>Key clicks of the typewriter text of the scenes, to <see cref="SoundHost"/> (#262).</summary>
+    public TypewriterClicks Clicks { get; }
+
+    /// <summary>The host's end of the sound control (executes the commands; <see cref="HostSound"/> unless given).</summary>
+    public ISoundHost SoundHost { get; }
+
+    /// <summary>The name of a music file behind a far pointer into the core's data segment (int 64h function 00h).</summary>
+    private string? FileName(ushort segment, ushort offset)
+    {
+        if (segment != DgroupLayout.Segment) return null;
+        var bytes = Core.Bytes;
+        int end = Array.IndexOf(bytes, (byte)0, offset);
+        return end < 0 ? null : System.Text.Encoding.ASCII.GetString(bytes, offset, end - offset);
+    }
+
+    /// <summary>The host's return to the main menu after the end of a game when the menu switch is on, else null.</summary>
+    public MenuAfterGameOver? MenuReturn { get; }
+
+    /// <summary>Note for the status line while a deviation switch is on (null when both are off).</summary>
+    public string? Deviation => (RobotSkip, MenuReturn) switch
+    {
+        (null, null) => null,
+        (not null, null) => "robot phase skipped (deviation, --original-roboter turns it off)",
+        (null, not null) => "back to the menu after the end (deviation, --original-ende turns it off)",
+        _ => "robot phase skipped, back to the menu after the end (deviations, --original-roboter, --original-ende)",
+    };
 
     public Dgroup Core { get; }
 
-    public ProgramMachine Machine { get; }
+    /// <summary>
+    /// The core's program machine; after the end of a game with the menu switch on, the machine that goes on at the loop start
+    /// (<see cref="MenuAfterGameOver"/>).
+    /// </summary>
+    public ProgramMachine Machine { get; private set; }
 
     public ProgramStart Start { get; }
 
@@ -240,14 +311,33 @@ public sealed class ProgramHost
             Extra.NextFrame(held);
             FatMike.NextFrame(held);
             Purchase.NextFrame(held);
+            Ending.NextFrame(held);
             Report.NextFrame();
-            Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held));
-            Machine.DrainEvents();
+            Machine.Advance(new PhaseTick(Machine.LastFrame + 1, held, Makes(held)));
+            var events = Machine.DrainEvents();
             Machine.DrainWeekEvents();
+            Sound.Flush();
+            if (MenuReturn?.Continue(Machine, events) is { } next) Machine = next;
             Scene.NextFrame();
             foreach (var e in Menu.DrainEvents()) Scene.Apply(e);
             PlayEarlier();
         }
+    }
+
+    private readonly HashSet<byte> _held = [];
+
+    /// <summary>
+    /// Makes for the keyboard handler's counter DS:115D: keys held in this frame that were not held in the frame before (the
+    /// host sees the keys once per frame).
+    /// </summary>
+    // [APPROX] 27C6:0043 counts every make byte of IRQ 1; the host counts per frame, so two makes of one key within a frame
+    // and the typematic repeats of a held key are not counted.
+    private int Makes(IReadOnlyCollection<byte> held)
+    {
+        int makes = held.Count(k => !_held.Contains(k));
+        _held.Clear();
+        _held.UnionWith(held);
+        return makes;
     }
 
     /// <summary>

@@ -3,9 +3,10 @@ using Traders.App.Rendering;
 using Traders.Assets;
 using Traders.Vga;
 
-// Usage: traders [path-to-gamedata/dos] [--scale n] [--aspect] [--frames n] [--original-roboter] (HostArguments)
+// Usage: traders [path-to-gamedata/dos] [--scale n] [--aspect] [--frames n] [--original-roboter] [--original-ende] (HostArguments)
 // With the original files the host runs the program (start, main menu, new game, week loop of the core); without them it
-// shows colour bars. The host skips the robot phase (call 18) unless --original-roboter is given (decision F3 = A of R7).
+// shows colour bars. The host skips the robot phase (call 18) unless --original-roboter is given (decision F3 = A of R7)
+// and goes back to the main menu after the end of a game unless --original-ende is given (decision F3 = B of R9).
 var arguments = HostArguments.Parse(args);
 string? dir = arguments.Directory ?? AssetLibrary.FindOriginalDos() ?? AssetLibrary.FindOriginalDos(Environment.CurrentDirectory);
 
