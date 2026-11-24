@@ -25,7 +25,7 @@
 **Einzelner Folgeteil:** wie oben mit dem Zusatz „Nur Teil <n>; danach Schritt 5 bzw. 6 ohne weiteren Teil.“
 
 **Fixlauf** (geplanter Lauf): Startaufruf wie oben mit Auftrag „Befunde `<IDs>` aus `<review-datei>` zu PR #`<nr>` beheben, Head
-vorher `<sha>`“ – ohne Befund (nur Rebase): „PR #`<nr>` auf `main` rebasen, Head vorher `<sha>`“. Am Ende
+vorher `<sha>`“ – ohne Befund: „`main` per Merge-Commit in PR #`<nr>` holen, Head vorher `<sha>`“. Am Ende
 (`zusammenarbeit.md` §5 Punkt 8): bei behobenem P0/P1 Label `spur-wartet` und in der Übergabe „Nachprüfung anlegen –
 Leitstelle“ mit fertigem Kurzaufruf aus `review-anfrage.md` (Delta alter..neuer Head, nur diese Befunde; nicht selbst anlegen),
 sonst Label `leitstelle-delta`. Mit dem Push des neuen
@@ -43,7 +43,8 @@ Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Be
    Draft-PR mit `Bearbeiter: <Agent>` und Base-SHA.
 4. Harte Regeln: Befund in `docs/routines/` → Differenztest gegen RefEmu (rot bzw. fehlend) → Port → grün; Dateigrenzen;
    `[ORIGINAL]`/`[APPROX]`; Mehrrundenprobe, wenn Phasenfolge, Geld, Vorräte oder KI berührt sind.
-5. Vor jedem Push: `git fetch origin && git rebase origin/main`, `tools/pruefen.sh --schnell` (`AGENTS.md` §5).
+5. Vor jedem Push: `git fetch origin`; ist `main` neuer, per Merge-Commit integrieren (kein Rebase, kein Force-Push); `tools/pruefen.sh
+   --schnell` (`AGENTS.md` §5). Der Lauf dauert mit den Gesamtpartieproben 30–80 min: im Hintergrund starten, Log abfragen, nicht abbrechen.
 6. Fertig: Beschreibung nach `.github/pull_request_template.md`, Draft aufheben, Status im eigenen Abschnitt von
    `docs/arbeitspakete.md`.
 7. **Immer zum Schluss** (fertig wie unterbrochen): Übergabekommentar nach `docs/handoffs/VORLAGE.md` (`Bearbeiter: frei`).
@@ -60,7 +61,7 @@ Gilt, wenn die Spur in `docs/arbeitspakete.md` eine geordnete Liste von Teilen h
    keine Fortsetzung, Lauf beenden.
 2. **Ein Branch, ein PR:** Teil 1 legt `paket/<spur>` von aktuellem `main` an und öffnet den Draft-PR mit der Teilliste als
    Aufgabenliste. Jeder Teil sind Commits auf diesem Branch; eine Fortsetzung übernimmt ihn nach der Übergabe – nacheinander, nie
-   gleichzeitig. Vor dem Push auf `origin/main` rebasen, dann `git push --force-with-lease`.
+   gleichzeitig. Vor dem Push `main` per Merge-Commit einmergen, normaler Push.
 3. **Teil abschließen:** grünes `tools/pruefen.sh --schnell`, gepusht, Teil im PR abgehakt, Übergabe mit „Fortsetzungen verbraucht: n von 3“.
    Der PR bleibt Draft, bis alle Teile fertig sind; dann den nächsten Teil im selben Lauf beginnen, solange Zeit bleibt.
 4. **Teil blockiert** (kein grünes `pruefen.sh --schnell`, Beleg fehlt, fremde Datei nötig, Frage an den Nutzer): Draft mit Übergabe, Label

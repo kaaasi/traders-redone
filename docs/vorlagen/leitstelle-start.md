@@ -27,16 +27,19 @@
    aktuelle Runde, die offenen PRs (Titel, Bearbeiter, letzte Übergabe) und die Reviews der Runde. Kein Vorwissen aus Chats nötig.
 2. **Planen:** Runde mit Ziel, Spuren (Teile, Dateigrenzen, Abnahme, Modell, Abhängigkeiten), Zuständigkeit gemeinsamer Dateien,
    Integrationsfolge und offenen Fragen an den Nutzer in `docs/arbeitspakete.md` auf `prozess/plan-runde-<n>`; dem Nutzer nur
-   Entscheidungsbedarf und Link nennen. Spuren starten erst nach dem **Go** des Nutzers.
+   Entscheidungsbedarf und Link nennen. **Schnittstellen zwischen Spuren** (gemeinsame Typen, Ereignisse, Zeit- und Zählgrößen)
+   im Plan vollständig festlegen: Einheit, Nullpunkt, Phase, zuständige Spur (Erfahrung R9: R9M-1, R9T-1). Spuren starten erst nach dem **Go** des Nutzers.
 3. **Starten:** je Spur geplanter Lauf mit dem Kurzaufruf „Geplanter Lauf mit Teilen“ aus `spur-start.md` (`anhang.md` F).
 4. **Review anlegen:** je fertiger Spur Erstreview als geplanter Lauf (frische Sitzung, Kurzaufruf aus `review-anfrage.md`);
-   Gesamtreview am Rundenende: dem Nutzer den ausgefüllten Kurzaufruf für ChatGPT geben (`anhang.md` C, D).
+   Gesamtreview am Rundenende: dem Nutzer den ausgefüllten Kurzaufruf für ChatGPT geben (`anhang.md` C, D). In jedem Review- und
+   Gesamtreview-Aufruf die Laufzeit von `tools/pruefen.sh` nennen (derzeit 30–80 min: im Hintergrund starten, nicht abbrechen).
 5. **Integration:** Spur-PRs nach Review und Merge-Prüfung (`zusammenarbeit.md` §6) in der Integrationsfolge mergen. Ist `main`
-   seit dem Review neu und der PR **ohne Konflikt**, wird **nicht** rebased: vorher lokal `tools/pruefen.sh --schnell` mit Originaldaten auf `main` + PR,
-   Tabelle im Merge-Kommentar. `integration/<runde>` nur bei Konflikten zwischen Spuren. Eigene Integrations-Commits brauchen
+   seit dem Review im Code neu, wird **nicht** rebased: `update-branch` (bzw. Merge-Lauf Haiku bei Doku-Konflikten) und CI auf dem
+   neuen Head mit Originaldaten, Tabelle aus dem CI-Log im Merge-Kommentar (`zusammenarbeit.md` §6 Nr. 2). `integration/<runde>` nur bei Konflikten zwischen Spuren. Eigene Integrations-Commits brauchen
    das Review wie jede andere Änderung.
 6. **Nach jedem Merge:** `STATUS.md` (Meilensteine, Routinen – Erzeugung nach `tools/abdeckung.py`, sobald vorhanden),
-   `CHANGELOG.md`, Status in `docs/arbeitspakete.md`.
+   `CHANGELOG.md`, Status in `docs/arbeitspakete.md`. Eigene Doku-Änderungen (Status, Nachträge, Entscheidungen) **gebündelt** in
+   einem Sammel-PR je halbem Tag mit einem Review (Haiku), nicht je Änderung ein PR (Erfahrung R9).
 7. **Rundenende:** Gesamtreview ausgewertet, Befunde als Issues, Runde nach `docs/archiv/runde-<n>.md`, nächste Runde vorschlagen.
 8. **Immer zum Schluss:** Übergabekommentar nach `docs/handoffs/VORLAGE.md` in jedem PR, an dem die Sitzung gearbeitet hat; ohne
    PR als `docs/handoffs/<datum>-<thema>.md`.

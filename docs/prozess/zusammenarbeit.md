@@ -42,12 +42,17 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 
 - **Ein Branch – ein Bearbeiter.** Je gleichzeitigem Agenten ein eigener Klon bzw. Worktree. Fortsetzungen einer Spur arbeiten
   **nacheinander** auf `paket/<spur>` mit einem PR (`spur-start.md` „Teile und Fortsetzung“).
-- Kein `git push --force` auf fremde Branches; auf eigenen nur `--force-with-lease` nach Rebase.
+- Kein `git push --force`; `main` wird per Merge-Commit in den eigenen Branch geholt (Force-Push ist in geplanten Läufen gesperrt,
+  Erfahrung R9).
 - Dateigrenzen einhalten; Berührungen gemeinsamer Dateien im PR begründen. Überschneidende Spuren laufen nacheinander.
 - `docs/arbeitspakete.md` nur im eigenen Statusabschnitt; Planabschnitte ändert die Leitstelle.
 - Abgeschlossene Branches erst löschen, wenn geprüft ist, dass keine unintegrierte Arbeit darauf liegt (`git log main..<branch>`).
 - Status nur in GitHub (`docs/arbeitspakete.md`, PRs, Labels, `STATUS.md`); ein GitHub-Project ist optional und darf keine
   zweite, von Hand gepflegte Statusquelle werden.
+- **Fixlauf außerhalb des Plans** (Nutzer 24.11.2026): Belegt eine Spur oder ein Review einen Fehler in fremden Dateien, behebt ihn
+  nicht die Spur, sondern ein eigener Fixlauf `fix/<thema>` mit eigenem PR, Issue und Erstreview. Die Leitstelle trägt ihn als
+  Nachtrag in den Plan ein (Ziel, Dateigrenzen, Modell) und legt ihn nach dem Kurzsatz des Nutzers im Chat an („Lege den Fixlauf für
+  #<nr> an“); die Spur arbeitet ohne die betroffene Probe weiter (Skip mit Verweis auf das Issue).
 - **Geplante Läufe (Aufgaben) legt allein die Leitstelle an** (oder der Nutzer) – Spuren, Fixläufe und Reviews nie, auch nicht
   als Fortsetzung oder Nachprüfung (Nutzer 12.11.2026). Sie melden Bedarf mit Label `spur-wartet` und fertigem Prompt in der
   Übergabe. Hintergrundagenten nur mit Auftrag des Nutzers bzw. der Leitstelle.
@@ -86,7 +91,7 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
      | Label | gesetzt von, wann | entfernt von, wann |
      |---|---|---|
      | `review-ja` / `review-nein` | jedes Review am geprüften PR (das andere entfernen) | durch das nächste Review; `review-nein` der Fixlauf mit dem Push des neuen Heads |
-     | `leitstelle-delta` | Fixlauf, der nur P2/P3 behebt oder nur rebased | Leitstelle nach der Delta-Prüfung |
+     | `leitstelle-delta` | Fixlauf, der nur P2/P3 behebt oder nur `main` einmergt | Leitstelle nach der Delta-Prüfung |
      | `beleg-strittig` | Fixlauf, der einem belegten Befund mit eigenem Beleg widerspricht | Leitstelle nach ihrer Entscheidung |
      | `spur-wartet` | jeder Lauf, nach dem ein weiterer nötig ist (Fortsetzung, Nachprüfung, Review) oder der blockiert ist | Leitstelle nach Anlegen des Laufs bzw. Entscheidung oder Vorlage beim Nutzer |
 
@@ -107,8 +112,10 @@ gepushte Stand; der Nachfolger schreibt zuerst einen Übernahmekommentar („üb
 GitHub Free erzwingt nichts davon ([anhang.md](anhang.md) B); die Liste ist verbindlich und wird im Merge-Kommentar abgehakt:
 
 1. [ ] **Head-SHA** = vom Review freigegebener SHA (sonst Nachprüfung; Ausnahmen mit Delta-Prüfung nach §5 Punkt 4).
-2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review neu: `tools/pruefen.sh --schnell` mit Originaldaten auf dem
-   Merge-Ergebnis (`main` + PR) lokal wiederholen, Tabelle im Merge-Kommentar.
+2. [ ] **Base aktuell:** ohne Konflikt gegen aktuellen `main`; ist `main` seit dem Review im Code neu (nicht nur Doku, per `compare`):
+   `main` in den PR holen (`PUT …/pulls/<nr>/update-branch`, bei Doku-Konflikten Merge-Lauf Haiku) und die CI auf dem neuen Head mit
+   Originaldaten abwarten; Tabelle aus dem CI-Log in den Merge-Kommentar (Delta „nur Merge von main“, §5 Nr. 4). Ein lokaler Lauf
+   der Leitstelle zählt nur, wenn er vollständig endet (Hintergrundprozesse enden mit der Antwort, Erfahrung R9).
 3. [ ] **CI grün auf genau diesem Head** (Check-Runs des Head-SHA). Nur `docs/**`/`*.md` geändert: CI startet nicht
    (Pfadfilter in `build.yml`) → „entfällt, nur Doku“ nach Bestätigung per `compare`/`--stat`. Gilt nicht für
    `docs/routines/**` und `STATUS.md`: sie sind Eingaben von `tools/abdeckung.py --check`, dafür läuft die CI immer.
