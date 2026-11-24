@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md), Runde 8: [archiv/runde-8.md](archiv/runde-8.md)).
 
-## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go Nutzer 22.11.2026; Spuren 1–5 gemergt 23.11.2026)
+## Aktuelle Runde: 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (Plan Leitstelle 22.11.2026, Go Nutzer 22.11.2026; Spuren 1–5 gemergt 23.11.2026, Spur 0 24.11.2026)
 
 **Ziel:** Zwischenziel **„Gesamtpartie ohne Roboterkampf“** (Nutzer 11.11.2026): Der Host spielt mit Roboter-Schalter
 (R7 F3 = A) vom Hauptmenü über eine neue Partie Woche für Woche bis zum Ende (Zielvermögen oder F10), zeigt die Endbilder
@@ -109,7 +109,7 @@ bis zu Routinen mit `[ORIGINAL]`-Marker; Größen in Byte):
   ausgegeben, Musik vor Effekt nicht gestoppt, Host hält am Ende bzw. kehrt mit Standard nicht ins Hauptmenü zurück, mit Originalschalter
   nicht bis zum Abbau → rot); `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
-- **Status (Leitstelle):** gestartet 23.11.2026 (geplanter Lauf `Traders R9 partie`, Opus) nach Merge von 1–5; mitzunehmen #253, #254, #256. Für #254 zusätzlich erlaubt: `src/Traders.Audio/Effects/EffectMachine*.cs` und `tests/Traders.Tests/Audio/Effects*` (Tick vom Aufrufer, gemeinsamer Zähler `DS:1180`).
+- **Status (Leitstelle):** **gemergt 24.11.2026** (PR #259, Claude Opus, Fortsetzungen 3 von 3; Review `reviews/2026-11-24-r9-partie.md` „Ja“, P3 → #268; Merge von `main` per `update-branch`, Delta-Prüfung Leitstelle). Zusätzlich erlaubt waren `src/Traders.Audio/Effects/EffectMachine*.cs` und `tests/Traders.Tests/Audio/Effects*` (#254). Folgefixe außerhalb des Plans (Nutzer): #265 (Fix #264, `StationScene`, Review `reviews/2026-11-24-fix-stationen-0288.md` „Ja“) und #270 (Probe mit Mensch, #268, Review `reviews/2026-11-24-fix-partie-mensch.md` „Ja“).
 - **Status:** Teil 1 fertig (PR #259, Claude): `EndCheckStep` bekommt mit den Schriften als Eingabe (`WeekScreenInputs.Fonts`)
   `EndingStep` als Rest (`WeekScreens.Ending`, Szene `EndingScene` im Host), Tastenzähler `DS:115D` als Eingabe des Ticks
   (`PhaseTick.Makes`); Host spielt mit Roboter-Schalter über das Ende bis zum Abbau `1777:018C` gleich dem Original
