@@ -115,6 +115,7 @@ Runden im Fahrplan von [arbeitspakete.md](arbeitspakete.md). Die Nummern M4–M1
 | E6 | Netzwerk mit Host | Gemeinsamer Kern, geprüfte Spielerbefehle, Server entscheidet Zufall/KI/Cheats |
 | E7 | Dedicated Server | Headless-Host, Lobby, Wiederbeitritt, versionierte Zustände |
 | E8 | Eigene OPL2-Synthese | Übertragenen Emulator aus R9 (F1 = B, Nutzer 22.11.2026) durch eigene Umsetzung ersetzen; Abgleich gegen die bisherige Ausgabe, Fremdcode und `THIRD_PARTY.md`-Eintrag entfernen |
+| E9 | Spielstände | Mehrere Speicherplätze statt nur `SAVEGAME.DAT` (Name, Datum, Woche), optional Zufallszustand `DS:10D2` mitspeichern, damit eine geladene Partie gleich weiterläuft; Originalformat (0x900 Byte) bleibt lesbar und schreibbar (Nutzer 24.11.2026) |
 
 Netzwerkfähigkeit wird ab M3 im Kern vorbereitet (Befehle statt direkter Zustandsänderung,
 serialisierbarer Zustand), damit E6/E7 keinen Umbau erfordern.

@@ -276,6 +276,8 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
   abschaltbare Host-Abweichung (Schalter wie `RobotPhaseSkip`); das Original beendet das Programm (Abbruchweg B: Aufruf `1777:017F`, Prüfung `0184` →
   Abbau `018C`), der Kern bleibt originalgetreu. Spur 0: Abweichung in `src/Traders.App/Deviations/**`, Tests für beide
   Einstellungen.
+- **„Fortsetzen“ nach dem Ende** (Nutzer 24.11.2026): Nach der Rückkehr ins Hauptmenü (F3 = B) bleibt „fortsetzen“ wie im
+  Original im Menü angeboten (Hinweis aus `reviews/2026-11-24-r9-partie.md`); keine Änderung.
 - **Plan-Review** `reviews/2026-11-22-r9-plan.md` „Nein“ (Opus): P2 R9PL-1–3, P3 R9PL-4–9 eingearbeitet (Leitstelle
   22.11.2026; R9PL-3 entschieden: Marker `[ORIGINAL-FX]`, Tabellen zur Laufzeit, Werkzeugausgabe git-ignoriert); nur Plantext,
   daher Delta-Prüfung der Leitstelle statt Nachprüfung (vom Review so freigestellt).
