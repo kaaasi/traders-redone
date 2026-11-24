@@ -137,8 +137,12 @@ internal static class StationsSceneHarness
     /// data segment image, VRAM, DAC and driver registers of the start; fonts and masks from FONTS.PP and MASKS.PP, the text
     /// buffer from the original's memory. random(0) gets the original's clock values.
     /// </summary>
+    /// <param name="layersImage">
+    /// Optional change of the layers' data segment image before the run (default: the original's whole data segment, as the
+    /// scene tests had it; <see cref="HostLayersImage"/> for the host's image).
+    /// </param>
     public static Result RunPort(MachineSnapshot start, List<int> clock, int font, Func<int, IReadOnlyCollection<byte>> keys,
-        int keep, bool viaStep = false, int originalPictures = -1)
+        int keep, bool viaStep = false, int originalPictures = -1, Action<byte[]>? layersImage = null)
     {
         var snap = OriginalProgram.Resume(TestGameData.DosDir, start);
         var ds = snap.DataSegment();
@@ -182,7 +186,9 @@ internal static class StationsSceneHarness
             captures.Add(new(MenuSceneHarness.Hash(driver.Vram.Planes, dac.Registers, driver.DisplayStart), ListHash(layers!.Ds),
                 driver.DisplayStart, captures.Count));
         }
-        layers = new GraphicsLayers(driver, (byte[])ds.Clone(), dac, new Capturing(Take)) { DataSegment = snap.Dgroup };
+        var image = (byte[])ds.Clone();
+        layersImage?.Invoke(image);
+        layers = new GraphicsLayers(driver, image, dac, new Capturing(Take)) { DataSegment = snap.Dgroup };
         ushort textOff = core.U16(MenuLayout.TextBuffer), textSeg = core.U16(MenuLayout.TextBuffer + 2);
         var textBytes = snap.Machine.Mem.ReadBlock(textSeg, textOff, 0x8000);
         layers.OtherMemory = new FarBuffer(textSeg, textOff, (byte[])textBytes.Clone());
@@ -277,11 +283,12 @@ internal static class StationsSceneHarness
     /// differing pixel (or the DAC entry) is named. Returns the number of pictures.
     /// </summary>
     public static (int Pictures, HashSet<StationCall> Calls, byte[] End) AssertSame(Action<OriginalProgram> setUp, int font,
-        Func<int, IReadOnlyCollection<byte>> keys, string label, MachineSnapshot? from = null, bool viaStep = false)
+        Func<int, IReadOnlyCollection<byte>> keys, string label, MachineSnapshot? from = null, bool viaStep = false,
+        Action<byte[]>? layersImage = null)
     {
         var (start, clock, original) = RunOriginal(setUp, font, keys, from, -1);
         // the last capture is taken after 1B03:0009 returned; the others are the original's retrace waits
-        var port = RunPort(start, clock, font, keys, -1, viaStep, original.Captures.Count - 1);
+        var port = RunPort(start, clock, font, keys, -1, viaStep, original.Captures.Count - 1, layersImage);
         int n = Math.Min(original.Captures.Count, port.Captures.Count);
         for (int i = 0; i < n; i++)
         {
@@ -291,7 +298,7 @@ internal static class StationsSceneHarness
             if (o.Picture != q.Picture)
             {
                 var ok = RunOriginal(_ => { }, font, keys, start, i).Run;
-                var pk = RunPort(start, clock, font, keys, i, viaStep);
+                var pk = RunPort(start, clock, font, keys, i, viaStep, layersImage: layersImage);
                 where += Describe(ok.Kept!, pk.Kept!, ok.KeptDac!, pk.KeptDac!) + " – port calls before: " + string.Join(" | ", pk.KeptEvents ?? []);
             }
             Assert.Fail($"{label}: picture {i} of {original.Captures.Count} differs: start original {o.DisplayStart:X4}, port " +
@@ -302,6 +309,18 @@ internal static class StationsSceneHarness
         var diff = StationsLockstep.Diff(original.DataSegment, port.DataSegment);
         Assert.True(diff.Count == 0, $"{label}: end: " + string.Join(", ", diff));
         return (original.Captures.Count, port.Calls, original.DataSegment);
+    }
+
+    /// <summary>
+    /// The layers' image as the host has it (issue #264): the host's layers start from T.EXE's data segment image and never get
+    /// the core's game data, so the text pointer table DS:37CC (written at the program start by the text loader, a core part)
+    /// keeps the image's bytes there; the output's own state stays the original's.
+    /// </summary>
+    public static void HostLayersImage(byte[] image)
+    {
+        var exe = ProgramSteps.InitialState(File.ReadAllBytes(TestGameData.Dos("T.EXE"))).Bytes;
+        int length = 4 * MenuLayout.TextPointerCount;
+        exe.AsSpan(MenuLayout.TextPointers, length).CopyTo(image.AsSpan(MenuLayout.TextPointers, length));
     }
 
     private static string Describe(byte[][] op, byte[][] pp, byte[] od, byte[] pd)

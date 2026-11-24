@@ -147,6 +147,12 @@ Textpuffer, Objekte `21AF`/`23CD`, Seiten `0B67`, `21FD:0185/026C/0329/037D/03EB
   Die Szene spielt jede Warteroutine schrittweise (`StationScene.NextFrame` vor dem Takt des Kerns, wie `DisasterScene`) und
   bekommt je Takt nur die Ereignisse dieses Bildes; sie hält bei denselben Rückläufen. Ton `21A7:0054` geht an
   `StationScene.Sound`, der Tastenklick der Tipptexte an `GraphicsLayers.Effects`.
+- **Zeilentabelle von `0288` (Issue #264):** `0101` übergibt die Fernzeigertabelle der Zeilen (`DS:3AD0`, Texte 192…194, Teil
+  der Texttabelle `DS:37CC`, gesetzt vom Textlader des Programmstarts). Das sind Spieldaten des Kerns: die Szene liest die
+  Tabelle bei DS-Segment aus dem DS des Kerns, die Zeilentexte selbst aus dem Textpuffer. Vorher las sie die Tabelle aus dem
+  DS-Abbild der Schichten; im Host enthält es die Textzeiger nie (Abbild aus `T.EXE`), die Zeilen wurden als Nullzeiger
+  gelesen, nichts getippt (kein Seitenwechsel, kein Klick ab dem ersten Bild nach dem Einblenden), Kern und Zufall blieben
+  gleich. Die Szenentests sahen es nicht, weil ihr Schichtenabbild das ganze DS des Originals war.
 - **Handler Aufruf 11:** `StationsStep` (`src/Traders.Core/Stations/StationsStep.cs`, nicht eingebunden): `Begin` bis zum ersten
   Halt, je `Tick` ein Bild (Zähler `Retraces`, `Polls`); fertig im Bild, in dem `0009` zurückkehrt. Bildladen in der Bildtabelle
   (`ImageTable.RecordLoad`) wie `PlantingStep`; Regelseite leer beim Start (`1178` überdeckt die Zeichenseite ganz und kopiert sie
@@ -184,3 +190,8 @@ zweite mit Piraten; alle 31 Aufrufarten gespielt, 22 703 Bilder), `Scene_game_we
 Aufruf 12; je Zustand Zahl der Takte = Rückläufe des Originals, Woche 0: 1267 Takte, 1268 Bilder mit dem Schlussbild; vor R6S-1
 rot mit 291 Takten gegen 1453 Rückläufe). Gegenproben beim Entwickeln: eine Pause zu kurz, Schatten- und Textfarbe vertauscht,
 Objekte ohne Spiegelung der Kernfelder, `0185` im Kern ein Rücklauf mehr bzw. weniger – jeweils rot.
+
+`tests/Traders.Tests/Stations/StationsHostSceneTests.cs` (Issue #264): Zustand aus einer echten Partie mit Mensch (Start 12:01,
+Spieler 1 Mensch über das Hauptmenü, Tasten in den Wochen) am Eintritt `1B03:0009` der ersten Woche mit neuen Stationen
+(Woche 1), Phase über `StationsStep` Bild für Bild wie oben, das Schichtenabbild mit der Texttabelle `DS:37CC` aus `T.EXE` wie im
+Host (`StationsSceneHarness.HostLayersImage`). Vor der Behebung rot: Bild 72 von 1947, Anzeigestart Original 0000, Port 4000.
