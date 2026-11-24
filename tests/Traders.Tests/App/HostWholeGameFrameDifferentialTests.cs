@@ -64,11 +64,6 @@ public class HostWholeGameFrameDifferentialTests
         F10,
     }
 
-    /// <summary>Why the probe with a human is skipped for now (lane partie; fix run fix/stationen-0288, #264).</summary>
-    private const string NewStationsLate =
-        "blocked until #264 (fix/stationen-0288) is merged: with a human, week 2: the core reports 0A69:0288 of 1B03:0101 " +
-        "(new stations) one frame after the original - PR #259";
-
     private sealed record Outcome(ProgramHost Host, OriginalProgram Original, Dictionary<(int Week, int Call), int> Frames,
         int Clicks, int Commands);
 
@@ -126,10 +121,10 @@ public class HostWholeGameFrameDifferentialTests
     }
 
     /// <summary>
-    /// Probe with player 1 human (skipped: <see cref="NewStationsLate"/>): as the first probe; the human's key clicks of the
+    /// Probe with player 1 human: as the first probe; the human's key clicks of the
     /// scenes' typewriter texts are among the sound commands compared at every retrace.
     /// </summary>
-    [GameDataFact(Skip = NewStationsLate)]
+    [GameDataFact]
     public void Whole_game_with_a_human_to_the_target_in_week_2_runs_frame_by_frame_with_its_sounds_to_the_teardown()
     {
         var r = Play(EndBy.Target, endWeek: 2, returnToMenu: false, human: true);
