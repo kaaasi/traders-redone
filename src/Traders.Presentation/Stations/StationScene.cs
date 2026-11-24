@@ -243,7 +243,7 @@ public sealed class StationScene
             short height = (short)U16(GraphicsLayers.FontLineHeight);
             ushort step = (ushort)(height + height / 5);
             ushort at = (ushort)(linesOffset + (ushort)(i << 2));
-            ushort lineOffset = ReadFar16(linesSegment, at), lineSegment = ReadFar16(linesSegment, (ushort)(at + 2));
+            ushort lineOffset = ReadTable16(linesSegment, at), lineSegment = ReadTable16(linesSegment, (ushort)(at + 2));
             foreach (int s in CenteredTypewriterSteps(x, (ushort)(y + step * i), w, lineOffset, lineSegment, colour, wait, -1))
                 yield return s;
         }
@@ -290,6 +290,14 @@ public sealed class StationScene
     private byte ReadFar(ushort segment, ushort offset) =>
         segment == _gfx.DataSegment ? _gfx.Ds[offset]
         : (_gfx.OtherMemory ?? throw new InvalidOperationException("No far memory for the texts.")).Read(segment, offset);
+
+    /// <summary>
+    /// A word of a far pointer table given by the core (the lines of 0A69:0288): in DS it is game data – the text pointers
+    /// DS:37CC set by the program start's text loader – and is read from the core's data segment (issue #264: the layers' image
+    /// of the host never holds them, the lines were read as null pointers and nothing was typed); elsewhere as a far read.
+    /// </summary>
+    private ushort ReadTable16(ushort segment, ushort offset) =>
+        segment == _gfx.DataSegment ? _state.U16(offset) : ReadFar16(segment, offset);
 
     private ushort ReadFar16(ushort segment, ushort offset) =>
         (ushort)(ReadFar(segment, offset) | ReadFar(segment, (ushort)(offset + 1)) << 8);
