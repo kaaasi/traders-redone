@@ -1,6 +1,6 @@
 # Zwischenstände
 
-## Runde 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (22.–24.11.2026) · Spuren gemergt, Gesamtreview offen
+## Runde 9 – Ende und Abend, Ton, Gesamtpartie ohne Roboterkampf (22.–24.11.2026) · letzter Code `c8e35de`, Abschluss nach Gesamtreview „Ja“
 
 - Prozess: Plan (PR #239, Plan-Review „Nein“ R9PL-1–9 eingearbeitet; F1 = B, E8 nach v1.0), Einheit der OPL-Ticks und
   Phasenregel `DS:1180` (PR #250, R9M-1/R9T-1).
@@ -13,6 +13,7 @@
   spielt ohne Halt; Rückkehr ins Hauptmenü als Host-Abweichung (F3 = B, `--original-ende`); #253, #254, #256.
 - Fix #264 (PR #265): `StationScene` las die Texttabelle aus dem Schichtenabbild; Folgelauf (PR #270): Probe mit Mensch frei,
   Tonmerker im Gleichschritt (#268). Zwischenziel **Gesamtpartie ohne Roboterkampf** erreicht.
+- Gesamtreview (Codex, zwei Teile) „Ja“: keine neuen Fehler; Testlücken → #275, #276. M13 abgeschlossen, M14 bis auf den Hörvergleich.
 
 ## Runde 8 – Fat Mike, Wettbewerb, Einkauf, ganze Woche im Host (17.–22.11.2026) · letzte Spur `4aa1566`, Abschluss nach Gesamtreview „Ja“
 
