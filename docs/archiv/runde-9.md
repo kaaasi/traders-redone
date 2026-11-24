@@ -286,7 +286,7 @@ eigener Unterabschnitt; `docs/analyse/TON.md`: 2 (§4), 3 (§2, §5). `STATUS.md
   `…-fix-partie-mensch.md` („Ja“); Doku `…-r9-zeitbasis.md` (+ Nachprüfung), `…-r9-f3.md`, `…-r9-status.md`, `…-r9-status-2.md`.
 - Gesamtreview Codex [reviews/2026-11-24-r9-gesamt.md](../reviews/2026-11-24-r9-gesamt.md) und
   [Teil 2](../reviews/2026-11-24-r9-gesamt-teil2.md) „Ja“ auf `c8e35de`: keine neuen Fehler; Gegenbeispiele R9M-1, R9K-1/M7, #264 rot;
-  `pruefen.sh --schnell` mit Originaldaten 1395/0/0. Testlücken → #275 (unbeeinflusstes Zielende), #276 („fortsetzen“ nach dem Ende).
+  `pruefen.sh --schnell` mit Originaldaten 1395/0/0. Maßgeblich ist Teil 2 (Teil 1 ohne Empfehlung wegen abgebrochenen Prüflaufs). Testlücken → #275 (unbeeinflusstes Zielende), #276 („fortsetzen“ nach dem Ende).
 - Ergebnis: M13 (Ende/Rang) abgeschlossen; M14 (Ton) bis auf den Hörvergleich durch den Nutzer; Zwischenziel **Gesamtpartie ohne
   Roboterkampf** erreicht (M15 🟡). Offene P3: #75 B1, #249, #262, #275, #276.
 - Erfahrungen: Hintergrundprozesse der Leitstelle enden mit der Antwort – Merge-Prüfung „main + PR“ über `update-branch` und die CI auf
