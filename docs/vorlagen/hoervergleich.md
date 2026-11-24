@@ -3,7 +3,7 @@
 **Kurzaufruf** (der Nutzer schreibt ihn in einen neuen Chat; der Chat führt ihn durch den Vergleich):
 
 > Repo kaaasi/traders-redone. Führe mich durch den Hörvergleich nach `docs/vorlagen/hoervergleich.md`.
-> Code-Stand: `<sha | main>` · Vergleichsquelle: `<DOSBox mit AdLib | Video: Link/Datei>` · binde traders-referenz mit push ein.
+> Code-Stand: `<sha | main>` · Vergleichsquelle: `<DOSBox mit AdLib | Video: Link/Datei>` · binde traders-referenz mit access read ein.
 
 ## Zweck
 
