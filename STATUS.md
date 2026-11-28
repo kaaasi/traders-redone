@@ -427,6 +427,8 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `0E9E:0264` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0E9E:0312` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
 | `0E9E:037A` | [0E9E_000E_steuerung.md](docs/routines/0E9E_000E_steuerung.md) | `src/Traders.Core/Input/ControlReader.cs` | `ControlReaderDifferentialTests.cs` | ✅ |
+| `0EDE:0322` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotReadiness.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
+| `0EDE:1826` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotReadiness.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
 | `111D:0009` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Disasters/Catastrophes.cs`, `src/Traders.Core/Phases/CatastropheGuardStep.cs` | `HostLoadedWeekFrameDifferentialTests.cs`, `CatastropheFrameDifferentialTests.cs`, `StarShowDifferentialTests.cs`, `CatastropheGuardDifferentialTests.cs` | ✅ |
 | `111D:0112` | [111D_0112_regelseite.md](docs/routines/111D_0112_regelseite.md) | `src/Traders.Core/Disasters/Catastrophes.cs` | `StarShowDifferentialTests.cs` | ✅ |
 | `111D:0264` | [111D_0009_katastrophen.md](docs/routines/111D_0009_katastrophen.md) | `src/Traders.Core/Disasters/Catastrophes.cs` | `StarShowDifferentialTests.cs` | ✅ |
@@ -611,6 +613,14 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1B03:148B` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:15D7` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:1617` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
+| `1C68:000B` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | – | – | 🔍 |
+| `1C68:006B` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotReadiness.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
+| `1C68:00A5` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | – | – | 🔍 |
+| `1C68:00FC` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | – | – | 🔍 |
+| `1C68:01A8` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotPurchaseRules.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
+| `1C68:02ED` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotPurchaseRules.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
+| `1C68:03C8` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotPurchaseRules.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
+| `1C68:0641` | [1C68_000B_roboterphase.md](docs/routines/1C68_000B_roboterphase.md) | `src/Traders.Core/Robots/Purchase/RobotPurchaseRules.cs` | `RobotPurchaseRulesDifferentialTests.cs` | ✅ |
 | `1DEF:000C` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs`, `src/Traders.Core/Extra/ExtraStep.cs` | `ProgramHostTests.cs`, `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
 | `1DEF:00DB` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:0105` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
@@ -806,7 +816,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0DFD` | 0x340 | 5 | 5 | 4 | 4 |
 | `0E31` | 0x6D0 | 7 | 7 | 7 | 7 |
 | `0E9E` | 0x400 | 5 | 5 | 5 | 5 |
-| `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
+| `0EDE` | 0x23F0 | 56 | 2 | 2 | 2 |
 | `111D` | 0x860 | 7 | 7 | 7 | 7 |
 | `11A3` | 0x1250 | 15 | 15 | 15 | 15 |
 | `12C8` | 0x950 | 12 | 0 | 0 | 0 |
@@ -819,7 +829,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `186C` | 0xC10 | 19 | 7 | 2 | 2 |
 | `192D` | 0x1D60 | 74 | 55 | 55 | 55 |
 | `1B03` | 0x1650 | 44 | 44 | 44 | 44 |
-| `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
+| `1C68` | 0x1870 | 40 | 8 | 5 | 5 |
 | `1DEF` | 0x8F0 | 14 | 14 | 14 | 14 |
 | `1E7E` | 0xE50 | 19 | 0 | 0 | 0 |
 | `1F63` | 0x1500 | 27 | 27 | 27 | 27 |
@@ -837,7 +847,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **652** | **641** | **641** |
+| **Summe** | **0x28DC0** | **891** | **662** | **648** | **648** |
 
 ### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)
 
