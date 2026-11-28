@@ -136,7 +136,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün; Raster, `DS:10D2` und Ziehungszahl gleich, Befehlsliste der Feld-Hilfen gleich, Szene pixelgenau je Bild; Gegenprobe im Review (zwei Ziehungen vertauscht,
   Raster um eine Spalte verschoben, Abbruchbedingung `<` statt `<=` → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 3 900 Byte.
-- **Status:** –
+- **Status:** Teil 1 (Vorab-PR) in Arbeit, Claude, Branch `paket/feld`.
 
 ## 4 `aufstellung` – Aufstellung `0535` mit Aufstellungs-KI `12C8`
 
