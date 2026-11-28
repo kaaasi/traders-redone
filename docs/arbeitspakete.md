@@ -18,7 +18,7 @@ Erfahrungen R9. Ergebnis: Kauf, Kampffeld und Aufstellung je Bild gleich dem Ref
 (Disassembly, Spielkern, Zufall, KI, Differenztests), Spur 5 Claude Sonnet (Testergänzungen, Werkzeug, Doku); Erstreviews und
 Plan-Review Opus. **Base:** `main` `08c086a`. Namen der Läufe: `Traders R10 <spur>`.
 **Starts zeitversetzt** (Nutzungslimit): 2, 3 und 5 sofort nach dem Go, 1 eine Stunde später, 4 zwei Stunden später, 0 nach Merge
-von 1–4. Spur 1 Teil 2 erst nach Merge von Spur 2 Teil 1, Spur 4 Teil 2 erst nach Merge von Spur 3 Teil 1 (Vorab-PRs, unten).
+von 1–4. Spur 1 Teil 2 erst nach Merge der ganzen Spur 2, Spur 4 Teil 2 erst nach Merge von Spur 3 Teil 1 (Vorab-PRs, unten).
 
 **Schnitt R10/R11** (Leitstelle 28.11.2026, `tools/callgraph.py` auf `T.EXE`, transitive Hülle ab `1C68:000B` innerhalb der sieben
 Robotersegmente; alle Aufrufe nach außen sind schon portiert; Größen in Byte): gesamt 207 Routinen ≈ 34 700. **R10:** 115
@@ -56,11 +56,13 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 |---|---|---|
 | Teilschritte von Aufruf 18 | je Original-Routine ein `IWeekStepHandler` (`Begin`/`Tick` wie `PurchaseStep`), beginnt im Bild des Far-Calls aus `1C68:000B` und endet in dem Bild, in dem das Original deren `retf` erreicht; Bildzähler = Bilder seit Beginn von Aufruf 18 | jede Spur für ihre Einsprünge; Spur 0 setzt zusammen |
 | `1C68:006B` „kämpft jemand?“ | Ergebnis `bool` (AL ≠ 0) im Ergebnis des Kauf-Handlers; schreibt `DS:37AA` | Spur 1 |
-| Kauf-KI `16D6:000E` | reine Funktion auf `Dgroup` + `OriginalRandom` (eine Aufrufstelle von `random` laut Graph), ohne Bild; gerufen aus dem Kauf-Handler an der Stelle `1C68:00CB` | Spur 2 |
-| Hilfsroutinen `1C68:0A28`/`0AB0`, `150F:1B56` | `public static` auf `Dgroup`, ohne Bild, in `src/Traders.Core/Robots/Shared/` (Vorab-PR Spur 2); von `16D6`, `1C68:0515`/`0681`/`0812` und in R11 von `0EDE` gerufen | Spur 2 |
+| Kauf-KI `16D6:000E` und `16D6:06F6` | reine Funktionen auf `Dgroup` + `OriginalRandom` (eine Aufrufstelle von `random` laut Graph), ohne Bild; `000E` gerufen aus dem Kauf-Handler an `1C68:00CB`, `06F6` aus `1C68:00FC` an `1C68:0127` (schreibt `[bx+37C3]` über `074B`/`08D6`, Steuerbits der Computer im Kaufbildschirm, R10PL-1) | Spur 2 |
+| Hilfsroutinen `1C68:0A28`/`0AB0`/`0B02`, `150F:1B56` | `public static` auf `Dgroup`, ohne Bild, in `src/Traders.Core/Robots/Shared/` (Vorab-PR Spur 2); `0A28`/`0AB0` von `16D6` und `1C68:0515`/`0681`/`0812` (nicht in R11), `0B02` von `16D6:0823`, `1C68:0E87` und in R11 `0EDE:16D2`, `1B56` von `16D6:0067` und in R11 `0EDE:051C`/`16D2` gerufen (R10PL-1, R10PL-4) | Spur 2 |
 | Kampffeld `DS:48F4` | 9 × 26 Byte (Zeile × Spalte wie `22A3`, `DATENLAYOUT.md` §4), Arbeitsdaten `54xx` des Feldes; `1E7E:0004` füllt es, danach nur lesend außer durch Routinen der Spur 3 | Spur 3 |
-| Feld-Hilfen `1E7E:083F`/`0870`/`088D`/`08F1`/`0DB3` | `public static` auf `Dgroup`, ohne Bild, `src/Traders.Core/Robots/Field/` (Vorab-PR Spur 3); gerufen von `0535:041F` und in R11 von `0EDE` | Spur 3 |
-| Aufstellungshilfen `0535:095C`/`0AE1`/`0B3F`/`0B8D`, `0EDE:1EA8`/`1F3F`, `1C68:0B02`/`0E87`, `0EDE:0322`/`1826` | öffentlich aufrufbar (R11 nutzt sie im Kampf); Zeichenanteile als Befehlsliste der Szene | 4 bzw. 1 |
+| Feld-Hilfen `1E7E:083F`/`0870`/`088D`/`08F1`/`0DB3` | `public static` auf `Dgroup` in `src/Traders.Core/Robots/Field/` (Vorab-PR Spur 3); **Zeichenanteile als Befehlsliste** (`0DB3` ruft `0A96:0311` Typ 7 vor dem Schreiben des Rasters, `08F1` zusätzlich `0A96:0525` Typ 12; R10PL-2), Befehle gehen an den Aufrufer zurück; gerufen von `0535:041F` (`083F`/`0870`/`088D`) und in R11 `0EDE:11DA`/`136C`/`189C` (nicht `0870`, R10PL-4) | Spur 3 |
+| Kampfvorbereitung `150F:012E`, `150F:0406` | Teilschritt-Handler für den Aufruf aus `1C68:000B` **und** daneben `public static` auf `Dgroup` (rein, kein Zufall); R11 ruft `012E` erneut aus `0EDE:0362`, `0406` aus `150F:100B` (R10PL-4) | Spur 3 |
+| Aufstellungshilfen `0535:095C`/`0AE1`/`0B3F`/`0B8D`, `0EDE:1EA8`/`1F3F`, `1C68:0E87`, `0EDE:0322`/`1826` | öffentlich aufrufbar (R11 nutzt sie im Kampf); Zeichenanteile als Befehlsliste der Szene | 4 bzw. 1 |
+| Roboterfelder 18–25 (`43CE`, `376C`, `376E`, `2EF8`, `377C`, `40EC`, `33DC`, `3016`) und gemeinsame indizierte Ziele (`302E`/`3030`, `3786`/`3788`, `3320`/`3322`, `330E`, `43B2`; `37C3` mit Spur 2) | Namen und Einträge in `DgroupLayout.cs`/`DATENLAYOUT.md` legt **Spur 1** an (`1C68:03C8`, `099D`); Spur 2 und 4 nutzen sie und ergänzen nur eigene Adressen (R10PL-5) | Spur 1 |
 | Zufall | nur `OriginalRandom` auf `DS:10D2`; Tests prüfen Zahl und Reihenfolge der Ziehungen je Routine | alle |
 
 **Zuständigkeit gemeinsamer Dateien:** `WeekSteps.cs`/`WeekScreens.cs` (Bindung von Aufruf 18) und `src/Traders.App/**` nur Spur 0;
@@ -73,15 +75,17 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
   `4B9A` mod `08EC` ≠ 0 → sofort zurück; `idiv` mit Vorzeichen über `Int16Math`), Kauf (Spur 1), bei `006B` = 0 Ende, sonst
   `21FD:037D(47h)`, Feld (Spur 3), `150F:012E` (Spur 3), `12C8:000B` und Aufstellung (Spur 4) nacheinander je Bild; **Kampf
   `0EDE:0009` und `0535:06CE` als ausstehender Rest** (`IPartialWeekStepHandler`-Rest wie Aufruf 19 in R7), in Tests aus dem Orakel.
-  Bindung an Aufruf 18 in `WeekSteps`/`WeekScreens` (additiv, ohne Rest hält die Maschine vor dem Kampf). (2) **Probe:** Gleichschritt
+  Bindung an Aufruf 18 in `WeekSteps`/`WeekScreens` (additiv, ohne Rest hält die Maschine vor dem Kampf). Grenzfall der Bedingung
+  synthetisch über `OriginalProgram.Call(0x1C68, 0x000B)` mit Abbruch am Einsprung `1C68:00A5`: `4B9A` = `8001h`, `08EC` = 3
+  (mit Vorzeichen Rest −1 → Rückkehr; vorzeichenlos 0 → Kauf), weil Woche ≥ 0 und Zyklus 1–4 `div` und `idiv` nicht unterscheiden (R10PL-3). (2) **Probe:** Gleichschritt
   Bild für Bild (Datensegment, `DS:10D2`, Bildzähler) über vier Wochen mit Schalter an, Zyklus 1 und 2, Mensch und drei Computer:
   Wochen ohne Roboterphase, Kauf ohne Kampf (Aufruf 18 vollständig), Kauf mit Kampf bis zum Einsprung `0EDE:0009`, Kampf aus dem
   Orakel; Fall Schalter aus. `MultiWeekRound7DifferentialTests` erweitern statt verdoppeln. (3) **Host nach F1 = A:** Überspringen bleibt Standard; `--original-roboter` spielt bis vor den Kampf und hält dort.
 - **Dateigrenzen:** `src/Traders.Core/Robots/Phase/**`, `tests/Traders.Tests/Robots/Phase/**`, `src/Traders.Core/Phases/**` (nur
-  Bindung von Aufruf 18), `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**`,
-  `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
+  Bindung von Aufruf 18), `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**` außer den Dateien der
+  Spur 5 (`HostWholeGame*`, `ProgramHostTests.cs`; nach deren Merge erweiterbar), `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
 - **Abnahme:** alle drei Läufe grün; Gleichschritt bis vor den Kampf und vollständig ohne Kampf; Gegenprobe im Review (Zyklus mit
-  `div` statt `idiv`, `006B` ignoriert, Ausblenden fehlt, Aufstellung vor Feld, ein Bild doppelt → rot); Host nach F1;
+  `div` statt `idiv` im synthetischen Grenzfall, `006B` ignoriert, Ausblenden fehlt, Aufstellung vor Feld, ein Bild doppelt → rot); Host nach F1;
   `check-architecture.py` grün.
 - **Abhängigkeiten:** Start nach Merge von 1–4.
 - **Status:** –
@@ -89,29 +93,29 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 ## 1 `kauf` – Roboterkauf `1C68` (Steuerung, Bildschirm, Mensch)
 
 - **Teile:** (1) **Befund** `1C68_000B_roboterphase.md` (alle Routinen von `1C68` in der R10-Hülle außer `0A28`/`0AB0`, dazu
-  `0EDE:0322`/`1826`): Ablauf `00A5` (lädt `V-KAMPF`, `177F`, `01A8`/`02ED`, `21FD:037D(553h)`, `0B75` mit `0E67`/`0E87`/`0B02`/`0EF6`/
-  `0D8C`/`0DEA`/`1372`, Kauf-KI, `17FE`, Palette `21FD:026C(E4Ch)`, `00FC` Mensch mit `0681`/`1061`/`0812`/`0F41`/`0FE9`/`099D`,
-  `04A9`/`0515`/`1422`, `0641`, `1824`, `14B9`/`14D7`/`152E`/`15BB`/`1617`/`16F4`, `0B51`/`10A3`/`10DC`/`0FA3`/`129F`, `21AF:0472`, `03C8` setzt Felder 19–25), `006B`, geschriebene Adressen (direkt: `00A3`, `00A5`, `0E72`, `0F0A`,
-  `2E6E`–`2E8C`, `3066`, `37AA`, `37C7`, `3CE6`, `4108`/`4109`, `4BB4`/`4BB5`, `5470`–`547A`; indizierte nachtragen), Kern ohne
-  Kaufablauf (Steuerung, `006B`, `03C8`), Differenztests über `LoadOnly`/`Call`. (2) **Kaufablauf** (nach Merge Spur 2 Teil 1):
-  Kauf-Handler Bild für Bild mit Menscheneingaben (kaufen, verkaufen, nichts, Geld knapp, Grenzen) und Kauf-KI an `00CB`; Ergebnis
+  `0EDE:0322`/`1826`): Ablauf `00A5` (lädt `V-KAMPF`, `177F`, `01A8`/`02ED`, `21FD:037D(553h)`, `0B75` mit `0E67`/`0E87`/`0EF6`/
+  `0D8C`/`0DEA`/`1372` (`0B02` von Spur 2), Kauf-KI, `17FE`, Palette `21FD:026C(E4Ch)`, `00FC` Mensch mit `0681`/`1061`/`0812`/`0F41`/`0FE9`/`099D`,
+  `04A9`/`0515`/`1422`, `0641`, `1824`, `14B9`/`14D7`/`152E`/`15BB`/`1617`/`16F4`, `0B51`/`10A3`/`10DC`/`0FA3`/`129F`, `21AF:0472`, `03C8` setzt Felder 19–25), `006B`, geschriebene Adressen (direkt: `0E72`, `0F0A`, `37AA`, `5470`–`5478`, `547A`; indizierte nach R10PL-5, Felder 18–25
+  benennt diese Spur), Kern ohne
+  Kaufablauf (Steuerung, `006B`, `03C8`), Differenztests über `LoadOnly`/`Call`. (2) **Kaufablauf** (nach Merge der ganzen Spur 2):
+  Kauf-Handler Bild für Bild mit Menscheneingaben (kaufen, verkaufen, nichts, Geld knapp, Grenzen) und Kauf-KI an `00CB` und `0127`; Ergebnis
   `006B`. (3) **Szene** `src/Traders.Presentation/Robots/Purchase*`: Kaufbildschirm pixelgenau gegen den RefEmu je Bild, Befehlsliste.
 - **Dateigrenzen:** `src/Traders.Core/Robots/Purchase/**`, `tests/Traders.Tests/Robots/Purchase/**`,
-  `src/Traders.Presentation/Robots/Purchase*`, `tests/Traders.Tests/Presentation/Robots/Purchase*`, `docs/routines/1C68_*`.
+  `src/Traders.Presentation/Robots/Purchase*`, `tests/Traders.Tests/Presentation/Robots/Purchase*`, `docs/routines/1C68_000B_*`.
 - **Abnahme:** alle drei Läufe grün; Kauf im Gleichschritt mit Mensch und Computern, Szene pixelgenau; Gegenprobe im Review
   (Felder 19–25 nicht gesetzt, Preis mit Vorzeichen falsch, Mensch-Eingabe doppelt, `006B` liefert 1 ohne Roboter → rot).
-- **Abhängigkeiten:** Teil 2 nach Merge von Spur 2 Teil 1. Größe ≈ 6 000 Byte.
+- **Abhängigkeiten:** Teil 2 nach Merge der ganzen Spur 2 (R10PL-1). Größe ≈ 6 100 Byte.
 - **Status:** –
 
 ## 2 `kauf-ki` – Kauf-KI `16D6` und gemeinsame Hilfen
 
-- **Teile:** (1) **Vorab-PR:** Befund und Port `1C68:0A28`/`0AB0`, `150F:1B56` (`Robots/Shared/`, Schnittstelle oben), Differenztests
+- **Teile:** (1) **Vorab-PR:** Befund und Port `1C68:0A28`/`0AB0`/`0B02`, `150F:1B56` (`Robots/Shared/`, Schnittstelle oben), Differenztests
   mit Grenzfällen. (2) **Kauf-KI** `16D6:000E` mit `0067`, `01ED`/`02F7`, `037C`/`0499`/`057C`, `05DB`/`0823`, `06F6`/`074B`/`08D6`
   (Befund `16D6_000E_roboterkauf_ki.md`; Zufall 1×, Reihenfolge belegen), Differenztests je Computerspieler über Orakelzustände
   (vier Roboterwochen, verschiedene Level/IQ, Geld knapp, alle Teile gekauft). (3) Mehrrundenprobe der KI allein (Zustand nach
   `16D6:000E` je Woche gegen den RefEmu).
 - **Dateigrenzen:** `src/Traders.Core/Robots/Shared/**`, `src/Traders.Core/Ai/RobotPurchase*`, `tests/Traders.Tests/Robots/Shared/**`,
-  `tests/Traders.Tests/Ai/RobotPurchase*`, `docs/routines/16D6_*`, `docs/routines/1C68_0A28_*`, `docs/routines/150F_1B56_*`.
+  `tests/Traders.Tests/Ai/RobotPurchase*`, `docs/routines/16D6_*`, `docs/routines/1C68_0A28_*`, `docs/routines/1C68_0B02_*`, `docs/routines/150F_1B56_*`.
 - **Abnahme:** alle drei Läufe grün; Gegenprobe im Review (Ziehung ausgelassen, Vergleich vorzeichenlos statt mit Vorzeichen,
   Spielerschleife ab 1 statt 0 → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 3 000 Byte.
@@ -124,10 +128,12 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
   `0132`, `049C`/`06A7`, `0812`, `09C4`: 17 Aufrufstellen von `random`, Ziehungen in Reihenfolge, Raster `DS:48F4` und Arbeitsdaten; Verwerfungs- oder
   Wiederholschleifen mit Abbruchzähler; Differenztests über viele Startwerte (`new Random(seed + n)`), Grenzen des Rasters. (3)
   **`150F:012E`** mit `0438`, `02C2`/`0331`/`0406`, `065A`, `04D1`/`05BB` (Befund `150F_012E_kampfvorbereitung.md`), Differenztests je
-  Computerspieler. (4) Szene nur, falls `1E7E:0004` zeichnet (Teil 1 klärt; sonst entfällt, Kampffeld zeichnet R11).
+  Computerspieler. (4) **Szene** `src/Traders.Presentation/Robots/Field*`: `1E7E:0004` zeichnet (Hülle ruft `0A96:001B`, `0267`, `0311`, `0525`,
+  `06A8`, `0C3F`; R10PL-2) – Kampffeld pixelgenau gegen den RefEmu je Bild, Befehlsliste.
 - **Dateigrenzen:** `src/Traders.Core/Robots/Field/**`, `src/Traders.Core/Ai/RobotBattle*`, `tests/Traders.Tests/Robots/Field/**`,
-  `tests/Traders.Tests/Ai/RobotBattle*`, `src/Traders.Presentation/Robots/Field*`, `docs/routines/1E7E_*`, `docs/routines/150F_012E_*`.
-- **Abnahme:** alle drei Läufe grün; Raster, `DS:10D2` und Ziehungszahl gleich; Gegenprobe im Review (zwei Ziehungen vertauscht,
+  `tests/Traders.Tests/Ai/RobotBattle*`, `src/Traders.Presentation/Robots/Field*`, `tests/Traders.Tests/Presentation/Robots/Field*`,
+  `docs/routines/1E7E_*`, `docs/routines/150F_012E_*`.
+- **Abnahme:** alle drei Läufe grün; Raster, `DS:10D2` und Ziehungszahl gleich, Befehlsliste der Feld-Hilfen gleich, Szene pixelgenau je Bild; Gegenprobe im Review (zwei Ziehungen vertauscht,
   Raster um eine Spalte verschoben, Abbruchbedingung `<` statt `<=` → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 3 900 Byte.
 - **Status:** –
