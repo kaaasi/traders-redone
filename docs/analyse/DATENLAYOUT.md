@@ -621,3 +621,16 @@ Befund [`20B3_008E_ende.md`](../routines/20B3_008E_ende.md); Namen in `src/Trade
 | `54D4` | W u | `RankState` | Zustand des Rangbilds 0…7 | G – `0863` |
 | `54D6` | B s | `Winners` | Sieger (Rang 0), danach verbleibende Trunkrunden | G – `008E`, `0ADC` |
 | `115D` | B u | `MakeCount` | Make-Zähler; `27C6:00D2` = 0 | G – `27C6:00D2` |
+
+## Runde 10, Spur `kauf-ki` (gemeinsame Hilfen `1C68:0A28`/`0AB0`/`0B02`, `150F:1B56`)
+
+Befunde [`1C68_0A28_roboterhilfen.md`](../routines/1C68_0A28_roboterhilfen.md), [`150F_1B56_kampfstufe.md`](../routines/150F_1B56_kampfstufe.md);
+Namen (vorläufig) in `src/Traders.Core/Robots/Shared/RobotSharedLayout.cs`. Die Roboterfelder 18–25 (`43CE`, `376C`, …) benennt
+Spur `kauf`; hier nur gelesen. Beleg: `tests/Traders.Tests/Robots/Shared/RobotHelpersDifferentialTests.cs`.
+
+| Offset | Typ | Name | Bedeutung (vermutet) | Beleg |
+|---|---|---|---|---|
+| `0E8F` | W[12] s | `ItemPrice` | Grundpreis je Kaufposten 0–11 (initialisierte Daten) | G – `1C68:0A28` |
+| `0E9F` | W[4] s | `UpgradePrice` | = `ItemPrice[8..11]`, abgezogen für den besessenen Posten | G – `1C68:0A28` |
+| `2F01` | B[4] s | `OwnedUpgrade` | besessener Posten der Gruppe 8–11 (0–3), `0xFF` = keiner | G – `1C68:0A28` (gelesen) |
+| `40E7` | B[4] | `BattleLevel` | 0, solange `376C[p·4]` ≤ 5 (ohne Vorzeichen), sonst `(T2·4 + T3 + T4 + T5) / 7` mit `Tk = 43CE[p·6+k]/10` | G – `150F:1B56` (indiziert geschrieben), gelesen `16D6:015C` |
