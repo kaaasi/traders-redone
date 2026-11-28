@@ -449,6 +449,19 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `11A3:0EB8` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:0F2E` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
 | `11A3:104B` | [11A3_0000_wochenplanung.md](docs/routines/11A3_0000_wochenplanung.md) | `src/Traders.Core/Ai/WeekPlanning.cs` | `WeekPlanningDifferentialTests.cs` | ✅ |
+| `12C8:000B` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:003B` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:005A` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:00B5` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs` | ✅ |
+| `12C8:015C` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs` | ✅ |
+| `12C8:024E` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs` | ✅ |
+| `12C8:02BB` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs` | ✅ |
+| `12C8:02EA` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs` | ✅ |
+| `12C8:030B` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:0539` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:0621` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:06D6` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
+| `12C8:08EA` | [12C8_000B_aufstellung_ki.md](docs/routines/12C8_000B_aufstellung_ki.md) | `src/Traders.Core/Ai/RobotLineupAi.cs` | `RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs` | ✅ |
 | `135D:000E` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs`, `PlantingGameStateDifferentialTests.cs` | ✅ |
 | `135D:00AC` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
 | `135D:0240` | [135D_000E_computerzug.md](docs/routines/135D_000E_computerzug.md) | `src/Traders.Core/Ai/Planting.cs` | `PlantingDifferentialTests.cs` | ✅ |
@@ -809,7 +822,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `0EDE` | 0x23F0 | 56 | 0 | 0 | 0 |
 | `111D` | 0x860 | 7 | 7 | 7 | 7 |
 | `11A3` | 0x1250 | 15 | 15 | 15 | 15 |
-| `12C8` | 0x950 | 12 | 0 | 0 | 0 |
+| `12C8` | 0x950 | 12 | 13 | 13 | 13 |
 | `135D` | 0xC00 | 14 | 14 | 14 | 14 |
 | `141D` | 0xF20 | 17 | 17 | 17 | 17 |
 | `150F` | 0x1C70 | 41 | 0 | 0 | 0 |
@@ -837,7 +850,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **652** | **641** | **641** |
+| **Summe** | **0x28DC0** | **891** | **665** | **654** | **654** |
 
 ### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)
 

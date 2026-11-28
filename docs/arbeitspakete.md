@@ -152,7 +152,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün; Aufstellung im Gleichschritt mit Mensch und Computern, Szene pixelgenau; Gegenprobe im Review
   (Kampfwert `40EC` ohne Obergrenze, KI wählt Platz eins daneben, Effekt nicht gestoppt, Bild doppelt → rot).
 - **Abhängigkeiten:** Teil 2 nach Merge von Spur 3 Teil 1. Größe ≈ 5 800 Byte.
-- **Status:** –
+- **Status:** Teil 1 fertig in PR #295 (Draft; Befund `12C8_000B_aufstellung_ki.md`, Port `RobotLineupAi`, Differenztests und Orakelzustände Wochen 1–4); Teil 2 wartet auf Merge Spur 3 Teil 1 (#291).
 
 ## 5 `sammel` – Testlücken, P3, Werkzeuge
 
