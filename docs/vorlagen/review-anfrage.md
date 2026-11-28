@@ -25,8 +25,9 @@ allein die Leitstelle (Nutzer 12.11.2026).“ und – weil Originaldaten nötig 
    Review muss aus einer anderen Sitzung kommen.
 2. SDK und Originaldaten nach `AGENTS.md` §3 einrichten (Claude: `CLAUDE.md`, `tools/claude/fetch-reference.sh original`). Prüfe genau den genannten Head: `git rev-parse HEAD` = Head-SHA und
    `git status --porcelain` leer, sonst „unverifizierter Stand“ (`anhang.md` E). Selbst bauen und `tools/pruefen.sh` ausführen –
-   Erstreview: alle drei Läufe; Nachprüfung und Gesamtreview: `--schnell`. Ohne Originaldaten im Bericht „Originaldaten nicht
-   geprüft“. Aussagen der PR-Beschreibung nicht ungeprüft übernehmen.
+   Erstreview: alle drei Läufe; Nachprüfung und Gesamtreview: `--schnell`. Laufzeit: `--schnell` 30–80 min, alle drei Läufe ein Mehrfaches –
+   im Hintergrund starten (`tools/pruefen.sh --hintergrund [--schnell]`), mit `--stand` abfragen; fertig erst, wenn die letzte Zeile des Logs
+   `ENDE-MARKER rc=<n>` lautet. Ohne Originaldaten im Bericht „Originaldaten nicht geprüft“. Aussagen der PR-Beschreibung nicht ungeprüft übernehmen.
 3. Zuerst die genannten Gegenbeispiele erneut ausführen, dann Diff, betroffene Aufrufer, neue Tests. Eine Gegenprobe pro neuem
    Test, wo es geht (gezielte Mutation in temporärer Kopie → Test muss rot werden). Bei portierten Routinen: Fundstelle in `T.EXE`
    (`tools/segmap.py` bzw. `fetch-reference.sh disasm`) gegen den Befund in `docs/routines/` lesen und prüfen, dass der Differenztest den

@@ -4,6 +4,13 @@
 #   tools/pruefen.sh            hashes, architecture, coverage, restore (lock files), build without warnings and three test runs
 #                               (integration PRs, first reviews, changes to the test infrastructure)
 #   tools/pruefen.sh --schnell  the same with one test run: with original data if present, otherwise without (normal PR)
+#   tools/pruefen.sh --hintergrund [--schnell]
+#                               starts the check detached and returns at once; log TR_PRUEF_STAND/lauf.log (default
+#                               ${TMPDIR:-/tmp}/traders-pruefen/lauf.log). The log ends with the table and then, as its very
+#                               last line, "ENDE-MARKER rc=<exit code>" - only that line means the run has finished.
+#   tools/pruefen.sh --stand    reports a background run: "läuft"/"fertig" (rc), last step, test results so far per run, and
+#                               after the end marker the table; exit code 0 = finished green, 2 = still running, 1 = finished red,
+#                               3 = no run known
 #
 # Test runs:
 #   1. with original data   TR_REQUIRE_GAMEDATA=1 - fails if gamedata/ is missing (only when present)
@@ -20,10 +27,57 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 SLN=TradersRedone.slnx
-QUICK=0; [ "${1:-}" = "--schnell" ] && QUICK=1
+STAND="${TR_PRUEF_STAND:-${TMPDIR:-/tmp}/traders-pruefen}"
+QUICK=0; BG=0; QUERY=0
+for arg in "$@"; do
+  case "$arg" in
+    --schnell) QUICK=1 ;;
+    --hintergrund) BG=1 ;;
+    --stand) QUERY=1 ;;
+    *) echo "Unbekannte Option: $arg (--schnell, --hintergrund, --stand)"; exit 64 ;;
+  esac
+done
+
+if [ "$QUERY" -eq 1 ]; then
+  [ -f "$STAND/lauf.log" ] || { echo "Kein Hintergrundlauf bekannt ($STAND/lauf.log fehlt)"; exit 3; }
+  ende=$(grep -E '^ENDE-MARKER rc=[0-9]+$' "$STAND/lauf.log" | tail -1)
+  pid=$(cat "$STAND/lauf.pid" 2>/dev/null || true)
+  if [ -z "$ende" ] && { [ -z "$pid" ] || ! kill -0 "$pid" 2>/dev/null; }; then
+    echo "Lauf abgebrochen ohne Ende-Marker (Prozess ${pid:-?} läuft nicht mehr); letzte Zeilen:"; tail -5 "$STAND/lauf.log"; exit 1
+  fi
+  [ -z "$ende" ] && echo "läuft (Prozess $pid)" || echo "fertig (${ende#ENDE-MARKER })"
+  echo "Schritt: $(grep -E '^== ' "$STAND/lauf.log" | tail -1)"
+  protokolle=$(grep -m1 -E '^Protokolle: ' "$STAND/lauf.log" | sed 's/^Protokolle: //')
+  if [ -n "$protokolle" ] && ls "$protokolle"/test-*.txt >/dev/null 2>&1; then
+    for t in "$protokolle"/test-*.txt; do
+      echo "  $(basename "$t" .txt): $(grep -c -E '^\s*Passed ' "$t") bestanden, $(grep -c -E '^\s*Failed ' "$t") fehlgeschlagen bisher"
+    done
+  fi
+  if [ -n "$ende" ]; then
+    sed -n '/^### Tests zum Head/,/^Ergebnis:/p' "$STAND/lauf.log"
+    [ "$ende" = "ENDE-MARKER rc=0" ] && exit 0 || exit 1
+  fi
+  exit 2
+fi
+
+if [ "$BG" -eq 1 ]; then
+  mkdir -p "$STAND"
+  if [ -f "$STAND/lauf.pid" ] && kill -0 "$(cat "$STAND/lauf.pid")" 2>/dev/null; then
+    echo "Es läuft schon eine Prüfung (Prozess $(cat "$STAND/lauf.pid")); Abfrage: tools/pruefen.sh --stand"; exit 65
+  fi
+  args=(); [ "$QUICK" -eq 1 ] && args+=(--schnell)
+  : >"$STAND/lauf.log"
+  # the end marker is written by the wrapper after the child has returned, i.e. after the table
+  TR_LOG="$STAND/lauf.log" setsid nohup bash -c 'rc=0; "$0" "$@" >>"$TR_LOG" 2>&1 || rc=$?; echo "ENDE-MARKER rc=$rc" >>"$TR_LOG"' "$0" ${args[@]+"${args[@]}"} \
+    >/dev/null 2>&1 </dev/null &
+  echo $! >"$STAND/lauf.pid"
+  echo "Prüfung im Hintergrund gestartet (Prozess $!). Abfrage: tools/pruefen.sh --stand; Log: $STAND/lauf.log"
+  exit 0
+fi
 GAMEDATA="${TRADERS_GAMEDATA:-$ROOT/gamedata}"
 DATA=0; [ -f "$GAMEDATA/dos/T.EXE" ] && DATA=1
 LOG="$(mktemp -d)"
+echo "Protokolle: $LOG"
 STATUS=0
 schritt() { echo "== $1"; }
 fehler() { echo "FEHLER: $1"; STATUS=1; }

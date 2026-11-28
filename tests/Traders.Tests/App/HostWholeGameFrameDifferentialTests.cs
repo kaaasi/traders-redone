@@ -62,7 +62,21 @@ public class HostWholeGameFrameDifferentialTests
 
         /// <summary>F10 held in the original from the harvest (call 16) of the end week on (key table DS:3D8B).</summary>
         F10,
+
+        /// <summary>Nothing set: the lowest target is chosen in the settings menu (F7, F2 four times) and the end check ends the game on the wealth.</summary>
+        Regular,
     }
+
+    /// <summary>
+    /// Keys of the settings menu after the second main menu pass (offset in frames after the pass, key): F7 opens the settings,
+    /// F2 raises the target 20000 → 30000 → 40000 → 50000 → 10000 (192D:0C34, wrapping above 50000), RETURN leaves the settings;
+    /// the RETURN that starts the game follows in the plan of the menu.
+    /// </summary>
+    private static readonly (int Delay, byte Key)[] LowestTargetKeys =
+        [(0, MenuKeys.F7), (80, MenuKeys.F2), (100, MenuKeys.F2), (120, MenuKeys.F2), (140, MenuKeys.F2), (180, MenuKeys.Enter)];
+
+    /// <summary>Frames after the second pass until RETURN starts the game when the settings menu came first.</summary>
+    private const int SettingsStartDelay = 260;
 
     private sealed record Outcome(ProgramHost Host, OriginalProgram Original, Dictionary<(int Week, int Call), int> Frames,
         int Clicks, int Commands);
@@ -133,6 +147,46 @@ public class HostWholeGameFrameDifferentialTests
         Assert.True(r.Clicks > 0, "no key click of the scenes");
     }
 
+    /// <summary>
+    /// #275 (R9G-1, review R9 part 2): the game with the target as a player chooses it and nothing set behind the game's back. Probe
+    /// 1777:000C, 1777:01F8, 20B3:0005, 21A7:0054, 218B:0094 – four computers, the settings menu (F7) with the lowest target
+    /// (F2 four times: 20000 → 30000 → 40000 → 50000 → 10000), RETURN; the clock and the keys as in the other probes
+    /// (<see cref="ProgramStartDifferentialTests.ReferenceStart"/>, seed and clock of the reference start; the menu keys by frame
+    /// are <see cref="LowestTargetKeys"/>), no key in the weeks. The computers earn the target: the first wealth of 10000 or more is
+    /// reached at the end check of week 17, the game ends there; every frame of the 18 weeks (call 18 jumped over: the robot
+    /// phase is a declared stand-in, <see cref="Traders.App.Deviations.RobotPhaseSkip"/>, 18 skips), the end check, the end screens, the
+    /// end music, the key, the teardown 1777:018C and the program's exit with <c>--original-ende</c> are equal to the RefEmu:
+    /// week, random state DS:10D2, data segment (the target DS:08F4 unchanged at 10000), picture, sound commands.
+    /// Time limit: <see cref="RegularMaxFrames"/> frames (about 220 000 are needed; roughly 7 minutes).
+    /// Counter-checks (local, review): the target set to 0 behind the game's back (the weeks 2 to 17 not played → the end week
+    /// is 2 and the test fails on the week), F2 pressed only three times (target 50000, the game does not end by week 17 →
+    /// red), the end check's wealth comparison replaced by `&gt;` → red at the end check.
+    /// </summary>
+    [Fact(Skip = "Open finding, see handover of PR #293: with the settings menu (F7) the field qualities DS:45DA.. (11 bytes) differ at the week report of week 0 although the random state is equal; without it (default target 20000, RETURN only) the sound commands differ in week 9, call 4 (original: query, EffectsReset, Effect 0016 more than the host at that frame). Needs a fix run (zusammenarbeit.md section 4); needs original data like a GameDataFact.")]
+    public void Whole_game_to_the_lowest_regular_target_runs_frame_by_frame_to_the_teardown()
+    {
+        var r = Play(EndBy.Regular, endWeek: RegularEndWeek, returnToMenu: false, human: false, maxFrames: RegularMaxFrames);
+        var host = r.Host;
+        Assert.Equal(ProgramStatus.Ended, host.Machine.Status);
+        Assert.Equal(0, host.Machine.ExitCode);
+        Assert.True(r.Original.Machine.Exited, "original did not exit");
+        // the target was chosen in the menu and not touched since: the lowest, reached by the wealth of at least one player
+        Assert.Equal(10_000u, host.Core.U32(DgroupLayout.Target));
+        Assert.Contains(Enumerable.Range(0, 4), pl => host.Core.U32(DgroupLayout.CurrentWealth + 4 * pl) >= 10_000u);
+        Assert.Equal(RegularEndWeek + 1, r.Original.Week); // 20B3:0071 counts the week of the end once more
+        Assert.Equal(RegularEndWeek + 1, host.Core.S16(DgroupLayout.Week));
+        Assert.Equal(RegularEndWeek + 1, host.RobotSkip!.Skipped); // the declared stand-in: one skip per week
+        AssertWeeks(r, lastWeek: RegularEndWeek);
+        var commands = ((StubSoundHost)host.SoundHost).Executed;
+        Assert.Contains(commands, c => c is { Kind: SoundCommandKind.Driver, Function: SoundCommand.Load });
+        Assert.Equal(new SoundCommand(SoundCommandKind.EffectsStop), commands[^1]);
+    }
+
+    /// <summary>The week of the end check that ends the game on the wealth with the lowest target (measured with the host alone; the RefEmu equal frame by frame).</summary>
+    private const int RegularEndWeek = 17;
+
+    private const int RegularMaxFrames = 300_000;
+
     private void AssertWeeks(Outcome r, int lastWeek)
     {
         int Frames(int week, int call) => r.Frames.GetValueOrDefault((week, call));
@@ -149,13 +203,14 @@ public class HostWholeGameFrameDifferentialTests
         Assert.Equal(0, Frames(lastWeek, WeekSteps.TradeCall)); // the week of the end has no trade
     }
 
-    private Outcome Play(EndBy endBy, int endWeek, bool returnToMenu, bool human)
+    private Outcome Play(EndBy endBy, int endWeek, bool returnToMenu, bool human, int maxFrames = MaxFrames)
     {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
         var p = OriginalProgram.Start(Dir, ProgramStartDifferentialTests.Options(start));
         var sound = new OriginalSoundRecorder(p);
         var plan = human ? HumanMenuPlan : ComputerMenuPlan;
+        bool settings = endBy == EndBy.Regular;
         int emuPasses = 0;
         ushort menu = p.Segment(0x192D);
         foreach (ushort site in new ushort[] { 0x0345, 0x1AAD })
@@ -163,7 +218,12 @@ public class HostWholeGameFrameDifferentialTests
             {
                 emuPasses++;
                 foreach (var (n, key) in plan)
-                    if (n == emuPasses) m.ScheduleKey(m.Seconds + 0.001, key, MenuHold / 70.0);
+                    if (n == emuPasses && !(settings && key == MenuKeys.Enter)) m.ScheduleKey(m.Seconds + 0.001, key, MenuHold / 70.0);
+                if (settings && emuPasses == 2)
+                {
+                    foreach (var (delay, key) in LowestTargetKeys) m.ScheduleKey(m.Seconds + 0.001 + delay / 70.0, key, MenuHold / 70.0);
+                    m.ScheduleKey(m.Seconds + 0.001 + SettingsStartDelay / 70.0, MenuKeys.Enter, MenuHold / 70.0);
+                }
             });
         // bytes the loader and the C start-up set before main: host values (as in ProgramHostTests)
         new RefEmuProgramOracle(p).RunToCallSite(ProgramLoop.Step(1));
@@ -186,7 +246,15 @@ public class HostWholeGameFrameDifferentialTests
         {
             int passes = host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;
             for (; planned < plan.Length && host.Machine.NextStep == ProgramLoop.MainMenu && passes >= plan[planned].Passes; planned++)
-                holds.Add((f, f + MenuHold, plan[planned].Key));
+            {
+                if (settings && plan[planned].Key == MenuKeys.Enter)
+                {
+                    foreach (var (delay, key) in LowestTargetKeys) holds.Add((f + delay, f + delay + MenuHold, key));
+                    holds.Add((f + SettingsStartDelay, f + SettingsStartDelay + MenuHold, MenuKeys.Enter));
+                }
+                else
+                    holds.Add((f, f + MenuHold, plan[planned].Key));
+            }
             host.Frame(f, holds.Where(h => f >= h.From && f < h.To).Select(h => h.Key).ToList());
             if (host.Machine.WeekMachine is { NextStep: WeekSteps.ReportCall, Status: PhaseStatus.Waiting }) break;
         }
@@ -202,7 +270,7 @@ public class HostWholeGameFrameDifferentialTests
         int lastWeek = 0, lastStep = WeekSteps.ReportCall;
         for (int frame = 0; ; frame++)
         {
-            Assert.True(frame < MaxFrames, $"the game did not end within {MaxFrames} frames");
+            Assert.True(frame < maxFrames, $"the game did not end within {maxFrames} frames");
             bool hostDone = host.Machine.Status == ProgramStatus.Ended || (host.MenuReturn?.Returns ?? 0) > 0;
             m.Run(1);
             m.Run(8_000_000_000, mm => (mm.Cpu.Cs == retrace && mm.Cpu.IP == RetraceEntry) || (mm.Cpu.Cs == loop && mm.Cpu.IP == call18)

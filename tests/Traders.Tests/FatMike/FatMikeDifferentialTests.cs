@@ -393,7 +393,7 @@ public class FatMikeDifferentialTests
             ArrangeSearch(h, p, cols, rows, target);
             if (SeedForLongSearch(r.Next(1, 1 << 20), cols, rows, target, 150) is not { } seed)
             {
-                n--; // no seed found: the low bits of the generator can make a pair of power-of-two ranges miss the cell for ever
+                n--; // no seed found: power-of-two range divisors bound the search length from above, so no seed in the window may reach minPairs (#249)
                 continue;
             }
             h.Program.WriteDword(OriginalProgram.RandomStateOffset, seed);
