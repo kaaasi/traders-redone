@@ -119,7 +119,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün; Gegenprobe im Review (Ziehung ausgelassen, Vergleich vorzeichenlos statt mit Vorzeichen,
   Spielerschleife ab 1 statt 0 → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 3 000 Byte.
-- **Status:** –
+- **Status:** Teil 1 (Vorab-PR) in Arbeit auf `paket/kauf-ki` (Claude, Base `00a6e8d`).
 
 ## 3 `feld` – Kampffeld `1E7E:0004` und Kampfvorbereitung der KI `150F:012E`
 
