@@ -621,3 +621,29 @@ Befund [`20B3_008E_ende.md`](../routines/20B3_008E_ende.md); Namen in `src/Trade
 | `54D4` | W u | `RankState` | Zustand des Rangbilds 0…7 | G – `0863` |
 | `54D6` | B s | `Winners` | Sieger (Rang 0), danach verbleibende Trunkrunden | G – `008E`, `0ADC` |
 | `115D` | B u | `MakeCount` | Make-Zähler; `27C6:00D2` = 0 | G – `27C6:00D2` |
+
+## Runde 10, Spur `aufstellung` (Aufstellungs-KI `12C8`)
+
+Befund [`12C8_000B_aufstellung_ki.md`](../routines/12C8_000B_aufstellung_ki.md); Namen in `src/Traders.Core/Ai/RobotLineupLayout.cs`
+(vorläufig, außer wo vermerkt). Roboterfelder 21/23/24/25 (`2EF8`, `40EC`, `33DC`, `3016`) über ihre Namen in `DgroupLayout`;
+`43B2` (Modus 0Eh) und die gemeinsamen Ziele `302E`/`3786` legt Spur `kauf` fest (R10PL-5), `48F4` als Kampffeld Spur `feld`.
+Belege: `tests/Traders.Tests/Ai/RobotLineupAiDifferentialTests.cs`, `RobotLineupAiGameStateDifferentialTests.cs`.
+
+| Offset | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `07C0` / `07C4` | B[4] s | `CornerX` / `CornerY` | Ecke des Spielers im Grobraster 8 × 8 (0,7,7,0 / 0,0,7,7) | G – `00B5`, `024E` |
+| `07C8` / `07CC` | B[4] s | `DirectionX` / `DirectionY` | Richtung von der Ecke ins Feld (+1/−1) | G – `00B5` |
+| `0844` / `0848` | B[4] u | `StartX` / `StartY` | Startzelle des Aufstellungszeigers (3,22,22,3 / 3,3,22,22) | G – `0535:00B4`, `06D6` |
+| `0854` / `0858` | B[4] u | `QuadrantMinX` / `QuadrantMaxX` | Spalten des eigenen Quadranten (1–12 bzw. 13–24) | G – `06D6` |
+| `085C` / `0860` | B[4] u | `QuadrantMinY` / `QuadrantMaxY` | Zeilen des eigenen Quadranten | G – `06D6` |
+| `0878` / `0880` | B[8] s | `NeighbourX` / `NeighbourY` | Versatz der acht Nachbarn, im Uhrzeigersinn ab (0, −1) | G – `015C` |
+| `2E90` | B[4] u | `Wanted` | Vergleichswert zu `4650` außerhalb von Modus 0Eh (von `0535`) | G – `08EA` |
+| `2E98` | B[4][4] u | `RingSpare` | 1 = leerer Ring, aus `33DC` noch bezahlbar (9 je Block) | G – `030B` |
+| `3052` / `305E` | W[4] s | `PointerX` / `PointerY` | Aufstellungszeiger (Feldzelle), Start = `0844`/`0848` | G – `0535:00B4`, `0539` |
+| `374C` | B[4][4] u | `RingTaken` | 1 = Ring in Gang 1 von `030B` genommen | G – `030B`, `06D6` |
+| `4478` | B[8][8] u | `Blocks` | Grobraster (Block = 3 × 3 Feldzellen), Index 8x + y, ≠ 0 belegt | G – `005A`, `015C` |
+| `44C6` | B[8] u | `Marks` | markierte Blöcke: Bit `08C6[x]` in Byte y; `000B` setzt Zeilen 0, 1, 6, 7 auf C3h | G – `000B`, `02BB`, `02EA` |
+| `44CE` | B[4][4] s | `RingUnits` | geplante Einheiten je Ring (2 in Gang 1, bis 6 in Gang 2) | G – `030B`, `06D6` |
+| `454A` / `4552` | W[4] s | `TargetX` / `TargetY` | Zielzelle der Suche `06D6` | G – `06D6`, `0539`, `0621` |
+| `45CC` | B[4] u | `Presses` | Feuerdrücke am Ziel, `0539` zählt herunter | G – `06D6`, `0539` |
+| `4650` | B[4] u | `Pass` | Gang der Zielsuche, + 1 je vollem Durchlauf des Quadranten | G – `003B`, `06D6`, `08EA` |
