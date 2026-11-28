@@ -621,3 +621,17 @@ Befund [`20B3_008E_ende.md`](../routines/20B3_008E_ende.md); Namen in `src/Trade
 | `54D4` | W u | `RankState` | Zustand des Rangbilds 0…7 | G – `0863` |
 | `54D6` | B s | `Winners` | Sieger (Rang 0), danach verbleibende Trunkrunden | G – `008E`, `0ADC` |
 | `115D` | B u | `MakeCount` | Make-Zähler; `27C6:00D2` = 0 | G – `27C6:00D2` |
+
+## Runde 10, Spur `feld` (Kampffeld `1E7E`)
+
+Befund [`1E7E_0004_kampffeld.md`](../routines/1E7E_0004_kampffeld.md); Namen in `src/Traders.Core/Robots/Field/BattleFieldLayout.cs`.
+Belege: `tests/Traders.Tests/Robots/Field/FieldCellsDifferentialTests.cs`.
+
+| Offset | Typ | Name | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `48F4` | B[26][26] | `Grid` | Kampffeld, Zelle (x, y) bei `26·x + y`, endet vor `4B98`; außerhalb der Roboterphase dasselbe Raster als Produktionsergebnis (nur 9·26) | G – `1E7E:0004` (x, y 0…19h), Differenztest `0DB3` |
+| `084C` / `0850` | B[4] u | `RobotX` / `RobotY` | Feldlage des Roboters je Spieler | G – Differenztest `08F1` |
+| `2F01` | B[4] s | `RobotLabel` | Beschriftung je Spieler, Index in `0F72`, −1 = keine | G – Differenztest `08F1` |
+| `0F72` / `0F82` | Far[] / B[4] | `LabelText` / `LabelColour` | Beschriftungstexte / Farbe je Spieler | G – Differenztest `08F1` |
+| `0F86` | B[] | `FrameCellValue` | Zellwert je Roboterbild | G – Differenztest `08F1` |
+| `4BB6` | B[4] | `RobotFrame` | zuletzt gezeichnetes Roboterbild je Spieler | G – Differenztest `08F1` |
