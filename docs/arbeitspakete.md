@@ -5,7 +5,7 @@ einem PR, eigenen Dateien und klarer Abnahme. Regeln: [AGENTS.md](../AGENTS.md),
 [prozess/zusammenarbeit.md](prozess/zusammenarbeit.md). Den Status pflegt jede Spur nur in ihrem eigenen Abschnitt; Plan-
 abschnitte ändert die Leitstelle. Abgeschlossene Runden stehen in [archiv/](archiv/) (Paketphase AP1–AP5: [archiv/runde-0.md](archiv/runde-0.md), Runde 1: [archiv/runde-1.md](archiv/runde-1.md), Runde 2: [archiv/runde-2.md](archiv/runde-2.md), Runde 3: [archiv/runde-3.md](archiv/runde-3.md), Runde 4: [archiv/runde-4.md](archiv/runde-4.md), Runde 5: [archiv/runde-5.md](archiv/runde-5.md), Runde 6: [archiv/runde-6.md](archiv/runde-6.md), Runde 7: [archiv/runde-7.md](archiv/runde-7.md), Runde 8: [archiv/runde-8.md](archiv/runde-8.md), Runde 9: [archiv/runde-9.md](archiv/runde-9.md)).
 
-## Aktuelle Runde: 10 – Roboterphase bis vor den Kampf (Plan Leitstelle 28.11.2026, Go offen)
+## Aktuelle Runde: 10 – Roboterphase bis vor den Kampf (Plan Leitstelle 28.11.2026, Go Nutzer 28.11.2026)
 
 **Ziel:** Erste Hälfte von M12. Aufruf 18 der Woche (`1C68:000B`) läuft im Kern originalgetreu **bis vor den Kampf**:
 Bedingung (Schalter `DS:411A`, Zyklus `DS:4B9A` mod `DS:08EC`), Roboterkauf `1C68:00A5` mit Kauf-KI `16D6`, Entscheidung
@@ -76,7 +76,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
   Bindung an Aufruf 18 in `WeekSteps`/`WeekScreens` (additiv, ohne Rest hält die Maschine vor dem Kampf). (2) **Probe:** Gleichschritt
   Bild für Bild (Datensegment, `DS:10D2`, Bildzähler) über vier Wochen mit Schalter an, Zyklus 1 und 2, Mensch und drei Computer:
   Wochen ohne Roboterphase, Kauf ohne Kampf (Aufruf 18 vollständig), Kauf mit Kampf bis zum Einsprung `0EDE:0009`, Kampf aus dem
-  Orakel; Fall Schalter aus. `MultiWeekRound7DifferentialTests` erweitern statt verdoppeln. (3) **Host nach F1.**
+  Orakel; Fall Schalter aus. `MultiWeekRound7DifferentialTests` erweitern statt verdoppeln. (3) **Host nach F1 = A:** Überspringen bleibt Standard; `--original-roboter` spielt bis vor den Kampf und hält dort.
 - **Dateigrenzen:** `src/Traders.Core/Robots/Phase/**`, `tests/Traders.Tests/Robots/Phase/**`, `src/Traders.Core/Phases/**` (nur
   Bindung von Aufruf 18), `tests/Traders.Tests/Phases/**`, `src/Traders.App/**`, `tests/Traders.Tests/App/**`,
   `src/Traders.RefEmu/OriginalProgram.cs` (additiv).
@@ -166,15 +166,13 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abhängigkeiten:** keine; vor Spur 0 mergen (Spur 0 erweitert `App/**`).
 - **Status:** –
 
-## Offene Fragen an den Nutzer (Runde 10)
+## Entscheidungen des Nutzers (Runde 10, 28.11.2026)
 
-- **G1:** Go für Runde 10 nach diesem Plan (nach Plan-Review)?
-- **F1 – Host in R10:** **A** (empfohlen) Überspringen bleibt Standard; mit `--original-roboter` spielt der Host Kauf, Feld und
-  Aufstellung original und hält vor dem Kampf (bisher an Aufruf 18). **B** Der Host spielt standardmäßig Kauf bis Aufstellung original
-  und überspringt nur Kampf und Nachlauf – bewusste Abweichung bis R11 (gekaufte Roboter kämpfen nicht).
-- **F2:** Spuren 1 und 4 je bis zu zwei Fortsetzungen über das Limit von 3?
-- **F3:** #283 (Abdeckungsgrafik, Nutzerauftrag) Erstreview als Lauf (Opus) anlegen und danach mergen; #284 (Hörvergleich M14, nur
-  Review-Datei) mergen?
+- **G1 = Go.**
+- **F1 = A:** Überspringen bleibt im Host Standard; mit `--original-roboter` spielt der Host Kauf, Feld und Aufstellung original
+  und hält vor dem Kampf (Spur 0 Teil 3).
+- **F2 = nein:** keine Fortsetzungen über das Limit von 3.
+- **F3 = ja:** Erstreview für #283 (Abdeckungsgrafik) als Lauf (Opus), danach Merge; #284 (Hörvergleich M14) mergen.
 
 Nicht in R10: Ton-Befunde #285–#287 (HV-1–3, Tonausgabe bis kurz vor v1.0 zurückgestellt, Nutzer 28.11.2026) → R12; #262
 (Tastenklicks in den Kern) → Aufräumen R12 (Leitstelle 28.11.2026).
