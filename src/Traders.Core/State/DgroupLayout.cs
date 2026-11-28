@@ -113,6 +113,31 @@ public static class DgroupLayout
     public const int AuctionStartPrice = 0x2BC2; // word      ware price at the start of the auction (0B9F:0093)
     public const int WeatherTable = 0x112C;    // sbyte[3][6] stride 6: percent change per kind and weather
 
+    // ---- robot purchase (round 10, track "kauf"; docs/routines/1C68_000B_roboterphase.md, DATENLAYOUT.md "R10 kauf") ----
+    // Robot fields 18..25 keep their saved names above; purchase item k = 1..7 is stored in field 18 + k (see RobotStock).
+    public const int RobotFights = 0x45D2;     // byte[4]     1 = robot takes part in the battle (0EDE:0322)
+    public const int RobotBudget = 0x4BF4;     // dword[4]    money left for the robot purchase (1C68:01A8, 0812)
+    public const int RobotPrice = 0x3CBC;      // dword[4]    price of the selected item (1C68:0A28 via 0515/0681/0812)
+    public const int RobotShop = 0x3CB7;       // byte[4]     counter the pointer stands at (0..4, table DS:0E85), FF none
+    public const int RobotItem = 0x44C2;       // sbyte[4]    selected item (0..7 stock, 8..11 type, 12.. parts), FF none
+    public const int RobotType = 0x2F01;       // sbyte[4]    chosen robot type (item - 8), FF none
+    public const int RobotStep = 0x443E;       // sbyte[4]    horizontal step of the pointer per frame (-2, 0, +2)
+    public const int RobotStock = 0x48A4;      // word[4][8]  stride 16: purchase items 0..7 while shopping (1C68:02ED)
+    public const int RobotStockStride = 16;
+    public const int RobotItemLimit = 0x08A2;  // word[8]     upper limit per stock item (initialised data)
+    public const int RobotPlayersDone = 0x547A; // word       players that left the shop; the purchase ends at 4
+    public const int RobotDrawPlayer = 0x0E72; // word        player whose panel is redrawn this frame, cycles 0..3
+    public const int RobotWalkSound = 0x0F0A;  // byte        1 while the walking sound plays (1C68:1824)
+    public const int RobotAnimation = 0x5470;  // byte[9]     frame counters of the shop animations (1C68:14D7..16F4)
+    public const int MoveDelay = 0x3786;       // dword[4]    input delay of 0E9E (also ControlReader.MoveDelay)
+    public const int FireDelay = 0x302E;       // dword[4]    fire delay of 0E9E (also ControlReader.FireDelay)
+    public const int ObjectRecords = 0x330C;   // byte[8][26] object records (GRAFIK.md §4): +2 height, +14h x, +16h y
+    public const int ObjectStride = 26;
+    public const int ObjectHeight = 0x330E;    // word        ObjectRecords + 2
+    public const int ObjectX = 0x3320;         // word        ObjectRecords + 14h
+    public const int ObjectY = 0x3322;         // word        ObjectRecords + 16h
+    public const int RobotPhaseMode = 0x43B2;  // byte[4]     in the purchase: 0Bh walking, 0Ch at a counter
+
     /// <summary>Index into the field grid arrays (x = column, y = row).</summary>
     public static int FieldIndex(int x, int y) => x * FieldRowsMax + y;
 }

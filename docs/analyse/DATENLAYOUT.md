@@ -621,3 +621,30 @@ Befund [`20B3_008E_ende.md`](../routines/20B3_008E_ende.md); Namen in `src/Trade
 | `54D4` | W u | `RankState` | Zustand des Rangbilds 0…7 | G – `0863` |
 | `54D6` | B s | `Winners` | Sieger (Rang 0), danach verbleibende Trunkrunden | G – `008E`, `0ADC` |
 | `115D` | B u | `MakeCount` | Make-Zähler; `27C6:00D2` = 0 | G – `27C6:00D2` |
+
+## Runde 10, Spur `kauf` (Roboterkauf `1C68`)
+
+Befund `docs/routines/1C68_000B_roboterphase.md`, Port `src/Traders.Core/Robots/Purchase/`, Namen in `DgroupLayout.cs`
+(Block „robot purchase“). Ergänzt die Roboterfelder 18–25 aus §2: **Kaufposten k = 1…7 liegt in Feld 18 + k**
+(`376C`, `376E`, `2EF8`, `377C`, `40EC`, `33DC`, `3016`); `1C68:02ED` kopiert sie je Woche in die Einkaufskopie `48A4`,
+`1C68:03C8` zurück. Feld 18 `43CE` sind drei Teilepaare (`1C68:099D` schreibt beide Bytes eines Paars mit 10·Stufe + 9;
+unter 10 = nicht gekauft, `0EDE:1826`). Die spielerische Bedeutung der Posten bleibt offen (Kaufbildschirm in Teil 3).
+
+| DS-Offset | Breite | Name (Port) | Bedeutung | Beleg |
+|---|---|---|---|---|
+| `45D2` | B[4] | `RobotFights` | 1 = Roboter kämpft: Teil ≥ 10 und Wort `376C + 4p` ≠ 0 | G – Differenztest `0EDE:0322`, `1C68:006B` |
+| `4BF4` | D[4] s | `RobotBudget` | Kaufgeld: Vermögen/10, 500…2000, Computer + (Geld/100)·(IQ·12, 16 Bit); `0812` zieht den Preis ab | G – `1C68:01A8` |
+| `3CBC` | D[4] | `RobotPrice` | Preis des gewählten Postens (`0A28`) | W – `0515`, `0681`, `0812` |
+| `3CB7` | B[4] u | `RobotShop` | Theke unter dem Zeiger (Tabelle `0E85`: 0 Ausgang, 1–4), FFh keine | G – `01A8`; W – `0515` |
+| `44C2` | B[4] s | `RobotItem` | gewählter Posten: 0–7 Vorrat, 8–11 Typ, ab 12 Teile; FFh keiner; Startwert `0E8A`, Grenzen `0898`/`089D` je Theke | G – `01A8`; W – `0681`, `0812` |
+| `2F01` | B[4] s | `RobotType` | gewählter Robotertyp (Posten − 8), FFh keiner | G – `01A8`; W – `0812` |
+| `443E` | B[4] s | `RobotStep` | Schritt des Zeigers je Bild (−2, 0, +2) | G – `01A8`, `0641` |
+| `48A4` | W[4][8] | `RobotStock` | Einkaufskopie der Posten 0…7, Abstand 16; Posten 0 beginnt bei 0 und wird nicht gespeichert | G – `02ED`, `03C8` |
+| `08A2` | W[8] | `RobotItemLimit` | Obergrenze je Posten (Initialdaten) | W – `0812` |
+| `547A` | W | `RobotPlayersDone` | Spieler, die den Laden verlassen haben; Kauf endet bei 4 | G – `01A8`; W – `00FC`, `0515`, `0681` |
+| `0E72` | W | `RobotDrawPlayer` | Spieler, dessen Tafel dieses Bild neu gezeichnet wird, 0…3 reihum | W – `00FC`, `0B51` |
+| `0F0A` | B | `RobotWalkSound` | 1, solange das Laufgeräusch spielt | W – `1824` |
+| `5470` | B[9] | `RobotAnimation` | Zähler der Ladenanimationen | W – `14D7`…`16F4` |
+| `3786` / `302E` | D[4] | `MoveDelay` / `FireDelay` | wie §10; im Kauf 0 (Start), 1000, 3 bzw. 10000, 7 | G – `01A8`; W – `04A9`, `0681`, `0812` |
+| `3320` / `3322`, `330E` | W | `ObjectX` / `ObjectY`, `ObjectHeight` | Objektsätze `330C + 1Ah·p` (`GRAFIK.md` §4): Zeiger x = 6p + 8Ch (0 ≤ x < 12Dh), y = p + 6Eh, Höhe 0Bh | G – `01A8`, `0641`; W – `177F` |
+| `43B2` | B[4] u | `RobotPhaseMode` | im Kauf: 0Bh laufen, 0Ch an der Theke | G – `01A8`; W – `0515`, `0681` |
