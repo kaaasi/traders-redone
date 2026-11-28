@@ -170,7 +170,12 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün (Test-Infrastruktur); Gegenprobe im Review (Ziel nachträglich gesetzt, Fortsetzen ohne Woche +1,
   Hintergrundlauf meldet Ende vor Testende → rot).
 - **Abhängigkeiten:** keine; vor Spur 0 mergen (Spur 0 erweitert `App/**`).
-- **Status:** –
+- **Status** (Claude Sonnet, 28.11.2026, PR #293, Draft): Teil 4 fertig (`pruefen.sh --hintergrund`/`--stand`, Ende-Marker `ENDE-MARKER rc=<n>`, Docs in
+  `spur-start.md` Schritt 5 und `review-anfrage.md`; `abdeckung.py --check` warnt bei „Ausnahmeliste“ ohne vorhandenen Test, Vorlage ergänzt).
+  Teil 3: #249 behoben; #75 B2 und B3 stehen schon in `main`, **B1 offen** (Seitenfüllungen `0B67:0002` sind im Differenztest nur mit
+  einer Prüfnaht in `src/Traders.Vga` oder einem Hook im RefEmu nach `23CD:04F6` sichtbar; `src/Traders.Vga` liegt außerhalb der Dateigrenzen).
+  Teil 2 (#276) fertig: `HostWholeGameContinueTests`. Teil 1 (#275): Test geschrieben (`Whole_game_to_the_lowest_regular_target_…`,
+  18 Wochen, ≈ 220 000 Bilder), aber **übersprungen**, weil er zwei Abweichungen aufdeckt (Beleg in PR #293, Übergabe).
 
 ## Entscheidungen des Nutzers (Runde 10, 28.11.2026)
 
