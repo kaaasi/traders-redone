@@ -281,7 +281,7 @@ public class ProgramHostTests
     /// switch the target DS:08F4 is set to 0 after the end check of week 0 (<see cref="EndTarget"/>), so the game ends at the
     /// end check of week 1.
     /// </summary>
-    private static ProgramHost PlayToHalt(bool skipRobotPhase, Action<ProgramHost, long>? beforeFrame = null, bool returnToMenu = true)
+    internal static ProgramHost PlayToHalt(bool skipRobotPhase, Action<ProgramHost, long>? beforeFrame = null, bool returnToMenu = true)
     {
         var start = ProgramStartDifferentialTests.ReferenceStart;
         var (clock, _, _) = ProgramStartDifferentialTests.OriginalInputs(start, ProgramStartDifferentialTests.NoExtraKeys);
@@ -436,7 +436,7 @@ public class ProgramHostTests
     private static bool NotSoundFlag((int Offset, int Length, string Owner) r) =>
         !Traders.Tests.Phases.RefEmuProgramOracle.SoundOwned.Any(f => f.Offset == r.Offset && f.Length == r.Length);
 
-    private static int Passes(ProgramHost host) => host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;
+    internal static int Passes(ProgramHost host) => host.Menu.Menu?.RandomCalls.Count(c => c.Argument == 1) ?? 0;
 
     /// <summary>The RefEmu's rendered picture as a mode-X page at offset 0 (pixel i in plane i % 4).</summary>
     private static Traders.Vga.ModeXMemory OriginalScreen(Traders.RefEmu.Hardware.FrameDump frame)
