@@ -480,6 +480,7 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `141D:0E67` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `141D:0ED7` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
 | `141D:0F01` | [141D_0008_handelski.md](docs/routines/141D_0008_handelski.md) | `src/Traders.Core/Ai/TradeAi.cs` | `TradeAiDifferentialTests.cs` | ✅ |
+| `150F:1B56` | [150F_1B56_kampfstufe.md](docs/routines/150F_1B56_kampfstufe.md) | `src/Traders.Core/Robots/Shared/RobotHelpers.cs` | `RobotHelpersDifferentialTests.cs` | ✅ |
 | `1777:000C` | [1777_000C_main.md](docs/routines/1777_000C_main.md) | `src/Traders.Core/Phases/ProgramLoop.cs`, `src/Traders.Core/Phases/ProgramMachine.cs`, `src/Traders.Core/Phases/ProgramSound.cs`, `src/Traders.Core/Phases/ProgramSteps.cs`, `src/Traders.Core/Trade/TradeRules.cs` | `ProgramHumanDifferentialTests.cs`, `ProgramMachineDifferentialTests.cs` | ✅ |
 | `1777:01F8` | [1777_01F8_wochenschleife.md](docs/routines/1777_01F8_wochenschleife.md) | `src/Traders.Core/Phases/PhaseMachine.cs`, `src/Traders.Core/Phases/WeekLoop.cs` | `ProgramHostTests.cs`, `MultiWeekDifferentialTests.cs`, `MultiWeekRound7DifferentialTests.cs`, `MultiWeekScreenDifferentialTests.cs`, `PhaseMachineDifferentialTests.cs` | ✅ |
 | `1777:02DC` | [1777_02DC_wochenpreise.md](docs/routines/1777_02DC_wochenpreise.md) | `src/Traders.Core/Rules/WeeklyPrices.cs` | `WeeklyRulesDifferentialTests.cs` | ✅ |
@@ -611,6 +612,9 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1B03:148B` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:15D7` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
 | `1B03:1617` | [1B03_0009_stationen.md](docs/routines/1B03_0009_stationen.md) | `src/Traders.Core/Stations/StationPhase.Selection.cs` | `StationsDifferentialTests.cs` | ✅ |
+| `1C68:0A28` | [1C68_0A28_roboterhilfen.md](docs/routines/1C68_0A28_roboterhilfen.md) | `src/Traders.Core/Robots/Shared/RobotHelpers.cs` | `RobotHelpersDifferentialTests.cs` | ✅ |
+| `1C68:0AB0` | [1C68_0A28_roboterhilfen.md](docs/routines/1C68_0A28_roboterhilfen.md) | `src/Traders.Core/Robots/Shared/RobotHelpers.cs` | `RobotHelpersDifferentialTests.cs` | ✅ |
+| `1C68:0B02` | [1C68_0A28_roboterhilfen.md](docs/routines/1C68_0A28_roboterhilfen.md) | `src/Traders.Core/Robots/Shared/RobotHelpers.cs` | `RobotHelpersDifferentialTests.cs` | ✅ |
 | `1DEF:000C` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs`, `src/Traders.Core/Extra/ExtraStep.cs` | `ProgramHostTests.cs`, `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
 | `1DEF:00DB` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:0105` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs`, `ExtraFrameDifferentialTests.cs` | ✅ |
@@ -812,14 +816,14 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `12C8` | 0x950 | 12 | 0 | 0 | 0 |
 | `135D` | 0xC00 | 14 | 14 | 14 | 14 |
 | `141D` | 0xF20 | 17 | 17 | 17 | 17 |
-| `150F` | 0x1C70 | 41 | 0 | 0 | 0 |
+| `150F` | 0x1C70 | 41 | 1 | 1 | 1 |
 | `16D6` | 0xA10 | 12 | 0 | 0 | 0 |
 | `1777` | 0x540 | 4 | 4 | 4 | 4 |
 | `17CB` | 0xA10 | 9 | 9 | 9 | 9 |
 | `186C` | 0xC10 | 19 | 7 | 2 | 2 |
 | `192D` | 0x1D60 | 74 | 55 | 55 | 55 |
 | `1B03` | 0x1650 | 44 | 44 | 44 | 44 |
-| `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
+| `1C68` | 0x1870 | 40 | 3 | 3 | 3 |
 | `1DEF` | 0x8F0 | 14 | 14 | 14 | 14 |
 | `1E7E` | 0xE50 | 19 | 0 | 0 | 0 |
 | `1F63` | 0x1500 | 27 | 27 | 27 | 27 |
@@ -837,7 +841,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **652** | **641** | **641** |
+| **Summe** | **0x28DC0** | **891** | **656** | **645** | **645** |
 
 ### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)
 
