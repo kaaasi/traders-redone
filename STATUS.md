@@ -625,6 +625,12 @@ sind. Mitgeprüfte Laufzeithilfen (`0000:4F4E`/`5058`/`4FA0` Long-Arithmetik, `0
 | `1DEF:06F8` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:0751` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
 | `1DEF:07AD` | [1DEF_000C_zusatzphase.md](docs/routines/1DEF_000C_zusatzphase.md) | `src/Traders.Core/Extra/ExtraPhase.cs` | `ExtraDifferentialTests.cs` | ✅ |
+| `1E7E:0004` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | – | – | 🔍 |
+| `1E7E:083F` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | `src/Traders.Core/Robots/Field/FieldCells.cs` | `FieldCellsDifferentialTests.cs` | ✅ |
+| `1E7E:0870` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | `src/Traders.Core/Robots/Field/FieldCells.cs` | `FieldCellsDifferentialTests.cs` | ✅ |
+| `1E7E:088D` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | `src/Traders.Core/Robots/Field/FieldCells.cs` | `FieldCellsDifferentialTests.cs` | ✅ |
+| `1E7E:08F1` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | `src/Traders.Core/Robots/Field/FieldCells.cs` | `FieldCellsDifferentialTests.cs` | ✅ |
+| `1E7E:0DB3` | [1E7E_0004_kampffeld.md](docs/routines/1E7E_0004_kampffeld.md) | `src/Traders.Core/Robots/Field/FieldCells.cs` | `FieldCellsDifferentialTests.cs` | ✅ |
 | `1F63:000F` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `ProgramHostTests.cs`, `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
 | `1F63:01B2` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs` | ✅ |
 | `1F63:0305` | [1F63_000F_fatmike.md](docs/routines/1F63_000F_fatmike.md) | `src/Traders.Core/FatMike/FatMikePhase.cs` | `FatMikeDifferentialTests.cs`, `FatMikeFrameDifferentialTests.cs` | ✅ |
@@ -821,7 +827,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `1B03` | 0x1650 | 44 | 44 | 44 | 44 |
 | `1C68` | 0x1870 | 40 | 0 | 0 | 0 |
 | `1DEF` | 0x8F0 | 14 | 14 | 14 | 14 |
-| `1E7E` | 0xE50 | 19 | 0 | 0 | 0 |
+| `1E7E` | 0xE50 | 19 | 6 | 5 | 5 |
 | `1F63` | 0x1500 | 27 | 27 | 27 | 27 |
 | `20B3` | 0xD80 | 27 | 27 | 27 | 27 |
 | `218B` | 0x1C0 | 5 | 5 | 5 | 5 |
@@ -837,7 +843,7 @@ Status: ✅ portiert mit eigenem Differenztest (`[DIFFERENTIAL]`) · 🟢 portie
 | `2850` | 0x8A0 | 1 | 0 | 0 | 0 |
 | `28DA` | 0x10 | 0 | 0 | 0 | 0 |
 | `28DB` | 0x10 | 0 | 0 | 0 | 0 |
-| **Summe** | **0x28DC0** | **891** | **652** | **641** | **641** |
+| **Summe** | **0x28DC0** | **891** | **658** | **646** | **646** |
 
 ### FXDRIVER.EXE (`[ORIGINAL-FX]`, Offset im entpackten Abbild)
 

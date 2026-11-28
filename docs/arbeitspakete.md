@@ -136,7 +136,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün; Raster, `DS:10D2` und Ziehungszahl gleich, Befehlsliste der Feld-Hilfen gleich, Szene pixelgenau je Bild; Gegenprobe im Review (zwei Ziehungen vertauscht,
   Raster um eine Spalte verschoben, Abbruchbedingung `<` statt `<=` → rot).
 - **Abhängigkeiten:** keine. Größe ≈ 3 900 Byte.
-- **Status:** –
+- **Status:** Teil 1 (Vorab-PR) fertig, PR #291 (Claude): Befund `1E7E_0004_kampffeld.md`, Feld-Hilfen `0DB3`/`083F`/`0870`/`088D`/`08F1` mit Differenztests. Abweichung zum Plan: Kampffeld `DS:48F4` ist 26 × 26 Byte (nicht 9 × 26), Beleg im Befund. Teile 2–4 nach dem Merge auf `paket/feld-2`.
 
 ## 4 `aufstellung` – Aufstellung `0535` mit Aufstellungs-KI `12C8`
 
