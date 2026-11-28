@@ -44,7 +44,9 @@ Heads `review-nein` entfernen. Widerspricht der Lauf einem Befund mit eigenem Be
 4. Harte Regeln: Befund in `docs/routines/` → Differenztest gegen RefEmu (rot bzw. fehlend) → Port → grün; Dateigrenzen;
    `[ORIGINAL]`/`[APPROX]`; Mehrrundenprobe, wenn Phasenfolge, Geld, Vorräte oder KI berührt sind.
 5. Vor jedem Push: `git fetch origin`; ist `main` neuer, per Merge-Commit integrieren (kein Rebase, kein Force-Push); `tools/pruefen.sh
-   --schnell` (`AGENTS.md` §5). Der Lauf dauert mit den Gesamtpartieproben 30–80 min: im Hintergrund starten, Log abfragen, nicht abbrechen.
+   --schnell` (`AGENTS.md` §5). Der Lauf dauert mit den Gesamtpartieproben 30–80 min: im Hintergrund starten (`tools/pruefen.sh --hintergrund --schnell`),
+   mit `tools/pruefen.sh --stand` abfragen (Schritt, Tests je Lauf bisher; Exit 2 = läuft, 0 = grün, 1 = rot), nicht abbrechen. Fertig ist er
+   erst mit der letzten Log-Zeile `ENDE-MARKER rc=<n>` (danach steht die Tabelle für PR und Übergabe im Log).
 6. Fertig: Beschreibung nach `.github/pull_request_template.md`, Draft aufheben, Status im eigenen Abschnitt von
    `docs/arbeitspakete.md`.
 7. **Immer zum Schluss** (fertig wie unterbrochen): Übergabekommentar nach `docs/handoffs/VORLAGE.md` (`Bearbeiter: frei`).

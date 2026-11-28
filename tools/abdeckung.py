@@ -31,6 +31,10 @@ Usage:
   python3 tools/abdeckung.py --write   renew the tables between <!-- abdeckung:anfang --> and <!-- abdeckung:ende -->
   python3 tools/abdeckung.py --check   exit 1 if STATUS.md is stale, a marker has no finding, a ported finding has no
                                        differential test or a marker/tag has no valid address (part of tools/pruefen.sh)
+
+Exception lists (spur sammel R10, #268): a finding in docs/routines/ that declares a list of fields the port holds differently
+(`Ignored`, `Owned`, ...) writes it as a line "Ausnahmeliste `<Name>` – Test: `<TestMethod>`" (docs/routines/_vorlage.md). A line
+with "Ausnahmeliste" but without a test name that exists as a method in tests/ is only a WARNING ("WARNUNG:", exit code unchanged).
 """
 import collections
 import os
@@ -87,6 +91,41 @@ def findings():
         for s, o in ADDR.findall(title):
             result[(int(s, 16), int(o, 16))] = f.name
     return result
+
+
+EXCEPTION_LIST = re.compile(r"Ausnahmeliste", re.IGNORECASE)
+EXCEPTION_TEST = re.compile(r"Test:\s*`([A-Za-z_][A-Za-z0-9_]*)`")
+
+
+def exception_list_warnings(lines_by_file=None, test_names=None):
+    """Warnings for findings with an exception list but no test that exists (arguments only for the self-check)."""
+    if lines_by_file is None:
+        lines_by_file = {f.name: f.read_text(encoding="utf-8").splitlines()
+                         for f in sorted((ROOT / "docs/routines").glob("*.md")) if not f.name.startswith("_")}
+    if test_names is None:
+        text = "\n".join(f.read_text(encoding="utf-8", errors="replace") for f in (ROOT / "tests").rglob("*.cs"))
+        test_names = set(re.findall(r"\b(?:void|Task)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", text))
+    warnings = []
+    for name, lines in lines_by_file.items():
+        for n, line in enumerate(lines, 1):
+            if not EXCEPTION_LIST.search(line):
+                continue
+            named = EXCEPTION_TEST.findall(line)
+            if not named:
+                warnings.append(f"{name}:{n}: Ausnahmeliste ohne Testangabe (Test: `<Methode>`)")
+            for t in named:
+                if t not in test_names:
+                    warnings.append(f"{name}:{n}: Ausnahmeliste nennt Test `{t}`, den es in tests/ nicht gibt")
+    return warnings
+
+
+def exception_list_self_check(errors):
+    """Counter-checks of the exception-list warning: no test named, unknown test, known test (no warning)."""
+    got = exception_list_warnings({"a.md": ["Ausnahmeliste `Ignored`", "Ausnahmeliste `Owned` - Test: `Nope`",
+                                            "Ausnahmeliste `X` - Test: `Real`", "no list here"]}, {"Real"})
+    if [w.split(": ", 1)[1].split(" ")[0] for w in got] != ["Ausnahmeliste", "Ausnahmeliste"] or len(got) != 2 \
+            or ":1:" not in got[0] or ":2:" not in got[1]:
+        errors.append(f"Selbsttest der Ausnahmelisten-Prüfung: unerwartetes Ergebnis {got}")
 
 
 def scan(tag: str, pattern: re.Pattern, files, errors):
@@ -371,6 +410,9 @@ def main():
         print("STATUS.md erneuert.")
     elif new != text:
         errors.append("STATUS.md ist veraltet – python3 tools/abdeckung.py --write ausführen und mitcommitten")
+    exception_list_self_check(errors)
+    for w in exception_list_warnings():
+        print(f"WARNUNG: {w}")
     for e in errors:
         print(f"FEHLER: {e}")
     if not errors and mode != "--write":

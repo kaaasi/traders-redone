@@ -24,3 +24,5 @@ Abbruchzähler im Harness; Empfehlung: eigener Zufallsstartwert je Testfall (`ne
 
 Ausnahmelisten im Gleichschritt (`Ignored`, `Owned` u. ä.) brauchen einen Test, der festhält, welche Felder nie darin stehen
 dürfen (z. B. Tonmerker, Zufallszustand); Gegenprobe: Feld in die Liste aufnehmen → rot (Erfahrung R9, #268).
+Im Befund eine Zeile je Liste: ``Ausnahmeliste `<Name>` – Test: `<Testmethode>` ``; `tools/abdeckung.py --check` warnt (`WARNUNG:`, kein Fehler),
+wenn eine Zeile mit „Ausnahmeliste“ keinen Test nennt oder der genannte Test in `tests/` fehlt (R10 `sammel`).
