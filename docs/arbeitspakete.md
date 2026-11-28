@@ -105,7 +105,7 @@ Routinen ≈ 18 900 (Kauf 55 ≈ 9 000 mit 1 Aufrufstelle von `random`, Feld und
 - **Abnahme:** alle drei Läufe grün; Kauf im Gleichschritt mit Mensch und Computern, Szene pixelgenau; Gegenprobe im Review
   (Felder 19–25 nicht gesetzt, Preis mit Vorzeichen falsch, Mensch-Eingabe doppelt, `006B` liefert 1 ohne Roboter → rot).
 - **Abhängigkeiten:** Teil 2 nach Merge der ganzen Spur 2 (R10PL-1). Größe ≈ 6 100 Byte.
-- **Status:** –
+- **Status:** in Arbeit (Claude, Teil 1), Branch `paket/kauf`, Base `00a6e8d`.
 
 ## 2 `kauf-ki` – Kauf-KI `16D6` und gemeinsame Hilfen
 
